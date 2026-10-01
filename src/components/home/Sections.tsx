@@ -157,7 +157,7 @@ export function AccountsTable() {
             </Link>
           }
         />
-        <div className="scroll-x mt-34" data-reveal>
+        <div className="panel scroll-x mt-34 px-21 pb-8 pt-13 lg:px-34" data-reveal>
           <table className="table-gx min-w-[38rem]">
             <caption className="sr-only">Comparison of Classic, Premium and ECN accounts</caption>
             <thead>

@@ -1,0 +1,277 @@
+/* ==========================================================================
+   DEPTH — the owner's direction: blocks and tabs are dimensional. Layered
+   shadows, soft gradients, a lift on hover, and six logo-derived tones that
+   cycle across sibling blocks. Still one system: every value is a token
+   (see "DEPTH" in tokens.css).
+
+   This sheet is imported after globals.css, so it refines the component
+   classes defined there.
+   ========================================================================== */
+
+/* ---- panels: raised objects with a gradient edge -------------------------- */
+.panel,
+.panel-quiet {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background:
+    var(--grad-surface) padding-box,
+    linear-gradient(140deg, color-mix(in srgb, var(--tone-2) 50%, transparent), color-mix(in srgb, var(--tone-1) 34%, transparent) 34%, var(--line) 61.8%, color-mix(in srgb, var(--tone-3) 46%, transparent)) border-box;
+  box-shadow: var(--depth-2);
+}
+.panel-quiet {
+  box-shadow: var(--depth-1);
+}
+
+/* ---- blocks: the tile ----------------------------------------------------
+   Any grid of sibling cells becomes a set of raised tiles. Two existing
+   markup patterns are upgraded in place (hairline grids drawn with borders or
+   with a 1px gap), plus the explicit `.tiles` container. */
+.tiles,
+.grid.border-l.border-t,
+.gap-px.bg-line,
+.gap-px.bg-night-line {
+  border-width: 0;
+  background: transparent;
+  gap: 0.8125rem;
+  overflow: visible;
+  border-radius: 0;
+  perspective: 1200px;
+  /* default tone; each child overrides it by position below */
+  --tone: var(--tone-1);
+  --tone-b: var(--tone-2);
+}
+.tiles > *,
+.grid.border-l.border-t > .border-b.border-r,
+.gap-px.bg-line > *,
+.gap-px.bg-night-line > * {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--tone) 26%, var(--line));
+  border-radius: 8px;
+  background: linear-gradient(155deg, color-mix(in srgb, var(--tone) 11%, var(--surface)) 0%, var(--surface) 46%, color-mix(in srgb, var(--tone-b) 6%, var(--surface)) 100%);
+  box-shadow:
+    var(--hi),
+    0 1px 2px rgba(20, 25, 29, 0.06),
+    0 13px 26px -16px color-mix(in srgb, var(--tone) 70%, transparent),
+    0 5px 13px -9px rgba(20, 25, 29, 0.2);
+  overflow: hidden;
+  transition:
+    transform var(--t-base) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    border-color var(--t-base) var(--ease-out);
+}
+/* the coloured top edge */
+.tiles > *::before,
+.grid.border-l.border-t > .border-b.border-r::before,
+.gap-px.bg-line > *::before,
+.gap-px.bg-night-line > *::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--tone), var(--tone-b));
+  pointer-events: none;
+}
+/* inner links must not paint over the tile */
+.tiles > * > a,
+.grid.border-l.border-t > .border-b.border-r > a,
+.gap-px.bg-line > * > a,
+.gap-px.bg-night-line > * > a {
+  background: transparent !important;
+}
+/* six tones, cycling */
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 2) {
+  --tone: var(--tone-2);
+  --tone-b: var(--tone-3);
+}
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 3) {
+  --tone: var(--tone-3);
+  --tone-b: var(--tone-4);
+}
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 4) {
+  --tone: var(--tone-4);
+  --tone-b: var(--tone-6);
+}
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 5) {
+  --tone: var(--tone-5);
+  --tone-b: var(--tone-1);
+}
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 6) {
+  --tone: var(--tone-6);
+  --tone-b: var(--tone-5);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :hover {
+    transform: translateY(-5px) rotateX(2.5deg);
+    border-color: color-mix(in srgb, var(--tone) 55%, var(--line));
+    box-shadow:
+      var(--hi),
+      0 2px 3px rgba(20, 25, 29, 0.06),
+      0 26px 42px -18px color-mix(in srgb, var(--tone) 78%, transparent),
+      0 13px 21px -13px rgba(20, 25, 29, 0.24);
+  }
+  [data-motion="reduced"] :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :hover {
+    transform: none;
+  }
+}
+
+/* ---- tabs: a sunken track with a raised, coloured key --------------------- */
+.seg {
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--grad-sunken);
+  box-shadow: inset 0 1px 3px rgba(20, 25, 29, 0.16);
+  overflow: visible;
+}
+.seg > button,
+.seg > a {
+  border-radius: 6px;
+  border-left: 0 !important;
+  transition:
+    background var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-instant) var(--ease-out);
+}
+.seg > [aria-pressed="true"],
+.seg > [aria-selected="true"],
+.seg > [aria-current="true"] {
+  background: var(--grad-accent);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 6px 13px -5px color-mix(in srgb, var(--tone-1) 75%, transparent),
+    0 1px 2px rgba(20, 25, 29, 0.25);
+}
+.seg > :not([aria-pressed="true"]):not([aria-selected="true"]):not([aria-current="true"]):hover {
+  background: var(--grad-surface);
+  box-shadow: var(--depth-1);
+}
+.seg > :active {
+  transform: translateY(1px);
+}
+
+/* ---- buttons: keys with weight -------------------------------------------- */
+.btn {
+  border-radius: 7px;
+}
+.btn-primary {
+  background: var(--grad-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 1px 2px rgba(20, 25, 29, 0.3),
+    0 8px 18px -8px rgba(20, 25, 29, 0.55);
+}
+.btn-primary:hover {
+  background: var(--grad-accent);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 1px 2px rgba(20, 25, 29, 0.25),
+    0 13px 26px -10px color-mix(in srgb, var(--tone-1) 80%, transparent);
+  transform: translateY(-1px);
+}
+.btn-accent {
+  background: var(--grad-accent);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 10px 21px -10px color-mix(in srgb, var(--tone-1) 80%, transparent);
+}
+.btn-ghost {
+  background: var(--grad-surface);
+  border-color: var(--line-strong);
+  box-shadow: var(--depth-1);
+}
+.btn-ghost:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--depth-2);
+}
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 5px rgba(20, 25, 29, 0.3);
+}
+.on-night .btn-primary {
+  background: var(--grad-ink);
+  color: var(--night);
+}
+.on-night .btn-primary:hover {
+  background: var(--grad-accent);
+  color: #06101a;
+}
+.on-night .btn-ghost {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
+}
+
+/* ---- small parts ----------------------------------------------------------- */
+.chip {
+  border-radius: 5px;
+  background: var(--grad-surface);
+  box-shadow: var(--depth-1);
+}
+.input,
+.select,
+.textarea {
+  border-radius: 7px;
+  box-shadow: inset 0 1px 3px rgba(20, 25, 29, 0.09);
+}
+.eyebrow::before {
+  height: 2px;
+  background: var(--grad-dna);
+}
+.dna-light::before {
+  background:
+    radial-gradient(55% 62% at 84% 14%, color-mix(in srgb, var(--tone-1) 15%, transparent), transparent 70%),
+    radial-gradient(40% 52% at 98% 66%, color-mix(in srgb, var(--tone-3) 13%, transparent), transparent 70%),
+    radial-gradient(34% 44% at 62% 0%, color-mix(in srgb, var(--tone-5) 9%, transparent), transparent 72%),
+    radial-gradient(30% 40% at 72% 96%, color-mix(in srgb, var(--tone-4) 12%, transparent), transparent 72%);
+}
+
+/* ---- rows: typographic lists become coloured ledgers ----------------------
+   Sibling rows (li.border-b.border-line) carry a tone bar on the left,
+   cycling through the six tones, and lift on hover like the tiles. */
+main li.border-b.border-line {
+  --tone: var(--tone-1);
+  --tone-b: var(--tone-2);
+  position: relative;
+  border-radius: 6px;
+  margin-top: 5px;
+  border-bottom-color: transparent;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tone) 9%, var(--surface)) 0%, var(--surface) 38.2%, color-mix(in srgb, var(--tone-b) 4%, var(--surface)) 100%);
+  box-shadow: var(--depth-1);
+  transition:
+    transform var(--t-base) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out);
+}
+main li.border-b.border-line::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: 6px 0 0 6px;
+  background: linear-gradient(180deg, var(--tone), var(--tone-b));
+}
+main li.border-b.border-line > a {
+  padding-left: 1.3125rem;
+  border-radius: 6px;
+  background: transparent !important;
+}
+main li.border-b.border-line:nth-child(6n + 2) { --tone: var(--tone-2); --tone-b: var(--tone-3); }
+main li.border-b.border-line:nth-child(6n + 3) { --tone: var(--tone-3); --tone-b: var(--tone-4); }
+main li.border-b.border-line:nth-child(6n + 4) { --tone: var(--tone-4); --tone-b: var(--tone-6); }
+main li.border-b.border-line:nth-child(6n + 5) { --tone: var(--tone-5); --tone-b: var(--tone-1); }
+main li.border-b.border-line:nth-child(6n + 6) { --tone: var(--tone-6); --tone-b: var(--tone-5); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  main li.border-b.border-line:has(> a):hover {
+    transform: translateY(-3px);
+    box-shadow:
+      var(--hi),
+      0 2px 3px rgba(20, 25, 29, 0.06),
+      0 21px 34px -18px color-mix(in srgb, var(--tone) 72%, transparent);
+  }
+}
+/* the night surface uses its own line token */
+.on-night li.border-b.border-night-line {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 38.2%);
+}

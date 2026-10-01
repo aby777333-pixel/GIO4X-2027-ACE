@@ -128,6 +128,44 @@
   --elev-3: 0 0 0 1px rgba(236, 238, 240, 0.08), 0 34px 89px -34px rgba(0, 0, 0, 0.85);
 }
 
+/* ---- DEPTH: tones, gradients and layered shadows ---------------------------
+   Six tones, all derived from or harmonious with the logo: blocks and tabs
+   cycle through them so the page is multi-coloured without being random. */
+:root,
+[data-theme="light"] {
+  --tone-1: #0870b8; /* market blue */
+  --tone-2: #00a098; /* teal */
+  --tone-3: #089040; /* emerald */
+  --tone-4: #b08d45; /* champagne */
+  --tone-5: #4a52b8; /* indigo */
+  --tone-6: #b4534a; /* muted crimson */
+  --grad-dna: linear-gradient(135deg, #00a098 0%, #0870b8 50%, #089040 100%);
+  --grad-accent: linear-gradient(135deg, #0a7cc8 0%, #0868aa 45%, #00807a 100%);
+  --grad-ink: linear-gradient(180deg, #2c343b 0%, #14191d 100%);
+  --grad-surface: linear-gradient(180deg, #ffffff 0%, #faf8f2 100%);
+  --grad-sunken: linear-gradient(180deg, #e6e2d8 0%, #efece4 100%);
+  --hi: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --depth-1: var(--hi), 0 1px 2px rgba(20, 25, 29, 0.07), 0 5px 13px -8px rgba(20, 25, 29, 0.18);
+  --depth-2: var(--hi), 0 1px 2px rgba(20, 25, 29, 0.06), 0 13px 34px -13px rgba(8, 80, 140, 0.26), 0 5px 13px -8px rgba(20, 25, 29, 0.14);
+  --depth-3: var(--hi), 0 2px 3px rgba(20, 25, 29, 0.06), 0 34px 55px -21px rgba(8, 80, 140, 0.34), 0 13px 21px -13px rgba(20, 25, 29, 0.2);
+}
+[data-theme="dark"] {
+  --tone-1: #4ba6e2;
+  --tone-2: #35c2b8;
+  --tone-3: #3fb872;
+  --tone-4: #d6bd82;
+  --tone-5: #9aa0f2;
+  --tone-6: #e5837a;
+  --grad-accent: linear-gradient(135deg, #5ab4ee 0%, #3a9be0 45%, #2fb8ae 100%);
+  --grad-ink: linear-gradient(180deg, #ffffff 0%, #dfe3e6 100%);
+  --grad-surface: linear-gradient(180deg, #1b252e 0%, #141b22 100%);
+  --grad-sunken: linear-gradient(180deg, #070b0e 0%, #0d1318 100%);
+  --hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --depth-1: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.04), 0 5px 13px -5px rgba(0, 0, 0, 0.6);
+  --depth-2: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.05), 0 13px 34px -13px rgba(0, 0, 0, 0.8), 0 0 34px -21px rgba(75, 166, 226, 0.5);
+  --depth-3: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.07), 0 34px 55px -21px rgba(0, 0, 0, 0.9), 0 0 55px -21px rgba(75, 166, 226, 0.6);
+}
+
 /* ---- ACCENT PALETTES ("moods") -------------------------------------------
    A mood changes the accent, never the building. Default accent = brand blue.
    Each palette defines a light and a dark value that pass AA against --bg. */

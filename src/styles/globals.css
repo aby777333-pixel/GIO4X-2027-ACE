@@ -492,6 +492,20 @@
     --viz-faint: rgba(238, 240, 241, 0.09);
     --brand-soft: rgba(90, 176, 232, 0.13);
     --glass: rgba(12, 17, 22, 0.76);
+    --tone-1: #4ba6e2;
+    --tone-2: #35c2b8;
+    --tone-3: #3fb872;
+    --tone-4: #d6bd82;
+    --tone-5: #9aa0f2;
+    --tone-6: #e5837a;
+    --grad-accent: linear-gradient(135deg, #5ab4ee 0%, #3a9be0 45%, #2fb8ae 100%);
+    --grad-ink: linear-gradient(180deg, #ffffff 0%, #dfe3e6 100%);
+    --grad-surface: linear-gradient(180deg, #1b252e 0%, #141b22 100%);
+    --grad-sunken: linear-gradient(180deg, #070b0e 0%, #0d1318 100%);
+    --hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    --depth-1: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.04), 0 5px 13px -5px rgba(0, 0, 0, 0.6);
+    --depth-2: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.05), 0 13px 34px -13px rgba(0, 0, 0, 0.8), 0 0 34px -21px rgba(75, 166, 226, 0.5);
+    --depth-3: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.07), 0 34px 55px -21px rgba(0, 0, 0, 0.9), 0 0 55px -21px rgba(75, 166, 226, 0.6);
   }
   /* fine coordinate grid — part of the signature material language */
   .grid-field {
@@ -1018,7 +1032,18 @@
   --accent-ink: #071019;
   --brand-soft: rgba(90, 176, 232, 0.13);
   --glass: rgba(12, 17, 22, 0.76);
+  --grad-ink: linear-gradient(180deg, #ffffff 0%, #dfe3e6 100%);
+  --grad-accent: linear-gradient(135deg, #5ab4ee 0%, #3a9be0 45%, #2fb8ae 100%);
+  --grad-surface: linear-gradient(180deg, #1b252e 0%, #141b22 100%);
+  --grad-sunken: linear-gradient(180deg, #070b0e 0%, #0d1318 100%);
+  --hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
   color: var(--on-night);
+}
+[data-chrome="night"] header[data-site-header] .btn-primary {
+  color: var(--night);
+}
+[data-chrome="night"] header[data-site-header] .btn-primary:hover {
+  color: #06101a;
 }
 
 /* Source mode (GIO4X Lens): outline every data note on the page */

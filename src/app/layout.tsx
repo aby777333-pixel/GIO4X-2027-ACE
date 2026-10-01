@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
+import "@/styles/depth.css";
 import { isProduction, site } from "@/config/site";
 import { PREFS_BOOT_SCRIPT } from "@/lib/prefs";
 
