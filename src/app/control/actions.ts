@@ -50,16 +50,21 @@ export async function signIn(formData: FormData): Promise<void> {
   if (!supabase) redirect(`${SIGN_IN_PATH}?error=unavailable`);
 
   let outcome: "ok" | "invalid" | "throttled" | "unavailable" = "unavailable";
-  try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error) outcome = "ok";
-    // One answer for every refusal (wrong password, unknown address, unconfirmed
-    // or disabled account): the response must not reveal whether an account exists.
-    else if (error.status === 429) outcome = "throttled";
-    else if (typeof error.status === "number" && error.status >= 400 && error.status < 500) outcome = "invalid";
-    else outcome = "unavailable";
-  } catch {
-    outcome = "unavailable";
+  // A failure that never produced an answer from the Auth server (a dropped
+  // connection, a cold start, a 5xx) is tried once more before giving up.
+  for (let attempt = 0; attempt < 2 && outcome === "unavailable"; attempt++) {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) outcome = "ok";
+      // One answer for every refusal (wrong password, unknown address, unconfirmed
+      // or disabled account): the response must not reveal whether an account exists.
+      else if (error.status === 429) outcome = "throttled";
+      else if (typeof error.status === "number" && error.status >= 400 && error.status < 500) outcome = "invalid";
+      // name and status only: never the address or the password
+      else console.error("[control] sign-in unavailable", error.name, error.status ?? "no-status");
+    } catch (e) {
+      console.error("[control] sign-in threw", e instanceof Error ? e.name : "unknown");
+    }
   }
 
   if (outcome !== "ok") redirect(`${SIGN_IN_PATH}?error=${outcome}`);
