@@ -39,7 +39,6 @@ const TOOLS: Record<string, { Component: ComponentType<ToolProps>; rates: boolea
   "order-anatomy": { Component: OrderAnatomy, rates: false },
 };
 
-export const dynamicParams = false;
 
 export function generateStaticParams() {
   return tools.filter((t) => t.slug in TOOLS).map((t) => ({ slug: t.slug }));

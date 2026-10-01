@@ -19,7 +19,6 @@ import "@/components/knowledge/knowledge.css";
 
 type Params = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
 
 export function generateStaticParams() {
   return glossary.map((t) => ({ slug: t.slug }));

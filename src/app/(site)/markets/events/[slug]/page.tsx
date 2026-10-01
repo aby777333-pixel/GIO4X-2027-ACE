@@ -11,7 +11,6 @@ import { webPageSchema } from "@/lib/schema";
 
 type Params = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
 
 export function generateStaticParams() {
   return econEvents.map((e) => ({ slug: e.slug }));

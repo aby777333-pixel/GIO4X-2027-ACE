@@ -43,7 +43,7 @@ docs/                     this folder
 | Kind of page | Strategy |
 |---|---|
 | Institutional, legal, trust, academy, glossary, tools, labs, platform pages | Static (built once) |
-| Instrument, asset-class, article, lesson, term, bank, event pages | Static via `generateStaticParams`, `dynamicParams = false` (unknown slugs are real 404s) |
+| Instrument, asset-class, article, lesson, term, bank, event pages | Static via `generateStaticParams`; unknown slugs call `notFound()` and return a real 404. (`dynamicParams = false` is deliberately not used: it makes prerendered dynamic routes 404 on the Netlify runtime.) |
 | Pages showing ECB reference fixings (`/`, `/markets`, pairs, currency strength, converter tools, Morning Room) | Static with `revalidate = 3600` |
 | Time-dependent UI (sessions, clocks, greeting) | Server renders a neutral state; the client fills it from the visitor's clock (`useNow`) so nothing server-rendered is ever presented as "now" |
 | `/control/**` | Dynamic, authenticated, `private, no-store`, `noindex` |

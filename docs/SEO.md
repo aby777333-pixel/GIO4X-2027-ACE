@@ -23,7 +23,7 @@ thin pages. Every indexable page must be worth indexing.
 | Any non-production environment (`NEXT_PUBLIC_SITE_ENV` ≠ `production`) | `noindex, nofollow` in metadata **and** `Disallow: /` in robots.txt |
 | `/search`, `/preferences`, `/sign-in`, `/open-account` | `noindex, follow`; disallowed in robots.txt; absent from sitemaps |
 | `/control/**`, `/api/**` | `X-Robots-Tag: noindex`, disallowed, authenticated or write-only |
-| Unknown slugs | real 404 (`dynamicParams = false`), never a soft 404 |
+| Unknown slugs | real 404 (`notFound()`), never a soft 404 |
 
 `robots.txt` never blocks CSS, JS, fonts or images. Disallow is not treated as a security control.
 

@@ -10,7 +10,6 @@ import "@/components/knowledge/knowledge.css";
 
 type Params = { params: Promise<{ section: string }> };
 
-export const dynamicParams = false;
 
 /** Only sections that have articles exist as routes. */
 export function generateStaticParams() {

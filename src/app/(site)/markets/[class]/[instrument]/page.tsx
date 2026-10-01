@@ -17,7 +17,6 @@ import { webPageSchema } from "@/lib/schema";
 
 type Params = { params: Promise<{ class: string; instrument: string }> };
 
-export const dynamicParams = false;
 export const revalidate = 3600;
 
 export function generateStaticParams() {
