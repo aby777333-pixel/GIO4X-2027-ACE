@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Params) {
   const { slug } = await params;
   const t = getTerm(slug);
   if (!t) return {};
-  return pageMeta({ title: `${t.term}: definition | Glossary`, description: metaDescription(t.definition), path: `/glossary/${t.slug}` });
+  return pageMeta({ ownCard: true, title: `${t.term}: definition | Glossary`, description: metaDescription(t.definition), path: `/glossary/${t.slug}` });
 }
 
 export default async function TermPage({ params }: Params) {

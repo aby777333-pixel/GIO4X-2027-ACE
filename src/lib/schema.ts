@@ -88,7 +88,7 @@ export function articleSchema(opts: {
     dateModified: opts.dateModified ?? opts.datePublished,
     articleSection: opts.section,
     inLanguage: "en",
-    image: absoluteUrl(`${opts.path}/opengraph-image`),
+    image: absoluteUrl("/opengraph-image"),
     // Desk bylines are organisational authors: no invented individuals.
     author: { "@type": "Organization", name: opts.author, url: site.url },
     publisher: { "@id": `${site.url}/#organization` },

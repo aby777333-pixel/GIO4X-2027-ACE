@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Params) {
   const i = getInstrument(key, slug);
   const cls = getAssetClass(key);
   if (!i || !cls) return {};
-  return pageMeta({ title: `${i.symbol}: ${i.name}`, description: describe(i, cls), path: instrumentHref(i) });
+  return pageMeta({ ownCard: true, title: `${i.symbol}: ${i.name}`, description: describe(i, cls), path: instrumentHref(i) });
 }
 
 /** The hero's right-hand figure: the last ECB fixing where one exists, otherwise the published conditions. */

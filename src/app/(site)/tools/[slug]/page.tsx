@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Params) {
   const { slug } = await params;
   const tool = getTool(slug);
   if (!tool) return {};
-  return pageMeta({ title: pageTitle(tool.name, tool.kind), description: tool.description, path: `/tools/${tool.slug}` });
+  return pageMeta({ ownCard: true, title: pageTitle(tool.name, tool.kind), description: tool.description, path: `/tools/${tool.slug}` });
 }
 
 /** Only the latest fixing crosses to the client: eight numbers and a date. */

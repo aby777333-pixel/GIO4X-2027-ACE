@@ -12,6 +12,8 @@ type PageMeta = {
   type?: "website" | "article";
   publishedTime?: string;
   modifiedTime?: string;
+  /** the route has its own opengraph-image file: do not attach the default card */
+  ownCard?: boolean;
   /** use the title as-is, without the "| GIO4X" template */
   absoluteTitle?: boolean;
 };
@@ -21,6 +23,8 @@ type PageMeta = {
  * always consistent, and tracking or filter parameters can never leak into a
  * canonical URL because the path is supplied explicitly.
  */
+const DEFAULT_CARD = { url: "/opengraph-image", width: 1200, height: 630, alt: `${site.name}: ${site.tagline}` };
+
 /** Search and share snippets are cut at ~160 characters; trim on a word so they never end mid-word. */
 function snippet(text: string, max = 158): string {
   const t = text.replace(/\s+/g, " ").trim();
@@ -46,8 +50,10 @@ export function pageMeta(input: PageMeta): Metadata {
       url: m.path,
       title: fullTitle,
       description: m.description,
+      // the default card; a route with its own opengraph-image file overrides it
+      ...(m.ownCard ? {} : { images: [DEFAULT_CARD] }),
       ...(m.type === "article" ? { publishedTime: m.publishedTime, modifiedTime: m.modifiedTime ?? m.publishedTime } : {}),
     },
-    twitter: { card: "summary_large_image", title: fullTitle, description: m.description },
+    twitter: { card: "summary_large_image", title: fullTitle, description: m.description, ...(m.ownCard ? {} : { images: [DEFAULT_CARD.url] }) },
   };
 }

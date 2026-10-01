@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Params) {
   const { slug } = await params;
   const a = getArticle(slug);
   if (!a) return {};
-  return pageMeta({ title: a.title, description: a.description, path: `/intelligence/${a.slug}`, type: "article", publishedTime: a.published, modifiedTime: a.updated });
+  return pageMeta({ ownCard: true, title: a.title, description: a.description, path: `/intelligence/${a.slug}`, type: "article", publishedTime: a.published, modifiedTime: a.updated });
 }
 
 export default async function ArticlePage({ params }: Params) {

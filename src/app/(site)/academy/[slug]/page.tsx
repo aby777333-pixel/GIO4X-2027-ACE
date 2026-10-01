@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Params) {
   const { slug } = await params;
   const l = getLesson(slug);
   if (!l) return {};
-  return pageMeta({ title: `${l.title} | Academy`, description: l.description, path: `/academy/${l.slug}`, type: "article", publishedTime: l.published, modifiedTime: l.updated });
+  return pageMeta({ ownCard: true, title: `${l.title} | Academy`, description: l.description, path: `/academy/${l.slug}`, type: "article", publishedTime: l.published, modifiedTime: l.updated });
 }
 
 export default async function LessonPage({ params }: Params) {
