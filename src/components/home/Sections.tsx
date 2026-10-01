@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
-import { TerminalStudy } from "@/components/brand/TerminalStudy";
 import { SectionHead } from "@/components/ui/Page";
 import { accountRows, accounts } from "@/data/accounts";
 import { assetClasses, instrumentsByClass } from "@/data/instruments";
@@ -89,7 +88,7 @@ export function PlatformsChapter() {
   return (
     <section className="on-night relative overflow-hidden" aria-labelledby="platforms-chapter">
       <div aria-hidden className="grid-field pointer-events-none absolute inset-0 opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
-      <div className="wrap relative section">
+      <div className="wrap relative section-quiet pb-55 lg:pb-89">
         <div className="phi items-end">
           <div data-reveal>
             <p className="eyebrow">Platforms</p>
@@ -104,40 +103,39 @@ export function PlatformsChapter() {
           </p>
         </div>
 
-        <div className="mt-55 grid gap-34 lg:grid-cols-phi lg:gap-55">
-          <article data-reveal>
-            <div className="rounded-md border border-night-line bg-night-2 p-13 shadow-3 sm:p-21">
-              <TerminalStudy className="h-auto w-full" />
+        {/* The workspace itself has just been drawn by the sequence above, so this
+            chapter is typographic: two platforms, stated side by side. */}
+        <div className="mt-55 grid border-t border-night-line md:grid-cols-2">
+          <article className="flex flex-col justify-between gap-34 py-34 md:pr-55" data-reveal>
+            <div>
+              <p className="label">The GIO4X flagship</p>
+              <h3 className="h2 mt-13">777 Raptor</h3>
+              <p className="mt-13 max-w-[38ch] text-on-night-2">Built for the market. A multi-asset workspace on web, desktop and mobile, designed around how a trading day actually unfolds: see, organise, analyse, act, monitor.</p>
             </div>
-            <div className="mt-21 flex flex-wrap items-start justify-between gap-21">
-              <div className="max-w-[34rem]">
-                <p className="label">The GIO4X flagship</p>
-                <h3 className="h3 mt-8">777 Raptor</h3>
-                <p className="mt-8 text-on-night-2">Built for the market. A multi-asset workspace on web, desktop and mobile, designed around how a trading day actually unfolds: see, organise, analyse, act, monitor.</p>
-              </div>
-              <Link href="/platforms/raptor" className="btn btn-primary">
-                Explore Raptor
-              </Link>
-            </div>
+            <Link href="/platforms/raptor" className="btn btn-primary self-start">
+              Explore Raptor
+            </Link>
           </article>
-
-          <article className="flex flex-col justify-between gap-34 border-t border-night-line pt-34 lg:border-l lg:border-t-0 lg:pl-55 lg:pt-0" data-reveal style={{ ["--i" as string]: 2 }}>
+          <article className="flex flex-col justify-between gap-34 border-t border-night-line py-34 md:border-l md:border-t-0 md:pl-55" data-reveal style={{ ["--i" as string]: 2 }}>
             <div>
               <p className="label">The established standard</p>
-              <h3 className="h3 mt-8">MetaTrader 5</h3>
-              <p className="mt-8 text-on-night-2">Global markets, familiar workflow. The multi-asset platform from MetaQuotes that many traders already know, with its charting, order types and automated trading through Expert Advisors.</p>
-              <Link href="/platforms/metatrader-5" className="btn btn-ghost mt-21">
-                Explore MT5
-              </Link>
+              <h3 className="h2 mt-13">MetaTrader 5</h3>
+              <p className="mt-13 max-w-[38ch] text-on-night-2">Global markets, familiar workflow. The multi-asset platform from MetaQuotes that many traders already know, with its charting, order types and automated trading through Expert Advisors.</p>
             </div>
-            <div className="border-t border-night-line pt-21">
-              <p className="text-sm text-on-night-2">Not sure which suits you?</p>
-              <Link href="/platforms/compare" className="go mt-8">
-                Compare platforms
-              </Link>
-              <p className="mt-21 text-xs text-on-night-2">Workspace image is an illustrative study, not a screenshot. MetaTrader 5 is a trademark of MetaQuotes Ltd.</p>
-            </div>
+            <Link href="/platforms/metatrader-5" className="btn btn-ghost self-start">
+              Explore MT5
+            </Link>
           </article>
+        </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-34 gap-y-13 border-t border-night-line pt-21">
+          <p className="text-sm text-on-night-2">
+            Not sure which suits you?{" "}
+            <Link href="/platforms/compare" className="link text-on-night">
+              Compare the two, without a winner
+            </Link>
+            .
+          </p>
+          <p className="text-xs text-on-night-2">MetaTrader 5 is a trademark of MetaQuotes Ltd.</p>
         </div>
       </div>
     </section>

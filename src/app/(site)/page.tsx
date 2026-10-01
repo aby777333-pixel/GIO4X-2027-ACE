@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Hero } from "@/components/home/Hero";
+import { MarketToRaptor } from "@/components/home/MarketToRaptor";
 import { ReferenceRates } from "@/components/home/ReferenceRates";
 import { AccountsTable, AssetIndex, IntelligenceTeaser, Philosophy, PlatformsChapter, ToolsTeaser, TrustBlock } from "@/components/home/Sections";
 import { SessionStrip } from "@/components/market/SessionStrip";
@@ -19,7 +20,8 @@ export const revalidate = 3600;
 
 /**
  * The homepage is a front door, not an inventory. Its rhythm:
- *   cinematic → quiet strip → whisper → index → dominant chapter → data →
+ *   cinematic → quiet strip → whisper → index → the pinned sequence (globe to
+ *   Raptor) → platforms → data →
  *   tools → comparison → trust → reading. Section heights vary on purpose.
  */
 export default function HomePage() {
@@ -29,6 +31,7 @@ export default function HomePage() {
       <SessionStrip />
       <Philosophy />
       <AssetIndex />
+      <MarketToRaptor />
       <PlatformsChapter />
 
       <section className="section" aria-labelledby="pulse-home">

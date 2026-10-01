@@ -883,6 +883,144 @@
   }
 }
 
+/* ==========================================================================
+   THE GIO4X SEQUENCE (homepage): globe → coordinates → instruments → Raptor
+   Default = a short static composition (no JavaScript, reduced motion, low
+   effects). `.is-live` is added by the component only when the scroll-driven
+   scene may run; then the section becomes a tall track with a pinned stage.
+   ========================================================================== */
+.gx-seq-stage {
+  padding-block: clamp(3.4375rem, 8vw, 8.9375rem);
+}
+.gx-seq-canvas {
+  display: none;
+}
+.gx-seq-rail {
+  display: none;
+}
+.gx-seq-beats {
+  display: grid;
+  gap: 2.125rem;
+}
+.gx-seq-figure {
+  width: min(100% - var(--gutter) * 2, 46rem);
+  margin: 3.4375rem auto 0;
+  border: 1px solid var(--night-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.gx-seq-note {
+  width: min(100% - var(--gutter) * 2, 46rem);
+  margin: 0.8125rem auto 0;
+}
+@media (min-width: 1080px) {
+  .gx-seq:not(.is-live) .gx-seq-beats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.4375rem;
+  }
+}
+
+.gx-seq.is-live {
+  height: 380svh;
+}
+.gx-seq.is-live .gx-seq-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  padding-block: 0;
+  /* the material is interpolated per frame; class swaps only move text colours */
+  transition: color var(--t-slow) var(--ease-out);
+}
+.gx-seq.is-live .gx-seq-stage:not(.on-night) {
+  color: var(--ink);
+}
+.gx-seq.is-live .gx-seq-canvas {
+  display: block;
+}
+.gx-seq.is-live .gx-seq-rail {
+  display: block;
+}
+.gx-seq.is-live .gx-seq-copy {
+  position: absolute;
+  inset-inline: 0;
+  bottom: clamp(2.125rem, 7svh, 5.5625rem);
+  z-index: 1;
+  pointer-events: none;
+}
+.gx-seq.is-live .gx-seq-beats-wrap {
+  min-height: 15.5rem;
+  max-width: 34rem;
+  padding-left: 1.3125rem;
+}
+.gx-seq.is-live .gx-seq-beats {
+  display: block;
+}
+.gx-seq.is-live .gx-seq-beat {
+  position: absolute;
+  inset: 0 0 auto 1.3125rem;
+  opacity: 0;
+  transition:
+    opacity var(--t-slow) var(--ease-out),
+    transform var(--t-slow) var(--ease-out);
+}
+.gx-seq.is-live .gx-seq-figure {
+  position: absolute;
+  margin: 0;
+  opacity: 0;
+  border-radius: 5px;
+  box-shadow: var(--elev-3);
+  will-change: opacity, transform;
+}
+.gx-seq.is-live .gx-seq-note {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 0.8125rem;
+  width: auto;
+  max-width: 34rem;
+  margin: 0;
+  text-align: right;
+  opacity: 0.75;
+}
+@media (min-width: 1080px) {
+  .gx-seq.is-live {
+    height: 440svh;
+  }
+  .gx-seq.is-live .gx-seq-copy {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+  .gx-seq.is-live .gx-seq-beats-wrap {
+    min-height: 19rem;
+    max-width: 30rem;
+  }
+}
+@media (max-width: 1079px) {
+  .gx-seq.is-live .gx-seq-note {
+    display: none;
+  }
+  .gx-seq.is-live .gx-seq-beat .h2 {
+    font-size: clamp(1.625rem, 6.4vw, 2.125rem);
+  }
+}
+
+/* While a pinned night stage is under it, the header takes the night material. */
+[data-chrome="night"] header[data-site-header] {
+  --ink: var(--on-night);
+  --ink-2: var(--on-night-2);
+  --ink-3: #8a949c;
+  --line: var(--night-line);
+  --line-strong: rgba(238, 240, 241, 0.3);
+  --bg: var(--night);
+  --paper: #0f161c;
+  --surface: var(--night-2);
+  --accent: #5ab0e8;
+  --accent-ink: #071019;
+  --brand-soft: rgba(90, 176, 232, 0.13);
+  --glass: rgba(12, 17, 22, 0.76);
+  color: var(--on-night);
+}
+
 /* Source mode (GIO4X Lens): outline every data note on the page */
 [data-sources="on"] [data-source-note] {
   outline: 1px dashed var(--accent);
