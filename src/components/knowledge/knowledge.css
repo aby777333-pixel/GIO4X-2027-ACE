@@ -1,0 +1,145 @@
+/*
+ * Knowledge pages (Intelligence, Academy, Glossary, FAQ, Morning Room).
+ * Additions to the long-form `.prose-gx` class for the elements the imported
+ * content actually contains, plus a few behaviours that need selectors.
+ * Tokens only: no colour is hard-coded here.
+ */
+
+/* ---- long-form reading --------------------------------------------------- */
+.prose-gx.editorial > p:first-child {
+  font-size: 1.1875rem;
+  line-height: 1.62;
+  color: var(--ink);
+}
+.prose-gx h2:first-child {
+  margin-top: 0;
+}
+.prose-gx .scroll-x {
+  margin-top: 1.3125rem;
+}
+.prose-gx table {
+  min-width: 26rem;
+  font-size: 0.9375rem;
+}
+.prose-gx th {
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 0.8125rem 0.8125rem 0.8125rem 0;
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+.prose-gx td {
+  padding: 0.8125rem 0.8125rem 0.8125rem 0;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--ink);
+}
+.prose-gx td strong {
+  font-weight: 600;
+}
+/* a note carried over from the source (risk warnings, asides) */
+.prose-gx .note {
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
+  padding: 1.3125rem 0 1.3125rem 1.3125rem;
+  border-left: 2px solid var(--warn);
+  background: var(--paper);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.prose-gx .note p {
+  padding-right: 1.3125rem;
+}
+/* glossary terms: a dotted underline, never a forest of blue */
+.prose-gx a.gloss {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--ink-3);
+  text-underline-offset: 0.24em;
+  cursor: help;
+}
+.prose-gx a.gloss:hover,
+.prose-gx a.gloss:focus-visible {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* ---- reading progress ---------------------------------------------------- */
+.read-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 41;
+  pointer-events: none;
+}
+.read-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+  opacity: 0.85;
+}
+
+/* ---- disclosures (FAQ, table of contents, bibliography) ------------------ */
+.disclose > summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1.3125rem;
+}
+.disclose > summary::after {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.25rem;
+  border-right: 1px solid var(--ink-3);
+  border-bottom: 1px solid var(--ink-3);
+  transform: translateY(-0.2rem) rotate(45deg);
+  transition: transform var(--t-fast) var(--ease-out);
+  align-self: center;
+}
+.disclose[open] > summary::after {
+  transform: translateY(0.1rem) rotate(225deg);
+}
+.disclose > summary:hover {
+  color: var(--accent);
+}
+
+/* ---- Morning Room depth: the same modules, progressively more of them ---- */
+[data-depth="quick"] [data-show="standard"],
+[data-depth="quick"] [data-show="deep"],
+[data-depth="standard"] [data-show="deep"] {
+  display: none !important;
+}
+
+/* ---- glossary index: letters that have no visible term step back --------- */
+.az-rail a[aria-disabled="true"] {
+  color: var(--ink-3);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+@media print {
+  .read-progress {
+    display: none !important;
+  }
+  [data-depth] [data-show] {
+    display: revert !important;
+  }
+  .prose-gx {
+    max-width: none;
+  }
+  .prose-gx a.gloss {
+    text-decoration: none;
+  }
+  .prose-gx a.gloss::after {
+    content: none;
+  }
+}

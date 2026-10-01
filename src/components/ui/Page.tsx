@@ -58,8 +58,8 @@ export function PageHero({ crumbs, eyebrow, title, lead, children, aside, quiet,
   return (
     <header className={`relative overflow-hidden ${night ? "on-night" : "dna-light"} hairline-b`}>
       {!aside && (
-        <div aria-hidden className="pointer-events-none absolute -right-[6%] top-1/2 hidden -translate-y-1/2 text-ink opacity-[0.05] lg:block">
-          <Rosette size={quiet ? 340 : 520} strokeWidth={0.6} />
+        <div aria-hidden className="pointer-events-none absolute -right-[6%] top-1/2 hidden -translate-y-1/2 text-ink opacity-[0.11] lg:block">
+          <Rosette size={quiet ? 340 : 520} strokeWidth={1} bare />
         </div>
       )}
       <div className={`wrap relative ${quiet ? "pb-34 pt-34 lg:pb-55 lg:pt-55" : "pb-55 pt-34 lg:pb-89 lg:pt-55"}`}>
@@ -139,7 +139,13 @@ export function DataNote({
     delayed: "Delayed",
   };
   return (
-    <p className={`flex flex-wrap items-center gap-x-13 gap-y-3 text-xs text-ink-3 ${className}`}>
+    <p
+      className={`flex flex-wrap items-center gap-x-13 gap-y-3 text-xs text-ink-3 ${className}`}
+      data-source-note
+      data-status={label[status]}
+      data-source={source ?? ""}
+      data-updated={updated ?? ""}
+    >
       <span className="chip">{label[status]}</span>
       {source && (
         <span>

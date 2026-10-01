@@ -1,0 +1,377 @@
+[
+  {
+    "slug": "technical-analysis-of-the-financial-markets",
+    "title": "Technical Analysis of the Financial Markets",
+    "author": "John J. Murphy",
+    "category": "Technical Analysis",
+    "year": 1999,
+    "description": "Widely regarded as the bible of technical analysis, this comprehensive guide covers chart patterns, indicators, intermarket relationships, and trading systems used by professionals worldwide.",
+    "lessons": [
+      "Trend identification using trendlines, channels, and moving averages",
+      "Chart pattern recognition: head & shoulders, double tops/bottoms, triangles, flags",
+      "Oscillators and momentum indicators: RSI, MACD, Stochastics",
+      "Intermarket analysis: how bonds, commodities, and equities affect forex",
+      "Volume analysis and its role in confirming price movements"
+    ]
+  },
+  {
+    "slug": "trading-in-the-zone",
+    "title": "Trading in the Zone",
+    "author": "Mark Douglas",
+    "category": "Market Psychology",
+    "year": 2000,
+    "description": "Mark Douglas masterfully reveals how mental discipline and probabilistic thinking separate consistently profitable traders from those who struggle. This book dismantles the psychological barriers — fear, greed, overconfidence, and revenge trading — that sabotage even well-researched trading plans.",
+    "lessons": [
+      "Markets are neutral — your beliefs and expectations create your experience",
+      "Think in probabilities, not certainties — any single trade outcome is random",
+      "Consistency comes from process, not from being right on every trade",
+      "Fear and greed are symptoms of flawed beliefs about the market",
+      "Define your edge, execute flawlessly, and let probabilities play out over time"
+    ]
+  },
+  {
+    "slug": "the-new-market-wizards",
+    "title": "The New Market Wizards",
+    "author": "Jack D. Schwager",
+    "category": "Market Psychology",
+    "year": 1992,
+    "description": "In this celebrated follow-up to Market Wizards, Jack Schwager interviews a new generation of exceptional traders, uncovering the strategies, mindsets, and daily habits that led to extraordinary market success.",
+    "lessons": [
+      "There is no single formula for market success — each wizard found their own unique edge",
+      "Discipline and risk control matter far more than prediction accuracy",
+      "The best traders treat losses as tuition — they learn from every mistake",
+      "Emotional detachment from individual trade outcomes is essential for longevity",
+      "Continuous adaptation is non-negotiable — markets change and so must your approach"
+    ]
+  },
+  {
+    "slug": "algorithmic-trading",
+    "title": "Algorithmic Trading",
+    "author": "Ernest P. Chan",
+    "category": "Algorithmic Trading",
+    "year": 2013,
+    "description": "A practical, no-nonsense guide to building automated trading systems, covering backtesting methodology, execution algorithms, mean reversion strategies, and momentum-based approaches.",
+    "lessons": [
+      "Always validate a strategy with out-of-sample data before risking real capital",
+      "Mean reversion strategies work best in ranging markets; momentum in trending markets",
+      "Transaction costs and slippage can destroy a profitable backtest — always account for them",
+      "Simplicity beats complexity — overcomplicated models overfit to noise",
+      "Kelly criterion and proper position sizing are as important as the signal itself"
+    ]
+  },
+  {
+    "slug": "the-disciplined-trader",
+    "title": "The Disciplined Trader",
+    "author": "Mark Douglas",
+    "category": "Risk Management",
+    "year": 1990,
+    "description": "Mark Douglas's first masterpiece lays the psychological groundwork for developing the mental edge needed for consistent profitability in forex trading and all financial markets. The book focuses specifically on how risk management psychology and disciplined trade execution interact to create — or destroy — trading careers.",
+    "lessons": [
+      "The market environment is fundamentally different from every other life experience",
+      "You must learn to think in terms of probabilities, not certainties",
+      "Self-discipline is a skill that must be developed — it is not innate",
+      "Fear of loss causes traders to make the very mistakes they are trying to avoid",
+      "Accepting risk fully before entering a trade eliminates hesitation and emotional interference"
+    ]
+  },
+  {
+    "slug": "japanese-candlestick-charting-techniques",
+    "title": "Japanese Candlestick Charting Techniques",
+    "author": "Steve Nison",
+    "category": "Technical Analysis",
+    "year": 1991,
+    "description": "Steve Nison introduced Western traders to the ancient Japanese art of candlestick charting, and this foundational text remains the definitive reference on the subject. Learn to read and interpret patterns such as doji, hammer, engulfing, morning star, and evening star formations for precise entry and exit signals in currency trading.",
+    "lessons": [
+      "Candlestick patterns reveal the battle between buyers and sellers in real time",
+      "Context matters — the same pattern has different implications at support vs resistance",
+      "Combining candlesticks with Western technical tools creates the most powerful analysis",
+      "Volume confirmation dramatically increases the reliability of candlestick signals"
+    ]
+  },
+  {
+    "slug": "fibonacci-trading",
+    "title": "Fibonacci Trading",
+    "author": "Carolyn Boroden",
+    "category": "Technical Analysis",
+    "year": 2008,
+    "description": "Carolyn Boroden delivers a deep, practical exploration of using Fibonacci ratios and the golden ratio in forex trading and financial market analysis. The book covers retracements, extensions, time projections, and cluster analysis — showing how to identify high-probability confluence zones where multiple Fibonacci levels align.",
+    "lessons": [
+      "The 0.618 and 1.618 ratios are the most important levels for trade entries and targets",
+      "Always wait for price confirmation at a Fibonacci level before entering a trade",
+      "Combining Fibonacci with candlestick patterns and moving averages creates a complete system"
+    ]
+  },
+  {
+    "slug": "quantitative-trading",
+    "title": "Quantitative Trading",
+    "author": "Ernest P. Chan",
+    "category": "Algorithmic Trading",
+    "year": 2008,
+    "description": "This pragmatic guide teaches aspiring quantitative traders how to build their own trading business from scratch, covering strategy identification, backtesting pitfalls, risk management frameworks, and practical execution considerations for live markets.",
+    "lessons": [
+      "Start with simple strategies and prove they work before adding complexity",
+      "Transaction costs are the silent killer of algorithmic strategies",
+      "Paper trading is not a substitute for live trading — execution differences matter",
+      "Independent traders have advantages over institutions: speed to deploy and no bureaucracy"
+    ]
+  },
+  {
+    "slug": "market-wizards",
+    "title": "Market Wizards",
+    "author": "Jack D. Schwager",
+    "category": "Market Psychology",
+    "year": 1989,
+    "description": "The original classic that started it all — Jack Schwager's groundbreaking interviews with the greatest traders of the 1980s and 1990s, including legends like Paul Tudor Jones, Ed Seykota, and Bruce Kovner, many of whom built their fortunes in currency trading and forex markets. Each interview reveals unique approaches to technical analysis, risk management, and trading psychology that remain relevant decades later.",
+    "lessons": [
+      "Cut your losses short and let your profits run — the universal rule of successful trading",
+      "Every great trader has a method for dealing with losing streaks",
+      "Risk management is not about avoiding risk — it is about controlling it",
+      "The market is always right — your opinion of where price should be is irrelevant",
+      "Conviction in your approach must be earned through backtesting and experience"
+    ]
+  },
+  {
+    "slug": "reminiscences-of-a-stock-operator",
+    "title": "Reminiscences of a Stock Operator",
+    "author": "Edwin Lefèvre",
+    "category": "Market Psychology",
+    "year": 1923,
+    "description": "First published in 1923, this thinly veiled biography of legendary speculator Jesse Livermore remains one of the most insightful books ever written about trading psychology, market timing, and the emotional pitfalls that destroy traders across all eras.",
+    "lessons": [
+      "Patience is the most profitable virtue in trading — wait for your setup",
+      "The market will tell you when you are wrong — listen to price, not your ego",
+      "Adding to losing positions is the fastest way to financial ruin",
+      "Big money is made by sitting, not trading — hold your winners",
+      "Crowd psychology creates predictable patterns that repeat across all eras and markets"
+    ]
+  },
+  {
+    "slug": "a-random-walk-down-wall-street",
+    "title": "A Random Walk Down Wall Street",
+    "author": "Burton Malkiel",
+    "category": "Fundamental Analysis",
+    "year": 1973,
+    "description": "Burton Malkiel's enduring classic challenges traders and investors to think critically about market efficiency, the limitations of technical analysis, and the role of diversification in wealth building.",
+    "lessons": [
+      "Markets are more efficient than most traders believe — finding a genuine edge is hard",
+      "Past price patterns do not reliably predict future movements without additional context",
+      "Diversification is the only free lunch in investing — spread your risk",
+      "Emotional decisions consistently destroy returns — systematic approaches outperform",
+      "Understanding why most strategies fail makes you better at finding ones that work"
+    ]
+  },
+  {
+    "slug": "the-intelligent-investor",
+    "title": "The Intelligent Investor",
+    "author": "Benjamin Graham",
+    "category": "Wealth Management",
+    "year": 1949,
+    "description": "Benjamin Graham's masterwork on value investing and disciplined capital allocation has guided generations of investors, including Warren Buffett, who calls it the best investing book ever written. While focused on equities, the core principles of margin of safety, emotional discipline, and fundamental analysis translate powerfully to forex trading and portfolio management.",
+    "lessons": [
+      "The margin of safety — buying below intrinsic value — is the central concept of intelligent investing",
+      "Mr. Market is your servant, not your master — exploit irrational prices rather than following them",
+      "Emotional discipline matters more than IQ in investment success",
+      "Defensive investors should focus on capital preservation; enterprising investors on value discovery",
+      "Investment is most intelligent when it is most businesslike — treat your portfolio as a business"
+    ]
+  },
+  {
+    "slug": "flash-boys",
+    "title": "Flash Boys",
+    "author": "Michael Lewis",
+    "category": "Algorithmic Trading",
+    "year": 2014,
+    "description": "Michael Lewis's explosive investigation into high-frequency trading reveals how technological advantages and market microstructure create hidden costs for retail traders in US equity markets. This page-turner exposes the mechanics of front-running, dark pools, and the arms race for speed that shapes modern market structure.",
+    "lessons": [
+      "Speed advantages in trading create hidden costs for retail and institutional traders",
+      "Order routing and execution quality significantly impact your actual trading results",
+      "Dark pools reduce transparency but serve important institutional liquidity functions",
+      "Understanding market structure helps you avoid being exploited by faster participants"
+    ]
+  },
+  {
+    "slug": "currency-trading-for-dummies",
+    "title": "Currency Trading for Dummies",
+    "author": "Kathleen Brooks & Brian Dolan",
+    "category": "Fundamental Analysis",
+    "year": 2015,
+    "description": "Do not let the title fool you — this comprehensive guide provides an excellent foundation in forex trading fundamentals, covering everything from how the global currency market operates to specific strategies for trading major, minor, and exotic pairs.",
+    "lessons": [
+      "The forex market operates 24/5 across four major sessions with different characteristics",
+      "Currency prices are driven by interest rates, economic data, and central bank policies",
+      "Risk management is not optional — never risk more than 1-2% of your account per trade",
+      "Demo trading is essential before risking real money — practice until consistent",
+      "Understanding the major, minor, and exotic currency pair categories helps focus your trading"
+    ]
+  },
+  {
+    "slug": "day-trading-and-swing-trading-the-currency-market",
+    "title": "Day Trading and Swing Trading the Currency Market",
+    "author": "Kathy Lien",
+    "category": "Technical Analysis",
+    "year": 2015,
+    "description": "Kathy Lien, one of the most respected names in forex education, delivers a comprehensive guide that blends technical analysis with fundamental analysis for currency trading across multiple timeframes.",
+    "lessons": [
+      "Each major currency pair has a unique personality and optimal trading session",
+      "News releases create tradeable volatility — learn to position before and after the event",
+      "Range-bound and trending markets require fundamentally different strategies",
+      "Multi-timeframe analysis confirms signals and filters out noise"
+    ]
+  },
+  {
+    "slug": "the-little-book-of-currency-trading",
+    "title": "The Little Book of Currency Trading",
+    "author": "Kathy Lien",
+    "category": "Fundamental Analysis",
+    "year": 2011,
+    "description": "In this concise yet powerful guide, veteran forex strategist Kathy Lien distills decades of currency trading experience into accessible lessons covering market drivers, risk management principles and trading strategies. The book is particularly strong on explaining how economic indicators, interest rate differentials, and geopolitical events drive currency pair movements.",
+    "lessons": [
+      "Interest rate differentials are the single most powerful driver of currency pair movements",
+      "GDP, CPI, and employment data releases create the most significant market-moving events",
+      "Understanding which currencies are risk-on vs risk-off helps navigate market sentiment shifts",
+      "Central bank forward guidance is often more important than the actual rate decision"
+    ]
+  },
+  {
+    "slug": "forex-price-action-scalping",
+    "title": "Forex Price Action Scalping",
+    "author": "Bob Volman",
+    "category": "Price Action",
+    "year": 2011,
+    "description": "Bob Volman's meticulously detailed guide to scalping the forex markets using pure price action — no indicators, no oscillators, just raw price movement on the chart. The book presents a complete trading methodology with hundreds of chart examples showing exact entries, exits, and the reasoning behind each decision in real-time currency trading scenarios.",
+    "lessons": [
+      "Price action is the purest form of market data — indicators are derived from price, not the other way around",
+      "Scalping requires absolute emotional neutrality — no trade is important, the next 100 trades are",
+      "Tight stop-losses and quick profit-taking define the scalping approach to risk management",
+      "Screen time is irreplaceable — you develop pattern recognition through thousands of hours of chart study"
+    ]
+  },
+  {
+    "slug": "the-art-and-science-of-technical-analysis",
+    "title": "The Art and Science of Technical Analysis",
+    "author": "Adam Grimes",
+    "category": "Technical Analysis",
+    "year": 2012,
+    "description": "Adam Grimes combines rigorous statistical analysis with practical trading wisdom to separate what actually works in technical analysis from what is merely market folklore. The book uses quantitative evidence to evaluate chart patterns, indicators, and trading strategies, helping forex traders build systems grounded in statistical reality rather than wishful thinking.",
+    "lessons": [
+      "Most popular chart patterns perform only slightly better than random — know which ones actually work",
+      "Statistical edge comes from understanding market structure, not from memorizing patterns",
+      "Backtesting with proper methodology separates real edges from curve-fitted illusions",
+      "Risk management is not separate from strategy — it IS the strategy",
+      "The best traders focus on process and execution, not on individual trade outcomes"
+    ]
+  },
+  {
+    "slug": "naked-forex",
+    "title": "Naked Forex",
+    "author": "Alex Nekritin & Walter Peters",
+    "category": "Price Action",
+    "year": 2012,
+    "description": "This refreshingly practical book strips forex trading down to its essence — reading raw price action without relying on lagging indicators. Nekritin and Peters present specific, repeatable trading setups based on candlestick patterns, support and resistance zones, and market structure that can be applied directly to currency pairs on any platform.",
+    "lessons": [
+      "Removing indicators from your charts forces you to truly understand what price is doing",
+      "Last Kiss trades — retests of broken support/resistance — offer excellent risk-reward ratios",
+      "Demo trading naked charts for 3 months before going live develops essential pattern recognition skills"
+    ]
+  },
+  {
+    "slug": "come-into-my-trading-room",
+    "title": "Come Into My Trading Room",
+    "author": "Alexander Elder",
+    "category": "Risk Management",
+    "year": 2002,
+    "description": "Dr. Alexander Elder's comprehensive guide goes beyond strategy to cover the complete trading ecosystem: market analysis, trading psychology, risk management, and practical record-keeping. The book introduces Elder's famous Triple Screen trading system and provides detailed frameworks for managing risk across multiple timeframes in forex and other financial markets.",
+    "lessons": [
+      "A trading diary is the most underused tool in a trader's arsenal — journal everything",
+      "Risk management requires planning your exit before your entry on every trade",
+      "The 2% rule (never risk more than 2% per trade) and the 6% rule (stop trading if down 6% in a month) protect your capital",
+      "Professional traders think in terms of risk-reward ratios, not in terms of being right or wrong"
+    ]
+  },
+  {
+    "slug": "trading-for-a-living",
+    "title": "Trading for a Living",
+    "author": "Alexander Elder",
+    "category": "Market Psychology",
+    "year": 1993,
+    "description": "Dr. Alexander Elder's classic integrates trading psychology, technical analysis, and risk management into a unified framework for professional forex trading and market participation. The book is structured around three pillars — Mind, Method, and Money — each of which must be mastered before a trader can achieve consistent profitability in currency trading.",
+    "lessons": [
+      "Mind, Method, and Money — all three pillars must be mastered for consistent profitability",
+      "Individual psychology is the weakest link for most traders — your emotions are the enemy",
+      "Moving averages act as dynamic support and resistance and should anchor every chart",
+      "The Force Index and Elder-Ray indicators combine price and volume for powerful signals",
+      "Keep detailed records — the difference between professional and amateur is measurement"
+    ]
+  },
+  {
+    "slug": "the-black-swan",
+    "title": "The Black Swan",
+    "author": "Nassim Nicholas Taleb",
+    "category": "Risk Management",
+    "year": 2007,
+    "description": "Nassim Taleb's groundbreaking exploration of rare, unpredictable events that have outsized impacts on financial markets, economies, and human history fundamentally changed how sophisticated traders think about risk. The book demonstrates why traditional risk models catastrophically underestimate tail risk — the very risk that destroys trading accounts in forex and currency markets during extreme events.",
+    "lessons": [
+      "Rare, unpredictable events (Black Swans) have outsized impacts that dwarf all normal market movements",
+      "Traditional risk models (VaR, normal distributions) systematically underestimate extreme risk",
+      "Position sizing must account for scenarios far worse than anything in historical data",
+      "Antifragility — designing your portfolio to benefit from volatility — is superior to mere robustness",
+      "The inability to predict Black Swans means you must be structurally prepared for them at all times"
+    ]
+  },
+  {
+    "slug": "fooled-by-randomness",
+    "title": "Fooled by Randomness",
+    "author": "Nassim Nicholas Taleb",
+    "category": "Market Psychology",
+    "year": 2001,
+    "description": "In this provocative and deeply insightful work, Nassim Taleb examines how humans systematically confuse luck with skill, particularly in trading and investing, and how this confusion leads to catastrophic financial decisions. The book challenges forex traders to honestly evaluate whether their profits come from genuine edge or merely from favorable market conditions and survivorship bias.",
+    "lessons": [
+      "Survivorship bias makes successful traders look more skilled than they actually are",
+      "A strategy that worked in the past may have succeeded due to luck, not edge",
+      "Monte Carlo simulations reveal the role of randomness in trading outcomes",
+      "Outcome quality and decision quality are not the same thing — a good decision can have a bad outcome",
+      "Journaling and honest self-assessment are the only defenses against self-deception"
+    ]
+  },
+  {
+    "slug": "options-futures-and-other-derivatives",
+    "title": "Options, Futures, and Other Derivatives",
+    "author": "John C. Hull",
+    "category": "Options & Derivatives",
+    "year": 2017,
+    "description": "The definitive academic and professional reference on derivatives markets, covering options pricing theory, futures contracts, swaps, and exotic instruments with mathematical rigor and practical clarity. While comprehensive in scope, the sections on currency options, forward contracts, and interest rate derivatives are directly relevant to forex traders seeking to hedge risk or enhance returns.",
+    "lessons": [
+      "The Black-Scholes model provides the theoretical foundation for all options pricing",
+      "Forward contracts and swaps are used by institutions to hedge currency exposure",
+      "Understanding Greeks (delta, gamma, theta, vega) is essential for managing options positions",
+      "Interest rate derivatives influence currency values through carry trade dynamics and yield differentials"
+    ]
+  },
+  {
+    "slug": "the-man-who-solved-the-market",
+    "title": "The Man Who Solved the Market",
+    "author": "Gregory Zuckerman",
+    "category": "Algorithmic Trading",
+    "year": 2019,
+    "description": "Gregory Zuckerman's riveting account of Jim Simons and Renaissance Technologies — the most successful quantitative trading operation in history — describes how the firm built its trading on mathematical models and data. The book illustrates the power of removing human emotion from trading decisions and relying instead on rigorously tested algorithms.",
+    "lessons": [
+      "Hiring physicists and mathematicians instead of MBAs was Simons' key innovation",
+      "Even the best quantitative system requires constant refinement as markets evolve"
+    ]
+  },
+  {
+    "slug": "principles",
+    "title": "Principles",
+    "author": "Ray Dalio",
+    "category": "Wealth Management",
+    "year": 2017,
+    "description": "Ray Dalio, founder of the world's largest hedge fund Bridgewater Associates, shares the life and work principles that guided his extraordinary career in global macro trading and investment management, including extensive experience in currency markets and forex trading. The book's frameworks for radical transparency, systematic decision-making, and learning from mistakes apply directly to every aspect of a trader's development.",
+    "lessons": [
+      "Radical transparency — seeing things as they truly are — is the foundation of good decision-making",
+      "Pain + Reflection = Progress — every trading loss is an opportunity to learn and improve",
+      "Believability-weighted decision making produces better outcomes than democracy or autocracy",
+      "Systematic principles beat ad-hoc decisions in every domain, including trading",
+      "The biggest barrier to success is your ego — humility and open-mindedness compound faster than capital"
+    ]
+  }
+]

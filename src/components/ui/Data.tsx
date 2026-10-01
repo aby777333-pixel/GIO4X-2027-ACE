@@ -15,7 +15,7 @@ export function Change({ value, className = "" }: { value: number | null; classN
       </span>
       <span>
         <span className="sr-only">{flat ? "unchanged " : up ? "up " : "down "}</span>
-        {formatPct(value)}
+        {flat ? "0.00%" : formatPct(value)}
       </span>
     </span>
   );

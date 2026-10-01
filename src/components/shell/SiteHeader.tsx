@@ -7,6 +7,17 @@ import { nav } from "@/config/nav";
 import { Logo } from "@/components/brand/Logo";
 import { AppearanceButton } from "@/components/shell/Appearance";
 import { openCommandBar } from "@/components/shell/CommandBar";
+import { LensButton } from "@/components/shell/Lens";
+
+/** Which URL prefixes belong to which primary section (a page is "in" exactly one). */
+const SECTION_PREFIXES: Record<string, string[]> = {
+  markets: ["/markets"],
+  trading: ["/trading", "/partners", "/tools"],
+  platforms: ["/platforms"],
+  intelligence: ["/intelligence", "/morning-room", "/labs"],
+  academy: ["/academy", "/glossary", "/faq"],
+  company: ["/about", "/careers", "/media", "/contact", "/trust", "/legal", "/design", "/status"],
+};
 
 /**
  * Institutional navigation.
@@ -74,6 +85,7 @@ export function SiteHeader() {
   const isCurrent = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
   return (
+    <>
     <header
       ref={headerRef}
       data-site-header
@@ -95,7 +107,7 @@ export function SiteHeader() {
         <nav aria-label="Primary" className="ml-13 hidden lg:block">
           <ul className="flex items-center">
             {nav.map((s) => {
-              const current = isCurrent(s.href) || s.groups.some((g) => g.items.some((i) => isCurrent(i.href.split("#")[0])));
+              const current = (SECTION_PREFIXES[s.key] ?? [s.href]).some((p) => isCurrent(p));
               return (
                 <li key={s.key} onMouseEnter={() => intentOpen(s.key)}>
                   <button
@@ -136,6 +148,7 @@ export function SiteHeader() {
           <button type="button" onClick={() => openCommandBar()} className="btn btn-quiet h-[2.125rem] px-8 sm:hidden" aria-label="Search GIO4X">
             <SearchIcon />
           </button>
+          <LensButton />
           <AppearanceButton />
           <Link href="/sign-in" className="btn btn-quiet btn-sm hidden md:inline-flex">
             Sign in
@@ -201,11 +214,14 @@ export function SiteHeader() {
         ))}
       </div>
 
-      {/* drawer (mobile / tablet) */}
+    </header>
+
+      {/* drawer (mobile / tablet). A sibling of the header, not a child: the header's
+          backdrop-filter would otherwise become the containing block of this fixed panel. */}
       <div
         id="site-drawer"
         hidden={!drawer}
-        className="fixed inset-x-0 bottom-0 top-[3.4375rem] overflow-y-auto overscroll-contain border-t border-line bg-bg lg:hidden"
+        className="fixed inset-x-0 bottom-0 top-[3.4375rem] z-header overflow-y-auto overscroll-contain border-t border-line bg-bg lg:hidden"
       >
         <nav aria-label="Primary mobile" className="wrap pb-55 pt-13">
           <ul>
@@ -260,7 +276,7 @@ export function SiteHeader() {
           </div>
         </nav>
       </div>
-    </header>
+    </>
   );
 }
 

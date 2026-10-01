@@ -292,8 +292,8 @@ export function CommandBar() {
                   onClick={r.run}
                   className={`mx-8 flex cursor-pointer items-baseline justify-between gap-21 rounded-sm px-13 py-8 ${i === cursor ? "bg-brand-soft" : ""}`}
                 >
-                  <span className="truncate text-[0.9375rem] font-medium text-ink">{r.title}</span>
-                  {r.note && <span className="hidden shrink truncate text-xs text-ink-3 sm:inline">{r.note}</span>}
+                  <span className="max-w-full shrink-0 truncate text-[0.9375rem] font-medium text-ink sm:max-w-[61.8%]">{r.title}</span>
+                  {r.note && <span className="hidden min-w-0 truncate text-xs text-ink-3 sm:inline">{r.note}</span>}
                 </div>
               </div>
             );

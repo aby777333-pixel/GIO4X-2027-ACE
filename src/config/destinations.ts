@@ -20,8 +20,12 @@ const PORTAL_ENV: Record<PortalKey, string | undefined> = {
   openAccount: process.env.ACCOUNT_OPENING_URL,
 };
 
-/** Extra hosts allowed for portal destinations, comma separated (e.g. "portal.gio4x.com"). */
-const extraHosts = (process.env.OFFICIAL_PORTAL_HOSTS ?? "")
+/**
+ * Extra hosts allowed for portal destinations, comma separated (e.g. "portal.gio4x.com").
+ * Public on purpose: the browser-side link checker must recognise the same hosts
+ * the server does, and a hostname clients are sent to is not a secret.
+ */
+const extraHosts = (process.env.NEXT_PUBLIC_OFFICIAL_PORTAL_HOSTS ?? "")
   .split(",")
   .map((h) => h.trim().toLowerCase())
   .filter(Boolean);

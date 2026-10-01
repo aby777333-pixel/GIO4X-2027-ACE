@@ -21,7 +21,18 @@ type PageMeta = {
  * always consistent, and tracking or filter parameters can never leak into a
  * canonical URL because the path is supplied explicitly.
  */
-export function pageMeta(m: PageMeta): Metadata {
+/** Search and share snippets are cut at ~160 characters; trim on a word so they never end mid-word. */
+function snippet(text: string, max = 158): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("; "), cut.lastIndexOf(": "));
+  if (stop > max * 0.55) return cut.slice(0, stop + 1).replace(/[;:]$/, ".");
+  return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:–-]$/, "")}…`;
+}
+
+export function pageMeta(input: PageMeta): Metadata {
+  const m = { ...input, description: snippet(input.description) };
   const fullTitle = m.absoluteTitle ? m.title : `${m.title} | ${site.name}`;
   return {
     title: m.absoluteTitle ? { absolute: m.title } : m.title,

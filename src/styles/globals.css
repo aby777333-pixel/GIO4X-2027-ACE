@@ -13,6 +13,8 @@
     text-size-adjust: 100%;
     scroll-padding-top: calc(var(--header-h) + 1.3125rem);
     background: var(--bg);
+    /* no horizontal page scroll, ever; `clip` keeps position: sticky working */
+    overflow-x: clip;
   }
   @media (prefers-reduced-motion: no-preference) {
     html {
@@ -81,6 +83,23 @@
   }
   [hidden] {
     display: none !important;
+  }
+  /* grid and flex children may shrink below their content width, so a wide
+     table or a long unbroken string scrolls inside its own container instead
+     of widening the page */
+  :where(.grid, .phi) > * {
+    min-width: 0;
+  }
+  /* small controls keep a 44px hit area without growing visually */
+  [role="switch"],
+  .check input {
+    position: relative;
+  }
+  [role="switch"]::after,
+  .check input::before {
+    content: "";
+    position: absolute;
+    inset: -0.75rem;
   }
   /* reduced motion: static composition must stand on its own */
   @media (prefers-reduced-motion: reduce) {
@@ -335,6 +354,16 @@
     transform: scaleX(1.618);
   }
 
+  /* touch targets: standalone text links get a 44px hit area on touch devices */
+  @media (pointer: coarse) {
+    .go,
+    nav[aria-label="Breadcrumb"] a {
+      min-height: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+
   /* ---- buttons --------------------------------------------------------- */
   .btn {
     position: relative;
@@ -560,6 +589,10 @@
     border-bottom: 1px solid var(--line-strong);
     white-space: nowrap;
   }
+  .table-gx th.num,
+  .table-gx td.num-right {
+    text-align: right;
+  }
   .table-gx td {
     padding: 0 0.8125rem 0 0;
     height: var(--row);
@@ -570,6 +603,9 @@
     background: var(--brand-soft);
   }
   .scroll-x {
+    /* containing block for absolutely positioned descendants (e.g. .sr-only),
+       so they scroll with the rail instead of widening the page */
+    position: relative;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
@@ -825,30 +861,33 @@
   }
 }
 
-/* scroll reveal: content is visible by default (no-JS, reduced motion);
-   the reveal only arms once the script marks the document ready */
-.js-reveal [data-reveal] {
-  opacity: 0;
-  transform: translateY(13px);
-  transition:
-    opacity var(--t-reveal) var(--ease-out),
-    transform var(--t-reveal) var(--ease-out);
-  transition-delay: calc(var(--i, 0) * 62ms);
-}
-.js-reveal [data-reveal].is-in {
-  opacity: 1;
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .js-reveal [data-reveal] {
-    opacity: 1;
-    transform: none;
+/* Scroll reveal for elements marked `data-reveal`.
+   Pure CSS (a view timeline), so there is no script, no class toggling and
+   nothing for hydration to disagree with. Content is fully visible wherever
+   view timelines are unsupported, under reduced motion and in print. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal] {
+      animation: gx-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry calc(34% + var(--i, 0) * 5%);
+    }
+    [data-motion="reduced"] [data-reveal] {
+      animation: none;
+    }
   }
 }
-[data-motion="reduced"] .js-reveal [data-reveal],
-[data-motion="reduced"].js-reveal [data-reveal] {
-  opacity: 1;
-  transform: none;
+@media print {
+  [data-reveal] {
+    animation: none !important;
+  }
+}
+
+/* Source mode (GIO4X Lens): outline every data note on the page */
+[data-sources="on"] [data-source-note] {
+  outline: 1px dashed var(--accent);
+  outline-offset: 5px;
+  border-radius: 2px;
 }
 
 /* ==========================================================================

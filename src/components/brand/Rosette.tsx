@@ -23,6 +23,8 @@ type Props = {
   className?: string;
   title?: string;
   strokeWidth?: number;
+  /** blades only, without the centre point (watermarks) */
+  bare?: boolean;
 };
 
 // One blade in a 100×100 box centred on (50,50), pointing "north".
@@ -35,7 +37,7 @@ const heel = { x: 50 + (R_IN / PHI) * Math.sin((20 * Math.PI) / 180), y: 50 - (R
 const f = (n: number) => n.toFixed(2);
 const BLADE = `M ${f(base.x)} ${f(base.y)} A ${f(R_OUT)} ${f(R_OUT)} 0 0 1 ${f(tip.x)} ${f(tip.y)} A ${f(R_OUT / PHI)} ${f(R_OUT / PHI)} 0 0 1 ${f(heel.x)} ${f(heel.y)}`;
 
-export function Rosette({ size = 55, blades = 8, variant = "line", spin = false, dna = false, className, title, strokeWidth = 1.25 }: Props) {
+export function Rosette({ size = 55, blades = 8, variant = "line", spin = false, dna = false, className, title, strokeWidth = 1.25, bare = false }: Props) {
   const id = dna ? "gx-dna" : undefined;
   const paint = dna ? `url(#${id})` : "currentColor";
   return (
@@ -75,7 +77,7 @@ export function Rosette({ size = 55, blades = 8, variant = "line", spin = false,
             />
           ) : null,
         )}
-        <circle cx="50" cy="50" r={R_IN / PHI / PHI} fill={paint} />
+        {!bare && <circle cx="50" cy="50" r={R_IN / PHI / PHI} fill={paint} />}
       </g>
     </svg>
   );

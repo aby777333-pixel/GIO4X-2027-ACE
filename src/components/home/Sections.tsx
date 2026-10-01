@@ -111,7 +111,7 @@ export function PlatformsChapter() {
             </div>
             <div className="mt-21 flex flex-wrap items-start justify-between gap-21">
               <div className="max-w-[34rem]">
-                <p className="label">Proprietary technology</p>
+                <p className="label">The GIO4X flagship</p>
                 <h3 className="h3 mt-8">777 Raptor</h3>
                 <p className="mt-8 text-on-night-2">Built for the market. A multi-asset workspace on web, desktop and mobile, designed around how a trading day actually unfolds: see, organise, analyse, act, monitor.</p>
               </div>

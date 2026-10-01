@@ -1,0 +1,391 @@
+{
+  "categories": [
+    {
+      "key": "getting-started",
+      "label": "Getting started",
+      "blurb": "What the markets and products are, and how an application works."
+    },
+    {
+      "key": "accounts",
+      "label": "Accounts",
+      "blurb": "Account conditions, tax and support."
+    },
+    {
+      "key": "trading-basics",
+      "label": "Trading basics",
+      "blurb": "Pips, spreads, swaps, analysis and the vocabulary of a trade."
+    },
+    {
+      "key": "margin-leverage",
+      "label": "Margin and leverage",
+      "blurb": "How leveraged positions are funded and measured."
+    },
+    {
+      "key": "orders",
+      "label": "Orders",
+      "blurb": "Size, execution and opposing positions."
+    },
+    {
+      "key": "platforms",
+      "label": "Platforms",
+      "blurb": "MetaTrader 5 and 777 Raptor."
+    },
+    {
+      "key": "funding",
+      "label": "Funding",
+      "blurb": "Currencies and the rules on who may pay in and out."
+    },
+    {
+      "key": "security",
+      "label": "Security",
+      "blurb": "Identity checks and regulatory status."
+    },
+    {
+      "key": "partners",
+      "label": "Partners",
+      "blurb": "Introducing Brokers and affiliates."
+    }
+  ],
+  "items": [
+    {
+      "id": "how-do-i-open-a-live-trading-account",
+      "cat": "getting-started",
+      "kind": "answer",
+      "q": "How do I open a live trading account?",
+      "a": "Opening a live account is straightforward: register on the GIO4X website, complete the KYC verification process by submitting your government-issued ID and proof of address, then fund your account using any of our accepted payment methods."
+    },
+    {
+      "id": "what-is-forex-trading",
+      "cat": "getting-started",
+      "kind": "answer",
+      "q": "What is forex trading?",
+      "a": "Forex (foreign exchange) trading is the buying and selling of currencies on the global market to profit from changes in exchange rates. It is the largest and most liquid financial market in the world, with over $7 trillion traded daily. Traders speculate on whether a currency will rise or fall relative to another."
+    },
+    {
+      "id": "what-are-cfds",
+      "cat": "getting-started",
+      "kind": "answer",
+      "q": "What are CFDs?",
+      "a": "CFDs (Contracts for Difference) are financial derivatives that allow you to trade the price movements of an underlying asset without actually owning it. You profit or lose based on the difference between the opening and closing price of your trade. CFDs are available on forex, stocks, indices, commodities, and cryptocurrencies."
+    },
+    {
+      "id": "what-are-the-risks-of-cfd-trading",
+      "cat": "getting-started",
+      "kind": "answer",
+      "q": "What are the risks of CFD trading?",
+      "a": "CFDs are leveraged products, which means both profits and losses are amplified. Always use stop-loss orders, manage your leverage responsibly, and never trade with funds you cannot afford to lose."
+    },
+    {
+      "id": "where-are-account-minimums-spreads-and-leverage-published",
+      "cat": "accounts",
+      "kind": "open",
+      "q": "Where are account minimums, spreads and leverage published?",
+      "a": "In one place: the account types page, where each figure is labelled indicative and carries its source. Earlier answers on these points disagreed with one another and have been withdrawn until they are confirmed.",
+      "links": [
+        {
+          "label": "Account types",
+          "href": "/trading/accounts"
+        },
+        {
+          "label": "Trading conditions",
+          "href": "/trading/conditions"
+        }
+      ]
+    },
+    {
+      "id": "what-are-the-support-hours",
+      "cat": "accounts",
+      "kind": "open",
+      "q": "What are the support hours?",
+      "a": "Support hours are not published yet, because earlier pages gave different answers. Write to info@gio4x.com or use the contact page.",
+      "links": [
+        {
+          "label": "Contact",
+          "href": "/contact"
+        }
+      ]
+    },
+    {
+      "id": "who-is-responsible-for-tax-on-trading-results",
+      "cat": "accounts",
+      "kind": "answer",
+      "q": "Who is responsible for tax on trading results?",
+      "a": "As a trader, you are solely responsible for reporting and paying taxes on your trading income in accordance with the tax laws of your country of residence. We recommend consulting a tax professional for guidance."
+    },
+    {
+      "id": "why-do-fx-swaps-triple-on-wednesdays",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "Why do FX swaps triple on Wednesdays?",
+      "a": "FX swaps triple on Wednesdays to account for the weekend rollover period. Since forex markets are closed on Saturday and Sunday, the Wednesday swap charge covers three days of financing — Wednesday night, Saturday, and Sunday. This is an industry-standard practice across all forex brokers."
+    },
+    {
+      "id": "what-are-the-trading-hours",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What are the trading hours?",
+      "a": "Forex markets are open 24 hours a day, 5 days a week — from Sunday 5:00 PM EST to Friday 5:00 PM EST. Specific instruments may have different trading hours."
+    },
+    {
+      "id": "what-is-a-pip",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is a pip?",
+      "a": "A pip (percentage in point) is the smallest standard price movement in a currency pair. For most forex pairs, one pip equals 0.0001 (the fourth decimal place). For JPY pairs, one pip equals 0.01 (the second decimal place). Pips are used to measure price changes and calculate profit or loss."
+    },
+    {
+      "id": "what-is-a-spread",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is a spread?",
+      "a": "The spread is the difference between the bid (sell) price and the ask (buy) price of an instrument. It represents the primary cost of trading. Spreads vary by instrument and market conditions, and tend to widen during high-volatility events."
+    },
+    {
+      "id": "what-is-a-swap-or-rollover-fee",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is a swap or rollover fee?",
+      "a": "A swap (also called rollover) is a fee charged or credited for holding a trading position overnight past the daily rollover time. The swap rate depends on the interest rate differential between the two currencies in the pair. Swaps triple on Wednesdays to account for the weekend when markets are closed."
+    },
+    {
+      "id": "what-happens-if-the-trader-i-copy-loses",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What happens if the trader I copy loses?",
+      "a": "Losses are proportionally shared just like profits. If the trader you copy incurs a loss, your account will reflect a proportional loss based on your allocation."
+    },
+    {
+      "id": "what-are-major-currency-pairs",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What are major currency pairs?",
+      "a": "Major currency pairs are the most traded forex pairs, all involving the US Dollar: EUR/USD (Euro), GBP/USD (British Pound), USD/JPY (Japanese Yen), USD/CHF (Swiss Franc), AUD/USD (Australian Dollar), NZD/USD (New Zealand Dollar), and USD/CAD (Canadian Dollar). These pairs offer the tightest spreads and highest liquidity."
+    },
+    {
+      "id": "what-is-fundamental-analysis",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is fundamental analysis?",
+      "a": "Fundamental analysis involves analyzing macroeconomic data, interest rates, geopolitical events, and central bank policies to predict future currency price movements. Key data points include GDP, inflation, employment figures, and trade balances. Fundamental traders focus on the underlying economic health of a country to make trading decisions."
+    },
+    {
+      "id": "what-is-technical-analysis",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is technical analysis?",
+      "a": "Technical analysis is the study of historical price charts, patterns, and mathematical indicators to predict future price movements. Common tools include moving averages, RSI, MACD, Bollinger Bands, and Fibonacci retracements. Technical analysts believe that all relevant information is already reflected in the price."
+    },
+    {
+      "id": "what-is-a-candlestick-chart",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is a candlestick chart?",
+      "a": "A candlestick chart is a type of price chart that displays the open, high, low, and close prices for a specific time period in a candle-shaped format. The body shows the range between open and close, while the wicks (shadows) show the high and low. Green/white candles indicate price increases; red/black indicate decreases."
+    },
+    {
+      "id": "what-is-support-and-resistance",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is support and resistance?",
+      "a": "Support and resistance are key price levels on a chart. Support is a price level where buying pressure is strong enough to prevent the price from falling further. Resistance is a level where selling pressure prevents the price from rising further. These levels are used by traders to identify potential entry and exit points."
+    },
+    {
+      "id": "what-is-nfp",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is NFP?",
+      "a": "NFP (Non-Farm Payrolls) is a key US economic indicator that reports the number of jobs added or lost in the economy, excluding the farming sector. It is released on the first Friday of every month by the Bureau of Labor Statistics. NFP releases often cause significant volatility in forex markets, particularly in USD pairs."
+    },
+    {
+      "id": "what-is-the-fomc",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is the FOMC?",
+      "a": "The FOMC (Federal Open Market Committee) is the branch of the US Federal Reserve that sets monetary policy, including interest rate decisions. FOMC meetings occur eight times per year, and their decisions directly impact the US Dollar and global financial markets. Traders closely watch FOMC statements for clues about future rate changes."
+    },
+    {
+      "id": "what-is-a-risk-reward-ratio",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is a risk-reward ratio?",
+      "a": "The risk-reward ratio compares the potential loss (risk) of a trade to the potential profit (reward). For example, a 1:2 risk-reward ratio means you risk $1 to potentially gain $2."
+    },
+    {
+      "id": "what-trading-styles-exist",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What trading styles exist?",
+      "a": "There are four main trading styles: Scalping (very short-term trades lasting seconds to minutes), Day Trading (positions opened and closed within the same day), Swing Trading (positions held for several days to weeks), and Position Trading (long-term positions held for weeks to months). Each style suits different personalities, time commitments, and risk appetites."
+    },
+    {
+      "id": "what-are-the-costs-of-cfd-trading",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What are the costs of CFD trading?",
+      "a": "The primary costs of CFD trading include the spread (difference between bid and ask price), overnight swap fees for positions held past the daily rollover, and potential commission on ECN accounts."
+    },
+    {
+      "id": "do-cfds-expire",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "Do CFDs expire?",
+      "a": "Most CFDs, including forex and stock CFDs, do not have an expiry date and can be held indefinitely (subject to swap fees). However, some commodity CFDs (like oil and natural gas) are based on futures contracts and have specific expiry dates."
+    },
+    {
+      "id": "what-is-the-difference-between-cfds-and-futures",
+      "cat": "trading-basics",
+      "kind": "answer",
+      "q": "What is the difference between CFDs and futures?",
+      "a": "Key differences include: CFDs have no fixed expiry date (most types), require lower capital due to higher leverage, and are traded directly with the broker. Futures have standardized expiry dates, are traded on regulated exchanges, and typically require larger capital."
+    },
+    {
+      "id": "what-is-margin-in-forex-trading",
+      "cat": "margin-leverage",
+      "kind": "answer",
+      "q": "What is margin in forex trading?",
+      "a": "Margin is the amount of capital required to open and maintain a leveraged trading position. It acts as a good-faith deposit or collateral held by the broker. Margin is not a fee or cost — it is simply a portion of your account equity set aside to keep your trade open."
+    },
+    {
+      "id": "how-is-margin-calculated",
+      "cat": "margin-leverage",
+      "kind": "answer",
+      "q": "How is margin calculated?",
+      "a": "Margin is calculated using the formula: Trade Size ÷ Leverage = Required Margin. For example, if you open a $100,000 position with 500:1 leverage, your required margin is $100,000 ÷ 500 = $200. The margin requirement varies depending on the instrument and your account leverage settings."
+    },
+    {
+      "id": "what-is-leverage",
+      "cat": "margin-leverage",
+      "kind": "answer",
+      "q": "What is leverage?",
+      "a": "Leverage is essentially borrowed capital that allows you to increase the size of your trading position beyond what your own funds would permit. With 500:1 leverage, every $1 in your account controls $500 in the market. While leverage amplifies potential profits, it equally amplifies potential losses."
+    },
+    {
+      "id": "what-is-free-margin",
+      "cat": "margin-leverage",
+      "kind": "answer",
+      "q": "What is free margin?",
+      "a": "Free margin is the difference between your account equity and used margin. It represents the funds available to open new positions or absorb losses on existing positions. If your free margin reaches zero, you cannot open new trades and may face a margin call."
+    },
+    {
+      "id": "what-is-margin-level-percentage",
+      "cat": "margin-leverage",
+      "kind": "answer",
+      "q": "What is margin level percentage?",
+      "a": "Margin level is calculated as (Equity / Used Margin) x 100%. It indicates the health of your account. Monitoring your margin level is essential for effective risk management."
+    },
+    {
+      "id": "what-is-slippage",
+      "cat": "orders",
+      "kind": "answer",
+      "q": "What is slippage?",
+      "a": "Slippage occurs when the price at which your order is executed differs from the price at which it was requested. This typically happens during periods of high volatility or low liquidity. Slippage can be positive (better price) or negative (worse price)."
+    },
+    {
+      "id": "what-is-hedging",
+      "cat": "orders",
+      "kind": "answer",
+      "q": "What is hedging?",
+      "a": "Hedging is a risk management strategy that involves opening opposite positions on the same instrument. For example, holding both a buy and a sell position on EUR/USD simultaneously. This allows traders to manage risk and protect against adverse price movements without closing their original position."
+    },
+    {
+      "id": "what-is-a-lot-size",
+      "cat": "orders",
+      "kind": "answer",
+      "q": "What is a lot size?",
+      "a": "A lot is the standard unit of measurement in forex trading. A standard lot equals 100,000 units of the base currency, a mini lot equals 10,000 units, and a micro lot equals 1,000 units."
+    },
+    {
+      "id": "which-platforms-does-gio4x-offer",
+      "cat": "platforms",
+      "kind": "answer",
+      "q": "Which platforms does GIO4X offer?",
+      "a": "Two: MetaTrader 5 and 777 Raptor. The platform pages describe each and compare them side by side. Feature questions that are not answered there can be sent to info@gio4x.com.",
+      "links": [
+        {
+          "label": "Compare platforms",
+          "href": "/platforms/compare"
+        },
+        {
+          "label": "MetaTrader 5",
+          "href": "/platforms/metatrader-5"
+        },
+        {
+          "label": "777 Raptor",
+          "href": "/platforms/raptor"
+        }
+      ]
+    },
+    {
+      "id": "how-long-do-deposits-and-withdrawals-take-and-what-do-they-cost",
+      "cat": "funding",
+      "kind": "open",
+      "q": "How long do deposits and withdrawals take, and what do they cost?",
+      "a": "Processing times and fees are not published here yet: the figures on the previous site conflicted with one another. Please ask before you fund an account.",
+      "links": [
+        {
+          "label": "Funding and withdrawals",
+          "href": "/trading/funding"
+        },
+        {
+          "label": "Contact",
+          "href": "/contact"
+        }
+      ]
+    },
+    {
+      "id": "are-there-third-party-transfer-restrictions",
+      "cat": "funding",
+      "kind": "answer",
+      "q": "Are there third-party transfer restrictions?",
+      "a": "Yes, for security and compliance purposes, all deposits and withdrawals must be made in the name of the trading account holder. Third-party transfers are not accepted. This policy helps prevent fraud and ensures the safety of your funds."
+    },
+    {
+      "id": "what-currencies-are-accepted-for-deposits",
+      "cat": "funding",
+      "kind": "answer",
+      "q": "What currencies are accepted for deposits?",
+      "a": "GIO4X accepts deposits in the following currencies: AUD, USD, GBP, EUR, AED, SGD, CAD, CHF, HKD, INR, and NZD."
+    },
+    {
+      "id": "is-gio4x-regulated",
+      "cat": "security",
+      "kind": "open",
+      "q": "Is GIO4X regulated?",
+      "a": "This site does not yet publish a regulatory status for GIO4X. Until one is published with a register reference you can check for yourself, treat the question as open and ask us directly at info@gio4x.com. The Trust Centre lists what has and has not been disclosed.",
+      "links": [
+        {
+          "label": "Transparency",
+          "href": "/trust/transparency"
+        },
+        {
+          "label": "Contact",
+          "href": "/contact"
+        }
+      ]
+    },
+    {
+      "id": "how-is-my-identity-verified",
+      "cat": "security",
+      "kind": "answer",
+      "q": "How is my identity verified?",
+      "a": "You will need to submit a valid government-issued photo ID (passport, national ID, or driver’s license) and a proof of address document (utility bill or bank statement dated within the last 3 months)."
+    },
+    {
+      "id": "what-are-the-introducing-broker-terms",
+      "cat": "partners",
+      "kind": "open",
+      "q": "What are the Introducing Broker terms?",
+      "a": "Rebate rates, payment schedules and tier structures are not published here yet, because earlier statements disagreed. The partners page explains how the programme is organised; for terms, write to us through the contact page.",
+      "links": [
+        {
+          "label": "Partners",
+          "href": "/partners"
+        },
+        {
+          "label": "Contact",
+          "href": "/contact"
+        }
+      ]
+    }
+  ]
+}

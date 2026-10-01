@@ -88,14 +88,13 @@ export const nav: NavSection[] = [
       {
         title: "777 Raptor",
         items: [
-          { label: "Explore Raptor", href: "/platforms/raptor" },
-          { label: "Raptor Intelligence", href: "/platforms/raptor#intelligence" },
+          { label: "Explore Raptor", href: "/platforms/raptor", note: "Built for the market" },
         ],
       },
       {
         title: "MetaTrader 5",
         items: [
-          { label: "Explore MT5", href: "/platforms/metatrader-5" },
+          { label: "Explore MT5", href: "/platforms/metatrader-5", note: "Global markets, familiar workflow" },
           { label: "Getting started", href: "/platforms/metatrader-5#getting-started" },
         ],
       },
@@ -117,7 +116,7 @@ export const nav: NavSection[] = [
       {
         title: "Read",
         items: [
-          { label: "Latest", href: "/intelligence" },
+          { label: "Latest", href: "/intelligence", note: "Analysis and explainers" },
           { label: "Morning Room", href: "/morning-room", note: "Today in sessions and schedule" },
         ],
       },

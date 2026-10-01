@@ -13,8 +13,8 @@ export function Hero() {
       {/* the coordinate field: fine, almost subliminal */}
       <div aria-hidden className="grid-field pointer-events-none absolute inset-0 [mask-image:radial-gradient(70%_70%_at_70%_45%,black,transparent)]" />
 
-      <div className="wrap relative grid min-h-[calc(100svh-var(--header-h)-4.5rem)] items-center gap-34 py-34 lg:grid-cols-phi-r lg:py-55">
-        <div className="relative z-1 max-w-[34rem] pb-34 pt-55 lg:py-0">
+      <div className="wrap relative grid items-center gap-34 py-34 lg:min-h-[calc(100svh-var(--header-h)-4.5rem)] lg:grid-cols-phi-r lg:py-55">
+        <div className="relative z-1 max-w-[34rem] pb-21 pt-34 lg:py-0">
           <p className="eyebrow" style={{ animation: "gx-rise 680ms var(--ease-out) both" }}>
             {site.tagline}
           </p>
@@ -48,7 +48,7 @@ export function Hero() {
         </div>
 
         <div
-          className="pointer-events-none absolute -right-[38%] top-[4%] w-[118%] opacity-50 sm:-right-[20%] sm:w-[90%] lg:pointer-events-auto lg:static lg:w-full lg:opacity-100"
+          className="pointer-events-none absolute -right-[46%] -top-[3%] w-[112%] opacity-60 [mask-image:linear-gradient(to_left,black_38.2%,transparent_78%)] sm:-right-[24%] sm:w-[90%] lg:pointer-events-auto lg:static lg:w-full lg:opacity-100 lg:[mask-image:none]"
           style={{ animation: "gx-fade 1100ms var(--ease-out) 160ms both" }}
         >
           <MarketSphere className="mx-auto w-full max-w-[46rem]" />

@@ -86,6 +86,7 @@ export function MarketSphere({ className }: { className?: string }) {
     let targetLon = 0;
     let px = 0; // pointer parallax
     let py = 0;
+    let first = true;
     const t0 = performance.now();
 
     const resize = () => {
@@ -129,14 +130,18 @@ export function MarketSphere({ className }: { className?: string }) {
       if (time - lastStatus > 30_000 || lastStatus === 0) {
         refreshStatus(now);
         lastStatus = time || 1;
-        if (lon0 === 0 && time < 100) lon0 = targetLon - 34;
+        if (first) {
+          // open a little short of the active region and settle into it
+          lon0 = targetLon - 21;
+          first = false;
+        }
       }
       const elapsed = (time - t0) / 1000;
       // ease toward the active region, plus a slow architectural drift
       const drift = still() ? 0 : Math.sin(elapsed / 21) * 13;
       let d = targetLon + drift - lon0;
       d = ((d + 540) % 360) - 180;
-      lon0 += still() ? d : d * 0.012;
+      lon0 += still() ? d : d * 0.02;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
@@ -213,7 +218,7 @@ export function MarketSphere({ className }: { className?: string }) {
         ctx.lineTo(cx + Math.cos(a) * dialR, cy + Math.sin(a) * dialR);
         ctx.strokeStyle = major ? palette.stroke : palette.faint;
         ctx.stroke();
-        if (major && size > 380) {
+        if (major && size > 380 && window.innerWidth >= 1080) {
           ctx.fillStyle = palette.muted;
           ctx.font = `500 10px ${palette.font}`;
           ctx.textAlign = "center";
@@ -321,7 +326,8 @@ export function MarketSphere({ className }: { className?: string }) {
           ctx.fill();
         }
         // label
-        if (p[2] > 0.18 && size > 320) {
+        // labels only where the sphere is a figure, not a backdrop (below lg it sits behind the headline)
+        if (p[2] > 0.18 && size > 320 && window.innerWidth >= 1080) {
           ctx.font = `600 11px ${palette.font}`;
           const name = s.centre.city;
           const tw = ctx.measureText(name).width;

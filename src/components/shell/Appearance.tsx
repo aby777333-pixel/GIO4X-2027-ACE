@@ -123,7 +123,7 @@ function Toggle({ label, hint, on, onChange }: { label: string; hint?: string; o
       >
         <span
           aria-hidden
-          className={`absolute top-[3px] h-[13px] w-[13px] rounded-full transition-transform duration-[260ms] ${on ? "translate-x-[16px] bg-[var(--accent-ink)]" : "translate-x-[3px] bg-ink-3"}`}
+          className={`absolute left-0 top-[3px] h-[13px] w-[13px] rounded-full transition-transform duration-[260ms] ${on ? "translate-x-[16px] bg-[var(--accent-ink)]" : "translate-x-[3px] bg-ink-3"}`}
         />
       </button>
     </div>

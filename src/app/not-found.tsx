@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { NotFoundSuggestions } from "@/components/shell/NotFoundSuggestions";
+import { SiteShell } from "@/components/shell/SiteShell";
 
 export const metadata: Metadata = { title: "This market doesn’t exist", robots: { index: false, follow: true } };
 
@@ -22,6 +23,7 @@ const routes = [
  */
 export default function NotFound() {
   return (
+    <SiteShell>
     <section className="relative overflow-hidden">
       <div aria-hidden className="grid-field pointer-events-none absolute inset-0 [mask-image:radial-gradient(60%_60%_at_50%_40%,black,transparent)]" />
       <div className="wrap relative grid min-h-[70svh] items-center gap-34 py-55 lg:grid-cols-phi lg:py-89">
@@ -45,5 +47,6 @@ export default function NotFound() {
         </div>
       </div>
     </section>
+    </SiteShell>
   );
 }

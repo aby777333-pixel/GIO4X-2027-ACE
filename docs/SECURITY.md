@@ -1,0 +1,214 @@
+# GIO4X security model (as built)
+
+This describes what exists in the repository today: the public form endpoints, the database, and the first
+version of GIO4X Control. It makes no claim beyond that. Nothing here is "unhackable"; the design assumes
+that any single layer can fail and tries to make sure another one is behind it.
+
+Related: `docs/CONTROL.md` (operating the console), `supabase/migrations/` (the rules themselves).
+
+## 1. Threat model, in brief
+
+**Assets**
+
+| Asset | Classification | Where |
+|---|---|---|
+| Enquiries: name, email, phone, country, message | Confidential (personal data) | `public.leads` |
+| Consent evidence: what was accepted, when, policy version | Confidential | `leads`, `newsletter_subscribers` |
+| Newsletter addresses | Confidential (personal data) | `public.newsletter_subscribers` |
+| Internal notes | Confidential | `public.lead_notes` |
+| Staff list and roles | Internal | `public.staff` |
+| Audit trail | Internal, integrity-critical | `public.audit_log` |
+| Staff sessions | Restricted | HttpOnly cookies scoped to `/control` |
+
+**Actors:** an anonymous visitor; an automated sender (spam, flooding); another website acting through a
+visitor's browser; anyone holding the publishable key (which is everyone: it ships to browsers); a signed-in
+Supabase user who is not staff; staff in the roles `viewer`, `agent`, `admin`; the owner with SQL access.
+
+**Main abuse cases and what answers them**
+
+| Abuse case | Controls |
+|---|---|
+| Spam or flooding through the forms | Honeypot and minimum fill time (silent discard); per-IP limiter in the API; database throttle triggers; 16 KB body cap |
+| Calling the database directly with the publishable key to skip the API | Insert-only policies; column-level INSERT grants; CHECK constraints repeating every API bound; the same throttle triggers |
+| Forging server-controlled values (`status`, `assigned_to`, timestamps, back-dated consent) | Columns not grantable to the public; `WITH CHECK` pins; timestamps stamped by trigger; consent time must be "now" |
+| Reading other people's enquiries | No SELECT privilege for `anon`; SELECT policy requires a `staff` row; inserts never use `RETURNING` |
+| Mass assignment (`role=admin`, `status=resolved`) | Top-level allow-list in the API (unknown field → 400); column grants in the database |
+| Stored script or markup in a message, shown later to staff | React escapes all output; no `dangerouslySetInnerHTML` on user data; control and invisible characters stripped on input; CSP as a backstop |
+| Spreadsheet formula injection through the CSV export | Cells starting with `= + - @` (and tab / CR) are prefixed with `'`; every cell quoted |
+| Another site posting through a visitor's browser (CSRF) | Public endpoints: Origin/Referer must be this site. Control: session cookies are `SameSite=Lax`, Next.js rejects server actions whose Origin differs from Host, the export route checks Origin itself |
+| A signed-in user who is not staff reaching the console | Server check on every page, action and route; RLS gives a non-staff user exactly the rights of a visitor |
+| A `viewer` or `agent` exceeding their role by calling the API directly | Policies and column grants per role; assignment rule in a trigger; UI restrictions are only a courtesy |
+| Tampering with the audit trail | No INSERT/UPDATE/DELETE privilege or policy; rows written only by triggers; UPDATE, DELETE and TRUNCATE refused by trigger for every role |
+| Account enumeration at sign-in | One generic message for every refusal; no sign-up; Supabase Auth rate limits plus a per-IP limiter |
+| Leaking database detail in errors | Fixed, generic messages; only an error code is logged, never the payload |
+| Cached private pages | `/control` is `Cache-Control: private, no-store`, `noindex`, always rendered on demand |
+
+## 2. The publishable key
+
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is not a secret. It maps to the Postgres role `anon` (or, with a
+session, `authenticated`). **There is no service-role key anywhere in this application**, so there is no key
+whose theft bypasses row-level security. RLS is the security boundary.
+
+With the publishable key and no session, a caller **can**:
+- insert one row into `leads` or `newsletter_subscribers`, supplying only the visitor columns, passing every
+  CHECK constraint and the throttles.
+
+They **cannot**: read any table; update or delete anything; set `status`, `assigned_to`, `created_at`,
+`updated_at` or `unsubscribed_at`; back-date consent; write notes; read or write `staff` or `audit_log`; call
+`is_staff()`, `staff_role()`, `staff_directory()` or `record_subscriber_export()`.
+
+A signed-in user **without a `staff` row** has the same rights as a visitor, plus reading nothing: the helper
+functions return false/null/empty for them.
+
+## 3. Row-level security by role
+
+RLS is **enabled and forced** on every table. No policy means no access. PostgREST also needs table
+privileges, so each cell below is "privilege granted **and** policy passes".
+
+| Table | Operation | anon | signed-in, not staff | viewer | agent | admin |
+|---|---|---|---|---|---|---|
+| `leads` | INSERT (visitor columns only; `status='new'`, `assigned_to` null, consent time ≈ now) | yes | yes | yes | yes | yes |
+| `leads` | SELECT | no | no | yes | yes | yes |
+| `leads` | UPDATE `status` | no | no | no | yes | yes |
+| `leads` | UPDATE `assigned_to` | no | no | no | self or unassign | anyone |
+| `leads` | UPDATE any other column, DELETE | no | no | no | no | no |
+| `lead_notes` | SELECT | no | no | yes | yes | yes |
+| `lead_notes` | INSERT (`author` = caller, always) | no | no | no | yes | yes |
+| `lead_notes` | UPDATE, DELETE | no | no | no | no | no |
+| `newsletter_subscribers` | INSERT (`unsubscribed_at` null, consent time ≈ now) | yes | yes | yes | yes | yes |
+| `newsletter_subscribers` | SELECT | no | no | yes | yes | yes |
+| `newsletter_subscribers` | UPDATE, DELETE | no | no | no | no | no |
+| `staff` | SELECT own row | no | (no row) | yes | yes | yes |
+| `staff` | SELECT all rows | no | no | no | no | yes |
+| `staff` | INSERT, UPDATE, DELETE | no | no | no | no | no (SQL only) |
+| `audit_log` | SELECT | no | no | yes | yes | yes |
+| `audit_log` | INSERT, UPDATE, DELETE, TRUNCATE | no | no | no | no | no (triggers only; append-only for the owner too) |
+
+Functions (all `SECURITY DEFINER`, `search_path = ''`, fully qualified names, EXECUTE for `authenticated`
+only): `is_staff()`, `staff_role()`, `staff_directory()` (id and display name only, to staff only),
+`record_subscriber_export(int)` (admin only; writes the audit row). Trigger functions have EXECUTE revoked
+from every API role.
+
+Two deliberate choices worth knowing:
+- **A user may read their own `staff` row.** The console needs the caller's role; reading your own role
+  reveals nothing you are not entitled to know. Other people's roles are admin-only.
+- **Display names are visible to all staff** through `staff_directory()` so the console can show who is
+  assigned and who wrote a note. Roles are not included.
+
+### Verify after applying the migrations
+
+The migrations could not be executed while they were written, so run these once. Replace the URL and key.
+
+```bash
+# 1. anon cannot read (expect 401/permission denied or an empty array, never rows)
+curl -s "$SUPABASE_URL/rest/v1/leads?select=*" -H "apikey: $KEY"
+curl -s "$SUPABASE_URL/rest/v1/staff?select=*" -H "apikey: $KEY"
+curl -s "$SUPABASE_URL/rest/v1/audit_log?select=*" -H "apikey: $KEY"
+
+# 2. anon cannot forge a server-controlled column (expect 401/403 "permission denied")
+curl -s -X POST "$SUPABASE_URL/rest/v1/leads" -H "apikey: $KEY" -H "Content-Type: application/json" \
+  -d '{"id":"00000000-0000-4000-8000-000000000001","reference":"GX-AAAAAAAA","name":"x","email":"x@example.com","topic":"General","message":"x","page":"/","utm":{},"privacy_accepted_at":"2026-01-01T00:00:00Z","privacy_version":"v","marketing_consent":false,"status":"resolved"}'
+
+# 3. the same without "status" but with the old consent date: refused by the policy (back-dated consent)
+# 4. the application path: submit the contact form on the site; expect 200 and a GX- reference,
+#    then find the row in GIO4X Control.
+# 5. anon cannot call the helpers (expect 401/403/404)
+curl -s -X POST "$SUPABASE_URL/rest/v1/rpc/staff_directory" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'
+```
+
+Then run the Supabase security advisor on the project and read every finding.
+
+## 4. Input validation (`src/lib/server/validate.ts`)
+
+- Only `application/json`; body read as a stream and abandoned past 16 KB (413).
+- Top-level allow-list: an unexpected field is a 400. Types are checked, never coerced.
+- Strings: Unicode NFC, control characters removed, zero-width and bidirectional formatting characters
+  removed (they can disguise text shown to staff), whitespace collapsed, trimmed, then length-checked.
+- `email`: ASCII, lower-cased, 6–254 characters, pattern-checked. `topic`: one of the eleven allowed values.
+  `message`: 1–5000 characters. `name` ≤ 120. `phone`: digits, spaces, `+ ( ) . / -`, 5–40.
+  `country`, `accountInterest` ≤ 80. `page`: a same-site path (no `//`, backslash or whitespace; query and
+  fragment dropped). `utm`: only the five `utm_*` keys are kept, each ≤ 120 characters; other keys inside
+  `utm` are dropped, not stored.
+- The database repeats every bound as a CHECK constraint, so the direct-PostgREST route is held to the same
+  rules.
+- Honeypot filled, or submitted in under 2.5 s: the response is an ordinary 200 with a reference, and
+  nothing is stored.
+- Not stored at all: IP address, user agent, query strings.
+
+## 5. Rate limiting, three layers
+
+| Layer | Rule | Honest limits |
+|---|---|---|
+| API, per IP, in memory (`src/lib/server/rate-limit.ts`) | 30 requests and 5 accepted submissions per 10 minutes, per endpoint; 10 sign-in attempts per 10 minutes | Per function instance and lost when an instance is recycled. Slows a casual script; does not stop a distributed sender. |
+| Database triggers (`0003_triggers.sql`) | 30 inserts per minute per table (global); 3 leads per email address per hour | Durable and cannot be bypassed. The global breaker is shared: a flood makes the form unavailable to everyone for up to a minute. No per-IP rule (the database cannot trust an IP). |
+| Supabase Auth | Its own limits on sign-in and token refresh | Configured in the Supabase dashboard. |
+
+A throttled insert returns 429 from PostgREST (`SQLSTATE PT429`) and from the API.
+
+## 6. GIO4X Control
+
+- Email and password through Supabase Auth; no sign-up; accounts are created by the owner.
+- Sessions are cookies: `HttpOnly`, `SameSite=Lax`, `Secure` in production, `Path=/control`. The public
+  site and `/api` never receive them. No token is stored where page scripts can read it.
+- `src/middleware.ts` runs only on `/control`. It refreshes the session and redirects visitors without one.
+  It does not decide access.
+- Access is decided in `src/lib/server/staff.ts` on every page, server action and route handler, using
+  `auth.getUser()` (validated by the Auth server, so a revoked session stops working at once). Every query
+  then runs as that user, so RLS decides again.
+- States: no session → sign-in; signed in without a staff row → "Not authorised"; environment variables
+  missing → "Not configured"; tables unreadable → a plain notice.
+- The subscriber export is POST-only, admin-only, same-origin, and is written to the audit log *before* the
+  file is produced.
+
+## 7. Headers and CSP (`next.config.mjs`, owned by the lead engineer)
+
+`Content-Security-Policy` (`default-src 'self'`; scripts from self only; `connect-src` self and the Supabase
+project; frames only TradingView; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`;
+`frame-ancestors 'none'`), `Strict-Transport-Security` (two years, subdomains, preload),
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy:
+strict-origin-when-cross-origin`, a restrictive `Permissions-Policy`, `Cross-Origin-Opener-Policy:
+same-origin`. `/control/*` adds `Cache-Control: private, no-store` and `X-Robots-Tag: noindex, nofollow`;
+`/api/*` adds `Cache-Control: no-store`.
+
+Known weakness, stated: `script-src` includes `'unsafe-inline'` because statically generated Next.js pages
+need an inline bootstrap. A nonce-based policy would require rendering every page on demand.
+
+## 8. Secrets
+
+- The repository contains no passwords, no default accounts and no secret keys. `.env.local` holds only
+  public values (site URL, Supabase URL, publishable key) and is not committed.
+- Any future secret (service-role key, email provider key, Turnstile secret) lives only in the hosting
+  provider's environment settings, never in a `NEXT_PUBLIC_` variable, never in the repository.
+- A secret that is ever committed or pasted somewhere is rotated, not merely deleted.
+
+## 9. Not built yet (deliberately)
+
+| Not built | Consequence today |
+|---|---|
+| MFA enforcement for staff | A stolen password is enough to sign in. |
+| Four-eyes approval, privileged re-authentication | An admin acts alone; exports need no second person. |
+| Service-role operations | No unsubscribe, re-subscribe, deletion or correction through the application; these are done in SQL by the owner. |
+| Email sending | No acknowledgement to the enquirer, no notification to staff. |
+| File uploads | None accepted anywhere. |
+| CAPTCHA / challenge | Bot defence is honeypot, timing and rate limits only. |
+| Per-client limiting at the edge, WAF rules | A distributed flood trips the global breaker and makes the forms unavailable. |
+| Retention and deletion schedule; privacy-request workflow | Rows are kept until removed in SQL. |
+| Staff management in the console | Staff are added and removed in SQL (`docs/CONTROL.md`). |
+| Session list / sign out everywhere / inactivity timeout | Sign-out ends the current session only. |
+| International (non-ASCII) email addresses | Rejected by the form. |
+
+## 10. Recommended next steps, in order
+
+1. In Supabase Auth: turn **off** public sign-ups; turn **on** leaked-password protection; set a strong
+   minimum password length; keep email confirmation on.
+2. Enrol every admin in **MFA (TOTP)**, then enforce it: require `aal2` in the staff policies and in
+   `staff.ts`.
+3. Set session time-box and inactivity timeout in Supabase Auth.
+4. Run the Supabase security and performance advisors after every migration.
+5. If abuse appears: add Cloudflare Turnstile (or equivalent) to the forms, verified on the server, and a
+   per-IP rate-limit rule at the edge.
+6. Move the public inserts behind a service-role key held only by the server, then remove the public INSERT
+   policies and grants entirely, so the publishable key can do nothing at all.
+7. Add email (acknowledgement and staff notification) with SPF, DKIM and DMARC configured first.
+8. Define retention periods and build the privacy-request workflow (access, correction, deletion).
+9. Before launch: an independent review of the policies and a penetration test.

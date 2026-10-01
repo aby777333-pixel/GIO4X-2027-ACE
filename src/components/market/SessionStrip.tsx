@@ -39,7 +39,7 @@ export function SessionStrip() {
                     : "Weekend: markets closed"}
           </p>
         </div>
-        <ul className="scroll-x -mx-[var(--gutter)] flex snap-x gap-21 px-[var(--gutter)] lg:mx-0 lg:flex-1 lg:justify-between lg:gap-13 lg:px-0">
+        <ul className="scroll-x -mx-[var(--gutter)] flex snap-x scroll-px-[var(--gutter)] gap-21 px-[var(--gutter)] lg:mx-0 lg:flex-1 lg:justify-between lg:gap-13 lg:px-0">
           {centres.map((c, i) => {
             const s = statuses?.[i];
             return (

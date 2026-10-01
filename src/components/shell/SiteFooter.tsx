@@ -2,7 +2,8 @@ import Link from "next/link";
 import { nav, secondaryNav } from "@/config/nav";
 import { site } from "@/config/site";
 import { socials } from "@/config/destinations";
-import { riskWarning } from "@/config/legal";
+import { companyLine, riskWarning } from "@/config/legal";
+import { restrictedJurisdictions } from "@/data/accounts";
 import { Logo } from "@/components/brand/Logo";
 import { Rosette } from "@/components/brand/Rosette";
 
@@ -35,8 +36,8 @@ export function SiteFooter() {
 
   return (
     <footer data-site-footer className="on-night relative overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute -right-[8%] -top-[18%] text-on-night opacity-[0.045]">
-        <Rosette size={610} strokeWidth={0.6} />
+      <div aria-hidden className="pointer-events-none absolute -right-[8%] -top-[18%] text-on-night opacity-[0.09]">
+        <Rosette size={610} strokeWidth={1} bare />
       </div>
       <hr className="dna-rule" />
 
@@ -151,6 +152,13 @@ export function SiteFooter() {
           </Link>
           .
         </p>
+        <p className="mt-13 max-w-[92ch] text-sm leading-relaxed text-on-night-2">{companyLine}</p>
+        <details className="mt-13 max-w-[92ch] text-sm text-on-night-2">
+          <summary className="link-quiet inline-flex cursor-pointer items-center gap-8 font-medium text-on-night">
+            <span aria-hidden className="text-prestige">+</span> Jurisdictions where services are not available
+          </summary>
+          <p className="mt-8 leading-relaxed">Services are not available to residents of: {restrictedJurisdictions.join(", ")}.</p>
+        </details>
       </div>
 
       {/* colophon */}

@@ -1,0 +1,23 @@
+# GIO4X: Netlify build. Next.js is served by the official runtime plugin.
+# Security headers and redirects are defined once, in next.config.mjs, so they
+# are identical on every host and in local development.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Production is the only indexable environment.
+[context.production.environment]
+  NEXT_PUBLIC_SITE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NEXT_PUBLIC_SITE_ENV = "preview"
+
+[context.branch-deploy.environment]
+  NEXT_PUBLIC_SITE_ENV = "preview"

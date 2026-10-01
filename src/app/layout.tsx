@@ -4,12 +4,6 @@ import localFont from "next/font/local";
 import "@/styles/globals.css";
 import { isProduction, site } from "@/config/site";
 import { PREFS_BOOT_SCRIPT } from "@/lib/prefs";
-import { SiteHeader } from "@/components/shell/SiteHeader";
-import { SiteFooter } from "@/components/shell/SiteFooter";
-import { CommandBar } from "@/components/shell/CommandBar";
-import { Reveal } from "@/components/shell/Reveal";
-import { JsonLd } from "@/components/seo/JsonLd";
-import { organizationSchema, websiteSchema } from "@/lib/schema";
 
 // INTER — interface, data, forms, long functional reading.
 const inter = Inter({
@@ -87,16 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Applies saved display preferences before first paint: no theme flash. */}
         <script dangerouslySetInnerHTML={{ __html: PREFS_BOOT_SCRIPT }} />
       </head>
-      <body>
-        <SiteHeader />
-        <main id="main" tabIndex={-1} className="pt-[var(--header-h)] focus:outline-none">
-          {children}
-        </main>
-        <SiteFooter />
-        <CommandBar />
-        <Reveal />
-        <JsonLd data={[organizationSchema(), websiteSchema()]} />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -1,4 +1,5 @@
 import { nav, secondaryNav } from "@/config/nav";
+import { lessons } from "@/data/academy";
 import { articles } from "@/data/articles";
 import { glossary } from "@/data/glossary";
 import { assetClasses, instrumentHref, instruments } from "@/data/instruments";
@@ -50,10 +51,13 @@ export function buildSearchIndex(): SearchEntry[] {
     add({ t: `${t.name}${t.kind === "Calculator" ? " calculator" : ""}`, d: t.line, h: `/tools/${t.slug}`, g: "Tools", k: [...t.aliases, t.kind.toLowerCase(), "calculator", "tool"], w: 1.15 });
   }
   for (const g of glossary) {
-    add({ t: g.term, d: g.definition.length > 140 ? `${g.definition.slice(0, 137)}…` : g.definition, h: `/glossary/${g.slug}`, g: "Glossary", k: [g.slug.replace(/-/g, " "), ...(g.aliases ?? [])], w: 0.95 });
+    add({ t: g.term, d: g.definition.length > 240 ? `${g.definition.slice(0, 237).replace(/\s+\S*$/, "")}…` : g.definition, h: `/glossary/${g.slug}`, g: "Glossary", k: [g.slug.replace(/-/g, " "), ...(g.aliases ?? [])], w: 0.95 });
   }
   for (const a of articles) {
     add({ t: a.title, d: a.excerpt, h: `/intelligence/${a.slug}`, g: "Intelligence", k: a.tags.map((x) => x.toLowerCase()), w: 0.9 });
+  }
+  for (const l of lessons) {
+    add({ t: l.title, d: l.description, h: `/academy/${l.slug}`, g: "Academy", k: [l.level.toLowerCase(), "lesson"], w: 0.9 });
   }
   for (const s of nav) {
     const g = groupOfSection[s.key] ?? "Company";
