@@ -56,6 +56,11 @@ const nextConfig = {
   poweredByHeader: false,
   trailingSlash: false,
   images: { formats: ["image/avif", "image/webp"] },
+  // Share cards read their fonts and the logo from disk. Trace those files into
+  // the server bundle so cards can also be rendered on demand, not only at build.
+  outputFileTracingIncludes: {
+    "/**": ["./src/fonts/og/*.otf", "./public/brand/gio4x-logo.png"],
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
