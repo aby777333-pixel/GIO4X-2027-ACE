@@ -12,9 +12,11 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Production is the only indexable environment.
-[context.production.environment]
-  NEXT_PUBLIC_SITE_ENV = "production"
+# Indexing is controlled by NEXT_PUBLIC_SITE_ENV, set per site in the Netlify UI:
+#   "production" on the site that serves the real domain (indexable),
+#   anything else (e.g. "preview") everywhere else: noindex + Disallow: /.
+# It is deliberately not set here, so a preview site can never be indexed by
+# accident. Deploy previews and branch deploys are always forced to "preview".
 
 [context.deploy-preview.environment]
   NEXT_PUBLIC_SITE_ENV = "preview"
