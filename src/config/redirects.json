@@ -1,0 +1,130 @@
+[
+  {
+    "source": "/accounts",
+    "destination": "/trading/accounts"
+  },
+  {
+    "source": "/pricing",
+    "destination": "/trading/conditions"
+  },
+  {
+    "source": "/funding",
+    "destination": "/trading/funding"
+  },
+  {
+    "source": "/copy-trading",
+    "destination": "/trading/copy-trading"
+  },
+  {
+    "source": "/pamm",
+    "destination": "/trading/pamm"
+  },
+  {
+    "source": "/education",
+    "destination": "/academy"
+  },
+  {
+    "source": "/education/glossary",
+    "destination": "/glossary"
+  },
+  {
+    "source": "/education/books",
+    "destination": "/academy/books"
+  },
+  {
+    "source": "/blog",
+    "destination": "/intelligence"
+  },
+  {
+    "source": "/about/security",
+    "destination": "/trust/client-funds"
+  },
+  {
+    "source": "/about/online-security",
+    "destination": "/trust/security"
+  },
+  {
+    "source": "/support",
+    "destination": "/contact"
+  },
+  {
+    "source": "/compare",
+    "destination": "/platforms/compare"
+  },
+  {
+    "source": "/features",
+    "destination": "/platforms/raptor"
+  },
+  {
+    "source": "/raptor-intelligence",
+    "destination": "/platforms/raptor"
+  },
+  {
+    "source": "/ai-lab",
+    "destination": "/platforms/raptor"
+  },
+  {
+    "source": "/tools/algorator",
+    "destination": "/platforms/raptor"
+  },
+  {
+    "source": "/tools/gio-bots",
+    "destination": "/platforms/raptor"
+  },
+  {
+    "source": "/tools/market-widgets",
+    "destination": "/markets"
+  },
+  {
+    "source": "/markets/live",
+    "destination": "/markets"
+  },
+  {
+    "source": "/markets/eurusd",
+    "destination": "/markets/forex/eur-usd"
+  },
+  {
+    "source": "/markets/xauusd",
+    "destination": "/markets/metals/xau-usd"
+  },
+  {
+    "source": "/markets/btcusd",
+    "destination": "/markets/crypto/btc-usd"
+  },
+  {
+    "source": "/phi",
+    "destination": "/design"
+  },
+  {
+    "source": "/verify",
+    "destination": "/trust/verify"
+  },
+  {
+    "source": "/login",
+    "destination": "/sign-in"
+  },
+  {
+    "source": "/signin",
+    "destination": "/sign-in"
+  },
+  {
+    "source": "/register",
+    "destination": "/open-account"
+  },
+  {
+    "source": "/signup",
+    "destination": "/open-account"
+  },
+  {
+    "source": "/sitemap",
+    "destination": "/explore"
+  },
+  {
+    "source": "/platforms/mt5",
+    "destination": "/platforms/metatrader-5"
+  },
+  {
+    "source": "/platforms/777-raptor",
+    "destination": "/platforms/raptor"
+  }
+]

@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env.*.local
+.tmp
+*.tsbuildinfo
+next-env.d.ts
+.netlify
+.vercel
+.DS_Store
+npm-debug.log*
+
+# the owner brief is kept locally, not published
+docs/brief/*.docx

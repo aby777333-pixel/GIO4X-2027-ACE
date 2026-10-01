@@ -1,0 +1,251 @@
+/* ==========================================================================
+   GIO4X DESIGN TOKENS
+   --------------------------------------------------------------------------
+   Logo DNA (sampled from the supplied logo asset, docs/brief/gio4x-logo-source.png):
+     Market Blue   #0870B8   — the "4" and the cool end of the rosette gradient
+     Emerald       #089040   — the "X" and the warm end of the rosette gradient
+     Teal          #00A098   — the rosette mid-tone where blue meets green
+     Platinum      #A0A8A8   — the "GIO" wordmark
+   Everything else is a neutral stage (ivory / graphite) plus one prestige
+   metal (champagne). Light is the flagship; dark is "GIO4X after dark".
+   No component may hard-code a colour: use these variables.
+   ========================================================================== */
+
+:root {
+  /* φ */
+  --phi: 1.618;
+  --phi-major: 61.8%;
+  --phi-minor: 38.2%;
+
+  /* layout */
+  --page: 82.5rem; /* 1320px composition bound */
+  --gutter: clamp(1.3125rem, 4.2vw, 3.4375rem); /* 21 → 55 */
+  --header-h: 4.25rem;
+
+  /* motion (durations step by ~φ) */
+  --t-instant: 100ms;
+  --t-fast: 160ms;
+  --t-base: 260ms;
+  --t-slow: 420ms;
+  --t-reveal: 680ms;
+  --t-cinematic: 1100ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* logo DNA — raw, theme-independent */
+  --dna-blue: #0870b8;
+  --dna-emerald: #089040;
+  --dna-teal: #00a098;
+  --dna-platinum: #a0a8a8;
+
+  /* the "night" surface family is used for the footer and for deliberately
+     dark chapters (Raptor engine room) in BOTH themes */
+  --night: #0c1116;
+  --night-2: #121a21;
+  --on-night: #eef0f1;
+  --on-night-2: #a9b2ba;
+  --night-line: rgba(238, 240, 241, 0.13);
+}
+
+/* ---- LIGHT — the private-wealth office at 10 AM (flagship) ---------------- */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f4ee; /* warm ivory */
+  --paper: #fbfaf6; /* soft paper */
+  --surface: #ffffff;
+  --surface-2: #f0ede5;
+  --sunken: #ebe8df;
+  --ink: #14191d; /* graphite */
+  --ink-2: #3f474e;
+  --ink-3: #626b73;
+  --line: rgba(20, 25, 29, 0.11);
+  --line-strong: rgba(20, 25, 29, 0.24);
+
+  --brand: #0868aa; /* Market Blue, tuned for AA on ivory */
+  --brand-ink: #ffffff;
+  --brand-soft: rgba(8, 112, 184, 0.09);
+  --teal: #00807a;
+  --emerald: #067636;
+  --platinum: #8b9494;
+  --prestige: #b39c6b; /* champagne metal */
+  --prestige-ink: #7a6638;
+
+  --pos: #067636;
+  --neg: #a83430;
+  --neutral: #626b73;
+  --info: #0868aa;
+  --warn: #8a5d0c;
+
+  --focus: rgba(8, 112, 184, 0.45);
+  --glass: rgba(251, 250, 246, 0.78);
+  --grid-line: rgba(20, 25, 29, 0.055);
+  --viz-stroke: rgba(20, 25, 29, 0.2);
+  --viz-faint: rgba(20, 25, 29, 0.08);
+
+  --elev-1: 0 1px 0 rgba(20, 25, 29, 0.04), 0 1px 3px rgba(20, 25, 29, 0.05);
+  --elev-2: 0 1px 0 rgba(20, 25, 29, 0.03), 0 8px 21px -8px rgba(20, 25, 29, 0.14);
+  --elev-3: 0 2px 0 rgba(20, 25, 29, 0.02), 0 21px 55px -21px rgba(20, 25, 29, 0.24);
+}
+
+/* ---- DARK — the trading desk at 10 PM ------------------------------------ */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1014;
+  --paper: #0f151a;
+  --surface: #141b22;
+  --surface-2: #19222a;
+  --sunken: #080c0f;
+  --ink: #eceef0;
+  --ink-2: #b9c0c6;
+  --ink-3: #8b949c;
+  --line: rgba(236, 238, 240, 0.11);
+  --line-strong: rgba(236, 238, 240, 0.26);
+
+  --brand: #4ba6e2;
+  --brand-ink: #071019;
+  --brand-soft: rgba(75, 166, 226, 0.13);
+  --teal: #35c2b8;
+  --emerald: #3fb872;
+  --platinum: #a0a8a8;
+  --prestige: #cdb98a;
+  --prestige-ink: #d8c69b;
+
+  --pos: #4cc282;
+  --neg: #e5746d;
+  --neutral: #8b949c;
+  --info: #4ba6e2;
+  --warn: #dba84a;
+
+  --focus: rgba(75, 166, 226, 0.55);
+  --glass: rgba(11, 16, 20, 0.76);
+  --grid-line: rgba(236, 238, 240, 0.05);
+  --viz-stroke: rgba(236, 238, 240, 0.26);
+  --viz-faint: rgba(236, 238, 240, 0.09);
+
+  --elev-1: 0 0 0 1px rgba(236, 238, 240, 0.05);
+  --elev-2: 0 0 0 1px rgba(236, 238, 240, 0.06), 0 13px 34px -13px rgba(0, 0, 0, 0.7);
+  --elev-3: 0 0 0 1px rgba(236, 238, 240, 0.08), 0 34px 89px -34px rgba(0, 0, 0, 0.85);
+}
+
+/* ---- ACCENT PALETTES ("moods") -------------------------------------------
+   A mood changes the accent, never the building. Default accent = brand blue.
+   Each palette defines a light and a dark value that pass AA against --bg. */
+:root,
+[data-accent="gio4x"] {
+  --accent: var(--brand);
+  --accent-ink: var(--brand-ink);
+  --accent-2: var(--teal);
+  --accent-3: var(--emerald);
+}
+[data-accent="ivory"] {
+  --accent: #7a6638;
+  --accent-ink: #ffffff;
+  --accent-2: #b39c6b;
+  --accent-3: #3f474e;
+}
+[data-accent="midnight"] {
+  --accent: #1e3a5c;
+  --accent-ink: #ffffff;
+  --accent-2: #8b9494;
+  --accent-3: #b39c6b;
+}
+[data-accent="ocean"] {
+  --accent: #0b6a7e;
+  --accent-ink: #ffffff;
+  --accent-2: #0868aa;
+  --accent-3: #8b9494;
+}
+[data-accent="emerald"] {
+  --accent: #0a6a3a;
+  --accent-ink: #ffffff;
+  --accent-2: #00807a;
+  --accent-3: #9a8552;
+}
+[data-accent="royal"] {
+  --accent: #3b3f8f;
+  --accent-ink: #ffffff;
+  --accent-2: #8b9494;
+  --accent-3: #b39c6b;
+}
+[data-accent="mono"] {
+  --accent: #14191d;
+  --accent-ink: #ffffff;
+  --accent-2: #3f474e;
+  --accent-3: #8b9494;
+}
+[data-theme="dark"][data-accent="ivory"] {
+  --accent: #d8c69b;
+  --accent-ink: #14191d;
+  --accent-2: #cdb98a;
+  --accent-3: #b9c0c6;
+}
+[data-theme="dark"][data-accent="midnight"] {
+  --accent: #8fb4de;
+  --accent-ink: #0b1014;
+  --accent-2: #a0a8a8;
+  --accent-3: #cdb98a;
+}
+[data-theme="dark"][data-accent="ocean"] {
+  --accent: #56c0d4;
+  --accent-ink: #0b1014;
+  --accent-2: #4ba6e2;
+  --accent-3: #a0a8a8;
+}
+[data-theme="dark"][data-accent="emerald"] {
+  --accent: #4cc282;
+  --accent-ink: #0b1014;
+  --accent-2: #35c2b8;
+  --accent-3: #cdb98a;
+}
+[data-theme="dark"][data-accent="royal"] {
+  --accent: #a3a7f0;
+  --accent-ink: #0b1014;
+  --accent-2: #a0a8a8;
+  --accent-3: #cdb98a;
+}
+[data-theme="dark"][data-accent="mono"] {
+  --accent: #eceef0;
+  --accent-ink: #0b1014;
+  --accent-2: #b9c0c6;
+  --accent-3: #8b949c;
+}
+
+/* ---- ACCESSIBILITY PROFILES ---------------------------------------------- */
+[data-contrast="high"] {
+  --ink-2: var(--ink);
+  --ink-3: var(--ink-2);
+  --line: var(--line-strong);
+  --glass: var(--bg);
+}
+[data-contrast="high"][data-theme="light"] {
+  --ink: #000000;
+  --ink-2: #1a1a1a;
+  --line-strong: rgba(0, 0, 0, 0.6);
+  --brand: #044a7c;
+  --pos: #04562a;
+  --neg: #86201d;
+}
+[data-contrast="high"][data-theme="dark"] {
+  --ink: #ffffff;
+  --ink-2: #e6e9ec;
+  --line-strong: rgba(255, 255, 255, 0.6);
+}
+[data-text="large"] {
+  font-size: 112.5%;
+}
+[data-effects="low"] {
+  --glass: var(--bg);
+}
+
+/* ---- DENSITY -------------------------------------------------------------- */
+:root,
+[data-density="standard"] {
+  --row: 2.75rem;
+}
+[data-density="relaxed"] {
+  --row: 3.4375rem;
+}
+[data-density="pro"] {
+  --row: 2.125rem;
+}
