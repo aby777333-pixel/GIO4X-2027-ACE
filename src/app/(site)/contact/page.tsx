@@ -36,6 +36,13 @@ export default function ContactPage() {
           <h2 id="form-h" className="sr-only">
             Contact form
           </h2>
+          <p className="mb-21 max-w-measure text-sm text-ink-2">
+            Already have an account, or a problem that needs solving? Open a{" "}
+            <Link href="/support" className="link">
+              support request
+            </Link>{" "}
+            instead: you get a reference and can read our reply on the website.
+          </p>
           <ContactForm email={site.email} />
         </div>
       </section>

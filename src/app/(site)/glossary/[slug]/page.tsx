@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TermLinks } from "@/components/figures/company/TermLinks";
+import { FigureNote } from "@/components/figures/Figure";
 import { ReadRows } from "@/components/knowledge/Reader";
 import { CopyButton } from "@/components/knowledge/Share";
 import { firstSentence, resolveAll, resolveTools } from "@/components/markets/graph";
@@ -57,6 +59,16 @@ export default async function TermPage({ params }: Params) {
   const prev = glossary[at - 1];
   const next = glossary[at + 1];
   const [lede, ...rest] = t.definition.split(/(?<=[.!?])\s+(?=[A-Z])/);
+  // the reading aid under a short definition appears only where the lists beside it run well past it (rough heights, in pixels)
+  const beside = related.reduce((sum, r) => sum + (firstSentence(r.definition, 110).length > 56 ? 104 : 82), related.length ? 35 : 0) + (tools.length ? 60 + tools.length * 64 : 0) + (markets.length ? 60 + markets.length * 64 : 0);
+  const body =
+    110 +
+    44 * Math.ceil(lede.length / 44) +
+    (rest.length ? 21 + 29 * Math.ceil(rest.join(" ").length / 68) : 0) +
+    (t.formula ? 150 : 0) +
+    (t.example ? 150 : 0) +
+    (lessons.length + reads.length ? 110 + (lessons.length + reads.length) * 100 : 0);
+  const roomy = beside - body >= 360;
 
   return (
     <>
@@ -121,6 +133,11 @@ export default async function TermPage({ params }: Params) {
               <CopyButton text={`${t.term}: ${t.definition} (GIO4X Financial Glossary, ${absoluteUrl(path)})`} label="Copy definition" done="Definition copied" className="btn btn-quiet btn-sm" />
             </div>
             <p className="mt-21 max-w-measure text-xs text-ink-3">{educationalNote}</p>
+            {roomy && (
+              <FigureNote figure={<TermLinks />} label="How to read this page">
+                The definition stands on its own. The lists beside it lead to the terms it leans on and, where there are any, to the tools that work it out and the markets where it matters.
+              </FigureNote>
+            )}
           </article>
 
           <aside aria-label="Connections" className="grid gap-34 lg:border-l lg:border-line lg:pl-34">

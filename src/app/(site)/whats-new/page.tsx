@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ChangeMarks } from "@/components/figures/company/ChangeMarks";
+import { FigureNote } from "@/components/figures/Figure";
 import { EmptyState, NextSteps, PageHero } from "@/components/ui/Page";
 import { glossary } from "@/data/glossary";
 import { assetClasses, instruments } from "@/data/instruments";
@@ -85,6 +87,9 @@ export default function WhatsNewPage() {
                 <p className="mt-5">
                   <span className="chip">Current release</span>
                 </p>
+                <FigureNote figure={<ChangeMarks />} label="Key" className="!mt-21">
+                  Each entry is sorted by its mark: + for what is new, ~ for what has changed, − for what was removed.
+                </FigureNote>
               </div>
               <div>
                 <h2 id={`${r.id}-h`} className="h2">

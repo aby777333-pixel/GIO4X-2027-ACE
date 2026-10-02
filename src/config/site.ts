@@ -23,7 +23,7 @@ export const site = {
     country: "United Kingdom",
   },
   supportOffice: {
-    lines: ["No 48 Immanual Complex", "Thirunagar Katpadi", "Vellore 632006, Tamil Nadu"],
+    lines: ["2D, Queens Court", "No. 6, Montieth Road, Egmore", "Chennai, Tamil Nadu – 600 008"],
     country: "India",
   },
   /** Not verified: the previous codebase carried a placeholder number. */

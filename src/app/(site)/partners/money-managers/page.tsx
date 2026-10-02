@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { FourDiscs } from "@/components/figures/trading/FourDiscs";
 import { AskLine, NumberedRows, PendingList, RiskNote } from "@/components/trading/Blocks";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
 import { riskWarning } from "@/config/legal";
@@ -125,6 +127,13 @@ export default function MoneyManagersPage() {
             <Link href="/contact" className="btn btn-primary mt-34">
               Contact GIO4X
             </Link>
+            <FigureNote figure={<FourDiscs ratio={2.7} />}>
+              If you will run a pooled account, read the{" "}
+              <Link href="/trading/pamm" className="link">
+                PAMM page
+              </Link>{" "}
+              as your investors will: it sets out the risks they are told about and the questions it suggests they put to a manager first.
+            </FigureNote>
           </div>
           <div>
             <NumberedRows items={mm.steps} />

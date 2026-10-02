@@ -7,41 +7,11 @@
 export type PendingSection = { label: string; will: string; needs: string; phase: string };
 
 export const PENDING_SECTIONS: Record<string, PendingSection> = {
-  command: {
-    label: "Command Centre",
-    will: "One screen of the whole business: clients and accounts, money in and out, exposure, risk and compliance, and the health of each system.",
-    needs: "Every figure on it comes from another section, so it is built last. Until those exist it would have nothing true to show.",
-    phase: "Phase 7 · Oversight",
-  },
-  chats: {
-    label: "Live Chats",
-    will: "Conversations from the website and the client area: claim one, reply, hand it to a colleague, close it, with canned replies and a record of who said what.",
-    needs: "A chat window on the website, and an agreed rota so that a visitor is never left waiting on a chat nobody is watching.",
-    phase: "Phase 4 · Support",
-  },
-  tickets: {
-    label: "Tickets",
-    will: "Support requests with an owner, a priority, a response target, internal notes and a resolution code.",
-    needs: "Client records to attach a ticket to, and a sending domain so that replies reach the client by e-mail.",
-    phase: "Phase 4 · Support",
-  },
-  customers: {
-    label: "Customers",
-    will: "The client directory and a full view of one client: profile, verification, accounts, money movements, trades, tickets and notes.",
-    needs: "A client area where people register. Whether that is built here or the earlier portal is kept is the owner’s decision.",
-    phase: "Phase 2 · Clients and KYC",
-  },
   kyc: {
     label: "KYC",
     will: "Identity and address documents: view each one, accept or reject it with a reason, and a verification status derived from the documents, never set by hand.",
     needs: "Client records and a secure place for documents, plus the choice between manual review and a verification provider.",
     phase: "Phase 2 · Clients and KYC",
-  },
-  compliance: {
-    label: "Compliance",
-    will: "Stored risk assessments, cases, sanctions and politically-exposed-person screening, and monitoring of unusual money movements.",
-    needs: "Clients, verification and money movements to assess, and a screening provider.",
-    phase: "Phase 7 · Oversight",
   },
   funds: {
     label: "Funds & Settlement",
@@ -79,12 +49,6 @@ export const PENDING_SECTIONS: Record<string, PendingSection> = {
     needs: "A connection to MetaTrader 5 or 777 Raptor. Without one there are no trades to list, and none will be invented.",
     phase: "Phase 5 · Trading",
   },
-  reports: {
-    label: "Reporting Centre",
-    will: "Scheduled and on-demand reports: clients, money, trading and partners, each exportable with the export recorded.",
-    needs: "The sections it reports on.",
-    phase: "Phase 7 · Oversight",
-  },
   broker: {
     label: "Broker Controls",
     will: "Trading conditions in one place: spreads, leverage, swaps and trading hours, changed once and published everywhere, with two-person approval.",
@@ -113,12 +77,6 @@ export const PENDING_SECTIONS: Record<string, PendingSection> = {
     label: "Bulk Emailer",
     will: "Newsletters and notices to people who agreed to receive them, with templates, a preview, an unsubscribe link and a record of each send.",
     needs: "A sending domain with SPF, DKIM and DMARC set up. Until then, Subscribers shows who has agreed to hear from GIO4X.",
-    phase: "Phase 8 · Publishing",
-  },
-  config: {
-    label: "Configuration",
-    will: "Settings a broker changes without a developer: deposit instructions, account types, published documents and feature switches, each change approved and recorded.",
-    needs: "The sections whose settings it holds.",
     phase: "Phase 8 · Publishing",
   },
 };

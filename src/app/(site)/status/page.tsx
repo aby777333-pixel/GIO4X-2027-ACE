@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
+import { IncidentFeed } from "@/components/status/IncidentFeed";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { site } from "@/config/site";
 import { pageMeta } from "@/lib/meta";
@@ -41,6 +42,19 @@ export default function StatusPage() {
           </div>
         }
       />
+
+      {/* what staff have written and published from GIO4X Control: a list written by people, not a monitor */}
+      <section className="section-quiet pb-0" aria-labelledby="notices-h">
+        <div className="wrap">
+          <h2 id="notices-h" className="h3">
+            Notices from GIO4X
+          </h2>
+          <p className="mt-8 max-w-measure text-sm text-ink-3">Written and posted here by GIO4X staff when there is something to tell you: planned maintenance, a problem being worked on, and what was done about it.</p>
+          <div className="mt-21">
+            <IncidentFeed />
+          </div>
+        </div>
+      </section>
 
       <section className="section-quiet" aria-labelledby="services-h">
         <div className="wrap">
@@ -101,7 +115,13 @@ export default function StatusPage() {
                 and say what you are seeing.
               </li>
             </ul>
-            <p className="mt-13 text-sm text-ink-3">No incident notices are published at present.</p>
+            <p className="mt-13 text-sm text-ink-3">
+              Notices that have been posted are listed under{" "}
+              <a href="#notices-h" className="link">
+                Notices from GIO4X
+              </a>{" "}
+              at the top of this page.
+            </p>
           </div>
         </div>
       </section>

@@ -46,11 +46,11 @@ Each phase is one or more numbered migrations plus its pages, and is usable on i
 | 1. CRM | **Built:** pipeline stages with lost reasons, lead score with its reasons, follow-up tasks, other enquiries from the same address. **Still to do:** automatic assignment rules, e-mail reminders (needs the sending domain) | Phase 0 |
 | 2. Clients and KYC | Client records, document intake and viewer, per-document decisions, status derived from documents (Customers, KYC) | A client portal that creates clients: decision D2 |
 | 3. Money | Double-entry ledger as the only source of balances, deposit and withdrawal requests with holds, verified payout methods, four-eyes approval, fee engine (Funds & Settlement, Fee Engine, General Ledger) | Phase 2; D3 |
-| 4. Support | Tickets with SLAs and canned replies, live chat with handoff (Tickets, Live Chats) | Phase 2; e-mail domain |
+| 4. Support | **Built (2 October 2026):** tickets opened and followed on the website at `/support` (reference plus e-mail, no client account needed), staff queue with internal reply targets, live chat offered only while staff are present. **Still to do:** e-mail notification of a reply (needs the sending domain), canned replies, linking tickets to client accounts | E-mail domain; Phase 2 for the client link |
 | 5. Trading | Trading accounts, trade log, exposure, broker controls, trading-conditions manager (Trade Log, Broker Controls) | A trading-server connection: D4 |
 | 6. Partners | IB network and commissions, copy trading, PAMM (IB Network, Copy Trading, PAMM / MAM) | Phases 3 and 5 |
-| 7. Oversight | Compliance cases and screening, reporting centre, command centre (Compliance, Reporting Centre, Command Centre) | All of the above |
-| 8. Publishing | CMS, e-mail studio, status and incident tool, SEO and content health | E-mail domain; independent of 2–7 |
+| 7. Oversight | **Built (2 October 2026), over what exists today:** Customers (people who wrote in, not client accounts), a Compliance register of complaints, privacy and security matters, the Reporting Centre with an enquiries export, the Command Centre. **Still to do:** risk scoring, screening and case files; money and trading figures | Phases 2 to 6 for the rest |
+| 8. Publishing | **Built (2 October 2026):** Configuration: the website's announcement line, the chat switch, support hours, and staff-written incident notices on the public Status page. **Still to do:** CMS, e-mail studio, SEO and content health | E-mail domain; independent of 2–7 |
 
 Rules that apply from Phase 3 on, taken from the study of Control: amounts are `numeric` with a
 currency and are never taken from a form after creation; ledgers are append-only and corrected by

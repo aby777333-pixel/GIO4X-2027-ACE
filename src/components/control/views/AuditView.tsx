@@ -16,6 +16,21 @@ const ACTION_LABEL: Record<string, string> = {
   "staff.apply": "Staff change applied",
   "staff.reject": "Staff change rejected",
   "staff.cancel": "Staff change withdrawn",
+  "ticket.status": "Ticket status changed",
+  "ticket.assign": "Ticket assignment changed",
+  "ticket.priority": "Ticket priority changed",
+  "ticket.category": "Ticket category changed",
+  "ticket.reply": "Reply sent on a ticket",
+  "ticket.note": "Internal note added to a ticket",
+  "ticket.customer_reply": "Customer replied on a ticket",
+  "chat.claim": "Live chat taken",
+  "chat.close": "Live chat closed",
+  "config.set": "Site setting changed",
+  "incident.open": "Incident created",
+  "incident.update": "Incident update posted",
+  "incident.publish": "Incident published",
+  "incident.unpublish": "Incident withdrawn from the Status page",
+  "leads.export": "Enquiries exported",
   "subscribers.export": "Subscribers exported",
   "staff.grant": "Staff access granted",
   "staff.change": "Staff record changed",
@@ -72,8 +87,8 @@ export function AuditView({ rows, names, me, total, page, pageCount, failed, pas
                       <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(row.at)}</td>
                       <td className="whitespace-nowrap text-ink">{who(row.actor)}</td>
                       <td className="whitespace-nowrap text-ink">
-                        {row.entity === "lead" && row.entity_id && isUuid(row.entity_id) ? (
-                          <Link href={`/control/leads/${row.entity_id}`} className="link">
+                        {(row.entity === "lead" || row.entity === "ticket") && row.entity_id && isUuid(row.entity_id) ? (
+                          <Link href={`/control/${row.entity === "lead" ? "leads" : "tickets"}/${row.entity_id}`} className="link">
                             {ACTION_LABEL[row.action] ?? row.action}
                           </Link>
                         ) : (

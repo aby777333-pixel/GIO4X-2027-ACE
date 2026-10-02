@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { Documents } from "@/components/figures/trading/Documents";
+import { Residence } from "@/components/figures/trading/Residence";
 import { NotPublished } from "@/components/platforms/FactState";
 import { AccountExplorer } from "@/components/trading/AccountExplorer";
 import { AskLine, PendingList, RiskNote } from "@/components/trading/Blocks";
@@ -144,6 +147,13 @@ export default function AccountsPage() {
               What you will need.
             </h2>
             <p className="lead mt-21">{accountEligibility}</p>
+            <FigureNote figure={<Documents ratio={2.1} />} label="Worth knowing">
+              The same two documents are what verification asks for before a first withdrawal is released, so it is simplest to have them to hand from the start.{" "}
+              <Link href="/trading/funding" className="link">
+                Funding and withdrawals
+              </Link>{" "}
+              gives the reasons.
+            </FigureNote>
           </div>
           <div className="grid gap-55">
             <div data-reveal>
@@ -176,6 +186,9 @@ export default function AccountsPage() {
               Where GIO4X does not offer its services.
             </h2>
             <p className="mt-13 text-sm text-ink-2">Services are not available to residents of the jurisdictions listed. The list is carried over as previously published and may not be complete; your own country’s rules apply as well.</p>
+            <FigureNote figure={<Residence ratio={3} />} className="!mt-21">
+              Two tests apply, and both turn on where you are resident: this list, and whether trading forex and CFDs is permitted where you live.
+            </FigureNote>
           </div>
           <ul className="columns-2 gap-x-34 text-sm text-ink-2 sm:columns-3">
             {restrictedJurisdictions.map((c) => (

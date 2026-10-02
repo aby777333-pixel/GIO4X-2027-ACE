@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { ScaledCopy } from "@/components/figures/trading/ScaledCopy";
 import { Arrangement } from "@/components/trading/Arrangement";
 import { CopyDiagram } from "@/components/trading/Diagrams";
 import { copyTrading } from "@/data/trading";
@@ -22,6 +25,15 @@ export default function CopyTradingPage() {
       diagram={<CopyDiagram className="h-auto w-full" />}
       diagramCaption="Illustration of the mechanism. It shows no real provider and no results."
       what={copyTrading.what}
+      whatAside={
+        <FigureNote figure={<ScaledCopy ratio={2.6} />} label="In practice">
+          A copy is the provider’s trade at your scale, not a duplicate: sized by what you allocated, filled at the price available when it arrives. Several of the{" "}
+          <Link href="#arr-risks" className="link">
+            risks
+          </Link>{" "}
+          below follow from that.
+        </FigureNote>
+      }
       mechanics={copyTrading.mechanics}
       gioTitle="What GIO4X has published."
       gioLead="GIO4X offers copy trading. Both previous websites describe the same four steps and the same two controls; on almost everything else they differ, so the rest is listed as pending."

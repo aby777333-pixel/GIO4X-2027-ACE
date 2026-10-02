@@ -194,6 +194,7 @@ export const secondaryNav: NavGroup[] = [
     items: [
       { label: "Help & FAQ", href: "/faq" },
       { label: "Contact", href: "/contact" },
+      { label: "Support requests", href: "/support" },
       { label: "System status", href: "/status" },
       { label: "Display & privacy preferences", href: "/preferences" },
     ],

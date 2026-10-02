@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { BoundedScale } from "@/components/figures/company/BoundedScale";
+import { RollingMean } from "@/components/figures/company/RollingMean";
+import { FigureNote } from "@/components/figures/Figure";
 import { ReadRows } from "@/components/knowledge/Reader";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
@@ -122,6 +125,46 @@ export default function AcademyPage() {
                     <p className="num text-xs font-semibold tracking-[0.1em] text-ink-3">Level {String(i + 1).padStart(2, "0")}</p>
                     <h3 className="h3 mt-8">{lv.level}</h3>
                     <p className="mt-13 max-w-[38ch] text-ink-2">{lv.line}</p>
+                    {lv.level === "Beginner" && (
+                      <p className="mt-21 hidden max-w-[38ch] text-sm leading-relaxed text-ink-3 lg:block">
+                        New to currency markets? Begin with the{" "}
+                        <Link href={`/academy/${first.slug}`} className="link">
+                          first lesson
+                        </Link>
+                        . The{" "}
+                        <Link href="/glossary" className="link">
+                          glossary
+                        </Link>{" "}
+                        defines the terms these lessons use.
+                      </p>
+                    )}
+                    {lv.level === "Intermediate" && (
+                      <FigureNote figure={<RollingMean />} label="For example">
+                        A moving average smooths price by averaging a set number of periods, so it reacts gradually to change. The lessons at this level take one such idea at a time, and the{" "}
+                        <Link href="/tools" className="link">
+                          visual tools
+                        </Link>{" "}
+                        let you watch other mechanics with your own inputs.
+                      </FigureNote>
+                    )}
+                    {lv.level === "Advanced" && (
+                      <FigureNote figure={<BoundedScale />} label="Where to find them">
+                        The indicator lessons (Fibonacci retracement, RSI and MACD, Bollinger Bands) sit in the Technical analysis module above, marked Advanced. Each says what a reading measures and where it misleads.
+                      </FigureNote>
+                    )}
+                    {lv.level === "Professional concepts" && (
+                      <p className="mt-21 hidden max-w-[38ch] text-sm leading-relaxed text-ink-3 lg:block">
+                        To work the arithmetic yourself: the{" "}
+                        <Link href="/tools/position-size" className="link">
+                          position size calculator
+                        </Link>{" "}
+                        goes from the risk you accept to the size you trade, and the{" "}
+                        <Link href="/tools/drawdown" className="link">
+                          drawdown visualiser
+                        </Link>{" "}
+                        shows why a loss needs a larger gain to recover.
+                      </p>
+                    )}
                   </div>
                   <div className="grid gap-34">
                     {mods.map((m) => {

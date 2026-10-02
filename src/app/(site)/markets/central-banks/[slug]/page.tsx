@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
+import { FigureNote } from "@/components/figures/Figure";
+import { BankReleases } from "@/components/figures/product/BankReleases";
 import { bankHref, eventsForBank, instrumentsForBank, resolveEvents, resolveTerms } from "@/components/markets/graph";
 import { InlineLinks, LinkRows } from "@/components/markets/LinkRows";
 import { ZoneTime } from "@/components/markets/Now";
@@ -202,6 +204,12 @@ export default async function CentralBankPage({ params }: Params) {
               <h3 className="label">Economic events</h3>
               <LinkRows items={events} className="mt-13" />
               <p className="mt-13 text-xs text-ink-3">Releases commonly monitored in connection with {b.currency} or published for {areaPhrase(b.area)}. Dates are on each publisher’s own calendar.</p>
+              {/* only where this list is much shorter than the concepts beside it */}
+              {events.length <= 2 && (
+                <FigureNote figure={<BankReleases ratio={events.length > 1 ? 3.2 : 2.4} />} label={events.length > 1 ? undefined : "At the source"}>
+                  What each release is, and how it is commonly read, is on these pages. The rate itself is read at the bank’s own publication, linked in the profile above.
+                </FigureNote>
+              )}
             </div>
             <div>
               <h3 className="label">Concepts</h3>

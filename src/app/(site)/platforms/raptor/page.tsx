@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { RouteScene } from "@/components/cockpit/RouteScene";
+import { FigureNote } from "@/components/figures/Figure";
+import { ProofSheet } from "@/components/figures/product/ProofSheet";
 import { BeatRail } from "@/components/platforms/BeatRail";
 import { NotPublished } from "@/components/platforms/FactState";
 import { RaptorBreach } from "@/components/platforms/RaptorBreach";
@@ -366,6 +368,13 @@ export default function RaptorPage() {
               </Link>
               .
             </p>
+            <FigureNote figure={<ProofSheet />} label="Meanwhile">
+              What can be said today is on the{" "}
+              <Link href="/platforms/compare" className="link">
+                comparison page
+              </Link>
+              : each row gives what is documented for Raptor and for MetaTrader 5, and says plainly where nothing has been published.
+            </FigureNote>
           </div>
           <ul className="border-t border-line-strong">
             {raptorPending.map((r, i) => (

@@ -73,6 +73,7 @@ const ROUTES: [prefix: string, scene: SceneId, ownTag?: string][] = [
   ["/explore", "lexicon"],
   ["/search", "lexicon"],
   ["/contact", "beacon"],
+  ["/support", "beacon"],
   ["/status", "annunciator"],
   ["/trust", "vault"],
   ["/legal", "document"],

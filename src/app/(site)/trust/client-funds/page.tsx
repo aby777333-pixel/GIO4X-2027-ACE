@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { NotedChapter } from "@/components/figures/trust/NotedChapter";
+import { SeparationWall } from "@/components/figures/trust/SeparationWall";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AskGio4x, Chapter, Rows, Statement, Status } from "@/components/trust/Parts";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -112,7 +115,21 @@ export default function ClientFundsPage() {
         />
       </Chapter>
 
-      <Chapter id="what-it-does-not-do" eyebrow="The limits" title="What it does not protect against" flip>
+      <NotedChapter
+        id="what-it-does-not-do"
+        eyebrow="The limits"
+        title="What it does not protect against"
+        flip
+        note={
+          <FigureNote figure={<SeparationWall />} label="How to read this list">
+            Each row is a way money can be lost or held up even when it is kept apart from the firm’s own. Where GIO4X stands today on losses beyond a deposit and on insolvency is in the{" "}
+            <Link href="#questions" className="link">
+              questions below
+            </Link>
+            .
+          </FigureNote>
+        }
+      >
         <Rows
           items={[
             { t: "Market losses", d: "Money you lose by trading is lost. Separation concerns where your balance is kept, not what happens to it when a position moves against you." },
@@ -129,7 +146,7 @@ export default function ClientFundsPage() {
           </Link>{" "}
           says it directly: there is no guarantee that all funds will be recovered.
         </p>
-      </Chapter>
+      </NotedChapter>
 
       <section className="section hairline bg-paper" aria-labelledby="questions">
         <div className="wrap">

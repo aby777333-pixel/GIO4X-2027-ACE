@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Cadence } from "@/components/figures/company/Cadence";
+import { FigureNote } from "@/components/figures/Figure";
 import { DepthRoom, FxSessionsToday } from "@/components/knowledge/MorningRoom";
 import { EditionDate, Greeting, LocalClock } from "@/components/knowledge/Today";
 import { firstSentence } from "@/components/markets/graph";
@@ -35,7 +37,7 @@ const PAIRS: { base: RateCurrency; quote: RateCurrency; slug: string; show?: "st
 ];
 
 /** One module of the room: a numbered heading in the margin, content beside it. */
-function Module({ n, id, title, lead, children }: { n: string; id: string; title: string; lead: string; children: ReactNode }) {
+function Module({ n, id, title, lead, note, children }: { n: string; id: string; title: string; lead: string; note?: ReactNode; children: ReactNode }) {
   return (
     <section aria-labelledby={id} className="hairline">
       <div className="wrap grid grid-cols-[minmax(0,1fr)] gap-x-55 gap-y-21 py-34 lg:grid-cols-[minmax(0,1fr)_minmax(0,2.618fr)] lg:py-55">
@@ -47,6 +49,7 @@ function Module({ n, id, title, lead, children }: { n: string; id: string; title
           <p className="mt-8 max-w-[32ch] text-sm text-ink-3" data-show="standard">
             {lead}
           </p>
+          {note}
         </div>
         <div className="min-w-0">{children}</div>
       </div>
@@ -170,7 +173,19 @@ export default function MorningRoomPage() {
           <Fixings />
         </Module>
 
-        <Module n="03" id="mr-events" title="Scheduled events" lead="What a calendar would show, and where each release is published.">
+        <Module
+          n="03"
+          id="mr-events"
+          title="Scheduled events"
+          lead="What a calendar would show, and where each release is published."
+          note={
+            <div data-show="standard">
+              <FigureNote figure={<Cadence />} label="How to read this list" className="!mt-21">
+                Each row names a release, its kind and how often it appears. Open one to see what it measures. For the date and time of the next one, the publisher’s own calendar is the authority.
+              </FigureNote>
+            </div>
+          }
+        >
           <div className="panel-quiet p-21">
             <p className="h4">The economic calendar feed is not connected yet.</p>
             <p className="mt-8 max-w-measure text-sm text-ink-2">GIO4X does not have a licensed calendar feed on this site, so no release times, forecasts or results are shown here. Each publisher’s own calendar is the authority.</p>

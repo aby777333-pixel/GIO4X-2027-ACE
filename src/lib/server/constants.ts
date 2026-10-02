@@ -73,8 +73,97 @@ export const CAPABILITIES = [
   "audit.read",
   "staff.read",
   "staff.manage",
+  "tickets.read",
+  "tickets.write",
+  "chats.read",
+  "chats.write",
+  "customers.read",
+  "compliance.read",
+  "reports.read",
+  "command.read",
+  "config.manage",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
+
+/** Ticket categories. Must equal `tickets_category_valid` in 0007_support.sql. */
+export const TICKET_CATEGORIES = ["account", "platform", "funding", "technical", "complaint", "privacy", "security", "other"] as const;
+
+export const TICKET_CATEGORY_LABEL: Record<(typeof TICKET_CATEGORIES)[number], string> = {
+  account: "My account",
+  platform: "Trading platform",
+  funding: "Deposits and withdrawals",
+  technical: "Website or technical problem",
+  complaint: "Complaint",
+  privacy: "Privacy or my data",
+  security: "Security concern",
+  other: "Something else",
+};
+
+/** Ticket statuses. Must equal `tickets_status_valid` in 0007_support.sql. */
+export const TICKET_STATUSES = ["open", "pending", "solved", "closed"] as const;
+
+export const TICKET_STATUS_LABEL: Record<(typeof TICKET_STATUSES)[number], string> = {
+  open: "Open",
+  pending: "Waiting for customer",
+  solved: "Solved",
+  closed: "Closed",
+};
+
+/** Ticket priorities. Must equal `tickets_priority_valid` in 0007_support.sql. */
+export const TICKET_PRIORITIES = ["low", "normal", "high", "urgent"] as const;
+
+export const TICKET_PRIORITY_LABEL: Record<(typeof TICKET_PRIORITIES)[number], string> = {
+  low: "Low",
+  normal: "Normal",
+  high: "High",
+  urgent: "Urgent",
+};
+
+/**
+ * Hours within which a first reply is due, by priority. An internal target for
+ * staff, never a promise shown to the public. Must equal the hours in
+ * command_summary() in 0009_insight.sql.
+ */
+export const TICKET_TARGET_HOURS: Record<(typeof TICKET_PRIORITIES)[number], number> = { urgent: 2, high: 8, normal: 24, low: 72 };
+
+/** The categories the compliance register watches, and the enquiry topics that belong beside them. */
+export const COMPLIANCE_CATEGORIES = ["complaint", "privacy", "security"] as const;
+export const COMPLIANCE_TOPICS = ["Complaint", "Privacy", "Security"] as const;
+
+/** Must equal `incidents_component_valid` in 0006_site.sql and the services listed on /status. */
+export const INCIDENT_COMPONENTS = ["website", "client-portal", "trader-portal", "ib-portal", "raptor", "metatrader-5", "market-data", "support"] as const;
+
+export const INCIDENT_COMPONENT_LABEL: Record<(typeof INCIDENT_COMPONENTS)[number], string> = {
+  website: "Website",
+  "client-portal": "Client Portal",
+  "trader-portal": "Trader Portal",
+  "ib-portal": "IB Portal",
+  raptor: "777 Raptor",
+  "metatrader-5": "MetaTrader 5 connectivity",
+  "market-data": "Market data",
+  support: "Support",
+};
+
+/** Must equal `incidents_severity_valid` in 0006_site.sql. */
+export const INCIDENT_SEVERITIES = ["notice", "degraded", "outage", "maintenance"] as const;
+
+export const INCIDENT_SEVERITY_LABEL: Record<(typeof INCIDENT_SEVERITIES)[number], string> = {
+  notice: "Notice",
+  degraded: "Degraded",
+  outage: "Outage",
+  maintenance: "Maintenance",
+};
+
+/** Must equal `incidents_status_valid` in 0006_site.sql. */
+export const INCIDENT_STATUSES = ["scheduled", "investigating", "identified", "monitoring", "resolved"] as const;
+
+export const INCIDENT_STATUS_LABEL: Record<(typeof INCIDENT_STATUSES)[number], string> = {
+  scheduled: "Scheduled",
+  investigating: "Investigating",
+  identified: "Identified",
+  monitoring: "Monitoring",
+  resolved: "Resolved",
+};
 
 export const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"] as const;
 

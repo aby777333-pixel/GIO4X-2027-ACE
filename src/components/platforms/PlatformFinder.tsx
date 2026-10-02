@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { compareRows, finderValue, finderWhere, platformOrder, platforms, type PlatformKey, type ValueKey, type WhereKey } from "@/data/platforms";
 import { FactCell } from "./FactState";
+import { FinderWait } from "./FinderWait";
 
 /**
  * "Find your platform": two questions, a factual read-out for BOTH platforms,
@@ -55,9 +56,20 @@ export function PlatformFinder() {
 
       <div aria-live="polite" className="panel-quiet p-21 lg:p-34">
         {!ready ? (
-          <div className="grid h-full content-center gap-8">
-            <p className="h4">Answer both questions.</p>
-            <p className="max-w-measure text-sm text-ink-2">You will see what each platform documents for those two needs. You will not be told which to choose.</p>
+          <div className="flex h-full flex-col gap-21">
+            {/* the waiting instrument: decorative, and it treats both platforms alike */}
+            <FinderWait
+              className="min-h-[10.5rem] flex-1 lg:min-h-[15rem]"
+              panes={platformOrder.map((k) => platforms[k].name)}
+              first={where === null ? null : finderWhere.findIndex((x) => x.key === where)}
+              firstCount={finderWhere.length}
+              second={value === null ? null : finderValue.findIndex((x) => x.key === value)}
+              secondCount={finderValue.length}
+            />
+            <div className="grid gap-8">
+              <p className="h4">Answer both questions.</p>
+              <p className="max-w-measure text-sm text-ink-2">You will see what each platform documents for those two needs. You will not be told which to choose.</p>
+            </div>
           </div>
         ) : (
           <div>

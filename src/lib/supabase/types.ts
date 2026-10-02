@@ -122,6 +122,181 @@ export type AuditRow = {
   detail: Json;
 };
 
+export type TicketCategory = "account" | "platform" | "funding" | "technical" | "complaint" | "privacy" | "security" | "other";
+export type TicketStatus = "open" | "pending" | "solved" | "closed";
+export type TicketPriority = "low" | "normal" | "high" | "urgent";
+
+export type TicketRow = {
+  id: string;
+  reference: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  email: string;
+  category: TicketCategory;
+  subject: string;
+  message: string;
+  page: string;
+  privacy_accepted_at: string;
+  privacy_version: string;
+  status: TicketStatus;
+  priority: TicketPriority;
+  assigned_to: string | null;
+  first_response_at: string | null;
+  solved_at: string | null;
+  last_customer_at: string | null;
+};
+
+export type TicketInsert = {
+  id: string;
+  reference: string;
+  name: string;
+  email: string;
+  category: TicketCategory;
+  subject: string;
+  message: string;
+  page: string;
+  privacy_accepted_at: string;
+  privacy_version: string;
+};
+
+export type TicketMessageRow = {
+  id: string;
+  ticket_id: string;
+  created_at: string;
+  author_kind: "customer" | "staff";
+  author: string | null;
+  internal: boolean;
+  body: string;
+};
+
+/** What ticket_view() returns to the person who opened the ticket. Staff are never named. */
+export type TicketPublicView = {
+  reference: string;
+  created_at: string;
+  category: TicketCategory;
+  subject: string;
+  message: string;
+  status: TicketStatus;
+  messages: { at: string; from: "customer" | "staff"; body: string }[];
+};
+
+export type ChatStatus = "waiting" | "active" | "closed";
+
+/** The columns staff may read. The token hash is not readable through the API: never select "*" on this table. */
+export type ChatConversationRow = {
+  id: string;
+  created_at: string;
+  last_message_at: string;
+  status: ChatStatus;
+  visitor_name: string | null;
+  page: string;
+  claimed_by: string | null;
+  closed_at: string | null;
+  closed_by: "visitor" | "staff" | null;
+};
+
+export const CHAT_CONVERSATION_COLUMNS = "id, created_at, last_message_at, status, visitor_name, page, claimed_by, closed_at, closed_by";
+
+export type ChatMessageRow = {
+  id: number;
+  conversation_id: string;
+  created_at: string;
+  author_kind: "visitor" | "staff";
+  author: string | null;
+  body: string;
+};
+
+/** What chat_poll() returns to a visitor. */
+export type ChatPublicPoll = {
+  status: ChatStatus;
+  joined: boolean;
+  messages: { id: number; from: "visitor" | "staff"; body: string; at: string }[];
+};
+
+export type StaffPresenceRow = { user_id: string; chat_until: string };
+
+export type SiteSettingKey = "announcement" | "chat" | "support";
+export type SiteSettingRow = { key: SiteSettingKey; value: Json; updated_at: string; updated_by: string | null };
+
+/** What site_public() returns: the three values, shaped by site_setting_set(). */
+export type SitePublic = {
+  announcement?: { enabled: boolean; text: string; href: string; tone: "info" | "notice" };
+  chat?: { enabled: boolean };
+  support?: { hours: string };
+};
+
+export type IncidentComponent = "website" | "client-portal" | "trader-portal" | "ib-portal" | "raptor" | "metatrader-5" | "market-data" | "support";
+export type IncidentSeverity = "notice" | "degraded" | "outage" | "maintenance";
+export type IncidentStatus = "scheduled" | "investigating" | "identified" | "monitoring" | "resolved";
+
+export type IncidentRow = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+  title: string;
+  component: IncidentComponent;
+  severity: IncidentSeverity;
+  status: IncidentStatus;
+  started_at: string;
+  resolved_at: string | null;
+  published: boolean;
+};
+
+export type IncidentUpdateRow = { id: number; incident_id: string; created_at: string; author: string | null; status: IncidentStatus; body: string };
+
+/** One row of people_list(): everyone who has written in, one record per address. Not client accounts. */
+export type PersonListRow = {
+  key: string;
+  email: string;
+  name: string | null;
+  first_seen: string;
+  last_seen: string;
+  enquiries: number;
+  tickets: number;
+  open_tickets: number;
+  subscribed: boolean;
+  total: number;
+};
+
+/** What person_view() returns. */
+export type PersonView = {
+  key: string;
+  email: string;
+  name: string | null;
+  leads: { id: string; reference: string; created_at: string; topic: string; status: LeadStatus; stage: LeadStage; score: number; assigned_to: string | null }[];
+  tickets: { id: string; reference: string; created_at: string; category: TicketCategory; subject: string; status: TicketStatus; priority: TicketPriority; assigned_to: string | null }[];
+  subscription: { since: string; consent_version: string; unsubscribed_at: string | null } | null;
+  marketing_consent: boolean;
+};
+
+type Tally = { key: string; count: number }[];
+
+/** What report_summary() returns. Every figure is counted from rows at the moment it is asked for. */
+export type ReportSummary = {
+  days: number;
+  since: string;
+  leads: { total: number; spam: number; by_topic: Tally; by_stage: Tally; by_status: Tally; by_source: Tally; by_page: Tally; lost_reasons: Tally };
+  tickets: { total: number; solved: number; answered: number; first_response_median_minutes: number | null; by_category: Tally; by_status: Tally };
+  chats: { total: number; answered: number };
+  subscribers: { new: number; unsubscribed: number; active: number };
+  follow_ups: { created: number; completed: number };
+};
+
+/** What command_summary() returns. */
+export type CommandSummary = {
+  at: string;
+  leads: { new: number; unassigned: number; open: number; last_24h: number };
+  follow_ups: { open: number; overdue: number };
+  tickets: { open: number; pending: number; unassigned: number; unanswered: number; late: number; complaints_open: number };
+  chats: { waiting: number; active: number; staff_online: number; enabled: boolean };
+  staff: { active: number; pending_changes: number };
+  site: { incidents_open: number; incidents_published: number; announcement_on: boolean };
+  audience: { subscribers: number };
+  audit_24h: number;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -140,6 +315,54 @@ export type Database = {
       staff_changes: {
         Row: StaffChangeRow;
         Insert: { [_ in never]: never };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
+      tickets: {
+        Row: TicketRow;
+        Insert: TicketInsert;
+        Update: { status?: TicketStatus; priority?: TicketPriority; category?: TicketCategory; assigned_to?: string | null };
+        Relationships: [];
+      };
+      ticket_messages: {
+        Row: TicketMessageRow;
+        Insert: { ticket_id: string; body: string; internal?: boolean };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
+      chat_conversations: {
+        Row: ChatConversationRow;
+        Insert: { [_ in never]: never };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
+      chat_messages: {
+        Row: ChatMessageRow;
+        Insert: { [_ in never]: never };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
+      staff_presence: {
+        Row: StaffPresenceRow;
+        Insert: { [_ in never]: never };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
+      site_settings: {
+        Row: SiteSettingRow;
+        Insert: { [_ in never]: never };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
+      incidents: {
+        Row: IncidentRow;
+        Insert: { title: string; component: IncidentComponent; severity: IncidentSeverity; status?: IncidentStatus; started_at?: string; published?: boolean };
+        Update: { title?: string; component?: IncidentComponent; severity?: IncidentSeverity; published?: boolean };
+        Relationships: [];
+      };
+      incident_updates: {
+        Row: IncidentUpdateRow;
+        Insert: { incident_id: string; status: IncidentStatus; body: string };
         Update: { [_ in never]: never };
         Relationships: [];
       };
@@ -181,6 +404,24 @@ export type Database = {
       staff_propose_change: { Args: { p_user: string; p_role: string; p_display_name: string; p_active: boolean }; Returns: string };
       staff_decide: { Args: { p_change: string; p_approve: boolean }; Returns: undefined };
       staff_cancel: { Args: { p_change: string }; Returns: undefined };
+      site_public: { Args: { [_ in never]: never }; Returns: Json };
+      site_setting_set: { Args: { p_key: string; p_value: Json }; Returns: undefined };
+      ticket_view: { Args: { p_reference: string; p_email: string }; Returns: Json | null };
+      ticket_reply: { Args: { p_reference: string; p_email: string; p_body: string }; Returns: string };
+      chat_available: { Args: { [_ in never]: never }; Returns: boolean };
+      chat_start: { Args: { p_name: string; p_page: string; p_body: string }; Returns: Json };
+      chat_send: { Args: { p_id: string; p_token: string; p_body: string }; Returns: string };
+      chat_poll: { Args: { p_id: string; p_token: string; p_after?: number }; Returns: Json | null };
+      chat_end: { Args: { p_id: string; p_token: string }; Returns: string };
+      chat_presence: { Args: { p_on?: boolean }; Returns: undefined };
+      chat_staff_claim: { Args: { p_id: string }; Returns: undefined };
+      chat_staff_send: { Args: { p_id: string; p_body: string }; Returns: undefined };
+      chat_staff_close: { Args: { p_id: string }; Returns: undefined };
+      people_list: { Args: { p_search?: string; p_limit?: number; p_offset?: number }; Returns: PersonListRow[] };
+      person_view: { Args: { p_key: string }; Returns: Json | null };
+      report_summary: { Args: { p_days?: number }; Returns: Json };
+      command_summary: { Args: { [_ in never]: never }; Returns: Json };
+      record_leads_export: { Args: { row_count: number }; Returns: undefined };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

@@ -2,15 +2,19 @@ import type { ReactNode } from "react";
 import { CockpitBoot } from "@/components/cockpit/Boot";
 import { CockpitFx } from "@/components/cockpit/CockpitFx";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
+import { ChatWidget } from "@/components/shell/ChatWidget";
 import { CommandBar } from "@/components/shell/CommandBar";
 import { Lens } from "@/components/shell/Lens";
+import { ScrollArrows } from "@/components/shell/ScrollArrows";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { SiteHeader } from "@/components/shell/SiteHeader";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 
 /**
- * The public site chrome: header, main landmark, footer, command bar, Lens and
- * the organisation structured data. Used by the (site) route group and by the
+ * The public site chrome: header, main landmark, footer, command bar, Lens,
+ * the announcement line and chat window that staff control from GIO4X Control,
+ * and the organisation structured data. Used by the (site) route group and by the
  * root 404. GIO4X Control has its own shell and never renders this.
  */
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -18,6 +22,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <>
       <SiteHeader />
       <main id="main" tabIndex={-1} className="pt-[var(--header-h)] focus:outline-none">
+        {/* what staff publish from Control: one line above the page, when there is one */}
+        <AnnouncementBar />
         {children}
       </main>
       <SiteFooter />
@@ -25,6 +31,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <Lens />
       <CockpitFx />
       <CockpitBoot />
+      <ScrollArrows />
+      {/* live chat: offered only while a member of staff is present to answer */}
+      <ChatWidget />
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
     </>
   );

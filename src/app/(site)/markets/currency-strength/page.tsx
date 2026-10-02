@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { EightAround } from "@/components/figures/product/EightAround";
 import { bankHref, formatCorr, instrumentBySlug, ratePair } from "@/components/markets/graph";
 import { Head } from "@/components/markets/Head";
 import { RatesUnavailable } from "@/components/markets/RatesTable";
@@ -159,9 +161,14 @@ export default async function CurrencyStrengthPage() {
       {/* method */}
       <section className="section-quiet hairline" aria-labelledby="method-title">
         <div className="wrap phi phi-r items-start">
-          <h2 id="method-title" className="h3">
-            How it is calculated.
-          </h2>
+          <div>
+            <h2 id="method-title" className="h3">
+              How it is calculated.
+            </h2>
+            <FigureNote figure={<EightAround />} label="Reading a figure">
+              A positive figure means the currency rose on average against the other seven over that period. It does not mean it rose in any absolute sense: the eight figures only describe each other.
+            </FigureNote>
+          </div>
           <ol className="max-w-measure border-t border-line">
             {[
               ["The source", "The ECB publishes one euro reference rate per currency each working day. Every other pair is derived as a cross of two of those rates."],

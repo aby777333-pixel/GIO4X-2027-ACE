@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Rosette } from "@/components/brand/Rosette";
+import { SortingRack } from "@/components/figures/company/SortingRack";
+import { FigureNote } from "@/components/figures/Figure";
 import { EMAIL_RE, PHONE_RE, readUtm, submitContact } from "./submit";
 
 type Topic = {
@@ -276,6 +278,9 @@ export function ContactForm({ email }: { email: string }) {
               </p>
             )}
           </div>
+          <FigureNote figure={<SortingRack />} label="How it is routed" className="!mt-21">
+            The topic you choose travels with the message. Once it is received you are shown a reference: keep it, and quote it if you write again about the same matter.
+          </FigureNote>
         </div>
 
         <div className="grid gap-21">

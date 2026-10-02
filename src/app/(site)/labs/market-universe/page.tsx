@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { RingConstruction } from "@/components/figures/product/RingConstruction";
 import { MarketUniverse } from "@/components/labs/MarketUniverse";
 import { NextSteps, PageHero, SpecList } from "@/components/ui/Page";
 import { KIND_LABEL, RELATIONS, edges, graphStats, type Relation } from "@/data/graph";
@@ -42,6 +44,13 @@ export default function MarketUniversePage() {
             <h2 id="mu-method" className="h2 mt-13">
               Software over curated relations. Not a model.
             </h2>
+            <FigureNote figure={<RingConstruction />} label="Another reading">
+              The same relations can be read as sentences.{" "}
+              <Link href="/labs/connect-the-dots" className="link">
+                Connect the Dots
+              </Link>{" "}
+              finds the shortest documented route between the things you choose and writes it out, one relation per sentence.
+            </FigureNote>
           </div>
           <div>
             <div className="prose-gx">

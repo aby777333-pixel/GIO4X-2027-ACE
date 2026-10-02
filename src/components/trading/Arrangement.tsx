@@ -13,6 +13,10 @@ type Props = {
   diagram: ReactNode;
   diagramCaption: string;
   what: string[];
+  /** optional: something for the space under "What it is", beside the longer mechanics list */
+  whatAside?: ReactNode;
+  /** optional: something for the space under the published statements, beside the longer pending list */
+  gioAside?: ReactNode;
   mechanics: { title: string; body: string }[];
   /** "At GIO4X": what has been published consistently, and what has not */
   gioTitle: string;
@@ -57,6 +61,7 @@ export function Arrangement(p: Props) {
                 <p key={t}>{t}</p>
               ))}
             </div>
+            {p.whatAside}
           </div>
           <div>
             <h2 id="arr-how" className="h3 mb-21">
@@ -90,6 +95,7 @@ export function Arrangement(p: Props) {
                   </ol>
                 </>
               )}
+              {p.gioAside}
             </div>
             <div data-reveal>
               <h3 className="label">Not yet published</h3>

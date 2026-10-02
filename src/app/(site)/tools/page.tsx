@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { LeverBeam } from "@/components/figures/product/LeverBeam";
+import { WorkedLines } from "@/components/figures/product/WorkedLines";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { HubMini } from "@/components/tools/HubMini";
@@ -66,6 +69,9 @@ export default function ToolsHub() {
               </h2>
               <p className="lead mt-13">{g.question}</p>
               <p className="mt-13 max-w-narrow text-sm text-ink-3">{g.note}</p>
+              {g.key === "mechanics" && (
+                <FigureNote figure={<LeverBeam />}>Each one starts from placeholder figures. Change a figure and the drawing follows, with its formula and the working beside it.</FigureNote>
+              )}
             </div>
             <ul className="border-t border-line-strong" data-reveal={i > 0 ? true : undefined}>
               {g.items.map((t) => (
@@ -95,6 +101,9 @@ export default function ToolsHub() {
             <h2 id="rules" className="h2 mt-13 max-w-[16ch]">
               Arithmetic in the open, and nothing more.
             </h2>
+            <FigureNote figure={<WorkedLines />} label="Checking by hand">
+              In any tool, the column headed “How it works” gives the formula, then the same formula with your numbers, one step to a line. Follow one figure down the lines and the result can be reproduced on paper.
+            </FigureNote>
           </div>
           <ol className="border-t border-line">
             {[

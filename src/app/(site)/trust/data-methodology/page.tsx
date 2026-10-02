@@ -1,7 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { FigureNote } from "@/components/figures/Figure";
+import { CrossRate } from "@/components/figures/trust/CrossRate";
+import { NotedChapter } from "@/components/figures/trust/NotedChapter";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Chapter, Ext, Rows } from "@/components/trust/Parts";
+import { TimeZones } from "@/components/trust/TimeZones";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { educationalNote, indicativeNote } from "@/config/legal";
 import { pageMeta } from "@/lib/meta";
@@ -148,7 +152,21 @@ export default function DataMethodologyPage() {
         </div>
       </Chapter>
 
-      <Chapter id="calculations" eyebrow="Calculations" title="How changes, strength and correlations are worked out" lead="All four are descriptive statistics of reference fixings that have already been published. None is a signal and none is a forecast.">
+      <NotedChapter
+        id="calculations"
+        eyebrow="Calculations"
+        title="How changes, strength and correlations are worked out"
+        lead="All four are descriptive statistics of reference fixings that have already been published. None is a signal and none is a forecast."
+        note={
+          <FigureNote figure={<CrossRate />} label="Worth knowing">
+            Each of the four starts from one published value per currency per day. With too few fixings the result is shown as unavailable, and no number is estimated to fill it. They are applied on the{" "}
+            <Link href="/markets/currency-strength" className="link">
+              currency strength
+            </Link>{" "}
+            page.
+          </FigureNote>
+        }
+      >
         <div className="border-t border-line-strong">
           <Formula title="Cross rates" expr="BASE/QUOTE  =  (QUOTE per EUR) ÷ (BASE per EUR)">
             <p>The ECB publishes each currency against the euro. A pair that does not include the euro is derived by dividing one euro rate by the other, on the same fixing date.</p>
@@ -168,32 +186,46 @@ export default function DataMethodologyPage() {
             </p>
           </Formula>
         </div>
-      </Chapter>
+      </NotedChapter>
 
-      <Chapter id="time-zones" eyebrow="Time" title="Time zones" paper flip>
-        <Rows
-          items={[
-            { t: "Fixing dates are the ECB’s.", d: "A reference rate carries the date on which the European Central Bank set it, around 16:00 Central European Time. It is shown as a date, never as a time of day in your zone." },
-            {
-              t: "Sessions are computed in each venue’s own zone.",
-              d: "Opening and closing times are held in the local time of each financial centre and converted with your browser’s time-zone database, so daylight-saving changes in either place are handled on the correct dates.",
-            },
-            {
-              t: "They are shown in the zone you choose.",
-              d: (
-                <>
-                  By default that is your device’s zone. You can set another in{" "}
-                  <Link href="/preferences" className="link">
-                    preferences
-                  </Link>
-                  . Dials that span the whole day are marked in UTC.
-                </>
-              ),
-            },
-            { t: "Your clock is the clock.", d: "Schedules use the time reported by your device. If that clock is wrong, the schedule will be wrong by the same amount." },
-          ]}
-        />
-      </Chapter>
+      {/* Chapter's own markup, written out so the drawing can sit under the heading in the narrow column */}
+      <section className="section-quiet hairline bg-paper" aria-labelledby="time-zones">
+        <div className="wrap phi items-start">
+          <div className="lg:order-2">
+            <div data-reveal suppressHydrationWarning>
+              <p className="eyebrow">Time</p>
+              <h2 id="time-zones" className="h3 mt-13 max-w-[20ch] scroll-mt-[calc(var(--header-h)+2.125rem)]">
+                Time zones
+              </h2>
+            </div>
+            <TimeZones className="mt-21" />
+          </div>
+          <div className="lg:order-1">
+            <Rows
+              items={[
+                { t: "Fixing dates are the ECB’s.", d: "A reference rate carries the date on which the European Central Bank set it, around 16:00 Central European Time. It is shown as a date, never as a time of day in your zone." },
+                {
+                  t: "Sessions are computed in each venue’s own zone.",
+                  d: "Opening and closing times are held in the local time of each financial centre and converted with your browser’s time-zone database, so daylight-saving changes in either place are handled on the correct dates.",
+                },
+                {
+                  t: "They are shown in the zone you choose.",
+                  d: (
+                    <>
+                      By default that is your device’s zone. You can set another in{" "}
+                      <Link href="/preferences" className="link">
+                        preferences
+                      </Link>
+                      . Dials that span the whole day are marked in UTC.
+                    </>
+                  ),
+                },
+                { t: "Your clock is the clock.", d: "Schedules use the time reported by your device. If that clock is wrong, the schedule will be wrong by the same amount." },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
 
       <section className="section-quiet hairline" aria-labelledby="no-live">
         <div className="wrap phi items-start">

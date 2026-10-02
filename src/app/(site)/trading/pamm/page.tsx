@@ -1,3 +1,7 @@
+import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { PeriodGate } from "@/components/figures/trading/PeriodGate";
+import { Vessels } from "@/components/figures/trading/Vessels";
 import { Arrangement } from "@/components/trading/Arrangement";
 import { PoolDiagram } from "@/components/trading/Diagrams";
 import { pamm } from "@/data/trading";
@@ -22,6 +26,24 @@ export default function PammPage() {
       diagram={<PoolDiagram className="h-auto w-full" />}
       diagramCaption="Illustration of the mechanism. It shows no real manager and no results."
       what={pamm.what}
+      whatAside={
+        <FigureNote figure={<Vessels ratio={2.5} />} label="In practice">
+          The percentage works in both directions: a loss is divided by the same shares as a gain, and an investor cannot close a position the manager has opened. The{" "}
+          <Link href="#arr-risks" className="link">
+            risks
+          </Link>{" "}
+          are set out below.
+        </FigureNote>
+      }
+      gioAside={
+        <FigureNote figure={<PeriodGate ratio={3} />} className="!mt-21">
+          A request made part of the way through a period waits for its end. How long a period lasts has not been published, which is why it is among the{" "}
+          <Link href="#arr-q" className="link">
+            questions worth asking first
+          </Link>
+          .
+        </FigureNote>
+      }
       mechanics={pamm.mechanics}
       gioTitle="What GIO4X has published."
       gioLead="GIO4X offers PAMM accounts. The two previous websites agree on little beyond that, so this page publishes no minimums, no fees and no manager statistics."

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { Offices } from "@/components/company/Offices";
+import { PlumbLines } from "@/components/figures/company/PlumbLines";
+import { FigureNote } from "@/components/figures/Figure";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
 import { companyLine } from "@/config/legal";
 import { site } from "@/config/site";
@@ -76,6 +78,13 @@ export default function AboutPage() {
               “Gentleman” is a standard of conduct.
             </h2>
             <p className="lead mt-21">It is not a costume. It describes how a firm behaves when it would be easier, or more profitable in the short run, to behave otherwise. Five commitments follow from it.</p>
+            <FigureNote figure={<PlumbLines />} label="In practice">
+              Each commitment can be tested against the site itself. The four pages under{" "}
+              <Link href="#verify" className="link">
+                Verify
+              </Link>
+              , further down, exist so that what is said here can be checked.
+            </FigureNote>
           </div>
           <ol className="border-t border-line-strong">
             {conduct.map((c, i) => (

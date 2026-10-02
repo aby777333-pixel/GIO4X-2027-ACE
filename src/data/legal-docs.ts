@@ -504,8 +504,8 @@ const cookies: LegalDoc = {
   short: "Cookie Notice",
   category: "Privacy",
   summary: "Everything this website stores in your browser, key by key, and how to clear it. There are no advertising or analytics cookies.",
-  version: "1.0",
-  updated: "1 October 2026",
+  version: "1.1",
+  updated: "2 October 2026",
   origin: "new",
   keywords: ["cookies", "local storage", "tracking", "analytics", "advertising", "preferences", "consent"],
   sections: [
@@ -519,6 +519,7 @@ const cookies: LegalDoc = {
             "This website sets no advertising cookies and no analytics cookies.",
             "It loads no third-party scripts, so no third party can set a cookie through a script on these pages.",
             "It keeps a small number of display and convenience settings in your browser’s local storage. They stay on your device and are not sent to GIO4X.",
+            "For the length of a visit it may keep two items in session storage: an announcement you closed, and a live chat you started.",
             "An authentication cookie is set only for GIO4X staff who sign in to the internal console. Visitors to the public site do not receive it.",
           ],
         },
@@ -549,6 +550,27 @@ const cookies: LegalDoc = {
           rows: LOCAL_KEYS.map((k) => [k, LOCAL_KEY_PURPOSE[k].holds, LOCAL_KEY_PURPOSE[k].why]),
         },
         p("A key is written only when you use the feature it belongs to. If you never change a setting or use a tool, nothing is stored."),
+      ],
+    },
+    {
+      id: "session-storage",
+      title: "Session storage",
+      body: [
+        p("Session storage is like local storage, but the browser empties it when you close the tab. This website uses two keys there."),
+        {
+          kind: "table",
+          caption: "Session-storage keys used by this website",
+          head: ["Key", "What it holds", "Why"],
+          rows: [
+            ["gx:announcement:dismissed", "The text of an announcement line you closed.", "So the same announcement is not shown again during this visit. A new announcement is shown."],
+            [
+              "gx:chat",
+              "The identifier and access token of a live chat you started.",
+              "So the conversation continues when you move to another page. The token is sent to GIO4X’s database with each chat message, which is how the conversation is recognised as yours. It is removed when the chat ends.",
+            ],
+          ],
+        },
+        p("Neither key is written unless you close an announcement or start a chat."),
       ],
     },
     {

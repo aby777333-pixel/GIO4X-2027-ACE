@@ -37,7 +37,7 @@ See `docs/PORTAL-GATEWAY.md` for the security checklist to run before any of B1â
 | C1 | Telephone number | Old sites carried placeholders (`+91 1111 1111 11111`). One plausible number (`+91 416 355 1652`) is tied to the legacy "icareforex" brand. None is published. |
 | C2 | Support hours | 24/7 and 24/5 were both claimed. Not published. |
 | C3 | Official mailboxes | `info@`, `support@`, `security@`, `privacy@`, `careers@gio4x.com` appear in the old code. The site uses `info@gio4x.com` as the public contact and `careers@` on Careers. Please confirm which exist and are monitored; a `security.txt` will be published once `security@` is confirmed. |
-| C4 | Office list | Only the Ruislip head office and the Vellore support office are shown (the only two with addresses). Dubai, Singapore, Johannesburg and the Indian city list were unverified. |
+| C4 | Office list | Only the Ruislip head office and the Chennai support office (address given by the owner on 2 October 2026) are shown (the only two with addresses). Dubai, Singapore, Johannesburg and the Indian city list were unverified. |
 | C5 | Genuine job openings | Eight roles were listed on the old site; not carried over. |
 | C6 | Leadership names and biographies | Four executives were named on the old site; not carried over. |
 

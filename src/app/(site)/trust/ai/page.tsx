@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { NotedChapter } from "@/components/figures/trust/NotedChapter";
+import { SevenBounds } from "@/components/figures/trust/SevenBounds";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Chapter, Rows } from "@/components/trust/Parts";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -67,9 +70,25 @@ export default function AiPage() {
         </div>
       </section>
 
-      <Chapter id="ai-commitments" eyebrow="If an assistant is introduced" title="Seven boundaries, stated in advance." lead="These are commitments. They are written before any assistant exists so that they cannot be shaped around what one turns out to do." paper>
+      <NotedChapter
+        id="ai-commitments"
+        eyebrow="If an assistant is introduced"
+        title="Seven boundaries, stated in advance."
+        lead="These are commitments. They are written before any assistant exists so that they cannot be shaped around what one turns out to do."
+        paper
+        stretch
+        note={
+          <FigureNote figure={<SevenBounds />} label="Today" className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
+            None of the seven is in force yet, because there is no assistant on the public website in this release. Until one is introduced, every question goes to a person through the{" "}
+            <Link href="/contact" className="link">
+              contact page
+            </Link>
+            .
+          </FigureNote>
+        }
+      >
         <Rows numbered items={commitments} />
-      </Chapter>
+      </NotedChapter>
 
       <Chapter id="ai-why" eyebrow="Why so narrow" title="A fluent answer is not the same as a true one." flip>
         <div className="grid max-w-measure gap-21 text-ink-2" data-reveal suppressHydrationWarning>

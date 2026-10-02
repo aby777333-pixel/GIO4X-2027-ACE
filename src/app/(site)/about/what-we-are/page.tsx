@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Intermediary } from "@/components/figures/company/Intermediary";
+import { FigureNote } from "@/components/figures/Figure";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { educationalNote } from "@/config/legal";
 import { pageMeta } from "@/lib/meta";
@@ -76,15 +78,24 @@ export default function WhatWeArePage() {
             <p>Three things are deliberately absent, and their absence is a feature of the house rather than a gap in it.</p>
           </div>
 
-          <aside className="panel-quiet p-21 lg:sticky lg:top-[calc(var(--header-h)+2.125rem)] lg:p-34" aria-labelledby="short-h">
-            <p id="short-h" className="label">
-              In one paragraph
-            </p>
-            <p className="mt-13 font-display text-lg leading-snug text-ink">
-              GIO4X gives you access to markets and the means to understand them. It does not advise you, promise a return or tell you what to trade.
-            </p>
-            <p className="mt-21 text-xs text-ink-3">{educationalNote}</p>
-          </aside>
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+2.125rem)]">
+            <aside className="panel-quiet p-21 lg:p-34" aria-labelledby="short-h">
+              <p id="short-h" className="label">
+                In one paragraph
+              </p>
+              <p className="mt-13 font-display text-lg leading-snug text-ink">
+                GIO4X gives you access to markets and the means to understand them. It does not advise you, promise a return or tell you what to trade.
+              </p>
+              <p className="mt-21 text-xs text-ink-3">{educationalNote}</p>
+            </aside>
+            <FigureNote figure={<Intermediary />} label="Worth knowing" className="lg:max-w-none">
+              A broker charges through a spread, a commission, or both. At GIO4X the difference between the{" "}
+              <Link href="/trading/accounts" className="link">
+                three account types
+              </Link>{" "}
+              is how you pay for trading, and it is set out in one table.
+            </FigureNote>
+          </div>
         </div>
 
         <div className="wrap mt-34">

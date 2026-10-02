@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { ColumnNote, NotedChapter } from "@/components/figures/trust/NotedChapter";
+import { PortalGates } from "@/components/figures/trust/PortalGates";
+import { SenderLine } from "@/components/figures/trust/SenderLine";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { LinkChecker } from "@/components/trust/LinkChecker";
 import { Chapter, Ext, Rows } from "@/components/trust/Parts";
@@ -82,7 +86,17 @@ export default function VerifyPage() {
         </p>
       </Chapter>
 
-      <Chapter id="approved-third-parties" eyebrow="The registry" title="Approved third parties" lead="GIO4X links to these organisations on purpose. They are not GIO4X, and each is responsible for its own website.">
+      <NotedChapter
+        id="approved-third-parties"
+        eyebrow="The registry"
+        title="Approved third parties"
+        lead="GIO4X links to these organisations on purpose. They are not GIO4X, and each is responsible for its own website."
+        note={
+          <ColumnNote label="In the checker">
+            An address on one of these domains is answered “Approved third-party destination”, never “Official GIO4X”. The answer names the organisation and gives the reason GIO4X links to it.
+          </ColumnNote>
+        }
+      >
         <div className="scroll-x" data-reveal suppressHydrationWarning>
           <table className="table-gx min-w-[34rem]">
             <caption className="sr-only">Approved third-party destinations and the reason each is linked</caption>
@@ -109,9 +123,24 @@ export default function VerifyPage() {
         <p className="mt-21 max-w-measure text-sm text-ink-3">
           The technology provider’s own site is <Ext href={site.technologyPartner.url}>777raptor.com</Ext>. MetaTrader 5 is a trademark of MetaQuotes Ltd.
         </p>
-      </Chapter>
+      </NotedChapter>
 
-      <Chapter id="portals" eyebrow="Sign-in destinations" title="Portals" lead="The places where a client would sign in or apply. Each is listed here only once its address has been supplied and security-reviewed." paper>
+      <NotedChapter
+        id="portals"
+        eyebrow="Sign-in destinations"
+        title="Portals"
+        lead="The places where a client would sign in or apply. Each is listed here only once its address has been supplied and security-reviewed."
+        paper
+        note={
+          <FigureNote figure={<PortalGates />} label="Worth knowing">
+            A sign-in address that is not in this list has not been through those two steps, whoever sent it. Paste it into the{" "}
+            <Link href="#checker" className="link">
+              checker
+            </Link>{" "}
+            at the top of this page before you use it.
+          </FigureNote>
+        }
+      >
         <ul className="border-t border-line-strong">
           {portalKeys.map((k) => {
             const d = portals[k];
@@ -144,7 +173,7 @@ export default function VerifyPage() {
           </Link>
           .
         </p>
-      </Chapter>
+      </NotedChapter>
 
       <Chapter id="social-accounts" eyebrow="The registry" title="Official social accounts" lead="A profile is official only if it is listed here.">
         {socialEntries.length === 0 ? (
@@ -167,7 +196,22 @@ export default function VerifyPage() {
         )}
       </Chapter>
 
-      <Chapter id="genuine-communications" eyebrow="Messages" title="How to recognise a genuine GIO4X message" paper flip>
+      <NotedChapter
+        id="genuine-communications"
+        eyebrow="Messages"
+        title="How to recognise a genuine GIO4X message"
+        paper
+        flip
+        note={
+          <FigureNote figure={<SenderLine />} label="In practice">
+            Apply all four tests, not the first alone. If a message fails any of them, do not act on it: send the address and the message to GIO4X under the Security topic on the{" "}
+            <Link href="/contact?topic=security" className="link">
+              contact page
+            </Link>
+            .
+          </FigureNote>
+        }
+      >
         <Rows
           numbered
           items={[
@@ -177,7 +221,7 @@ export default function VerifyPage() {
             { t: "It does not hurry you.", d: "Deadlines, threats to close an account and offers that expire within the hour are the ordinary tools of fraud. A genuine request can wait while you check it." },
           ]}
         />
-      </Chapter>
+      </NotedChapter>
 
       <section className="section-quiet hairline" aria-labelledby="report">
         <div className="wrap flex flex-col gap-21 md:flex-row md:items-end md:justify-between">

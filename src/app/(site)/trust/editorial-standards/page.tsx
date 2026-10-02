@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { AgeingLine } from "@/components/figures/trust/AgeingLine";
+import { FactOrAnalysis } from "@/components/figures/trust/FactOrAnalysis";
+import { ColumnNote, NotedChapter } from "@/components/figures/trust/NotedChapter";
+import { OpenCorrection } from "@/components/figures/trust/OpenCorrection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AskGio4x, Chapter, Rows } from "@/components/trust/Parts";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -54,7 +59,21 @@ export default function EditorialStandardsPage() {
         </div>
       </section>
 
-      <Chapter id="sources" eyebrow="Sources" title="Primary sources first, and named." paper>
+      <NotedChapter
+        id="sources"
+        eyebrow="Sources"
+        title="Primary sources first, and named."
+        paper
+        note={
+          <ColumnNote label="In practice">
+            Where an article links to its source, follow the link and read the statement where it was made. The numbers in an article follow the same rule, set out in the{" "}
+            <Link href="/trust/data-methodology" className="link">
+              data methodology
+            </Link>
+            .
+          </ColumnNote>
+        }
+      >
         <Rows
           items={[
             {
@@ -65,9 +84,23 @@ export default function EditorialStandardsPage() {
             { t: "When a source cannot be found", d: "The statement is removed or rewritten as what it is: an opinion, an illustration or an open question." },
           ]}
         />
-      </Chapter>
+      </NotedChapter>
 
-      <Chapter id="fact-and-analysis" eyebrow="Facts and analysis" title="The reader should always know which one they are reading." flip>
+      <NotedChapter
+        id="fact-and-analysis"
+        eyebrow="Facts and analysis"
+        title="The reader should always know which one they are reading."
+        flip
+        note={
+          <FigureNote figure={<FactOrAnalysis />} label="Two quick checks">
+            The format label comes first: every article in{" "}
+            <Link href="/intelligence" className="link">
+              GIO4X Intelligence
+            </Link>{" "}
+            carries one. The words of explanation come second: where they appear, the sentence describes a relationship and does not state a fact.
+          </FigureNote>
+        }
+      >
         <Rows
           items={[
             { t: "Facts are stated as facts", d: "What was announced, what a rule says, how an instrument is specified. These can be checked against the source." },
@@ -79,7 +112,7 @@ export default function EditorialStandardsPage() {
             { t: "Worked examples are labelled", d: "A figure invented to show how a calculation works is called an example, uses round numbers, and is never presented as a market price." },
           ]}
         />
-      </Chapter>
+      </NotedChapter>
 
       <Chapter id="bylines" eyebrow="Bylines" title="Desks, not invented people." paper>
         <div className="grid max-w-measure gap-21 text-ink-2" data-reveal suppressHydrationWarning>
@@ -90,7 +123,17 @@ export default function EditorialStandardsPage() {
         </div>
       </Chapter>
 
-      <Chapter id="corrections" eyebrow="Corrections" title="A mistake is corrected in the open." flip>
+      <NotedChapter
+        id="corrections"
+        eyebrow="Corrections"
+        title="A mistake is corrected in the open."
+        flip
+        note={
+          <FigureNote figure={<OpenCorrection />} label="Worth knowing">
+            A correction never moves the publication date. The date a piece first appeared stays as it is, and the date of the material update is shown with it.
+          </FigureNote>
+        }
+      >
         <Rows
           numbered
           items={[
@@ -101,7 +144,7 @@ export default function EditorialStandardsPage() {
           ]}
         />
         <AskGio4x className="mt-34">Seen something that is wrong? Reports about an article are welcome from anyone, client or not.</AskGio4x>
-      </Chapter>
+      </NotedChapter>
 
       <Chapter id="market-data" eyebrow="Market data in articles" title="No price is quoted without its source and date." paper>
         <div className="grid max-w-measure gap-21 text-ink-2" data-reveal suppressHydrationWarning>
@@ -119,7 +162,17 @@ export default function EditorialStandardsPage() {
         </div>
       </Chapter>
 
-      <Chapter id="updates" eyebrow="Updates" title="Articles age. The page should say so." flip>
+      <NotedChapter
+        id="updates"
+        eyebrow="Updates"
+        title="Articles age. The page should say so."
+        flip
+        note={
+          <FigureNote figure={<AgeingLine />}>
+            Read the publication date before the text, and the notice above it where there is one. Both are there so that an older piece is read as an older piece.
+          </FigureNote>
+        }
+      >
         <Rows
           items={[
             { t: "Time-sensitive pieces carry a notice", d: "Where an article describes conditions that will change, a notice above the text says so, and the publication date is always shown." },
@@ -127,7 +180,7 @@ export default function EditorialStandardsPage() {
             { t: "Nothing is backdated", d: "A publication date is the date a piece first appeared. Changing an article does not change it." },
           ]}
         />
-      </Chapter>
+      </NotedChapter>
 
       <NextSteps
         items={[

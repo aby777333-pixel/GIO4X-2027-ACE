@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { ReturnLoop } from "@/components/figures/trading/ReturnLoop";
 import { AskLine, NumberedRows, PendingList, RiskNote } from "@/components/trading/Blocks";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
 import { riskWarning } from "@/config/legal";
@@ -103,6 +105,13 @@ export default function FundingPage() {
             <Link href="/trust/client-funds" className="go mt-21 min-h-[2.75rem] md:min-h-0">
               Client fund security
             </Link>
+            <FigureNote figure={<ReturnLoop ratio={3} />} className="!mt-21">
+              Most of this comes down to two ideas: the money stays in one name, and it leaves by the way it arrived.{" "}
+              <Link href="#path" className="link">
+                The path of a payment
+              </Link>
+              , above, shows the steps where each applies.
+            </FigureNote>
           </div>
           <NumberedRows items={fundingExplainers} as="ul" />
         </div>

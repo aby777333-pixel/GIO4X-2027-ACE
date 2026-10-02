@@ -36,6 +36,26 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/subscribers` | Subscriptions with consent evidence; 50 per page | staff |
 | `/control/subscribers/export` (POST) | CSV export, recorded in the audit log | admin |
 | `/control/audit` | The audit log; 50 per page | staff |
+| `/control/tickets` | Support requests opened on the website at `/support`: the queue, filters, reply-due marker against the internal target | `tickets.read` |
+| `/control/tickets/[id]` | One request: thread, reply to the customer, internal notes, status, priority, category, assignment, history | `tickets.read` (changes: `tickets.write`; assign a colleague: `leads.assign`) |
+| `/control/chats` | Live chat with website visitors. The website offers chat only while it is switched on in Configuration and someone has this screen open | `chats.read` (answer: `chats.write`) |
+| `/control/customers`, `/control/customers/[key]` | Everyone who has contacted GIO4X, one record per address: enquiries, tickets, subscription. Not client accounts. The key is a hash, so no address appears in a URL | `customers.read` |
+| `/control/compliance` | Register of complaints, privacy requests and security reports, drawn from tickets and enquiries, oldest open first | `compliance.read` |
+| `/control/reports` | Counts over 7, 30, 90 or 365 days: enquiries, support, chat, newsletter, follow-ups | `reports.read` |
+| `/control/reports/leads-export` (POST) | CSV export of enquiries, recorded in the audit log | `subscribers.export` |
+| `/control/command` | What needs attention now, across every section | `command.read` |
+| `/control/config` | The website's announcement line, the live-chat switch, support hours, and notices for the public Status page | `config.manage` |
+| `/control/<section>` | The sections not built yet (KYC, Funds, Fee Engine, General Ledger, IB, Copy, PAMM, Trade Log, Broker Controls, Event Bus, Document Builder, Bulk Emailer): what each will do and what it is waiting for | staff |
+
+### How the console reaches the website
+
+| On the website | Comes from |
+|---|---|
+| `/support`: open a request, look it up with reference and e-mail, read the reply, answer | Tickets. A staff reply appears there; the console sends no e-mail |
+| The chat button (only when chat is available) | Live Chats and the chat switch in Configuration |
+| The announcement line under the header | Configuration |
+| "Notices from GIO4X" on `/status` | Incidents in Configuration, when published. Written by staff; not monitoring |
+| Support hours on `/support` | Configuration |
 
 Times are shown in UTC, for everyone.
 
@@ -47,15 +67,17 @@ API role can read or write. A new module adds its capabilities with an `INSERT` 
 
 | Role | Can today |
 |---|---|
-| `admin` | Everything: all of the below, assign to anyone, export subscribers, manage staff. |
-| `compliance` | Read enquiries, subscribers, the audit log and the staff list. Change nothing. |
-| `sales`, `agent` | Read enquiries, subscribers and the audit log; change status and stage, take or release an enquiry, add notes and follow-ups. |
-| `support` | As sales, without subscribers. |
-| `finance`, `dealing` | Read the audit log. Their modules are not built yet. |
-| `viewer` | Read enquiries, subscribers and the audit log. Change nothing. |
+| `admin` | Everything: all of the below, assign to anyone, export subscribers and enquiries, manage staff, Configuration, Command Centre. |
+| `compliance` | Read enquiries, tickets, chats, customers, subscribers, the audit log and the staff list; the Compliance register and reports. Change nothing. |
+| `sales`, `agent` | Read enquiries, tickets, chats, customers, subscribers and the audit log; change status and stage, take or release an enquiry, add notes and follow-ups; answer chats. `agent` also works tickets; `sales` also reads reports. |
+| `support` | Enquiries as sales, without subscribers or reports; works tickets and answers chats. |
+| `finance`, `dealing` | Read the audit log; `finance` also reads reports. Their modules are not built yet. |
+| `viewer` | Read enquiries, tickets, chats, customers, subscribers and the audit log. Change nothing. |
 
 Capabilities: `leads.read`, `leads.write`, `leads.assign`, `tasks.write`, `subscribers.read`,
-`subscribers.export`, `audit.read`, `staff.read`, `staff.manage`. The TypeScript list is
+`subscribers.export`, `audit.read`, `staff.read`, `staff.manage`, `tickets.read`, `tickets.write`,
+`chats.read`, `chats.write`, `customers.read`, `compliance.read`, `reports.read`, `command.read`,
+`config.manage`. The TypeScript list is
 `CAPABILITIES` in `src/lib/server/constants.ts`; the console's menu is filtered by them in
 `src/components/control/nav-items.ts`.
 
@@ -138,6 +160,15 @@ Files, in order:
 4. `supabase/migrations/0004_capabilities.sql`: roles by capability, the active switch, staff requests
    and the functions that apply them.
 5. `supabase/migrations/0005_crm.sql`: pipeline stage, lost reason, score, follow-up tasks.
+6. `supabase/migrations/0006_site.sql`: what staff publish to the website (announcement, chat switch,
+   support hours) and incident notices for the Status page.
+7. `supabase/migrations/0007_support.sql`: support tickets and their messages; the public lookup and reply
+   functions.
+8. `supabase/migrations/0008_chat.sql`: live chat, staff presence, and the functions a visitor talks through.
+9. `supabase/migrations/0009_insight.sql`: customers (people who wrote in), report and command summaries,
+   the record of an enquiries export.
+10. `supabase/migrations/0010_person_scope.sql`: a person's record lists enquiries and tickets only to
+    roles that hold `leads.read` and `tickets.read`.
 
 Apply them as the `postgres` role (the Supabase SQL editor, `supabase db push`, or the Supabase MCP
 `apply_migration`). `0002` stops with a clear error if the applying role cannot bypass RLS, because the

@@ -44,10 +44,6 @@
     "destination": "/trust/security"
   },
   {
-    "source": "/support",
-    "destination": "/contact"
-  },
-  {
     "source": "/compare",
     "destination": "/platforms/compare"
   },

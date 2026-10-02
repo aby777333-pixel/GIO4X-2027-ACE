@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { NotedChapter } from "@/components/figures/trust/NotedChapter";
+import { TwoFactors } from "@/components/figures/trust/TwoFactors";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Chapter, Rows } from "@/components/trust/Parts";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -145,9 +148,25 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      <Chapter id="your-side" eyebrow="Your side" title="Seven habits that do most of the work." lead="General guidance, written for anyone with an online financial account. It is not specific to GIO4X and does not depend on it." paper>
+      <NotedChapter
+        id="your-side"
+        eyebrow="Your side"
+        title="Seven habits that do most of the work."
+        lead="General guidance, written for anyone with an online financial account. It is not specific to GIO4X and does not depend on it."
+        paper
+        stretch
+        note={
+          <FigureNote figure={<TwoFactors />} label="In practice" className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
+            If a message asks you to sign in, pay or download, paste its address into the{" "}
+            <Link href="/trust/verify" className="link">
+              Official Destination Checker
+            </Link>{" "}
+            first. The check runs on your device and makes no network request.
+          </FigureNote>
+        }
+      >
         <Rows numbered items={guidance} />
-      </Chapter>
+      </NotedChapter>
 
       <Chapter id="not-claimed" eyebrow="What is not claimed" title="No grades, no audits, no certificates." flip>
         <div className="grid max-w-measure gap-21 text-ink-2" data-reveal suppressHydrationWarning>

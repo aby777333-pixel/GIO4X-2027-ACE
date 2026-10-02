@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { FigureNote } from "@/components/figures/Figure";
+import { PendingRack } from "@/components/figures/product/PendingRack";
+import { SequenceRoute } from "@/components/figures/product/SequenceRoute";
 import { NotPublished } from "@/components/platforms/FactState";
 import { Screenshot } from "@/components/platforms/Screenshot";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -137,6 +140,13 @@ export default function Mt5Page() {
               </Link>
               .
             </p>
+            <FigureNote figure={<PendingRack />} label="Worth knowing">
+              None of these is published for 777 Raptor either. The{" "}
+              <Link href="/platforms/compare" className="link">
+                comparison page
+              </Link>{" "}
+              sets the two platforms side by side and marks every unpublished item in the same way.
+            </FigureNote>
           </div>
           <ul className="border-t border-line-strong">
             {gioPending.map((f, i) => (
@@ -211,6 +221,9 @@ export default function Mt5Page() {
             <Link href="/open-account" className="btn btn-primary mt-34">
               Open an account
             </Link>
+            <FigureNote figure={<SequenceRoute />} label="In practice">
+              Step four is the one that cannot be generalised. The server must be the one named by GIO4X, and the server name is among the details listed above as not yet published.
+            </FigureNote>
           </div>
           <ol className="border-t border-line-strong">
             {mt5GettingStarted.map((s, i) => (
