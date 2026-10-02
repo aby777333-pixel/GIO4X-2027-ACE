@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { KeptStub } from "@/components/figures/extra/KeptStub";
+import { SideNote } from "@/components/figures/extra/SideNote";
 import { CheckRequest } from "@/components/support/CheckRequest";
 import { OpenRequest } from "@/components/support/OpenRequest";
 import { SupportDesk } from "@/components/support/SupportDesk";
@@ -25,7 +27,7 @@ export default function SupportPage() {
         lead="Open a request and you are given a reference. Come back with that reference and your email address to read our reply and answer it. Nothing is sent to your inbox: the conversation stays on this page."
         quiet
       >
-        <a href="#open" className="btn btn-primary">
+        <a href="#open" className="btn btn-primary" data-tour="support">
           Open a request
         </a>
         <a href="#check" className="btn btn-ghost">
@@ -84,6 +86,9 @@ export default function SupportPage() {
             <h2 id="safe-h" className="h3 mt-13">
               What to leave out, and what to keep.
             </h2>
+            <SideNote figure={<KeptStub />} label="Coming back">
+              A request is found again with two things together: the reference you were shown and the email address you gave. Write the reference down before you leave the page.
+            </SideNote>
           </div>
           <ul className="border-t border-line-strong text-ink-2" data-reveal>
             <li className="border-b border-line py-13">GIO4X will never ask for your password or a one-time security code, here or anywhere else. Do not put either in a request.</li>

@@ -5,6 +5,7 @@ import { createBlogPost, saveBlogCorrection, saveBlogPost, setBlogStatus } from 
 import { BlogBody } from "@/components/blog/BlogBody";
 import { Notice } from "@/components/control/bits";
 import { fmtDateTime } from "@/components/control/format";
+import { LibraryButton, type LibraryChoice } from "@/components/control/MediaPicker";
 import { SubmitButton } from "@/components/control/SubmitButton";
 import { BlogStateBadge } from "@/components/control/views/BlogListView";
 import {
@@ -384,6 +385,29 @@ export function BlogEditor({ post, canWrite, canPublish, now, siteUrl }: BlogEdi
     setCoverUpload(IDLE);
   };
 
+  // a picture already in the store, chosen from the library: it fills in the same fields an upload does
+  const onCoverChosen = (chosen: LibraryChoice) => {
+    setValues((v) => ({ ...v, coverPath: chosen.path, coverWidth: chosen.width ? String(chosen.width) : "", coverHeight: chosen.height ? String(chosen.height) : "" }));
+    setCoverUpload({
+      phase: "done",
+      message: chosen.width && chosen.height ? `Chosen from the library: ${chosen.width} × ${chosen.height} pixels.` : "Chosen from the library. Its size could not be read here: enter the width and height yourself.",
+    });
+  };
+  const onOgChosen = (chosen: LibraryChoice) => {
+    set("ogPath", chosen.path);
+    setOgUpload({ phase: "done", message: "Chosen from the library." });
+  };
+  const onBodyChosen = (chosen: LibraryChoice) => {
+    // where the cursor was before the library opened: a textarea keeps its selection when it loses focus
+    const at = bodyRef.current?.selectionStart ?? values.body.length;
+    setValues((v) => {
+      const next = insertBlock(v.body, Math.min(at, v.body.length), `![${ALT_PLACEHOLDER}](${chosen.path})`, 2, ALT_PLACEHOLDER.length);
+      selection.current = [next.start, next.end];
+      return { ...v, body: next.text };
+    });
+    setBodyUpload({ phase: "done", message: "Inserted from the library. Type a description of the picture over the selected words." });
+  };
+
   /* ---- what the fields amount to ---- */
   const slugOk = isBlogSlug(values.slug);
   const tags = parseTags(values.tags);
@@ -619,6 +643,7 @@ export function BlogEditor({ post, canWrite, canPublish, now, siteUrl }: BlogEdi
                           Quote
                         </button>
                         <UploadButton id="blog-body-file" label="Picture" state={bodyUpload} onFile={onBodyPicture} className="btn btn-ghost btn-sm" />
+                        <LibraryButton label="From the library" className="btn btn-ghost btn-sm" onChoose={onBodyChosen} />
                       </div>
                     )}
                     <textarea
@@ -674,6 +699,7 @@ export function BlogEditor({ post, canWrite, canPublish, now, siteUrl }: BlogEdi
                     {!ro && (
                       <div className="flex flex-wrap items-center gap-8">
                         <UploadButton id="blog-cover-file" label={values.coverPath ? "Replace the picture" : "Upload a picture"} state={coverUpload} onFile={onCover} />
+                        <LibraryButton onChoose={onCoverChosen} />
                         {values.coverPath && (
                           <button type="button" className="btn btn-quiet" onClick={removeCover} data-remove-cover>
                             Remove cover
@@ -872,6 +898,7 @@ export function BlogEditor({ post, canWrite, canPublish, now, siteUrl }: BlogEdi
                   {!ro && (
                     <div className="mt-8 flex flex-wrap items-center gap-8">
                       <UploadButton id="blog-og-file" label={values.ogPath ? "Replace the separate picture" : "Upload a separate picture"} state={ogUpload} onFile={onOg} />
+                      <LibraryButton onChoose={onOgChosen} />
                       {values.ogPath && (
                         <button
                           type="button"

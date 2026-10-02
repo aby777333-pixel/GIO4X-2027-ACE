@@ -9,13 +9,19 @@ import { markLearned, useLearned } from "./learn";
  * in a fieldset, a Check button, then the verdict in words with the reason,
  * announced politely, and "Try again". A correct answer is remembered in this
  * browser only (see ./learn); nothing is sent anywhere and no score is kept.
+ *
+ * The Academy asks three of these at the end of a lesson. It passes
+ * `remember={false}`, so one right answer stores nothing by itself, and
+ * `onResult`, so the lesson can tell when all three have been answered
+ * correctly. Without those two props the form behaves exactly as before.
  */
-export function TermQuiz({ slug, quiz }: { slug: string; quiz: Quiz }) {
+export function TermQuiz({ slug, quiz, remember = true, onResult }: { slug: string; quiz: Quiz; remember?: boolean; onResult?: (right: boolean) => void }) {
   const name = useId();
   const [choice, setChoice] = useState<number | null>(null);
   const [state, setState] = useState<"asking" | "empty" | "right" | "wrong">("asking");
   // known only after the page has mounted: the first HTML is the same for everyone
-  const before = Boolean(useLearned()?.[slug]);
+  const stored = Boolean(useLearned()?.[slug]);
+  const before = remember && stored;
 
   const options = Array.isArray(quiz?.options) ? quiz.options.filter((o): o is string => typeof o === "string" && o.trim() !== "") : [];
   const answer = quiz?.answer;
@@ -37,7 +43,8 @@ export function TermQuiz({ slug, quiz }: { slug: string; quiz: Quiz }) {
     }
     const right = choice === answer;
     setState(right ? "right" : "wrong");
-    if (right) markLearned(slug);
+    if (right && remember) markLearned(slug);
+    onResult?.(right);
   }
 
   return (

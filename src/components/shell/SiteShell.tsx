@@ -1,14 +1,19 @@
 import type { ReactNode } from "react";
 import { CockpitBoot } from "@/components/cockpit/Boot";
 import { CockpitFx } from "@/components/cockpit/CockpitFx";
+import { RecentRecorder } from "@/components/desk/RecentRecorder";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
 import { ChatWidget } from "@/components/shell/ChatWidget";
 import { CommandBar } from "@/components/shell/CommandBar";
 import { Lens } from "@/components/shell/Lens";
+import { OfflineRegister } from "@/components/shell/OfflineRegister";
+import { Pulse } from "@/components/shell/Pulse";
 import { ScrollArrows } from "@/components/shell/ScrollArrows";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { SiteHeader } from "@/components/shell/SiteHeader";
+import { SoundFx } from "@/components/sound/SoundFx";
+import { Tour } from "@/components/tour/Tour";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 
 /**
@@ -34,6 +39,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <ScrollArrows />
       {/* live chat: offered only while a member of staff is present to answer */}
       <ChatWidget />
+      {/* the first-visit tour, and interface sounds (off unless switched on at /preferences) */}
+      <Tour />
+      <SoundFx />
+      {/* the site's own visit counter: one cookieless request per page view, none when the visitor has said no (/legal/cookies, "Counting visits") */}
+      <Pulse />
+      {/* My desk: the "recently viewed" list (only once switched on there), and the offline worker (production builds only) */}
+      <RecentRecorder />
+      <OfflineRegister />
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
     </>
   );

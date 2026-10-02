@@ -23,6 +23,16 @@ export type Prefs = {
   platform: "none" | "raptor" | "mt5";
   /** true: TradingView frames load as they scroll into view; false: each waits for its button */
   tvAuto: boolean;
+  /** true (the default): page views and searches are added to the site's anonymous daily totals; false: the browser sends nothing for them (src/lib/pulse-client.ts) */
+  countVisits: boolean;
+  /** true once the first-visit tour was started or declined: the invitation is not shown again */
+  tourDone: boolean;
+  /** interface sounds: off unless switched on at /preferences */
+  sound: boolean;
+  /** how loud the interface sounds are when they are on */
+  soundLevel: "quiet" | "normal";
+  /** off by default; true once the visitor switches it on: the offline worker may keep copies of opened pages and the tools in this browser's cache storage; false: it is removed and not started */
+  offline: boolean;
 };
 
 export const DEFAULT_PREFS: Prefs = {
@@ -37,6 +47,11 @@ export const DEFAULT_PREFS: Prefs = {
   tz: "local",
   platform: "none",
   tvAuto: false,
+  countVisits: true,
+  tourDone: false,
+  sound: false,
+  soundLevel: "quiet",
+  offline: false,
 };
 
 export const ACCENTS: { key: Prefs["accent"]; label: string; note: string }[] = [
@@ -93,10 +108,10 @@ export function writePrefs(p: Prefs): void {
 }
 
 /** Everything GIO4X stores in this browser. Used by the privacy reset. */
-export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch", "gx:boot", "gx:learn"] as const;
+export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch", "gx:boot", "gx:learn", "gx:sim", "gx:morning-depth"] as const;
 
-/** The session-storage keys (emptied by the browser when the tab closes): a closed announcement, an open chat. */
-export const SESSION_KEYS = ["gx:announcement:dismissed", "gx:chat"] as const;
+/** The session-storage keys (emptied by the browser when the tab closes): a closed announcement, an open chat, the stop a guided tour has reached. */
+export const SESSION_KEYS = ["gx:announcement:dismissed", "gx:chat", "gx:tour"] as const;
 
 export function resetLocal(): void {
   for (const k of LOCAL_KEYS) {
@@ -113,8 +128,25 @@ export function resetLocal(): void {
       /* ignore */
     }
   }
+  // the offline copy is part of "everything": empty it too (the worker keeps running and fills it again as pages are opened)
+  void clearOfflineCopy();
   applyPrefs(DEFAULT_PREFS);
   window.dispatchEvent(new CustomEvent("gx:prefs", { detail: DEFAULT_PREFS }));
+}
+
+/** Every cache the offline worker (public/sw.js) creates begins with this. */
+export const OFFLINE_CACHE_PREFIX = "gx-";
+
+/** Delete the pages and files the offline worker has kept in this browser's cache storage. Returns how many caches were removed. */
+export async function clearOfflineCopy(): Promise<number> {
+  try {
+    if (typeof caches === "undefined") return 0;
+    const names = (await caches.keys()).filter((n) => n.startsWith(OFFLINE_CACHE_PREFIX));
+    await Promise.all(names.map((n) => caches.delete(n)));
+    return names.length;
+  } catch {
+    return 0;
+  }
 }
 
 /**

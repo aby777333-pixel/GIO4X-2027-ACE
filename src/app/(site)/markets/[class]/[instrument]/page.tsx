@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { WatchButton } from "@/components/desk/Buttons";
 import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { InstrumentHelix } from "@/components/figures/markets/InstrumentHelix";
 import { firstSentence, ofKind, ratePair, resolveAll, resolveTerms, resolveTools, toneStyle } from "@/components/markets/graph";
@@ -143,6 +144,8 @@ export default async function InstrumentPage({ params }: Params) {
         <a href="#chart" className="btn btn-ghost">
           Chart
         </a>
+        {/* keeps the instrument on My desk (/desk), in this browser only */}
+        <WatchButton id={`${i.class}/${i.slug}`} symbol={i.symbol} />
       </PageHero>
 
       {/* Market DNA */}

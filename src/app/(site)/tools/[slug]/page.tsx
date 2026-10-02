@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { notFound } from "next/navigation";
+import { SaveButton } from "@/components/desk/Buttons";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { CompoundGrowth } from "@/components/tools/CompoundGrowth";
@@ -94,7 +95,10 @@ export default async function ToolPage({ params }: Params) {
         eyebrow={`Trader Toolkit · ${tool.kind}`}
         title={tool.name}
         lead={tool.line}
-      />
+      >
+        {/* keeps the tool on My desk (/desk), in this browser only */}
+        <SaveButton href={`/tools/${tool.slug}`} title={tool.name} className="btn btn-ghost" />
+      </PageHero>
 
       <section className="section-quiet" aria-label={`${tool.name}: the tool`}>
         <div className="wrap">

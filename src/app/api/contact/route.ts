@@ -21,6 +21,7 @@
 import { GENERIC_RATE_LIMITED, GENERIC_UNAVAILABLE, PRIVACY_VERSION } from "@/lib/server/constants";
 import { fail, json, newId, newReference } from "@/lib/server/http";
 import { classifyStorageError, honeypotFilled, openGate, submissionAllowed, tooFast } from "@/lib/server/public-form";
+import { countForm } from "@/lib/server/pulse";
 import { validateContact } from "@/lib/server/validate";
 import { createPublicSupabase } from "@/lib/supabase/server";
 
@@ -80,7 +81,11 @@ export async function POST(request: Request) {
       error = { code: "FETCH" };
     }
 
-    if (!error) return json({ ok: true, reference });
+    if (!error) {
+      // +1 on the day's total for this form (a count, nothing about the sender); it cannot fail the request
+      await countForm(request, input.accountInterest ? "interest" : "contact");
+      return json({ ok: true, reference });
+    }
 
     const kind = classifyStorageError(error, status);
     if (kind === "duplicate" && attempt === 0) continue;

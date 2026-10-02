@@ -8,7 +8,7 @@ import { tools } from "@/data/tools";
 import { CONTENT_REVISED, latest, type SitemapEntry, type SitemapName } from "@/lib/sitemap";
 
 /** Paths that exist but must never be listed: gateways, utilities, private surfaces. */
-const NOT_INDEXED = new Set(["/search", "/preferences", "/sign-in", "/open-account"]);
+const NOT_INDEXED = new Set(["/search", "/preferences", "/sign-in", "/open-account", "/desk", "/offline"]);
 
 const sectionOf = (path: string): SitemapName | null =>
   path.startsWith("/markets") ? "markets" : path.startsWith("/tools") ? "tools" : path.startsWith("/glossary") ? "glossary" : path.startsWith("/intelligence") ? "intelligence" : path.startsWith("/academy") ? "academy" : "pages";

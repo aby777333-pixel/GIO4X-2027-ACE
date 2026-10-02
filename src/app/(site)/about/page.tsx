@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { Offices } from "@/components/company/Offices";
 import { PlumbLines } from "@/components/figures/company/PlumbLines";
+import { Caliper } from "@/components/figures/extra/Caliper";
 import { FigureNote } from "@/components/figures/Figure";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
 import { companyLine } from "@/config/legal";
 import { site } from "@/config/site";
@@ -18,7 +20,7 @@ const conduct = [
   { n: "I", t: "Integrity", d: "Say what is true, including when the true answer is “not yet published”. A condition, a cost or a company detail appears on this site as it is, or it does not appear." },
   { n: "II", t: "Restraint", d: "No countdowns, no pop-ups, no urgency. A page is finished when nothing on it is trying to hurry you." },
   { n: "III", t: "Discipline", d: "Every number carries its source, its status and its date. Every calculator shows its formula. The same rule applies on the hundredth page as on the first." },
-  { n: "IV", t: "Discretion", d: "Ask for what is needed and no more. This site runs no advertising or analytics trackers at present, and what it remembers about you stays in your own browser, where you can clear it." },
+  { n: "IV", t: "Discretion", d: "Ask for what is needed and no more. This site runs no advertising and no third-party trackers. It counts its own page views as daily totals, with no cookie and nothing that identifies you, and you can switch that off. What it remembers about you stays in your own browser, where you can clear it." },
   { n: "V", t: "Respect for capital", d: "Money placed in a leveraged market can be lost. Risk is stated in ordinary type at the point of decision, and nothing here tells you what to trade." },
 ];
 
@@ -59,6 +61,11 @@ export default function AboutPage() {
               Company details
             </Link>
           </div>
+        }
+        companion={
+          <HeroCompanion layout="beside" label="To check it" figure={<Caliper />}>
+            The company line is repeated with the two published addresses further down, and the four pages under Verify exist so that what is said here can be checked.
+          </HeroCompanion>
         }
       >
         <Link href="/about/what-we-are" className="btn btn-primary">
@@ -182,6 +189,13 @@ export default function AboutPage() {
             <Offices className="mt-34" />
             <p className="mt-21 max-w-measure text-sm text-ink-3">
               These are the company line and the two addresses GIO4X has published. Details that have not been published, including any statement about regulatory status, are not shown here; the Transparency page lists what is still open.
+            </p>
+            <p className="mt-13 max-w-measure text-sm text-ink-3">
+              Both offices are marked on{" "}
+              <Link href="/about/world" className="link">
+                GIO4X on the map
+              </Link>
+              , a globe that also carries the financial centres and central banks this site covers.
             </p>
           </div>
           <aside className="panel-quiet p-21 lg:p-34" aria-labelledby="write-h" data-reveal>

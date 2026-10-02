@@ -1,7 +1,11 @@
 import Link from "next/link";
+import { CountVisitsPreference } from "@/components/company/CountVisitsPreference";
 import { PrivacyControls, TimeZonePreference } from "@/components/company/PrivacyControls";
+import { InstallApp } from "@/components/desk/InstallApp";
+import { OfflineCopy } from "@/components/desk/OfflineCopy";
 import { TradingViewPreference } from "@/components/markets/TradingViewPreference";
 import { AppearanceControls } from "@/components/shell/Appearance";
+import { SoundPreference } from "@/components/sound/SoundPreference";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { pageMeta } from "@/lib/meta";
 
@@ -52,6 +56,27 @@ export default function PreferencesPage() {
         </div>
       </section>
 
+      <section className="section-quiet hairline" aria-labelledby="sound-h">
+        <div className="wrap phi phi-r items-start">
+          <div>
+            <h2 id="sound-h" className="h3">
+              Sound
+            </h2>
+            <p className="mt-13 max-w-narrow text-ink-2">The site is silent unless you switch sound on here. The choice and its volume are kept with your display preferences, in this browser only.</p>
+            <div className="mt-21 border-l border-accent pl-13">
+              <p className="label">Guided tour</p>
+              <p className="mt-5 text-sm text-ink">Eight short stops across the markets, the accounts, the platforms, the tools and where to find help. It can be ended at any stop.</p>
+              <Link href="/#tour" className="go mt-8 min-h-[2.75rem]">
+                Take the tour
+              </Link>
+            </div>
+          </div>
+          <div className="panel p-21 sm:p-34">
+            <SoundPreference />
+          </div>
+        </div>
+      </section>
+
       <section className="section-quiet hairline" aria-labelledby="privacy-h">
         <div className="wrap">
           <div className="phi phi-r items-start">
@@ -60,16 +85,21 @@ export default function PreferencesPage() {
                 Privacy controls
               </h2>
               <p className="mt-13 max-w-narrow text-ink-2">The complete list of what this site may keep in your browser, and whether each item is there now.</p>
-              <div className="mt-21 border-l border-accent pl-13">
-                <p className="label">Trackers</p>
-                <p className="mt-5 text-sm text-ink">There are no advertising or analytics trackers on this site at present.</p>
-                <p className="mt-5 text-xs text-ink-3">
-                  If that ever changes, this page and the{" "}
-                  <Link href="/legal/cookies" className="link">
-                    Cookie Notice
-                  </Link>{" "}
-                  will say so.
+              <div className="mt-21 scroll-mt-[var(--header-h)] border-l border-accent pl-13" id="counting">
+                <p className="label">Trackers and counting</p>
+                <p className="mt-5 text-sm text-ink">
+                  There are no advertising trackers and no third-party trackers on this site. The site counts its own page views, accepted forms and searches as daily totals, with no cookie, no identifier and nothing that describes you.
                 </p>
+                <p className="mt-5 text-xs text-ink-3">
+                  Counting is on by default. Switch it off here, or leave it to your browser: a Global Privacy Control or Do Not Track signal is honoured without any setting. Exactly what is counted is in the{" "}
+                  <Link href="/legal/cookies#counting-visits" className="link">
+                    Cookie Notice
+                  </Link>
+                  .
+                </p>
+                <div className="mt-13 max-w-narrow">
+                  <CountVisitsPreference />
+                </div>
               </div>
               <div className="mt-21 scroll-mt-[var(--header-h)] border-l border-accent pl-13" id="third-party">
                 <p className="label">Third-party content</p>
@@ -83,6 +113,26 @@ export default function PreferencesPage() {
               </div>
             </div>
             <PrivacyControls />
+          </div>
+        </div>
+      </section>
+
+      <section id="offline" className="section-quiet hairline scroll-mt-[var(--header-h)] bg-paper" aria-labelledby="offline-h">
+        <div className="wrap phi phi-r items-start">
+          <div>
+            <h2 id="offline-h" className="h3">
+              Offline copy and app
+            </h2>
+            <p className="mt-13 max-w-narrow text-ink-2">
+              Switch this on and this browser keeps a copy of the calculators and the pages you have opened in its cache storage, so they still open without a connection. It is off until you choose it. The copy stays on this device and is sent nowhere.
+            </p>
+            <Link href="/desk" className="go mt-21">
+              My desk
+            </Link>
+          </div>
+          <div className="grid gap-34">
+            <OfflineCopy />
+            <InstallApp />
           </div>
         </div>
       </section>

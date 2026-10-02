@@ -76,11 +76,17 @@ export default function ToolsHub() {
               </h2>
               <p className="lead mt-13">{g.question}</p>
               <p className="mt-13 max-w-narrow text-sm text-ink-3">{g.note}</p>
+              {g.key === "cost" && (
+                // three tools make a short list: on wide screens the heading column carries where the inputs come from, as the rules below state
+                <p className="mt-21 hidden max-w-narrow border-l border-line-strong pl-13 text-sm leading-relaxed text-ink-3 lg:block">
+                  Costs start from the conditions GIO4X publishes, and conversions use the European Central Bank’s daily reference rate, named and dated. Everything else is a number you typed.
+                </p>
+              )}
               {g.key === "mechanics" && (
                 <FigureNote figure={<LeverBeam />}>Each one starts from placeholder figures. Change a figure and the drawing follows, with its formula and the working beside it.</FigureNote>
               )}
             </div>
-            <ul className="border-t border-line-strong" data-reveal={i > 0 ? true : undefined}>
+            <ul className="border-t border-line-strong" data-reveal={i > 0 ? true : undefined} data-tour={i === 0 ? "tools" : undefined}>
               {g.items.map((t) => (
                 <ToolRow key={t.slug} tool={t} />
               ))}

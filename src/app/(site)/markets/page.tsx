@@ -148,7 +148,7 @@ export default async function MarketsPage() {
       <section className="section hairline scroll-mt-[var(--header-h)]" id="asset-classes" aria-labelledby="classes-title">
         <div className="wrap">
           <Head eyebrow="Asset classes" id="classes-title" title={<>Six markets, each with its own structure.</>} lead="Open a class for how it is built and what is commonly monitored, or go straight to an instrument." />
-          <ul className="mt-55 border-t border-line-strong">
+          <ul className="mt-55 border-t border-line-strong" data-tour="markets">
             {assetClasses.map((a, n) => (
               <li key={a.key} className="grid gap-x-34 gap-y-8 border-b border-line py-21 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.618fr)]" data-reveal style={{ ["--i" as string]: n }}>
                 <div>

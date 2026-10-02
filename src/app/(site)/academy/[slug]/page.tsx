@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Lab } from "@/components/academy/labs";
+import { LessonQuiz } from "@/components/academy/LessonQuiz";
 import { Dates, Reader, SideBlock } from "@/components/knowledge/Reader";
 import { conceptSlugs, renderProse, shortDate } from "@/components/knowledge/prose";
 import { resolveAll, resolveTools } from "@/components/markets/graph";
@@ -8,6 +10,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps } from "@/components/ui/Page";
 import { absoluteUrl } from "@/config/site";
 import { getLesson, getModule, lessons, lessonsOf, neighbours } from "@/data/academy";
+import { labFor } from "@/data/academy-labs";
+import { quizFor } from "@/data/academy-quiz";
 import { pageMeta } from "@/lib/meta";
 import { articleSchema } from "@/lib/schema";
 
@@ -41,6 +45,10 @@ export default async function LessonPage({ params }: Params) {
   const related = resolveAll(l.related)
     .filter((r) => r.kind !== "Concept")
     .slice(0, 4);
+  // what follows the lesson text: an exercise (some lessons) and three questions (every lesson)
+  const lab = labFor(l.slug);
+  const questions = quizFor(l.slug);
+  const toc = [...l.toc, ...(lab ? [{ id: "try-it", text: "Try it yourself" }] : []), ...(questions ? [{ id: "check", text: "Check what you have read" }] : [])];
   const citation = `${l.byline} (${l.published.slice(0, 4)}). “${l.title}”. GIO4X Academy, ${shortDate(l.published)}${l.updated && l.updated !== l.published ? `, revised ${shortDate(l.updated)}` : ""}. ${url}`;
 
   return (
@@ -73,7 +81,7 @@ export default async function LessonPage({ params }: Params) {
             <span className="num">{l.readMinutes} min read</span>
           </>
         }
-        toc={l.toc}
+        toc={toc}
         html={html}
         url={url}
         citation={citation}
@@ -116,6 +124,30 @@ export default async function LessonPage({ params }: Params) {
           </>
         }
       >
+        {lab && (
+          <section aria-labelledby="try-it" className="no-print mt-55 scroll-mt-[calc(var(--header-h)+1.3125rem)] border-t border-line-strong pt-34">
+            <p className="eyebrow">Try it yourself</p>
+            <h2 id="try-it" className="h3 mt-13 scroll-mt-[calc(var(--header-h)+1.3125rem)]">
+              {lab.title}
+            </h2>
+            <p className="mt-8 max-w-measure text-ink-2">{lab.intro}</p>
+            <div className="mt-21">
+              <Lab lab={lab.lab} />
+            </div>
+          </section>
+        )}
+        {questions && (
+          <section aria-labelledby="check" className="no-print mt-55 border-t border-line-strong pt-34">
+            <p className="eyebrow">Three questions</p>
+            <h2 id="check" className="h3 mt-13 scroll-mt-[calc(var(--header-h)+1.3125rem)]">
+              Check what you have read
+            </h2>
+            <p className="mt-8 max-w-measure text-ink-2">Each answer is in the lesson above. Nothing is timed or graded: when all three are answered correctly, this browser remembers the lesson as completed, and nothing is sent anywhere.</p>
+            <div className="mt-21">
+              <LessonQuiz slug={l.slug} questions={questions} />
+            </div>
+          </section>
+        )}
         {(prev || next) && (
           <nav aria-label="Lessons in this module" className="no-print mt-55 grid gap-px overflow-hidden rounded border border-line bg-line sm:grid-cols-2">
             {prev ? (

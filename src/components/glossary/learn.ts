@@ -10,14 +10,23 @@ import { useSyncExternalStore } from "react";
  * object of slug → true. Nothing is sent anywhere and no score is kept: it
  * only lets the glossary show which terms have been checked. Cleared by
  * "start over" here and by the privacy reset.
+ *
+ * The Academy keeps its completed lessons in the same object, under keys that
+ * begin with LESSON_PREFIX ("lesson:<slug>"), so no second storage key exists.
+ * A colon cannot occur in a glossary slug, so the two never collide; the
+ * glossary's count and its "start over" leave the lesson entries alone, and
+ * the Academy's leave the glossary's.
  */
 export const LEARN_KEY = "gx:learn";
+
+/** marks an Academy lesson among the stored entries: "lesson:<slug>" */
+export const LESSON_PREFIX = "lesson:";
 
 export type Learned = Readonly<Record<string, true>>;
 
 const EVENT = "gx:learn";
 const EMPTY: Learned = Object.freeze({});
-const SLUG = /^[a-z0-9][a-z0-9-]{0,79}$/;
+const SLUG = /^(?:lesson:)?[a-z0-9][a-z0-9-]{0,79}$/;
 /** far more than the glossary holds: a stored object can never grow without bound */
 const LIMIT = 600;
 
@@ -70,13 +79,27 @@ export function markLearned(slug: string): void {
   announce();
 }
 
-export function clearLearned(): void {
+/** Remove one kind of entry and keep the other; the key itself goes when nothing is left. */
+function clearKind(lessons: boolean): void {
+  const kept: Record<string, true> = {};
+  for (const slug of Object.keys(readLearned())) if (slug.startsWith(LESSON_PREFIX) !== lessons) kept[slug] = true;
   try {
-    window.localStorage.removeItem(LEARN_KEY);
+    if (Object.keys(kept).length > 0) window.localStorage.setItem(LEARN_KEY, JSON.stringify(kept));
+    else window.localStorage.removeItem(LEARN_KEY);
   } catch {
     /* ignore */
   }
   announce();
+}
+
+/** The glossary's "start over": the checked terms go, completed Academy lessons stay. */
+export function clearLearned(): void {
+  clearKind(false);
+}
+
+/** The Academy's "start over": the completed lessons go, checked glossary terms stay. */
+export function clearLessons(): void {
+  clearKind(true);
 }
 
 function subscribe(onChange: () => void): () => void {
@@ -101,4 +124,8 @@ export function useLearned(): Learned | null {
   return useSyncExternalStore(subscribe, readLearned, onServer);
 }
 
-export const countLearned = (learned: Learned | null): number => (learned ? Object.keys(learned).length : 0);
+/** How many glossary terms are checked: Academy lesson entries are not terms and are not counted. */
+export const countLearned = (learned: Learned | null): number => (learned ? Object.keys(learned).filter((slug) => !slug.startsWith(LESSON_PREFIX)).length : 0);
+
+/** How many Academy lessons are stored as completed. */
+export const countLessons = (learned: Learned | null): number => (learned ? Object.keys(learned).filter((slug) => slug.startsWith(LESSON_PREFIX)).length : 0);

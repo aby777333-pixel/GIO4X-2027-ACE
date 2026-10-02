@@ -21,7 +21,7 @@ export function Hero() {
         <HeroScene scene="flightdeck" seed="/" />
         <CentreSummary />
         <p className="cx-home-note hidden text-xs text-ink-3 lg:block">
-          Financial centres by regular trading hours, joined when open together, with day and night from your clock. Dial: 24h UTC and the four FX sessions. Ladder, candles and tape are forms only, not market data.
+          Financial centres by regular trading hours, joined when open together, with day and night from your clock. Timeline: the day ahead in UTC, each centre&apos;s regular hours and the four FX sessions. Tape, ladder and candles are forms only, not market data.
         </p>
       </div>
 

@@ -107,6 +107,14 @@ export default function ComparePage() {
               <div className="mt-13">
                 <PendingMatrix caption="Availability of each account type on each platform: not yet published" rowHead="Account" rows={accounts.map((a) => ({ key: a.key, label: a.name, href: "/trading/accounts" }))} />
               </div>
+              {/* the market table beside this one is three rows longer: on wide screens the difference carries a pointer instead of a blank */}
+              <p className="mt-21 hidden max-w-[46ch] border-l border-line-strong pl-13 text-sm leading-relaxed text-ink-3 lg:block">
+                What is published for each account type is set out under{" "}
+                <Link href="/trading/accounts" className="link">
+                  Account types
+                </Link>
+                . The platform each one is offered on is the part still to be published, which is why the three rows above read the same.
+              </p>
             </div>
             <div data-reveal>
               <h3 className="h4">Market × platform</h3>

@@ -1,0 +1,399 @@
+/* ==========================================================================
+   THE MENU — glyphs, row treatments and the pointer's light
+   --------------------------------------------------------------------------
+   The header's mega menu and the phone drawer (src/components/shell/
+   SiteHeader.tsx). Every row carries a small drawing about its destination
+   (src/components/shell/nav-glyphs.tsx) that moves, in its own way, when the
+   row is hovered or focused. Columns differ in how their rows answer.
+
+   Nothing here moves layout: every effect is a transform, an opacity or a
+   paint on a pseudo-element. With motion reduced the drawings are still and
+   a row only changes colour.
+   ========================================================================== */
+
+/* ---- 1. THE GLYPH -------------------------------------------------------- */
+.mg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  /* optical: the drawing sits on the label's first line */
+  margin-top: 0.0625rem;
+  color: var(--ink-3);
+  transition: color var(--t-fast) var(--ease-out);
+}
+.mg * {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    stroke var(--t-fast) var(--ease-out),
+    fill var(--t-fast) var(--ease-out);
+}
+/* a solid point; a tinted area; a shape that sits over a line and hides it */
+.mg .mg-dot {
+  fill: currentColor;
+  stroke: none;
+}
+.mg .mg-fill {
+  fill: currentColor;
+  fill-opacity: 0.28;
+}
+.mg .mg-k {
+  fill: var(--mg-bg, var(--paper));
+}
+
+/* At rest a glyph is one quiet colour. Lit (its row hovered or focused, or in
+   the phone menu) the accent part takes the accent and the metal its champagne. */
+:is(.mg-row:hover, .mg-row:focus-visible) .mg {
+  color: var(--ink);
+}
+:is(.mg-row:hover, .mg-row:focus-visible, .mg-once) :is(.mg-a, .mg-a *) {
+  stroke: var(--accent);
+}
+:is(.mg-row:hover, .mg-row:focus-visible, .mg-once) :is(.mg-p, .mg-p *) {
+  stroke: var(--prestige);
+}
+:is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mg-a.mg-dot {
+  fill: var(--accent);
+  stroke: none;
+}
+:is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mg-a.mg-fill {
+  fill: var(--accent);
+}
+
+/* Movements. Each part names one and passes its numbers as custom properties
+   (--x --y px, --r deg, --s --sx --sy scale, --o opacity, --d delay, --t time).
+   Keyframes state only where a part STARTS or passes through: it always ends
+   at its own rest pose, which is the finished drawing. */
+.mga {
+  transform-box: view-box;
+  transform-origin: 10px 10px;
+}
+/* drawn strokes measure against pathLength="1"; the long gap keeps the round
+   cap of an undrawn stroke out of sight */
+.mga-draw {
+  stroke-dasharray: 1 3;
+}
+.mga-glint {
+  opacity: 0;
+}
+@keyframes mga-draw {
+  from {
+    stroke-dashoffset: 1.2;
+  }
+}
+@keyframes mga-spin {
+  from {
+    transform: rotate(var(--r, -360deg));
+  }
+}
+@keyframes mga-shift {
+  50% {
+    transform: translate(var(--x, 0px), var(--y, 0px));
+  }
+}
+@keyframes mga-from {
+  from {
+    transform: translate(var(--x, 0px), var(--y, 0px));
+    opacity: var(--o, 0);
+  }
+}
+@keyframes mga-rock {
+  35% {
+    transform: rotate(var(--r, 10deg));
+  }
+  70% {
+    transform: rotate(calc(var(--r, 10deg) * -0.4));
+  }
+}
+@keyframes mga-pop {
+  from {
+    transform: scale(var(--s, 0));
+    opacity: 0;
+  }
+}
+@keyframes mga-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes mga-grow {
+  from {
+    transform: scale(var(--sx, 1), var(--sy, 0));
+  }
+}
+@keyframes mga-pulse {
+  50% {
+    transform: scale(var(--s, 1.2));
+  }
+}
+@keyframes mga-glint {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(var(--x, 5px));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga {
+    animation-duration: var(--t, 560ms);
+    animation-timing-function: var(--ease-out);
+    /* --i: the glyph's place in its list (phone menu), a short stagger */
+    animation-delay: calc(var(--d, 0ms) + var(--i, 0) * 45ms);
+    animation-fill-mode: backwards;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-draw {
+    animation-name: mga-draw;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-spin {
+    animation-name: mga-spin;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-shift {
+    animation-name: mga-shift;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-from {
+    animation-name: mga-from;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-rock {
+    animation-name: mga-rock;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-pop {
+    animation-name: mga-pop;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-fade {
+    animation-name: mga-fade;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-grow {
+    animation-name: mga-grow;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-pulse {
+    animation-name: mga-pulse;
+  }
+  :is(.mg-row:hover, .mg-row:focus-visible, .mg-once) .mga-glint {
+    animation-name: mga-glint;
+  }
+}
+
+/* ---- 2. THE ROW ---------------------------------------------------------- */
+/* `isolation` keeps the row's own backdrop (::before, z-index -1) above the
+   panel and beneath the row's text. */
+.mg-row {
+  position: relative;
+  isolation: isolate;
+}
+.mg-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--brand-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-fast) var(--ease-out);
+}
+.mg-row:is(:hover, :focus-visible)::before {
+  opacity: 1;
+}
+.mg-text {
+  display: block;
+  min-width: 0;
+}
+.mg-label {
+  position: relative;
+  display: inline-block;
+}
+.mg-note {
+  transition: color var(--t-fast) var(--ease-out);
+}
+.mg-row:is(:hover, :focus-visible) .mg-note {
+  color: var(--ink-2);
+}
+
+/* a. SLIDE: the words step towards where they lead; the row takes a flat tint */
+[data-mg-fx="slide"] .mg-text {
+  transition: transform 200ms var(--ease-out);
+}
+[data-mg-fx="slide"] .mg-row:is(:hover, :focus-visible) .mg-text {
+  transform: translateX(3px);
+}
+
+/* b. WIPE: no backdrop at all; a rule is drawn under the label from the left
+   and the note rises into place */
+[data-mg-fx="wipe"] .mg-row::before {
+  background: none;
+}
+[data-mg-fx="wipe"] .mg-label::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms var(--ease-out);
+}
+[data-mg-fx="wipe"] .mg-row:is(:hover, :focus-visible) .mg-label::after {
+  transform: scaleX(1);
+}
+@keyframes mg-note-up {
+  from {
+    opacity: 0.35;
+    transform: translateY(3px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-mg-fx="wipe"] .mg-row:is(:hover, :focus-visible) .mg-note {
+    animation: mg-note-up 240ms var(--ease-out) backwards;
+  }
+}
+
+/* c. EDGE: a thin rule grows at the row's leading edge and its light falls
+   away across the row */
+[data-mg-fx="edge"] .mg-row::before {
+  background: linear-gradient(90deg, var(--brand-soft), transparent 88%);
+}
+[data-mg-fx="edge"] .mg-row::after {
+  content: "";
+  position: absolute;
+  inset: 0.3125rem auto 0.3125rem 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transition: transform 200ms var(--ease-out);
+  pointer-events: none;
+}
+[data-mg-fx="edge"] .mg-row:is(:hover, :focus-visible)::after {
+  transform: scaleY(1);
+}
+
+/* d. LIGHT: the row is lit from where the pointer is (--rx, --ry are written
+   by the panel's pointer handler; from the keyboard it lights from its start) */
+[data-mg-fx="light"] .mg-row::before {
+  background: radial-gradient(
+    9rem circle at var(--rx, 0%) var(--ry, 50%),
+    color-mix(in srgb, var(--accent) 30%, transparent),
+    color-mix(in srgb, var(--accent) 5%, transparent) 72%
+  );
+  transition-duration: var(--t-base);
+}
+
+/* ---- 3. THE PANEL -------------------------------------------------------- */
+/* A soft light follows the pointer across the open tray. */
+.mg-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    24rem circle at var(--mg-x, 50%) var(--mg-y, 0%),
+    color-mix(in srgb, var(--accent) 10%, transparent),
+    transparent 68%
+  );
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease-out);
+}
+.mg-panel:hover::before {
+  opacity: 1;
+}
+/* the tray's content sits above its light */
+.mg-panel > div {
+  position: relative;
+}
+[data-effects="low"] .mg-panel::before {
+  display: none;
+}
+
+/* ---- 4. THE SWITCHES (top-level menu buttons) ----------------------------
+   Each switch's strip of light arrives in its own way. The strip is the
+   button's own indicator (a Tailwind scale-x transform, see SiteHeader): only
+   its origin, timing and starting pose are changed here. */
+header[data-site-header] button[data-nav="markets"] > span[aria-hidden] {
+  transform-origin: left;
+}
+/* from the middle outward */
+header[data-site-header] button[data-nav="trading"] > span[aria-hidden] {
+  transform-origin: center;
+}
+/* from the far end back */
+header[data-site-header] button[data-nav="platforms"] > span[aria-hidden] {
+  transform-origin: right;
+}
+/* in five ticks, like a reading being taken */
+header[data-site-header] button[data-nav="intelligence"] > span[aria-hidden] {
+  transform-origin: left;
+  transition-timing-function: steps(5, end);
+}
+/* rising into place as it widens */
+header[data-site-header] button[data-nav="academy"] > span[aria-hidden] {
+  transform-origin: center;
+  transition-property: transform, opacity;
+}
+header[data-site-header] button[data-nav="academy"] > span[aria-hidden].scale-x-0 {
+  --tw-translate-y: 5px;
+  opacity: 0;
+}
+/* full width at once, opening from a hairline */
+header[data-site-header] button[data-nav="company"] > span[aria-hidden] {
+  transform-origin: center;
+}
+header[data-site-header] button[data-nav="company"] > span[aria-hidden].scale-x-0 {
+  --tw-scale-x: 1;
+  --tw-scale-y: 0;
+}
+
+/* ---- 5. THE PHONE MENU --------------------------------------------------- */
+/* Glyphs only: lit, and played once as their section opens (.mg-once). */
+#site-drawer {
+  --mg-bg: var(--bg);
+}
+
+/* ---- 6. MOTION OFF -------------------------------------------------------
+   Still drawings; a row changes colour and nothing else. (The global rule
+   already collapses durations; these remove the movements themselves.) */
+@media (prefers-reduced-motion: reduce) {
+  .mg .mga {
+    animation: none !important;
+  }
+  .mg-row .mg-text {
+    transform: none !important;
+  }
+  .mg-row .mg-note {
+    animation: none !important;
+  }
+  .mg-row::after,
+  .mg-row .mg-label::after,
+  .mg-panel::before {
+    display: none !important;
+  }
+  .mg-row.mg-row::before {
+    background: var(--brand-soft);
+  }
+}
+[data-motion="reduced"] .mg .mga {
+  animation: none !important;
+}
+[data-motion="reduced"] .mg-row .mg-text {
+  transform: none !important;
+}
+[data-motion="reduced"] .mg-row .mg-note {
+  animation: none !important;
+}
+[data-motion="reduced"] .mg-row::after,
+[data-motion="reduced"] .mg-row .mg-label::after,
+[data-motion="reduced"] .mg-panel::before {
+  display: none !important;
+}
+[data-motion="reduced"] .mg-row.mg-row::before {
+  background: var(--brand-soft);
+}

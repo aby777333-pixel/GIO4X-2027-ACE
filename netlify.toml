@@ -18,6 +18,22 @@
 # It is deliberately not set here, so a preview site can never be indexed by
 # accident. Deploy previews and branch deploys are always forced to "preview".
 
+# The offline worker and its kill switch (docs/OFFLINE.md). These two are files
+# in public/, which Netlify serves from its CDN without the headers of
+# next.config.mjs, so their cache rule is stated here: always revalidated, so a
+# new worker, or the kill switch, is picked up on the next page load.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/sw-off.txt"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Content-Type-Options = "nosniff"
+
 [context.deploy-preview.environment]
   NEXT_PUBLIC_SITE_ENV = "preview"
 

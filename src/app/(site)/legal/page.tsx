@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ThreeTags } from "@/components/figures/extra/ThreeTags";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { LegalIndex, type IndexDoc } from "@/components/trust/LegalIndex";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { companyLine } from "@/config/legal";
@@ -48,6 +50,11 @@ export default function LegalCentrePage() {
               <dd className="num font-display text-xl text-ink">{unpublishedDocs.length}</dd>
             </div>
           </dl>
+        }
+        companion={
+          <HeroCompanion layout="beside" label="Carried over" figure={<ThreeTags />}>
+            Documents carried over from the previous GIO4X website are reproduced sentence for sentence. Where a claim could not be supported it was taken out, and an editor’s note marks the place.
+          </HeroCompanion>
         }
       />
 

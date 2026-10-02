@@ -43,7 +43,7 @@ export default function AccountsPage() {
             </h2>
             <p className="lead mt-13 max-w-[58ch]">Select an account to read its character. The worked example beneath keeps all three in view.</p>
           </div>
-          <div className="mt-34 lg:mt-55">
+          <div className="mt-34 lg:mt-55" data-tour="accounts">
             <AccountExplorer />
           </div>
           <DataNote status="indicative" source="GIO4X published account conditions" className="mt-21">

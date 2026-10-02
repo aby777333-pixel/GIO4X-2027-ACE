@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { ContactForm } from "@/components/company/ContactForm";
 import { Offices } from "@/components/company/Offices";
+import { KeptKey } from "@/components/figures/extra/KeptKey";
+import { RegistryMatch } from "@/components/figures/extra/RegistryMatch";
+import { SideNote } from "@/components/figures/extra/SideNote";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { site } from "@/config/site";
 import { pageMeta } from "@/lib/meta";
@@ -28,6 +32,15 @@ export default function ContactPage() {
             </a>
             <p className="mt-13 text-sm font-medium text-ink">Never share your password or one-time security code in a message.</p>
           </div>
+        }
+        companion={
+          <HeroCompanion layout="beside" figure={<KeptKey ratio={2} />}>
+            With an account already, or a problem that needs solving, a{" "}
+            <Link href="/support" className="link">
+              support request
+            </Link>{" "}
+            gets a reference and a reply you can read on the website.
+          </HeroCompanion>
         }
       />
 
@@ -75,6 +88,13 @@ export default function ContactPage() {
             <h2 id="safe-h" className="h3 mt-13">
               How to tell a genuine reply from an imitation.
             </h2>
+            <SideNote figure={<RegistryMatch />} label="In practice">
+              A message that asks for a password or a one-time code is not from GIO4X, whoever it says it is from. How to read a sender’s address is set out on the{" "}
+              <Link href="/trust/verify" className="link">
+                link verifier
+              </Link>{" "}
+              page.
+            </SideNote>
           </div>
           <ul className="border-t border-line-strong text-ink-2" data-reveal>
             <li className="border-b border-line py-13">GIO4X will never ask for your password or a one-time security code, by email, by message or by telephone.</li>

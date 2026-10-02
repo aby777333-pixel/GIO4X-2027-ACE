@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
 import { Rosette } from "@/components/brand/Rosette";
+import { DotToPage } from "@/components/figures/extra/DotToPage";
+import { FigureNote } from "@/components/figures/Figure";
 import { KIND_LABEL, KIND_ORDER, compareNodes, connect, getNode, neighbours, type GraphNode, type Hop, type NodeKind, type SentencePart } from "@/data/graph";
 import { DotsDiagram } from "./DotsDiagram";
 import { KindLegend, KindMark } from "./glyph";
@@ -243,6 +245,13 @@ export function ConnectTheDots({ initial, example }: { initial: string[]; exampl
                 </ul>
               </div>
             ))}
+            {/* fewer than three kinds leaves a column of the row empty on wide screens: it carries what the links are for.
+                Only beside a list long enough to stand next to it. */}
+            {deeper.length < 3 && deeper.some((g) => g.items.length >= 4) && (
+              <FigureNote figure={<DotToPage />} className="lg:!mt-0">
+                Every mark in the diagram has a page of its own. The sentences above say how things are related; these pages say what each one is.
+              </FigureNote>
+            )}
           </div>
         </div>
       )}

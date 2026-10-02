@@ -4,6 +4,9 @@ import { DotsDiagram } from "@/components/labs/DotsDiagram";
 import { KindMark } from "@/components/labs/glyph";
 import { computeLayout } from "@/components/labs/layout";
 import { EXAMPLE_PICKS, picksQuery } from "@/components/labs/picks";
+import { MarketDayStill } from "@/components/labs/market-day/MarketDayStill";
+import { TradeStill } from "@/components/labs/trade-anatomy/TradeStill";
+import { SimulatorStill } from "@/components/labs/simulator/Still";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { Tabs } from "@/components/ui/Tabs";
 import { connect, graphStats, KIND_LABEL, KIND_ORDER } from "@/data/graph";
@@ -12,7 +15,7 @@ import { pageMeta } from "@/lib/meta";
 export const metadata = pageMeta({
   title: "GIO4X Labs",
   description:
-    "GIO4X Labs is where experiments live, apart from the core brokerage pages: the Market Universe, an explorable knowledge graph, and Connect the Dots, which explains how markets, institutions and concepts are related.",
+    "GIO4X Labs is where experiments live, apart from the core brokerage pages: the Market Universe, an explorable knowledge graph; Connect the Dots, which explains how markets, institutions and concepts are related; Trade Anatomy; One day of markets; and a practice desk on invented prices.",
   path: "/labs",
 });
 
@@ -139,11 +142,11 @@ export default function LabsPage() {
             <div>
               <p className="eyebrow">Open now</p>
               <h2 id="labs-open" className="h2 mt-13">
-                Two experiments, one graph.
+                Five experiments.
               </h2>
             </div>
             <p className="max-w-[34rem] text-ink-2">
-              Both are views of the same thing: the GIO4X Graph, which today holds <span className="num">{graphStats.nodes}</span> nodes and <span className="num">{graphStats.edges}</span> relations, built from the pages and reference data of this site.
+              The first two are views of the same thing: the GIO4X Graph, which today holds <span className="num">{graphStats.nodes}</span> nodes and <span className="num">{graphStats.edges}</span> relations, built from the pages and reference data of this site. The other three stand on their own: one order followed to its settlement, one day of sessions, and a practice desk on invented prices.
             </p>
           </div>
 
@@ -182,6 +185,51 @@ export default function LabsPage() {
                 <DotsDiagram connection={example} />
               </div>
             </Link>
+          </article>
+
+          <article className="mt-55 grid gap-34 border-t border-line pt-34 lg:grid-cols-phi lg:items-center lg:gap-55">
+            <Link href="/labs/trade-anatomy" aria-hidden tabIndex={-1} className="block overflow-hidden rounded border border-line">
+              <TradeStill />
+            </Link>
+            <div>
+              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">03</p>
+              <h3 className="h2 mt-8">Trade Anatomy</h3>
+              <p className="lead mt-13">One order followed through the seven stages of its life: the ticket, the checks, routing, the fill, the open position, the close and settlement into the balance.</p>
+              <p className="mt-13 max-w-measure text-ink-2">This one is not a view of the graph. It is a walkthrough of general mechanics, with the branches where an order’s path can change and what can go wrong at each stage. It holds no prices, and it reads in full without the animation.</p>
+              <Link href="/labs/trade-anatomy" className="go mt-21">
+                Open Trade Anatomy
+              </Link>
+            </div>
+          </article>
+
+          <article className="mt-55 grid gap-34 border-t border-line pt-34 lg:grid-cols-phi-r lg:items-center lg:gap-55">
+            <div>
+              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">04</p>
+              <h3 className="h2 mt-8">One day of markets</h3>
+              <p className="lead mt-13">Twenty-four hours of UTC as a two-minute film you can scrub: the line between night and day crossing a globe, and nine financial centres opening and closing in turn.</p>
+              <p className="mt-13 max-w-measure text-ink-2">It is drawn from the regular timetables and the position of the sun, and from nothing else: no prices and no measure of activity. Seven chapters carry the day in words, so it reads in full without the animation.</p>
+              <Link href="/labs/market-day" className="go mt-21">
+                Open One day of markets
+              </Link>
+            </div>
+            <Link href="/labs/market-day" aria-hidden tabIndex={-1} className="order-first block overflow-hidden rounded border border-line lg:order-none">
+              <MarketDayStill />
+            </Link>
+          </article>
+
+          <article className="mt-55 grid gap-34 border-t border-line pt-34 lg:grid-cols-phi lg:items-center lg:gap-55">
+            <Link href="/labs/simulator" aria-hidden tabIndex={-1} className="block overflow-hidden rounded border border-line bg-paper">
+              <SimulatorStill />
+            </Link>
+            <div>
+              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">05</p>
+              <h3 className="h2 mt-8">Practice desk</h3>
+              <p className="lead mt-13">A trading simulation on invented prices: place, manage and close example positions to learn the mechanics, with the arithmetic of every fill, charge and close shown.</p>
+              <p className="mt-13 max-w-measure text-ink-2">Not a view of the graph, and not a market. The price is a seeded random walk made in your browser, the instrument and the account are examples, and the settings are made up for practice: they are not GIO4X’s trading conditions.</p>
+              <Link href="/labs/simulator" className="go mt-21">
+                Open the Practice desk
+              </Link>
+            </div>
           </article>
         </div>
       </section>

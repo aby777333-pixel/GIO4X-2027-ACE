@@ -1,83 +1,102 @@
 /**
  * FLIGHT DECK — the trading day, seen from the flight deck.
  *
- * The homepage's instrument. One Canvas 2D scene, drawn on the whole stage:
- *   - the globe: a solid ball with the land as a field of points, lit by the real
- *     sun (sub-solar point from the UTC clock and the day of the year), so the
- *     terminator is where day meets night right now; the nine financial centres of
- *     src/lib/sessions.ts stand on it, lit by their regular trading hours
+ * The homepage's instrument: one Canvas 2D scene, luminous rather than drawn in
+ * hairlines, with the globe as its hero.
+ *
+ *   - the globe: a solid ball with filled continents, lit by the real sun (the
+ *     sub-solar point from the UTC clock, the day of the year and the equation of
+ *     time), so the warm terminator is where day meets night right now. It has an
+ *     atmosphere, a glint where the sun stands overhead, and, on its night side,
+ *     the lights of the nine financial centres of src/lib/sessions.ts. Each
+ *     centre is lit by its regular trading hours
  *   - flows: arcs between centres that are inside their regular sessions at the
  *     same time, with couriers of light travelling them
- *   - the dial: 24 hours of UTC about the globe, carrying the four FX session
- *     windows and the present minute
- *   - three forms that carry no data at all, only the shape of the thing: a tape
- *     of dashes orbiting the globe, a depth ladder standing to its right, a candle
- *     ribbon on the console below it. No prices, no axis, no symbol.
+ *   - three forms about the globe that carry no data at all, only the shape of
+ *     the thing: a tape of light over it, a depth ladder as two facing fins beside
+ *     it, a ribbon of candles under it. No prices, no axis, no symbol
+ *   - the words, over the globe: the day and the UTC time, the FX sessions open
+ *     now (or how long until the FX week opens), how many centres are open and
+ *     how many are in daylight, the next regular open and its countdown
+ *   - the timeline, under the globe: the three hours behind and the twenty-one
+ *     ahead, with each centre's regular hours as a bar, the four FX session
+ *     windows above them, and the present moment passing through
  *
  * It lives by itself. A seeded schedule read from the scene clock (never
  * Math.random) lets things happen at irregular intervals: a pulse leaves an open
  * centre and travels the globe, a burst of couriers crosses an ocean, a sweep
- * passes through the ladder, a comet circles the dial, a scanning light crosses
- * the land, a run of the tape prints bright.
+ * passes through a fin of the ladder, a comet circles the globe, a scanning light
+ * crosses the land, a run of the tape prints bright, a glint runs the timeline.
  *
- * Under the pointer it wakes: the instruments power up one after another, the
- * names gain their local times, the globe turns to face the pointer, the nearest
- * centre opens a readout (its real local time and the state of its regular
- * session), and the arcs from that centre light. The dial reads the hour under
- * the pointer and the FX windows that hour falls in; the ladder and the ribbon
- * answer with a level and a hairline. When the pointer leaves it settles again.
+ * Under the pointer it wakes: everything brightens and gains detail, the globe
+ * turns to face the pointer, and the centre nearest the pointer (on the globe or
+ * on its row of the timeline) is read out in words: venue, local time, UTC
+ * offset, the state of its regular session and the time to its next change, its
+ * regular hours, its sunrise and sunset. The timeline reads the hour under the
+ * pointer; the fins and the candles answer with a level and a hairline.
  *
- * What is real: clock times, time zones, the sun, which regular sessions are open.
- * Everything else is form, and the caption under the stage says so.
+ * The frame. All of it is composed inside one frame and clipped to it; the engine
+ * draws the champagne frame round it (Scene.frame). Beside the statement the frame
+ * uses the height of the stage: 34px from the top, room for the caption below,
+ * its right edge on the content column's and its left edge clear of the headline
+ * (never wider than a golden rectangle lying down, never taller than one standing).
+ * Its height is cut at golden sections: the words take 1/phi^4 of it, the globe's
+ * field 1/phi, the timeline 1/phi^3 (they sum to one). Below 1080px, where there
+ * is no room beside the headline, the frame stands above the statement and is
+ * wide: the globe in a square at its left, the words and the timeline beside it.
+ * Only the faint field behind (deck, dust, horizon) runs on outside the frame.
  *
- * The frame. Like every other page's instrument, all of it is composed inside one
- * golden rectangle (1.618 : 1) and clipped to it; the engine draws the champagne
- * frame round it (Scene.frame). On a desk screen the frame stands beside the
- * statement: its right edge on the content column's, its left edge clear of the
- * headline, as large as that allows, with an equal margin above and below. Below
- * 1080px it stands at the top of the stage, beside the headline or above the
- * statement (the scene measures where the words begin), whichever is larger.
- * Inside it the golden sections place the parts: the globe and its dial fill the
- * major section (a square), the ladder stands in the square of the minor section
- * and the ribbon in what is left under it. A frame too small for the panes (a
- * phone) carries the globe alone, on the golden cut. Only the faint field behind
- * (the deck, the dust, the horizon) runs on outside the frame.
- *
- * What it says in words, all of it from the clock and the regular timetable: the
- * day and the UTC time, the region that carries the day, the FX sessions open now
- * (or how long until the FX week opens), how many centres are in daylight and how
- * many are open, the next regular open and its countdown; and, for the centre
- * under the pointer, its venue, local time, UTC offset, regular hours, time to its
- * next change of state, and its sunrise and sunset (from its latitude, the sun's
- * declination and the equation of time; good to a few minutes).
+ * What is real: clock times, time zones, the sun, sunrise and sunset, which
+ * regular sessions are open and when. Everything else is form, and the caption
+ * under the stage says so. The scene keeps its own hues for the globe, for "open"
+ * and for champagne, so that it holds its colour in every accent; the accent's
+ * key light tints the glow, the tape and the frame.
  */
 import { TAU, clamp, rgba, type Frame, type Scene } from "../engine";
 import { pool } from "../kit";
-import { allCentreStatus, centres, formatDuration, fxOverview, fxSessions, localTime, windowInUtc, type CentreStatus } from "../../../lib/sessions";
+import { allCentreStatus, centres, formatDuration, fxOverview, fxSessions, localTime, type CentreStatus } from "../../../lib/sessions";
 
 const PI = Math.PI;
 const DEG = PI / 180;
 const PHI = (1 + Math.sqrt(5)) / 2;
 /** camera distance (world units) */
 const D = 6;
-/** the globe, the dial about it, the tape's orbit */
+/** the globe (world units) */
 const R = 0.8;
-const RD = 1;
-const RT = 1.13;
 const FLOOR = -1.3;
 const NC = centres.length;
 /** a point of the globe faces the viewer when its facing is above this (perspective horizon) */
 const HOR = R / D + 0.012;
-/** the tape's orbit: inclined so its near side dips under the equator, and rolled a little */
-const SIN_I = Math.sin(0.36);
-const COS_I = Math.cos(0.36);
-const SIN_R = Math.sin(-0.2);
-const COS_R = Math.cos(-0.2);
-const FX_TONE = ["teal", "blue", "blue", "emerald"] as const;
 const REGIONS = ["ASIA", "EUROPE", "AMERICAS"] as const;
 const WEEK = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+/** the centres' city codes, for a timeline too narrow for their names */
+const CODES = ["SYD", "TYO", "HKG", "SIN", "BOM", "DXB", "FRA", "LON", "NYC"] as const;
 /** the sun counts as up when its centre is 0.833 degrees under the horizon (refraction and its own radius) */
 const SUN_UP = Math.sin(-0.833 * DEG);
+/** the timeline's window, in minutes about the present */
+const PAST = 180;
+const SPAN = 1440;
+/**
+ * The scene's own hues. The accent may be grey (Mono) or champagne (Ivory); the
+ * globe, "open" and the champagne highlights keep their colour whatever it is.
+ */
+const HUE = {
+  deep: "#04121f",
+  ocean: "#0d4a7c",
+  air: "#49b6f0",
+  mist: "#3fd6c8",
+  land: "#a4dccd",
+  shade: "#163f4e",
+  warm: "#ffae62",
+  city: "#ffd79a",
+  open: "#3fe394",
+  gold: "#e8cf93",
+  up: "#93f2d2",
+  down: "#5d93e6",
+  bid: "#39d2c2",
+  ask: "#7aa2ff",
+} as const;
+const FX_HUE = [HUE.mist, HUE.air, HUE.air, HUE.open] as const;
 /** minutes as a clock time, any day */
 const clockOf = (m: number) => {
   const v = ((Math.round(m) % 1440) + 1440) % 1440;
@@ -306,132 +325,6 @@ function gp(ex: number, ey: number, ez: number, lift: number): void {
   F = -zc;
 }
 
-/** a point of the dial: `a` in radians clockwise from the top, in the plane through the globe's centre */
-const dp = (a: number, r: number) => pr(Math.sin(a) * r, Math.cos(a) * r, 0);
-
-/** a point of the tape's orbit */
-function tp(a: number): boolean {
-  const x0 = Math.cos(a) * RT;
-  const z0 = Math.sin(a) * RT;
-  const y1 = z0 * SIN_I;
-  return pr(x0 * COS_R - y1 * SIN_R, x0 * SIN_R + y1 * COS_R, z0 * COS_I);
-}
-
-/* ── a pane of glass: origin (its lower left corner), the two edges and the normal, 12 numbers */
-function pane(p: Float64Array, cx: number, cy: number, cz: number, w: number, h: number, yaw: number, tilt: number): void {
-  const cyy = Math.cos(yaw);
-  const sy = Math.sin(yaw);
-  const ct = Math.cos(tilt);
-  const st = Math.sin(tilt);
-  p[3] = cyy * w;
-  p[4] = 0;
-  p[5] = -sy * w;
-  p[6] = st * sy * h;
-  p[7] = ct * h;
-  p[8] = st * cyy * h;
-  p[9] = -ct * sy;
-  p[10] = st;
-  p[11] = -ct * cyy;
-  p[0] = cx - p[3] / 2 - p[6] / 2;
-  p[1] = cy - p[4] / 2 - p[7] / 2;
-  p[2] = cz - p[5] / 2 - p[8] / 2;
-}
-const pq = (p: Float64Array, u: number, v: number, lift = 0) =>
-  pr(p[0] + p[3] * u + p[6] * v + p[9] * lift, p[1] + p[4] * u + p[7] * v + p[10] * lift, p[2] + p[5] * u + p[8] * v + p[11] * lift);
-
-/** add a rectangle of the pane to the current path */
-function quad(ctx: CanvasRenderingContext2D, p: Float64Array, u0: number, v0: number, u1: number, v1: number, lift = 0): void {
-  if (!pq(p, u0, v0, lift)) return;
-  ctx.moveTo(X, Y);
-  pq(p, u1, v0, lift);
-  ctx.lineTo(X, Y);
-  pq(p, u1, v1, lift);
-  ctx.lineTo(X, Y);
-  pq(p, u0, v1, lift);
-  ctx.lineTo(X, Y);
-  ctx.closePath();
-}
-
-/** where the pointer is on a pane: its u and v, left in LU and LV */
-let LU = -1;
-let LV = -1;
-function local(p: Float64Array, mx: number, my: number): void {
-  pq(p, 0, 0);
-  const ax = X;
-  const ay = Y;
-  pq(p, 1, 0);
-  const e1x = X - ax;
-  const e1y = Y - ay;
-  pq(p, 0, 1);
-  const e2x = X - ax;
-  const e2y = Y - ay;
-  const det = e1x * e2y - e1y * e2x || 1;
-  LU = ((mx - ax) * e2y - (my - ay) * e2x) / det;
-  LV = (e1x * (my - ay) - e1y * (mx - ax)) / det;
-}
-
-/** the glass itself: smoked body, hairline, a lit top edge */
-function glass(f: Frame, p: Float64Array, on: number, lit: number): void {
-  const { ctx, pal } = f;
-  ctx.beginPath();
-  quad(ctx, p, 0, 0, 1, 1);
-  ctx.fillStyle = rgba(pal.bg, 0.8 * on);
-  ctx.fill();
-  ctx.fillStyle = rgba(pal.key, (0.035 + 0.03 * lit) * on);
-  ctx.fill();
-  ctx.strokeStyle = rgba(pal.ink, (0.14 + 0.1 * lit) * on);
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  line(ctx, p, 0, 1, 1, 1);
-  ctx.strokeStyle = rgba(pal.key, (0.45 + 0.4 * lit) * on);
-  ctx.lineWidth = 1.25;
-  ctx.stroke();
-  // four machined corners
-  ctx.beginPath();
-  for (let k = 0; k < 4; k++) {
-    const u = k & 1;
-    const v = k >> 1;
-    pq(p, u ? 1 - 0.07 * (p[7] / Math.hypot(p[3], p[5])) : 0.07 * (p[7] / Math.hypot(p[3], p[5])), v);
-    ctx.moveTo(X, Y);
-    pq(p, u, v);
-    ctx.lineTo(X, Y);
-    pq(p, u, v ? 0.93 : 0.07);
-    ctx.lineTo(X, Y);
-  }
-  ctx.strokeStyle = rgba(pal.ink, (0.3 + 0.4 * lit) * on);
-  ctx.lineWidth = 1.25;
-  ctx.stroke();
-}
-
-/** a band of reflected light crossing a pane: `k` runs 0..1 across it. Expects additive drawing. */
-function sheen(f: Frame, p: Float64Array, k: number, level: number): void {
-  if (k <= 0 || k >= 1 || level <= 0.01) return;
-  const { ctx } = f;
-  const u = -0.4 + 1.6 * k;
-  ctx.beginPath();
-  pq(p, clamp(u), 0);
-  ctx.moveTo(X, Y);
-  pq(p, clamp(u + 0.1), 0);
-  ctx.lineTo(X, Y);
-  pq(p, clamp(u + 0.34), 1);
-  ctx.lineTo(X, Y);
-  pq(p, clamp(u + 0.24), 1);
-  ctx.lineTo(X, Y);
-  ctx.closePath();
-  ctx.fillStyle = f.pal.ink;
-  ctx.globalAlpha = 0.075 * Math.sin(PI * k) * level;
-  ctx.fill();
-}
-
-/** start a path with one segment of a pane */
-function line(ctx: CanvasRenderingContext2D, p: Float64Array, u0: number, v0: number, u1: number, v1: number, lift = 0): void {
-  ctx.beginPath();
-  if (!pq(p, u0, v0, lift)) return;
-  ctx.moveTo(X, Y);
-  pq(p, u1, v1, lift);
-  ctx.lineTo(X, Y);
-}
-
 /** the current path as light: two wide soft strokes under a fine core */
 function bloom(ctx: CanvasRenderingContext2D, alpha: number, width: number): void {
   ctx.globalAlpha = alpha * 0.07;
@@ -458,7 +351,7 @@ function spark(f: Frame, x: number, y: number, r: number, a: number, colour: str
   ctx.beginPath();
   ctx.arc(x - r * 0.5, y, r, 0, TAU);
   ctx.fill();
-  ctx.fillStyle = pal.blue;
+  ctx.fillStyle = HUE.air;
   ctx.beginPath();
   ctx.arc(x + r * 0.5, y, r, 0, TAU);
   ctx.fill();
@@ -488,13 +381,79 @@ function text(f: Frame, str: string, x: number, y: number, size: number, colour:
 /** lettering that resolves: as much of it as `k` allows */
 const part = (str: string, k: number) => (k >= 1 ? str : str.slice(0, Math.ceil(str.length * clamp(k))));
 
+/** two pieces of lettering side by side, the first in one colour and the second in another */
+function pair(f: Frame, a: string, c: string, x: number, y: number, size: number, colA: string, colC: string, alpha: number, right = false, weightA = 600): void {
+  if (alpha <= 0.01) return;
+  const { ctx } = f;
+  if (right) {
+    text(f, c, x, y, size, colC, alpha, "right", 500);
+    ctx.font = `500 ${size}px ${f.pal.font}`;
+    text(f, a, x - (c ? ctx.measureText(c).width + 5 : 0), y, size, colA, alpha, "right", weightA);
+  } else {
+    text(f, a, x, y, size, colA, alpha, "left", weightA);
+    ctx.font = `${weightA} ${size}px ${f.pal.font}`;
+    text(f, c, x + (a ? ctx.measureText(a).width + 5 : 0), y, size, colC, alpha, "left", 500);
+  }
+}
+
+/** a point in the globe's own plane: angle `a` (radians, anticlockwise from the right), radius in globe radii, depth `z` */
+const fp = (a: number, r: number, z: number) => pr(Math.cos(a) * r * R, Math.sin(a) * r * R, z);
+
+/* ── the land as outlines on the unit sphere, for filling: one array for each land mass, and Antarctica as a cap */
+const SHAPES: Float32Array[] = [];
+function shapes(): Float32Array[] {
+  if (SHAPES.length) return SHAPES;
+  const add = (p: readonly number[]) => {
+    const v = new Float32Array((p.length / 2) * 3);
+    for (let i = 0; i < p.length / 2; i++) {
+      const lon = p[i * 2] * DEG;
+      const lat = p[i * 2 + 1] * DEG;
+      v[i * 3] = Math.cos(lat) * Math.sin(lon);
+      v[i * 3 + 1] = Math.sin(lat);
+      v[i * 3 + 2] = Math.cos(lat) * Math.cos(lon);
+    }
+    SHAPES.push(v);
+  };
+  LAND.forEach(add);
+  const cap: number[] = [];
+  for (let lon = -180; lon < 180; lon += 10) cap.push(lon, -(70 + 3 * Math.cos((lon + 90) * DEG)));
+  add(cap);
+  return SHAPES;
+}
+
+/**
+ * The land that faces the viewer, as one path. A vertex over the horizon is slid out to the limb along
+ * its own direction, so a land mass that runs round the edge of the globe is cut by the edge.
+ */
+function landPath(p: Path2D, rpx: number): void {
+  const all = shapes();
+  for (let k = 0; k < all.length; k++) {
+    const v = all[k];
+    const n = v.length / 3;
+    let seen = false;
+    for (let i = 0; i < n && !seen; i++) seen = -(m6 * v[i * 3] + m7 * v[i * 3 + 1] + m8 * v[i * 3 + 2]) >= HOR;
+    if (!seen) continue;
+    for (let i = 0; i < n; i++) {
+      gp(v[i * 3], v[i * 3 + 1], v[i * 3 + 2], 1);
+      let x = X;
+      let y = Y;
+      if (F < HOR) {
+        const dx = X - CX;
+        const dy = Y - CY;
+        const d = Math.hypot(dx, dy) || 1;
+        x = CX + (dx / d) * rpx;
+        y = CY + (dy / d) * rpx;
+      }
+      if (i) p.lineTo(x, y);
+      else p.moveTo(x, y);
+    }
+    p.closePath();
+  }
+}
+
 type State = {
-  /** the land */
+  /** the land as points, for the scanning light */
   e: Float32Array;
-  sx: Float32Array;
-  sy: Float32Array;
-  sz: Float32Array;
-  sb: Uint8Array;
   /** dust in the air: x, y, phase, speed */
   motes: Float32Array;
   /** the tape: start, length, tone */
@@ -507,7 +466,7 @@ type State = {
   py: Float32Array;
   pf: Float32Array;
   boxes: Float32Array;
-  /** the width of each centre's name and of the three region names, measured with the timetable */
+  /** the width of each centre's name, measured with the timetable */
   tw: Float32Array;
   /** the timetable, refreshed a few times a minute */
   at: number;
@@ -516,11 +475,10 @@ type State = {
   pairs: Uint8Array;
   npair: number;
   nopen: number;
-  /** the centre next to open, when none is */
+  /** the centre next to open */
   next: number;
   /** the longitude the globe turns to */
   face: number;
-  fx: Float32Array;
   sun: Float32Array;
   /** for each centre: its UTC offset (minutes), sunrise and sunset today (UTC minutes), whether the sun is up there */
   off: Int16Array;
@@ -534,6 +492,14 @@ type State = {
   /** in words: the FX sessions open now, and the centre whose regular session opens next */
   fxWords: string;
   nextWords: string;
+  /**
+   * The timeline: for each centre up to six stretches of its regular hours inside the window (start and
+   * end, in minutes from the reading of the timetable), and how many; the same for the four FX sessions.
+   */
+  bars: Float32Array;
+  nbar: Uint8Array;
+  fxb: Float32Array;
+  nfx: Uint8Array;
   /** what moves */
   init: boolean;
   lon: number;
@@ -542,13 +508,26 @@ type State = {
   spin: number;
   sel: number;
   selK: number;
-  ladder: Float64Array;
-  ribbon: Float64Array;
   /** below the desk layout: where the statement begins (pixels from the top of the stage), and when that was measured */
   sky: number;
   skyFor: number;
   skyAt: number;
 };
+
+/** one local window (a..b, local minutes) on yesterday, today and tomorrow, where those are weekdays, cut to the timeline */
+function days(out: Float32Array, base: number, n: number, max: number, weekday: number, minutes: number, a: number, c: number): number {
+  for (let d = -1; d <= 1; d++) {
+    const wd = (weekday + d + 7) % 7;
+    if (wd < 1 || wd > 5 || n >= max) continue;
+    const from = a - minutes + d * 1440;
+    const to = c - minutes + d * 1440;
+    if (to <= -PAST || from >= SPAN - PAST) continue;
+    out[base + n * 2] = Math.max(from, -PAST);
+    out[base + n * 2 + 1] = Math.min(to, SPAN - PAST);
+    n++;
+  }
+  return n;
+}
 
 function refresh(f: Frame, s: State, cap: number): void {
   const now = f.now;
@@ -574,6 +553,7 @@ function refresh(f: Frame, s: State, cap: number): void {
   s.nlit = 0;
   for (let i = 0; i < NC; i++) {
     const st = s.st[i];
+    const c = st.centre;
     s.open[i] = st.state === "open" ? 1 : 0;
     s.nopen += s.open[i];
     // its UTC offset, from its own wall clock; sunrise and sunset from its latitude and the sun's declination
@@ -581,9 +561,9 @@ function refresh(f: Frame, s: State, cap: number): void {
     if (off > 780) off -= 1440;
     if (off < -660) off += 1440;
     s.off[i] = off;
-    const lat = st.centre.lat * DEG;
+    const lat = c.lat * DEG;
     const half = Math.acos(clamp((SUN_UP - Math.sin(lat) * Math.sin(decl)) / (Math.cos(lat) * Math.cos(decl)), -1, 1)) / DEG;
-    const noon = 720 - 4 * st.centre.lon - eot;
+    const noon = 720 - 4 * c.lon - eot;
     s.rise[i] = noon - 4 * half;
     s.set[i] = noon + 4 * half;
     s.lit[i] = CV[i * 3] * s.sun[0] + CV[i * 3 + 1] * s.sun[1] + CV[i * 3 + 2] * s.sun[2] > SUN_UP ? 1 : 0;
@@ -592,9 +572,16 @@ function refresh(f: Frame, s: State, cap: number): void {
     const code = st.state === "open" ? 1 : st.state === "pre" ? 2 : st.state === "lunch" ? 3 : 0;
     if (s.was[i] !== 255 && s.was[i] !== code && !f.still) s.turned[i] = f.t;
     s.was[i] = code;
+    // its regular hours on the timeline (its midday break leaves a gap)
+    let n = 0;
+    if (c.lunch) {
+      n = days(s.bars, i * 12, n, 6, st.local.weekday, st.local.minutes, c.open, c.lunch[0]);
+      n = days(s.bars, i * 12, n, 6, st.local.weekday, st.local.minutes, c.lunch[1], c.close);
+    } else n = days(s.bars, i * 12, n, 6, st.local.weekday, st.local.minutes, c.open, c.close);
+    s.nbar[i] = n;
     if (st.state !== "closed") {
-      sx += Math.cos(st.centre.lon * DEG);
-      sy += Math.sin(st.centre.lon * DEG);
+      sx += Math.cos(c.lon * DEG);
+      sy += Math.sin(c.lon * DEG);
       any++;
     }
     if ((st.state === "closed" || st.state === "pre") && st.nextChangeIn < wait) {
@@ -611,7 +598,7 @@ function refresh(f: Frame, s: State, cap: number): void {
       if (s.open[i] && s.open[j]) list.push([i, j, CV[i * 3] * CV[j * 3] + CV[i * 3 + 1] * CV[j * 3 + 1] + CV[i * 3 + 2] * CV[j * 3 + 2]]);
     }
   }
-  list.sort((a, b) => a[2] - b[2]);
+  list.sort((a, c) => a[2] - c[2]);
   s.npair = Math.min(cap, list.length);
   for (let k = 0; k < s.npair; k++) {
     s.pairs[k * 2] = list[k][0];
@@ -619,8 +606,6 @@ function refresh(f: Frame, s: State, cap: number): void {
   }
   f.ctx.font = `600 11px ${f.pal.font}`;
   for (let i = 0; i < NC; i++) s.tw[i] = f.ctx.measureText(centres[i].city).width;
-  f.ctx.font = `600 8px ${f.pal.font}`;
-  for (let k = 0; k < 3; k++) s.tw[NC + k] = f.ctx.measureText(REGIONS[k]).width;
   // in words: the FX sessions open now (or how long until the FX week opens), and the next regular open
   const fx = fxOverview(now);
   if (fx.weekOpen) s.fxWords = fx.open.length ? fx.open.map((x) => x.name.toUpperCase()).join(" × ") : "BETWEEN SESSIONS";
@@ -630,10 +615,10 @@ function refresh(f: Frame, s: State, cap: number): void {
     s.fxWords = `WEEK CLOSED · OPENS IN ${formatDuration(Math.max(1, until))}`;
   }
   s.nextWords = s.next >= 0 ? `${centres[s.next].city.toUpperCase()} · ${formatDuration(s.st[s.next].nextChangeIn)}` : "";
+  // the four FX session windows on the timeline (weekdays in each session's own city)
   fxSessions.forEach((x, k) => {
-    const w = windowInUtc(x.tz, x.open, x.close, now);
-    s.fx[k * 2] = w.start;
-    s.fx[k * 2 + 1] = (((w.end - w.start) % 1440) + 1440) % 1440;
+    const lt = localTime(now, x.tz);
+    s.nfx[k] = days(s.fxb, k * 6, 0, 3, lt.weekday, lt.minutes, x.open, x.close);
   });
 }
 
@@ -690,7 +675,7 @@ function beam(f: Frame, x0: number, x1: number, y: number, a0: number, a1: numbe
   ctx.stroke();
 }
 
-/** dust in the air, flying past: the far half behind the globe, the near half in front of everything */
+/** dust in the air, flying past: fine points far off, soft discs out of focus near the viewer */
 function motes(f: Frame, s: State, front: boolean, level: number, clearX: number): void {
   const { ctx } = f;
   const m = s.motes;
@@ -700,7 +685,6 @@ function motes(f: Frame, s: State, front: boolean, level: number, clearX: number
     const z = 13 - ((m[i * 4 + 2] + f.t * m[i * 4 + 3]) % 17);
     if (z <= 0 !== front || !pr(m[i * 4], m[i * 4 + 1], z) || X < clearX + 24) continue;
     const near = clamp((2 - z) / 5);
-    // far motes are fine points; the near ones are out of focus, larger and fainter
     ctx.globalAlpha = level * sm((13 - z) / 3) * sm((z + 4) / 2.5) * (0.34 - 0.27 * near);
     ctx.beginPath();
     ctx.arc(X, Y, 0.7 + near * near * 4.2, 0, TAU);
@@ -709,74 +693,12 @@ function motes(f: Frame, s: State, front: boolean, level: number, clearX: number
   ctx.globalAlpha = 1;
 }
 
-/** the tape: dashes on an inclined orbit. The far half is drawn before the globe, the near half after it. */
-function tape(f: Frame, s: State, front: boolean, level: number, wake: number, print: number, printAt: number, clearX: number): void {
-  if (level <= 0.01) return;
-  const { ctx, pal } = f;
-  const d = s.dash;
-  const n = d.length / 3;
-  const turn = f.t * 0.05 + s.spin;
-  // the orbit itself, a hairline
-  ctx.beginPath();
-  let pen = false;
-  for (let i = 0; i <= 40; i++) {
-    const a = (front ? PI : 0) + (i / 40) * PI;
-    if (!tp(a) || X < clearX + 30) pen = false;
-    else if (pen) ctx.lineTo(X, Y);
-    else {
-      ctx.moveTo(X, Y);
-      pen = true;
-    }
-  }
-  ctx.strokeStyle = pal.ink;
-  ctx.globalAlpha = level * (front ? 0.13 : 0.07);
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  for (let i = 0; i < n; i++) {
-    const a0 = d[i * 3] + turn;
-    const a1 = a0 + d[i * 3 + 1];
-    const depth = Math.sin((a0 + a1) / 2);
-    if (depth < 0 !== front) continue;
-    if (!tp(a0)) continue;
-    const x0 = X;
-    const y0 = Y;
-    if (!tp(a1)) continue;
-    const near = (1 - depth) / 2;
-    const edge = sm((Math.min(x0, X) - clearX) / 60);
-    if (edge <= 0.01) continue;
-    // a run of the tape prints bright as it passes
-    let hot = 0;
-    if (print >= 0) {
-      const gap = Math.abs(wrap(((a0 - turn - printAt + print * 3.2) / DEG) % 360)) * DEG;
-      hot = clamp(1 - gap / 0.55) * Math.sin(PI * print);
-    }
-    ctx.beginPath();
-    ctx.moveTo(x0, y0);
-    ctx.lineTo(X, Y);
-    ctx.strokeStyle = d[i * 3 + 2] > 0.5 || hot > 0.3 ? pal.key : pal.ink;
-    const a = level * edge * (0.2 + 0.6 * near) * (0.72 + 0.28 * wake);
-    const w = 0.8 + 1.5 * near;
-    if (hot > 0.02) {
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = hot * 0.22 * edge * level;
-      ctx.lineWidth = w * 4;
-      ctx.stroke();
-      ctx.globalCompositeOperation = "source-over";
-    }
-    ctx.globalAlpha = Math.min(1, a + hot * 0.6 * edge);
-    ctx.lineWidth = w;
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-}
-
 const scene: Scene<State> = {
   pose: 12,
-  // composed for the whole stage: the statement keeps the left, the instrument the golden section to the right
+  // the homepage stage is taller than the others, so the scene composes its own frame (see `frame` below)
   free: true,
   setup(f) {
-    const e = field(f.mobile ? 4.5 : 2.7);
-    const n = e.length / 4;
+    const e = field(f.mobile ? 5.4 : 3.6);
     const nm = f.mobile ? 22 : 60;
     const mo = new Float32Array(nm * 4);
     for (let i = 0; i < nm; i++) {
@@ -785,20 +707,16 @@ const scene: Scene<State> = {
       mo[i * 4 + 2] = f.rnd(i * 4 + 13) * 17;
       mo[i * 4 + 3] = 0.22 + f.rnd(i * 4 + 14) * 0.5;
     }
-    // the tape: slots round the orbit, most of them carrying a dash of some length, a few left empty
-    const slots = f.mobile ? 54 : 120;
+    // the tape: slots along its run, most of them carrying a dash of some length, a few left empty
+    const slots = f.mobile ? 22 : 46;
     const dash: number[] = [];
     for (let i = 0; i < slots; i++) {
       if (f.rnd(i * 3 + 201) < 0.16) continue;
-      dash.push((i / slots) * TAU, (TAU / slots) * (0.2 + 0.62 * f.rnd(i * 3 + 202)), f.rnd(i * 3 + 203));
+      dash.push(i / slots, (1 / slots) * (0.2 + 0.62 * f.rnd(i * 3 + 202)), f.rnd(i * 3 + 203));
     }
     const seg = f.mobile ? 16 : 26;
     return {
       e,
-      sx: new Float32Array(n),
-      sy: new Float32Array(n),
-      sz: new Float32Array(n),
-      sb: new Uint8Array(n),
       motes: mo,
       dash: new Float32Array(dash),
       arc: new Float32Array((seg + 1) * 3),
@@ -807,7 +725,7 @@ const scene: Scene<State> = {
       py: new Float32Array(NC),
       pf: new Float32Array(NC),
       boxes: new Float32Array(NC * 4),
-      tw: new Float32Array(NC + 3),
+      tw: new Float32Array(NC),
       at: 0,
       st: [],
       open: new Uint8Array(NC),
@@ -816,7 +734,6 @@ const scene: Scene<State> = {
       nopen: 0,
       next: -1,
       face: 0,
-      fx: new Float32Array(8),
       sun: new Float32Array(3),
       off: new Int16Array(NC),
       rise: new Float32Array(NC),
@@ -827,6 +744,10 @@ const scene: Scene<State> = {
       turned: new Float32Array(NC).fill(-99),
       fxWords: "",
       nextWords: "",
+      bars: new Float32Array(NC * 12),
+      nbar: new Uint8Array(NC),
+      fxb: new Float32Array(24),
+      nfx: new Uint8Array(4),
       init: false,
       lon: 0,
       tilt: 20 * DEG,
@@ -834,8 +755,6 @@ const scene: Scene<State> = {
       spin: 0,
       sel: -1,
       selK: 0,
-      ladder: new Float64Array(12),
-      ribbon: new Float64Array(12),
       sky: 0,
       skyFor: -1,
       skyAt: 0,
@@ -849,59 +768,79 @@ const scene: Scene<State> = {
     const lite = f.mobile || f.q < 0.75;
     let g: CanvasGradient;
 
-    // ── the frame. One golden rectangle (1.618 : 1) holds the whole instrument and clips it, as on every
-    // other page; only the faint field behind it (deck, dust, horizon) runs on outside. Its right edge is the
-    // content column's (the same sums as engine.ts); its left edge keeps clear of the headline.
+    // ── the frame. It holds the whole instrument and clips it; only the faint field behind it runs on
+    // outside. Its right edge is the content column's (the same sums as engine.ts), its left edge keeps
+    // clear of the headline, and beside the statement it uses the height of the stage.
     const gutter = clamp(f.w * 0.042, 21, 55);
     const contentW = Math.min(f.w - gutter * 2, 1320);
     const right = (f.w + contentW) / 2;
     const b = BOX;
-    const left = (f.clear > 0 ? f.clear : (f.w - contentW) / 2 + contentW * 0.48) + clamp(contentW * 0.026, 22, 34);
-    let bw = f.mobile ? 0 : right - left;
-    if (desk) {
-      // beside the statement, as large as fits, with an equal margin above and below it that is deep
-      // enough for the caption to sit under the frame
-      bw = Math.min(bw, (f.h - 2 * Math.max(76, f.h * 0.08)) * PHI);
-      b.w = bw;
-      b.x = right - bw;
-      b.y = (f.h - bw / PHI) / 2;
-    } else {
+    if (!desk && (s.skyFor !== f.w * 4096 + f.h || t - s.skyAt > 2 || t < s.skyAt)) {
       // where the statement begins, measured now and then (it moves when the display face arrives)
-      if (s.skyFor !== f.w * 4096 + f.h || t - s.skyAt > 2 || t < s.skyAt) {
-        const body = ctx.canvas.closest(".cx-hero")?.querySelector(".cx-statement-body");
-        s.sky = body ? body.getBoundingClientRect().top - ctx.canvas.getBoundingClientRect().top : f.h * 0.3;
-        s.skyFor = f.w * 4096 + f.h;
-        s.skyAt = t;
-      }
-      // below the desk layout the stage fades toward the statement from 40% of its height. The frame
-      // stands at the top: beside the headline where the stage is wide, or above the statement as on
-      // the inner pages, whichever gives the larger frame.
-      bw = Math.min(bw, (f.h * 0.4 - 20) * PHI);
-      const over = Math.min(contentW, 560, (s.sky - 28) * PHI);
-      if (over > bw) {
-        b.w = over;
-        b.x = (f.w - over) / 2;
+      const body = ctx.canvas.closest(".cx-hero")?.querySelector(".cx-statement-body");
+      s.sky = body ? body.getBoundingClientRect().top - ctx.canvas.getBoundingClientRect().top : f.h * 0.3;
+      s.skyFor = f.w * 4096 + f.h;
+      s.skyAt = t;
+    }
+    // beside the statement: 34px from the top, room for the caption below (it shows from 1080px), never
+    // wider than a golden rectangle lying down and never taller than one standing
+    const foot = desk ? 76 : 34;
+    const left = f.clear > 0 ? f.clear + clamp(contentW * 0.026, 22, 34) : desk ? f.w / 2 : f.w;
+    let bh = f.h - 34 - foot;
+    const bw = Math.min(f.mobile ? 0 : right - left, bh * PHI);
+    bh = Math.min(bh, bw * PHI);
+    let beside = desk;
+    if (!desk) {
+      // or above the statement, as on the inner pages, where there is no room beside the headline
+      const ah = Math.min(s.sky - 34, contentW / 1.5);
+      const aw = Math.min(contentW, 760, ah * 3.4);
+      beside = bw >= 260 && bw * bh > aw * ah;
+      if (!beside) {
+        b.w = aw;
+        b.h = ah;
+        b.x = (f.w - aw) / 2;
         b.y = 14;
-      } else {
-        b.w = bw;
-        b.x = right - bw;
-        b.y = 20;
       }
     }
-    b.h = b.w / PHI;
-    BOXON = b.w >= 120;
+    if (beside) {
+      b.w = bw;
+      b.h = bh;
+      b.x = right - bw;
+      b.y = 34 + (f.h - 34 - foot - bh) / 2;
+    }
+    BOXON = b.w >= 150 && b.h >= 80;
+    const W = b.w;
     const H = b.h;
-    /** what the frame has room for: the two panes of glass; the readouts; the names on the globe */
-    const panes = BOXON && H >= 200;
-    const rich = panes && !f.mobile && H >= 240;
-    const named = rich && H >= 300;
-    const inset = Math.max(9, H * 0.035);
-    // The major section of a golden rectangle is a square: the globe and its dial fill it. The minor
-    // section is cut again at its own golden section: the ladder in its square, the ribbon below.
-    // A frame too small for the panes carries the globe alone, centred on the golden cut.
-    const gx = panes ? b.x + H / 2 : b.x + b.w * 0.618;
-    const gy = b.y + H / 2;
-    const unit = (H / 2 - inset) / 1.15;
+    // A tall frame is cut at golden sections of its height: the words take 1/phi^4 of it, the globe's
+    // field 1/phi, the timeline 1/phi^3. A wide one has the globe in a square at its left and the words
+    // and the timeline beside it.
+    const tower = H >= 400 && W / H < 1.9;
+    const band0 = tower ? H / PHI ** 4 : 0;
+    const band1 = tower ? H / PHI ** 3 : 0;
+    const inset = clamp(H * 0.03, 8, 16);
+    let gx: number;
+    let gy: number;
+    let radius: number;
+    /** the column beside the globe in a wide frame */
+    let colX = 0;
+    let colW = 0;
+    if (tower) {
+      // the globe may stand a little into the band of words, between the two blocks of them
+      const y0 = b.y + (W >= 520 ? inset * 0.6 : band0 + 4);
+      const y1 = b.y + H - band1 - 6;
+      radius = Math.min((y1 - y0) / 2.6, (W / 2 - 10) / 1.55);
+      gx = b.x + W / 2;
+      gy = (y0 + y1) / 2 - 0.105 * radius;
+    } else {
+      const side = Math.min(H, W * 0.5);
+      radius = Math.min((side / 2 - 4) / 1.55, (H - 8) / 2.6);
+      gx = b.x + side / 2;
+      gy = b.y + H / 2 - 0.105 * radius;
+      colX = b.x + side + 6;
+      colW = b.x + W - colX - inset;
+    }
+    const named = !f.mobile && radius >= 120;
+    const unit = radius / ((R * D) / Math.sqrt(D * D - R * R));
     if (BOXON) {
       f.cx = gx;
       f.cy = gy;
@@ -913,84 +852,66 @@ const scene: Scene<State> = {
     lens(f);
 
     // ══ the field behind the frame: dust, the deck, the light spilled on it, the horizon
-    motes(f, s, false, f.boot, desk ? f.clear + 16 : -1e6);
-    deck(f, 0.12 * f.boot);
-    pool(f, [0, FLOOR, -0.2], 2.4, pal.key, (desk ? 0.15 : 0.11) * f.boot);
-    pool(f, [0, FLOOR, 60], 28, pal.key, 0.24 * f.boot);
+    motes(f, s, false, f.boot, beside ? f.clear + 16 : -1e6);
+    deck(f, 0.085 * f.boot);
+    pool(f, [0, FLOOR, -0.2], 2.4, pal.key, (desk ? 0.14 : 0.1) * f.boot);
+    pool(f, [0, FLOOR, 60], 28, pal.key, 0.22 * f.boot);
     if (pr(0, FLOOR, 4000)) {
       const reach = f.on(0.05, 0.5);
-      beam(f, CX, CX + (f.w - CX) * reach, Y, 0.45 * reach, 0.1 * reach);
-      beam(f, CX, CX - 1.7 * UU * reach, Y, 0.45 * reach, 0);
+      beam(f, CX, CX + (f.w - CX) * reach, Y, 0.4 * reach, 0.1 * reach);
+      beam(f, CX, CX - 1.7 * UU * reach, Y, 0.4 * reach, 0);
     }
     ctx.globalAlpha = 1;
-    if (desk) {
-      // the statement owns the left of the stage: the field gives way to it
-      g = ctx.createLinearGradient(0, 0, f.w * 0.54, 0);
-      g.addColorStop(0, "rgba(0,0,0,1)");
-      g.addColorStop(0.3, "rgba(0,0,0,1)");
-      g.addColorStop(0.63, "rgba(0,0,0,0.78)");
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, f.w * 0.54, f.h);
-      ctx.globalCompositeOperation = "source-over";
-    }
+    // the statement owns its part of the stage: the field gives way to it (to the left where the frame
+    // stands beside the statement, downward where it stands above it)
+    g = beside ? ctx.createLinearGradient(0, 0, f.w * 0.54, 0) : ctx.createLinearGradient(0, f.h, 0, f.h * 0.38);
+    g.addColorStop(0, "rgba(0,0,0,1)");
+    g.addColorStop(beside ? 0.3 : 0.38, beside ? "rgba(0,0,0,1)" : "rgba(0,0,0,0.86)");
+    g.addColorStop(0.63, beside ? "rgba(0,0,0,0.78)" : "rgba(0,0,0,0.5)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = g;
+    if (beside) ctx.fillRect(0, 0, f.w * 0.54, f.h);
+    else ctx.fillRect(0, f.h * 0.38, f.w, f.h * 0.62);
+    ctx.globalCompositeOperation = "source-over";
     if (!BOXON) return;
 
-    // ══ the frame: a pane of darker glass, and everything of the instrument clipped to it
+    // ══ the frame: night glass, and everything of the instrument clipped to it
     const fieldU = UU;
     UU = unit;
     // (the engine sizes the pointer's light from this, as in its own frames)
-    f.u = Math.min(b.w / 3.9, H / 2.75);
+    f.u = Math.min(W / 3.9, H / 2.75);
     ctx.save();
     ctx.beginPath();
-    ctx.rect(b.x, b.y, b.w, H);
+    ctx.rect(b.x, b.y, W, H);
     ctx.clip();
-    ctx.fillStyle = "rgba(4, 8, 12, 0.5)";
-    ctx.fillRect(b.x, b.y, b.w, H);
-    if (panes) {
-      // the golden sections, engraved very lightly
-      ctx.strokeStyle = pal.gold;
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.1 * f.boot;
-      ctx.beginPath();
-      ctx.moveTo(Math.round(b.x + H) + 0.5, b.y);
-      ctx.lineTo(Math.round(b.x + H) + 0.5, b.y + H);
-      ctx.moveTo(b.x + H, Math.round(b.y + H * 0.618) + 0.5);
-      ctx.lineTo(b.x + b.w, Math.round(b.y + H * 0.618) + 0.5);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
+    ctx.fillStyle = "rgba(3, 8, 13, 0.58)";
+    ctx.fillRect(b.x, b.y, W, H);
     const U = UU * ZOOM;
     const rpx = (R * U * D) / Math.sqrt(D * D - R * R);
-    const clearX = -1e6;
 
     // ── waking. Calm until the pointer enters; up in about a second, down in about two.
     const want = still ? 1 : f.hover > 0.5 ? 1 : 0;
     s.wake = still ? 1 : s.wake + (want - s.wake) * Math.min(1, f.dt * (want > s.wake ? 2.4 : 1.3));
-    // while it wakes, a line of light runs down the frame, and the lettering resolves as the line passes it
-    const waking = !still && want === 1 && s.wake < 0.96;
-    const scanY = b.y + H * s.wake * 1.1;
-    const shown = (y: number) => (waking ? sm((scanY - y) / 16 + 0.5) : 1);
     if (s.wake < 0.002) s.wake = 0;
-    /** the instruments come up one after another: `order` 0..1 */
-    const stage = (order: number) => sm((s.wake - order * 0.55) / 0.45);
-    const wDial = stage(0);
-    const wGlobe = stage(0.25);
-    const wTape = stage(0.45);
-    const wLadder = stage(0.7);
-    const wRibbon = stage(1);
-    if (!still) s.spin += f.dt * 0.16 * s.wake;
+    const wake = s.wake;
+    // while it wakes, a line of light runs down the frame, and the lettering resolves as the line passes it
+    const waking = !still && want === 1 && wake < 0.96;
+    const scanY = b.y + H * wake * 1.1;
+    const shown = (y: number) => (waking ? sm((scanY - y) / 16 + 0.5) : 1);
+    if (!still) s.spin += f.dt * 0.16 * wake;
 
     // ── the timetable
     const nowMs = f.now.getTime();
-    if (!s.st.length || Math.abs(nowMs - s.at) > 20_000) refresh(f, s, rich ? 10 : 5);
+    if (!s.st.length || Math.abs(nowMs - s.at) > 20_000) refresh(f, s, lite ? 5 : 10);
+    /** minutes since the timetable was read: the timeline slides by this */
+    const since = (nowMs - s.at) / 60_000;
 
     // ── the globe's attitude: it faces the trading region, drifts, and turns to face the pointer
     const dxp = clamp((f.mx - CX) / rpx, -1.7, 1.7) * f.hover;
     const dyp = clamp((f.my - CY) / rpx, -1.5, 1.5) * f.hover;
-    const wantLon = s.face + (still ? 0 : Math.sin(t / 21) * 11) - dxp * 24;
-    const wantTilt = (20 + dyp * 9) * DEG;
+    const wantLon = s.face + (still ? 0 : Math.sin(t / 21) * 11) - dxp * 20;
+    const wantTilt = (20 + dyp * 8) * DEG;
     if (!s.init || still) {
       // it opens a little short of the trading region and settles into it
       s.lon = wantLon - (still ? 0 : 26);
@@ -1023,197 +944,141 @@ const scene: Scene<State> = {
     const pScan = still ? 0.46 : ev(t, 14, 6, 5);
     const pPrint = still ? 0.5 : ev(t, 5.5, 2.4, 6);
     const nPrint = still ? 1 : EVN;
-    const pSheen = still ? 0.42 : ev(t, 9, 1.9, 7);
+    const pGlint = still ? 0.5 : ev(t, 7.5, 2.2, 7);
 
-    // where the pointer is, among the instruments
-    const dPointer = Math.hypot(f.mx - CX, f.my - CY);
-    // the two panes of glass stand nearest the viewer, so the pointer is theirs first
-    const L = s.ladder;
-    const B = s.ribbon;
-    const ladOn = panes ? f.on(0.55, 0.4) : 0;
-    const ribOn = panes ? f.on(0.7, 0.3) : 0;
-    let onLad = 0;
-    let ladV = 0;
-    let onRib = 0;
-    let ribU = 0;
-    /** the minor section: its left edge, its width, and the height its clock takes at the top */
-    const mx0 = b.x + H;
-    const mw = b.w - H;
-    const hudH = mw >= 200 ? 38 : 31;
-    let ladN = 10;
-    let ribM = 34;
-    if (panes) {
-      const cut = b.y + H * 0.618;
-      const lt = b.y + inset + hudH + 19;
-      const lh = cut - 15 - lt;
-      const lw = Math.min(mw * 0.6, lh * 0.62);
-      ladN = lh < 140 ? 6 : 10;
-      // a pane is placed by the place it should take on screen, at its own depth
-      let k = (U * D) / (D - 0.35);
-      pane(L, (mx0 + mw / 2 - CX) / k, (CY - lt - lh / 2) / k - (1 - ladOn) * 0.08, -0.35, lw / (k * Math.cos(0.35)), lh / k, 0.35, 0);
-      local(L, f.mx, f.my);
-      onLad = LU > -0.15 && LU < 1.15 && LV > -0.05 && LV < 1.05 ? f.hover * ladOn : 0;
-      ladV = LV;
-      const rt = cut + 17;
-      const rh = b.y + H - inset - rt;
-      const rw = mw - inset * 2;
-      ribM = clamp(Math.round(rw / 7.2), 14, 34);
-      k = (U * D) / (D - 0.3);
-      pane(B, (mx0 + mw / 2 - CX) / k, (CY - rt - rh / 2) / k - (1 - ribOn) * 0.08, -0.3, rw / k, rh / (k * Math.cos(0.42)), 0, 0.42);
-      local(B, f.mx, f.my);
-      onRib = LU > -0.03 && LU < 1.03 && LV > -0.15 && LV < 1.15 ? f.hover * ribOn : 0;
-      ribU = LU;
+    // ── the timeline's place, and where the pointer is among the instruments
+    const lettering = H < 200 ? 0 : 1;
+    const ls = tower ? clamp(band0 / 6.2, 10.5, 15) : clamp(H / 9, 10.5, 14);
+    let tlX = 0;
+    let tlY = 0;
+    let tlW = 0;
+    let tlH = 0;
+    if (tower) {
+      tlX = b.x + inset;
+      tlY = b.y + H - band1 + 2;
+      tlW = W - inset * 2;
+      tlH = band1 - inset - 2;
+    } else if (H >= 250 && colW >= 190) {
+      tlX = colX;
+      tlY = b.y + inset + ls * 8;
+      tlW = colW;
+      tlH = b.y + H - inset - tlY;
     }
-    const onDial = rich && !onLad && !onRib ? f.hover * sm(1 - Math.abs(dPointer - RD * U) / (0.15 * U)) : 0;
+    const tlOn = tlH >= 70;
+    /** the timeline's column of names, its axis, the height of a row */
+    const tlName = tlW >= 480 ? 68 : 30;
+    const axX = tlX + tlName;
+    const axW = tlW - tlName - 4;
+    const rowY = tlY + 15;
+    const rowH = tlOn ? (tlH - 15 - 15) / NC : 0;
+    const minuteX = (m: number) => axX + ((m - since + PAST) / SPAN) * axW;
+    const inTl = tlOn && f.hover > 0 && f.mx > tlX && f.mx < tlX + tlW && f.my > tlY - 2 && f.my < tlY + tlH ? f.hover : 0;
+    const tlRow = inTl ? Math.floor((f.my - rowY) / rowH) : -1;
+    const dPointer = Math.hypot(f.mx - CX, f.my - CY);
+    const pd = dPointer / rpx;
+    const pang = Math.atan2(CY - f.my, f.mx - CX);
+    const onFin = !inTl && pd > 1.08 && pd < 1.66 && Math.abs(CY - f.my) < 0.68 * rpx ? f.hover : 0;
+    const onCan = !inTl && pd > 1.06 && pd < 1.52 && pang < -32 * DEG && pang > -148 * DEG ? f.hover : 0;
 
-    // ══ the tape's far side passes behind the globe
-    const tapeOn = f.on(0.4, 0.4);
-    tape(f, s, false, tapeOn, wTape, pPrint, dice(nPrint, 9) * TAU, clearX);
+    // ══ light behind the globe: a soft volume of it, so the globe stands in its own air
+    const globeOn = f.on(0, 0.5);
+    ctx.globalCompositeOperation = "lighter";
+    g = ctx.createRadialGradient(CX, CY, rpx * 0.6, CX, CY, rpx * 2.3);
+    g.addColorStop(0, rgba(HUE.air, 0.22 * globeOn));
+    g.addColorStop(0.4, rgba(pal.key, 0.09 * globeOn * (0.8 + 0.2 * wake)));
+    g.addColorStop(1, rgba(pal.key, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(CX, CY, rpx * 2.3, 0, TAU);
+    ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
 
-    // ══ the dial: 24 hours of UTC, the four FX windows, the present minute
-    const dialOn = f.on(0.25, 0.45);
-    const hours = f.now.getUTCHours();
-    const minutes = f.now.getUTCMinutes();
-    const nowA = ((hours * 60 + minutes + f.now.getUTCSeconds() / 60) / 1440) * TAU;
-    const scrubA = (Math.atan2(f.mx - CX, -(f.my - CY)) + TAU) % TAU;
-    if (dialOn > 0.01) {
-      ctx.strokeStyle = pal.ink;
+    // ══ the tape: a run of light over the globe, a little behind it and so a little soft
+    const formOn = f.on(0.4, 0.45);
+    {
+      const a0 = 30 * DEG;
+      const a1 = 150 * DEG;
       ctx.beginPath();
-      const n = lite ? 48 : 96;
-      for (let i = 0; i <= n; i++) {
-        dp((i / n) * TAU, RD);
+      for (let i = 0; i <= 20; i++) {
+        fp(a1 - ((a1 - a0) * i) / 20, 1.16, 0.25);
         if (i) ctx.lineTo(X, Y);
         else ctx.moveTo(X, Y);
       }
-      ctx.globalAlpha = (0.2 + 0.12 * wDial) * dialOn;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = pal.key;
+      ctx.globalAlpha = (0.07 + 0.05 * wake) * formOn;
+      ctx.lineWidth = Math.max(3, rpx * 0.035);
       ctx.stroke();
-      // quarter hours resolve as the dial wakes; the hours are always engraved
-      const fine = rich ? wDial : 0;
-      for (let pass = fine > 0.02 ? 0 : 1; pass < 3; pass++) {
+      const d = s.dash;
+      const turn = t * 0.018 + s.spin * 0.25;
+      const at = dice(nPrint, 9) * 0.6 + 0.2;
+      ctx.lineWidth = Math.max(1.6, rpx * 0.016);
+      for (let i = 0; i < d.length / 3; i++) {
+        const u = (((d[i * 3] + turn) % 1) + 1) % 1;
+        const edge = sm(u * 7) * sm((1 - u - d[i * 3 + 1]) * 7);
+        if (edge <= 0.02) continue;
+        fp(a1 - (a1 - a0) * u, 1.16, 0.25);
+        const x0 = X;
+        const y0 = Y;
+        fp(a1 - (a1 - a0) * (u + d[i * 3 + 1]), 1.16, 0.25);
+        // a run of the tape prints bright as it passes
+        const hot = pPrint >= 0 ? clamp(1 - Math.abs(u - at - (pPrint - 0.5) * 0.5) / 0.1) * Math.sin(PI * pPrint) : 0;
         ctx.beginPath();
-        const count = pass === 0 ? 96 : 24;
-        for (let i = 0; i < count; i++) {
-          if (pass === 0 ? i % 4 === 0 : (i % 6 === 0) !== (pass === 2)) continue;
-          const a = (i / count) * TAU;
-          // the scale opens under the pointer, like a loupe
-          const lens2 = onDial > 0.01 ? onDial * clamp(1 - Math.abs(wrap((a - scrubA) / DEG)) / 22) : 0;
-          dp(a, RD);
-          ctx.moveTo(X, Y);
-          dp(a, RD - (pass === 0 ? 0.018 : pass === 1 ? 0.032 : 0.058) * (1 + lens2 * 1.2));
-          ctx.lineTo(X, Y);
-        }
-        ctx.globalAlpha = (pass === 0 ? 0.26 * fine : pass === 1 ? 0.34 + 0.2 * wDial : 0.62 + 0.3 * wDial) * dialOn;
-        ctx.stroke();
-      }
-      if (rich) {
-        for (let hr = 0; hr < 24; hr += 6) {
-          dp((hr / 24) * TAU, RD - 0.105);
-          if (X > clearX) text(f, pad(hr), X, Y, 9, pal.ink2, (0.5 + 0.35 * wDial) * dialOn, "center");
-        }
-      }
-      // the four FX session windows, in two lanes so that an overlap reads as one
-      for (let k = 0; k < 4; k++) {
-        const a0 = (s.fx[k * 2] / 1440) * TAU;
-        const span = (s.fx[k * 2 + 1] / 1440) * TAU;
-        const r = RD + 0.03 + (k % 2) * 0.03;
-        const steps = Math.max(4, Math.round(span / 0.09));
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          dp(a0 + (span * i) / steps, r);
-          if (i) ctx.lineTo(X, Y);
-          else ctx.moveTo(X, Y);
-        }
-        ctx.strokeStyle = pal[FX_TONE[k]];
-        if (wDial > 0.02 && !lite) {
-          ctx.globalAlpha = 0.16 * wDial * dialOn;
-          ctx.lineWidth = 6;
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(X, Y);
+        ctx.strokeStyle = d[i * 3 + 2] > 0.5 ? pal.key : HUE.air;
+        if (hot > 0.02) {
+          ctx.globalCompositeOperation = "lighter";
+          ctx.globalAlpha = hot * 0.3 * edge * formOn;
+          ctx.lineWidth *= 4;
           ctx.stroke();
+          ctx.lineWidth /= 4;
+          ctx.globalCompositeOperation = "source-over";
+          ctx.strokeStyle = pal.ink;
         }
-        ctx.globalAlpha = (0.62 + 0.33 * wDial) * dialOn;
-        ctx.lineWidth = 1.6;
+        ctx.globalAlpha = Math.min(1, (0.7 + 0.25 * wake + hot) * edge * formOn);
         ctx.stroke();
       }
-      // the centre under the pointer writes its own day on the dial: its regular hours in champagne,
-      // and a mark where the sun rises and sets on it
-      if (rich && s.selK > 0 && s.sel >= 0) {
-        const c = centres[s.sel];
-        const a0 = ((c.open - s.off[s.sel]) / 1440) * TAU;
-        const span = ((c.close - c.open) / 1440) * TAU;
-        const steps = Math.max(4, Math.round(span / 0.09));
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          dp(a0 + (span * i) / steps, RD - 0.045);
-          if (i) ctx.lineTo(X, Y);
-          else ctx.moveTo(X, Y);
-        }
-        ctx.strokeStyle = pal.gold;
-        ctx.globalAlpha = 0.9 * s.selK * dialOn;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.strokeStyle = pal.ink;
-        ctx.lineWidth = 1;
-        for (let k = 0; k < 2; k++) {
-          const a = ((k ? s.set[s.sel] : s.rise[s.sel]) / 1440) * TAU;
-          dp(a, RD - 0.085);
-          ctx.beginPath();
-          // a rising sun is a whole disc, a setting one a half
-          ctx.arc(X, Y, 3, 0, k ? PI : TAU);
-          ctx.stroke();
-        }
-        ctx.globalAlpha = 1;
-      }
-      // the present minute
-      ctx.strokeStyle = pal.ink;
-      ctx.beginPath();
-      dp(nowA, RD - 0.075);
-      ctx.moveTo(X, Y);
-      dp(nowA, RD + 0.085);
-      ctx.lineTo(X, Y);
-      ctx.globalAlpha = 0.95 * dialOn;
-      ctx.lineWidth = 1.75;
-      ctx.stroke();
       ctx.globalAlpha = 1;
     }
 
     // ══ the globe
-    const globeOn = f.on(0, 0.5);
+    const cph = Math.cos(phi);
+    const sph = Math.sin(phi);
+    // its air: a halo that is brightest toward the sun
     ctx.globalCompositeOperation = "lighter";
-    g = ctx.createRadialGradient(CX, CY, rpx * 0.94, CX, CY, rpx * 1.2);
-    g.addColorStop(0, rgba(pal.key, 0.3 * globeOn));
-    g.addColorStop(0.35, rgba(pal.key, 0.09 * globeOn));
-    g.addColorStop(1, rgba(pal.key, 0));
+    g = ctx.createRadialGradient(CX + cph * rpx * 0.1 * sside, CY + sph * rpx * 0.1 * sside, rpx * 0.9, CX, CY, rpx * 1.22);
+    g.addColorStop(0, rgba(HUE.air, 0.55 * globeOn));
+    g.addColorStop(0.3, rgba(HUE.mist, 0.18 * globeOn));
+    g.addColorStop(1, rgba(HUE.mist, 0));
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.arc(CX, CY, rpx * 1.2, 0, TAU);
+    ctx.arc(CX, CY, rpx * 1.22, 0, TAU);
     ctx.fill();
     ctx.globalCompositeOperation = "source-over";
-    // a solid body: what passes behind it is hidden
+    // a solid body: the night ocean, and what passes behind it is hidden
     ctx.beginPath();
     ctx.arc(CX, CY, rpx, 0, TAU);
-    ctx.fillStyle = rgba(pal.bg, 0.96 * globeOn);
+    ctx.fillStyle = rgba(HUE.deep, globeOn);
     ctx.fill();
-    g = ctx.createRadialGradient(CX + scx * rpx * 0.5, CY - scy * rpx * 0.5, rpx * 0.05, CX, CY, rpx);
-    g.addColorStop(0, rgba(pal.key, 0.13 * globeOn));
-    g.addColorStop(0.7, rgba(pal.key, 0.035 * globeOn));
-    g.addColorStop(1, rgba(pal.key, 0.09 * globeOn));
+    g = ctx.createRadialGradient(CX, CY, rpx * 0.2, CX, CY, rpx);
+    g.addColorStop(0, rgba(HUE.ocean, 0.07 * globeOn));
+    g.addColorStop(0.8, rgba(HUE.ocean, 0.12 * globeOn));
+    g.addColorStop(1, rgba(HUE.air, 0.26 * globeOn));
     ctx.fillStyle = g;
     ctx.fill();
     // the day side: from the terminator to the limb that faces the sun
-    const cph = Math.cos(phi);
-    const sph = Math.sin(phi);
-    ctx.beginPath();
-    ctx.arc(CX, CY, rpx, phi - PI / 2, phi + PI / 2);
-    ctx.ellipse(CX, CY, rpx * Math.abs(stv), rpx, phi, PI / 2, PI * 1.5, stv < 0);
-    ctx.closePath();
+    const dayShape = new Path2D();
+    dayShape.arc(CX, CY, rpx, phi - PI / 2, phi + PI / 2);
+    dayShape.ellipse(CX, CY, rpx * Math.abs(stv), rpx, phi, PI / 2, PI * 1.5, stv < 0);
+    dayShape.closePath();
     g = ctx.createLinearGradient(CX - cph * rpx * stv, CY - sph * rpx * stv, CX + cph * rpx, CY + sph * rpx);
-    g.addColorStop(0, rgba(pal.key, 0.09 * globeOn));
-    g.addColorStop(0.5, rgba(pal.key, 0.2 * globeOn));
-    g.addColorStop(1, rgba(pal.key, 0.36 * globeOn));
+    g.addColorStop(0, rgba(HUE.ocean, 0.55 * globeOn));
+    g.addColorStop(0.55, rgba(HUE.ocean, 0.95 * globeOn));
+    g.addColorStop(1, rgba(HUE.air, 0.75 * globeOn));
     ctx.fillStyle = g;
-    ctx.fill();
+    ctx.fill(dayShape);
 
-    // the graticule, on the near side only
+    // the graticule, very quietly, on the near side only
     ctx.beginPath();
     for (let lon = 0; lon < 360; lon += 30) {
       let pen = false;
@@ -1244,58 +1109,57 @@ const scene: Scene<State> = {
         }
       }
     }
-    ctx.strokeStyle = pal.ink;
-    ctx.globalAlpha = (0.085 + 0.04 * wGlobe) * globeOn;
+    ctx.strokeStyle = HUE.air;
+    ctx.globalAlpha = (0.1 + 0.06 * wake) * globeOn;
     ctx.lineWidth = 1;
     ctx.stroke();
+    ctx.globalAlpha = 1;
 
-    // the land: points lit by the sun, and by the scanning light as it crosses them
-    const scanLon = pScan >= 0 ? s.lon - 105 + pScan * 210 : 0;
-    const scanK = pScan >= 0 ? Math.sin(PI * pScan) : 0;
-    {
+    // the land: filled, in shade on the night side and lit on the day side
+    const land = new Path2D();
+    landPath(land, rpx);
+    ctx.fillStyle = rgba(HUE.shade, 0.9 * globeOn);
+    ctx.fill(land);
+    ctx.save();
+    ctx.clip(dayShape);
+    g = ctx.createLinearGradient(CX - cph * rpx * stv, CY - sph * rpx * stv, CX + cph * rpx, CY + sph * rpx);
+    g.addColorStop(0, rgba(HUE.warm, 0.8 * globeOn));
+    g.addColorStop(0.16, rgba(HUE.land, 0.84 * globeOn));
+    g.addColorStop(1, rgba(HUE.land, 0.94 * globeOn));
+    ctx.fillStyle = g;
+    ctx.fill(land);
+    ctx.restore();
+    ctx.strokeStyle = HUE.air;
+    ctx.globalAlpha = 0.3 * globeOn;
+    ctx.lineWidth = 1;
+    ctx.stroke(land);
+    ctx.globalAlpha = 1;
+
+    // the scanning light: a meridian that crosses the globe and lights the land it passes
+    ctx.globalCompositeOperation = "lighter";
+    if (pScan >= 0) {
+      const scanLon = s.lon - 105 + pScan * 210;
+      const scanK = Math.sin(PI * pScan) * globeOn;
       const e = s.e;
       const n = e.length / 4;
-      // (a phone already has the coarser field)
-      const stride = !f.mobile && f.q < 0.75 ? 2 : 1;
       const k = D * ZOOM * UU * R;
-      const dot = clamp(rpx / 205, 0.72, 1.25) * globeOn;
-      for (let i = 0; i < n; i += stride) {
+      const dot = clamp(rpx / 150, 0.7, 1.3);
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const dl = wrap(e[i * 4 + 3] - scanLon);
+        if (dl > 1.5 || dl < -16) continue;
         const ex = e[i * 4];
         const ey = e[i * 4 + 1];
         const ez = e[i * 4 + 2];
         const zc = m6 * ex + m7 * ey + m8 * ez;
-        if (-zc < HOR) {
-          s.sb[i] = 9;
-          continue;
-        }
+        if (-zc < HOR) continue;
         const sc = k / (zc * R + D);
-        s.sx[i] = CX + (m0 * ex + m1 * ey + m2 * ez) * sc;
-        s.sy[i] = CY - (m3 * ex + m4 * ey + m5 * ez) * sc;
-        s.sz[i] = dot * (0.5 - 0.95 * zc);
-        const light = ex * sux + ey * suy + ez * suz;
-        let b = light > 0.16 ? 2 : light > -0.1 ? 1 : 0;
-        if (scanK > 0) {
-          const dl = wrap(e[i * 4 + 3] - scanLon);
-          if (dl < 1.5 && dl > -24) b = dl > -5 ? 3 : Math.min(2, b + 1);
-        }
-        s.sb[i] = b;
+        const h = dot * (0.5 - 0.9 * zc) * (1 + dl / 18);
+        ctx.rect(CX + (m0 * ex + m1 * ey + m2 * ez) * sc - h, CY - (m3 * ex + m4 * ey + m5 * ez) * sc - h, h * 2, h * 2);
       }
-      for (let b = 0; b < 4; b++) {
-        ctx.beginPath();
-        for (let i = 0; i < n; i += stride) {
-          if (s.sb[i] !== b) continue;
-          const h = s.sz[i];
-          ctx.rect(s.sx[i] - h, s.sy[i] - h, h * 2, h * 2);
-        }
-        ctx.fillStyle = b === 0 ? pal.key : pal.ink;
-        ctx.globalAlpha = b === 0 ? 0.36 : b === 1 ? 0.42 : b === 2 ? 0.74 : scanK * 0.25 + 0.75;
-        ctx.fill();
-      }
-    }
-
-    // light on the glass: the scanning meridian, the terminator, the limb
-    ctx.globalCompositeOperation = "lighter";
-    if (scanK > 0) {
+      ctx.fillStyle = pal.ink;
+      ctx.globalAlpha = 0.7 * scanK;
+      ctx.fill();
       const cl = Math.cos(scanLon * DEG);
       const sl = Math.sin(scanLon * DEG);
       ctx.beginPath();
@@ -1310,17 +1174,14 @@ const scene: Scene<State> = {
           pen = true;
         }
       }
-      ctx.strokeStyle = pal.key;
-      bloom(ctx, 0.4 * scanK * globeOn, 1);
+      ctx.strokeStyle = HUE.mist;
+      bloom(ctx, 0.5 * scanK, 1);
     }
+    // the terminator, warm; and an aurora along it: curtains of light standing off the surface
     ctx.beginPath();
     ctx.ellipse(CX, CY, rpx * Math.abs(stv), rpx, phi, PI / 2, PI * 1.5, stv < 0);
-    ctx.strokeStyle = pal.key;
-    bloom(ctx, (0.5 + 0.25 * wGlobe) * globeOn, 1.1);
-    ctx.beginPath();
-    ctx.arc(CX, CY, rpx, phi - 1.15, phi + 1.15);
-    bloom(ctx, (0.55 + 0.2 * wGlobe) * sside * globeOn, 1.3);
-    // an aurora along the terminator: curtains of light standing off the surface where day meets night
+    ctx.strokeStyle = HUE.warm;
+    bloom(ctx, (0.55 + 0.25 * wake) * globeOn, Math.max(1.2, rpx * 0.012));
     {
       const hl = Math.hypot(sux, suz) || 1;
       const ax = -suz / hl;
@@ -1329,7 +1190,7 @@ const scene: Scene<State> = {
       const by = suz * ax - sux * az;
       const bz = -suy * ax;
       const n = lite ? 26 : 64;
-      ctx.lineWidth = lite ? 2 : 3.4;
+      ctx.lineWidth = Math.max(1.6, rpx * 0.02);
       for (let i = 0; i < n; i++) {
         const th = (i / n) * TAU;
         const c = Math.cos(th);
@@ -1343,52 +1204,60 @@ const scene: Scene<State> = {
         const y0 = Y;
         const shimmer = 0.5 + 0.5 * Math.sin(t * 1.3 + i * 1.7 + 2 * Math.sin(t * 0.4 + i * 0.6));
         gp(ex, ey, ez, 1.025 + 0.075 * shimmer);
-        ctx.strokeStyle = i % 3 === 0 ? pal.teal : i % 3 === 1 ? pal.emerald : pal.indigo;
-        ctx.globalAlpha = (0.04 + 0.2 * shimmer) * globeOn * (0.6 + 0.4 * wGlobe);
+        ctx.strokeStyle = i % 3 === 0 ? HUE.mist : i % 3 === 1 ? HUE.open : HUE.ask;
+        ctx.globalAlpha = (0.04 + 0.2 * shimmer) * globeOn * (0.6 + 0.4 * wake);
         ctx.beginPath();
         ctx.moveTo(x0, y0);
         ctx.lineTo(X, Y);
         ctx.stroke();
       }
     }
+    // the rim: glass is brightest where it turns away from the viewer, and most of all toward the sun
+    ctx.globalAlpha = 1;
+    g = ctx.createRadialGradient(CX, CY, rpx * 0.74, CX, CY, rpx);
+    g.addColorStop(0, rgba(HUE.air, 0));
+    g.addColorStop(1, rgba(HUE.air, 0.42 * globeOn));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(CX, CY, rpx, 0, TAU);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(CX, CY, rpx, phi - 1.25, phi + 1.25);
+    ctx.strokeStyle = HUE.air;
+    bloom(ctx, (0.75 + 0.2 * wake) * (0.35 + 0.65 * sside) * globeOn, Math.max(1.3, rpx * 0.011));
     // the sun's glint on the glass, at the point where it stands overhead
     gp(sux, suy, suz, 1);
     if (F > HOR + 0.05) {
       const k = sm((F - HOR) / 0.5) * globeOn;
-      const gx = X;
-      const gy = Y;
-      const gr = rpx * 0.6;
-      g = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-      g.addColorStop(0, rgba(pal.ink, 0.22 * k));
-      g.addColorStop(0.22, rgba(pal.key, 0.13 * k));
-      g.addColorStop(1, rgba(pal.key, 0));
+      const gx0 = X;
+      const gy0 = Y;
+      const gr = rpx * 0.62;
+      g = ctx.createRadialGradient(gx0, gy0, 0, gx0, gy0, gr);
+      g.addColorStop(0, rgba(pal.ink, 0.3 * k));
+      g.addColorStop(0.2, rgba(HUE.air, 0.16 * k));
+      g.addColorStop(1, rgba(HUE.air, 0));
       ctx.save();
       ctx.beginPath();
       ctx.arc(CX, CY, rpx, 0, TAU);
       ctx.clip();
       ctx.globalAlpha = 1;
       ctx.fillStyle = g;
-      ctx.fillRect(gx - gr, gy - gr, gr * 2, gr * 2);
+      ctx.fillRect(gx0 - gr, gy0 - gr, gr * 2, gr * 2);
       ctx.restore();
     }
     ctx.globalCompositeOperation = "source-over";
-    ctx.beginPath();
-    ctx.arc(CX, CY, rpx, 0, TAU);
-    ctx.strokeStyle = pal.ink;
-    ctx.globalAlpha = 0.26 * globeOn;
-    ctx.lineWidth = 1;
-    ctx.stroke();
     ctx.globalAlpha = 1;
 
-    // ── the centres: where each stands on screen, and which one the pointer is nearest
-    let cand = -1;
-    let best = rich ? rpx * 0.34 : 0;
+    // ── the centres: where each stands on screen, and which one the pointer is nearest (on the globe,
+    // or on its row of the timeline)
+    let cand = tlRow >= 0 && tlRow < NC ? tlRow : -1;
+    let best = !f.mobile && lettering ? rpx * 0.36 : 0;
     for (let i = 0; i < NC; i++) {
       gp(CV[i * 3], CV[i * 3 + 1], CV[i * 3 + 2], 1);
       s.px[i] = X;
       s.py[i] = Y;
       s.pf[i] = F;
-      if (F < HOR + 0.04 || f.hover < 0.3 || dPointer > rpx * 1.12 || onLad || onRib) continue;
+      if (F < HOR + 0.04 || f.hover < 0.3 || pd > 1.06 || inTl) continue;
       const dist = Math.hypot(X - f.mx, Y - f.my);
       if (dist < best) {
         best = dist;
@@ -1401,6 +1270,8 @@ const scene: Scene<State> = {
       if (s.selK === 0) s.sel = cand;
     }
     const sel = s.selK > 0 ? s.sel : -1;
+    /** markers are drawn for a globe of some size and shrink with a small one */
+    const mk = clamp(rpx / 170, 0.5, 1.1);
 
     // ── a pulse leaves a centre and travels the globe: from one that is open, or, when none is,
     // from the one whose session opens next (in champagne)
@@ -1414,7 +1285,6 @@ const scene: Scene<State> = {
       } else pulseAt = s.next;
     }
     if (pulseAt >= 0) {
-      const tone = s.open[pulseAt] ? pal.emerald : pal.gold;
       const ox = CV[pulseAt * 3];
       const oy = CV[pulseAt * 3 + 1];
       const oz = CV[pulseAt * 3 + 2];
@@ -1427,7 +1297,7 @@ const scene: Scene<State> = {
       pulseR = pPulse * 2.5;
       pulseK = Math.pow(Math.sin(PI * pPulse), 0.7) * (1 - 0.45 * pPulse);
       ctx.globalCompositeOperation = "lighter";
-      ctx.strokeStyle = tone;
+      ctx.strokeStyle = s.open[pulseAt] ? HUE.open : HUE.gold;
       const n = lite ? 36 : 60;
       for (let ring = 0; ring < 2; ring++) {
         const rho = pulseR - ring * 0.16;
@@ -1448,7 +1318,7 @@ const scene: Scene<State> = {
             pen = true;
           }
         }
-        bloom(ctx, pulseK * (ring ? 0.35 : 0.9) * globeOn, ring ? 1 : 1.4);
+        bloom(ctx, pulseK * (ring ? 0.3 : 0.8) * globeOn, ring ? 1 : 1.4);
       }
       ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
@@ -1458,8 +1328,6 @@ const scene: Scene<State> = {
     const seg = f.q < 0.75 ? Math.round(s.seg * 0.7) : s.seg;
     const burst = pBurst >= 0 && s.npair > 0 ? Math.floor(dice(nBurst, 21) * s.npair) : -1;
     const trail = lite ? 5 : 9;
-    /** markers are drawn for a desk-sized globe and shrink with it */
-    const mk = clamp(rpx / 190, 0.62, 1);
     for (let p = 0; p < s.npair; p++) {
       const i = s.pairs[p * 2];
       const j = s.pairs[p * 2 + 1];
@@ -1495,31 +1363,28 @@ const scene: Scene<State> = {
       }
       const mine = sel >= 0 && (i === sel || j === sel) ? s.selK : 0;
       const quiet = sel >= 0 ? 1 - 0.55 * s.selK * (1 - mine) : 1;
-      const lit = (0.4 + 0.25 * wGlobe + 0.35 * mine + (p === burst ? 0.25 * Math.sin(PI * pBurst) : 0)) * quiet * globeOn;
-      ctx.strokeStyle = pal.key;
-      ctx.globalAlpha = lit * 0.2;
-      ctx.lineWidth = 4 + 2 * mine;
+      const lit = (0.5 + 0.25 * wake + 0.3 * mine + (p === burst ? 0.25 * Math.sin(PI * pBurst) : 0)) * quiet * globeOn;
+      ctx.strokeStyle = HUE.deep;
+      ctx.globalAlpha = 0.3 * lit;
+      ctx.lineWidth = (4.5 + 2 * mine) * mk;
       ctx.stroke();
-      ctx.globalAlpha = Math.min(1, lit);
-      ctx.lineWidth = 1.1 + 0.5 * mine;
+      ctx.strokeStyle = HUE.open;
+      ctx.globalAlpha = Math.min(1, lit * 1.15);
+      ctx.lineWidth = 1.3 + 0.6 * mine;
       ctx.stroke();
-      if (mine > 0.02) {
-        ctx.strokeStyle = pal.ink;
-        ctx.globalAlpha = 0.5 * mine;
-        ctx.lineWidth = 0.75;
-        ctx.stroke();
-      }
-      // couriers: light travelling the arc, each with its trail
       ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = lit * 0.3;
+      ctx.stroke();
+      // couriers: light travelling the arc, each with its trail
       const back = p & 1;
-      const count = still ? 1 : 1 + (wGlobe > 0.5 || mine > 0.5 ? 1 : 0) + (p === burst ? 5 : 0);
+      const count = still ? 1 : 1 + (wake > 0.5 || mine > 0.5 ? 1 : 0) + (p === burst ? 5 : 0);
       for (let c = 0; c < count; c++) {
         let h: number;
-        let size = 1.5;
+        let size = 1.5 * Math.max(0.7, mk);
         if (c >= count - (p === burst ? 5 : 0)) {
           // the burst: five in close order, quickly
           h = pBurst * 1.45 - (c - (count - 5)) * 0.09;
-          size = 2;
+          size *= 1.35;
         } else {
           const period = 5 + 3 * dice(p, 31);
           h = (t / period + dice(p, 32) + c * 0.5) % 1;
@@ -1535,10 +1400,10 @@ const scene: Scene<State> = {
           const x = A[k0 * 3] + (A[k0 * 3 + 3] - A[k0 * 3]) * fr;
           const y = A[k0 * 3 + 1] + (A[k0 * 3 + 4] - A[k0 * 3 + 1]) * fr;
           const fade = 1 - m / (trail + 1);
-          if (m === 0) spark(f, x, y, size, 0.95 * quiet * globeOn, pal.key);
+          if (m === 0) spark(f, x, y, size, 0.95 * quiet * globeOn, HUE.open);
           else {
             ctx.globalAlpha = 0.5 * fade * fade * quiet * globeOn;
-            ctx.fillStyle = pal.key;
+            ctx.fillStyle = HUE.up;
             ctx.beginPath();
             ctx.arc(x, y, size * (0.35 + 0.6 * fade), 0, TAU);
             ctx.fill();
@@ -1549,7 +1414,7 @@ const scene: Scene<State> = {
     }
     ctx.globalAlpha = 1;
 
-    // ── the centres themselves
+    // ── the centres themselves: a lamp for each, and, on the night side, the lights of the city
     let nb = 0;
     for (let pass = 0; pass < 2; pass++) {
       for (let i = 0; i < NC; i++) {
@@ -1557,10 +1422,32 @@ const scene: Scene<State> = {
         if ((st.state === "open") !== (pass === 0) || s.pf[i] < HOR + 0.02) continue;
         const x = s.px[i];
         const y = s.py[i];
-        const depth = (0.45 + 0.55 * sm((s.pf[i] - HOR) / 0.5)) * globeOn;
+        const depth = (0.5 + 0.5 * sm((s.pf[i] - HOR) / 0.5)) * globeOn;
         const open = st.state === "open";
-        const tone = open ? pal.emerald : st.state === "closed" ? pal.ink3 : pal.gold;
+        const tone = open ? HUE.open : st.state === "closed" ? pal.ink2 : HUE.gold;
         const mine = i === sel ? s.selK : 0;
+        if (!s.lit[i]) {
+          // night there: the city's own lights
+          const twinkle = still ? 0.8 : 0.72 + 0.28 * Math.sin(t * 2.3 + i * 2.1);
+          ctx.globalCompositeOperation = "lighter";
+          ctx.fillStyle = HUE.warm;
+          ctx.globalAlpha = 0.22 * depth * twinkle;
+          ctx.beginPath();
+          ctx.arc(x, y, 10 * mk, 0, TAU);
+          ctx.fill();
+          ctx.fillStyle = HUE.city;
+          ctx.globalAlpha = 0.9 * depth;
+          ctx.beginPath();
+          for (let q = 0; q < 9; q++) {
+            const qa = f.rnd(i * 13 + q + 500) * TAU;
+            const qr = (2.5 + 8 * f.rnd(i * 13 + q + 520)) * mk;
+            const on = still ? 1 : 0.55 + 0.45 * Math.sin(t * (1.3 + q * 0.37) + q * 2.1 + i);
+            ctx.moveTo(x + Math.cos(qa) * qr + 1, y + Math.sin(qa) * qr * 0.8);
+            ctx.arc(x + Math.cos(qa) * qr, y + Math.sin(qa) * qr * 0.8, (0.6 + 0.7 * on) * Math.max(0.7, mk), 0, TAU);
+          }
+          ctx.fill();
+          ctx.globalCompositeOperation = "source-over";
+        }
         // its session has just changed state (on the real timetable): a soft bloom opens from it
         const born = (t - s.turned[i]) / 4;
         if (born >= 0 && born < 1) {
@@ -1580,45 +1467,53 @@ const scene: Scene<State> = {
         if (open || flash > 0.02 || mine > 0.02) {
           const breathe = still ? 0.6 : 0.5 + 0.5 * Math.sin(t * 1.9 + i * 1.7);
           ctx.globalCompositeOperation = "lighter";
-          ctx.fillStyle = open ? pal.emerald : pal.gold;
-          ctx.globalAlpha = (open ? 0.14 + 0.1 * breathe : 0) * depth + 0.3 * flash + 0.12 * mine;
+          ctx.fillStyle = open ? HUE.open : HUE.gold;
+          ctx.globalAlpha = (open ? 0.2 + 0.12 * breathe : 0) * depth + 0.3 * flash + 0.14 * mine;
           ctx.beginPath();
-          ctx.arc(x, y, (9 + 5 * flash + 3 * mine) * mk, 0, TAU);
+          ctx.arc(x, y, (10 + 5 * flash + 3 * mine) * mk, 0, TAU);
           ctx.fill();
           ctx.globalCompositeOperation = "source-over";
           if (open) {
-            ctx.strokeStyle = pal.emerald;
-            ctx.globalAlpha = depth * (0.4 - 0.3 * breathe);
+            ctx.strokeStyle = HUE.open;
+            ctx.globalAlpha = depth * (0.5 - 0.38 * breathe);
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(x, y, (5 + 6 * breathe) * mk, 0, TAU);
+            ctx.arc(x, y, (5 + 7 * breathe) * mk, 0, TAU);
             ctx.stroke();
           }
         }
         ctx.globalAlpha = depth;
         ctx.beginPath();
-        ctx.arc(x, y, (3.1 + flash) * mk, 0, TAU);
+        ctx.arc(x, y, (3.2 + flash) * mk, 0, TAU);
         if (st.state === "closed") {
-          ctx.fillStyle = pal.bg;
+          ctx.fillStyle = HUE.deep;
           ctx.fill();
-          ctx.strokeStyle = flash > 0.05 ? pal.ink : tone;
-          ctx.lineWidth = 1.1;
+          ctx.strokeStyle = flash > 0.05 ? pal.ink : s.lit[i] ? pal.ink : HUE.city;
+          ctx.lineWidth = 1.2;
           ctx.stroke();
         } else {
           ctx.fillStyle = tone;
           ctx.fill();
           ctx.fillStyle = pal.ink;
-          ctx.globalAlpha = depth * 0.8;
+          ctx.globalAlpha = depth * 0.85;
           ctx.beginPath();
-          ctx.arc(x, y, 1.1 * mk, 0, TAU);
+          ctx.arc(x, y, 1.2 * mk, 0, TAU);
           ctx.fill();
         }
-        // names on a desk screen; their local times resolve as the globe wakes
+        if (mine > 0.02) {
+          // a reticle on the centre that is being read out
+          ctx.strokeStyle = HUE.gold;
+          ctx.globalAlpha = 0.9 * mine;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(x, y, 8.5 * Math.max(0.7, mk), t * 0.8, t * 0.8 + TAU * 0.78);
+          ctx.stroke();
+        }
+        // names where the globe is large enough for them; their local times resolve as it wakes
         if (!named || s.pf[i] < 0.3) continue;
         const name = st.centre.city;
         const tw = s.tw[i];
-        // beside its point, on the side away from the globe's axis, and always inside the globe's square
-        const lx = (x >= CX ? x + 10 + tw < mx0 - 4 : x - 10 - tw < b.x + 5) ? x + 10 : x - 10 - tw;
+        const lx = x >= CX ? x + 10 : x - 10 - tw;
         const BX = s.boxes;
         let clash = false;
         for (let k = 0; k < nb; k++) if (lx - 3 < BX[k * 4 + 2] && lx + tw + 3 > BX[k * 4] && y - 13 < BX[k * 4 + 3] && y + 13 > BX[k * 4 + 1]) clash = true;
@@ -1628,29 +1523,28 @@ const scene: Scene<State> = {
         BX[nb * 4 + 2] = lx + tw + 3;
         BX[nb * 4 + 3] = y + 13;
         nb++;
-        const show = depth * (1 - mine);
-        text(f, name, lx, y - 5, 11, pal.ink, (open ? 0.92 : 0.55 + 0.25 * wGlobe) * show, "left", 600, false, true);
-        text(f, part(st.local.label, wGlobe * 1.4), lx, y + 7, 10, pal.ink2, 0.85 * wGlobe * show * shown(y), "left", 500, false, true);
+        text(f, name, lx, y - 5, 11, pal.ink, (open ? 0.95 : 0.62 + 0.25 * wake) * depth, "left", 600, false, true);
+        text(f, part(st.local.label, wake * 1.4), lx, y + 7, 10, pal.ink2, 0.9 * wake * depth * shown(y), "left", 500, false, true);
       }
     }
     ctx.globalAlpha = 1;
 
     // ── a flare where the terminator meets the limb: first light
-    const flare = sside * globeOn * (0.55 + 0.25 * wGlobe + (still ? 0.1 : 0.12 * Math.sin(t * 0.6)));
+    const flare = sside * globeOn * (0.6 + 0.25 * wake + (still ? 0.1 : 0.12 * Math.sin(t * 0.6)));
     if (flare > 0.02) {
       const up = Math.sin(phi - PI / 2) < Math.sin(phi + PI / 2) ? phi - PI / 2 : phi + PI / 2;
       const fx = CX + Math.cos(up) * rpx;
       const fy = CY + Math.sin(up) * rpx;
-      const len = U * (lite ? 0.36 : 0.5) * (0.75 + 0.25 * wGlobe);
+      const len = rpx * (lite ? 0.4 : 0.6) * (0.75 + 0.25 * wake);
       ctx.globalCompositeOperation = "lighter";
-      g = ctx.createRadialGradient(fx, fy, 0, fx, fy, U * 0.42);
-      g.addColorStop(0, rgba(pal.ink, 0.5 * flare));
-      g.addColorStop(0.12, rgba(pal.key, 0.36 * flare));
-      g.addColorStop(0.4, rgba(pal.key, 0.1 * flare));
-      g.addColorStop(1, rgba(pal.key, 0));
+      g = ctx.createRadialGradient(fx, fy, 0, fx, fy, rpx * 0.5);
+      g.addColorStop(0, rgba(pal.ink, 0.6 * flare));
+      g.addColorStop(0.12, rgba(HUE.warm, 0.4 * flare));
+      g.addColorStop(0.4, rgba(HUE.warm, 0.1 * flare));
+      g.addColorStop(1, rgba(HUE.warm, 0));
       ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.arc(fx, fy, U * 0.42, 0, TAU);
+      ctx.arc(fx, fy, rpx * 0.5, 0, TAU);
       ctx.fill();
       // the streak, split a little into its colours
       g = ctx.createLinearGradient(fx - len, fy, fx + len, fy);
@@ -1658,378 +1552,506 @@ const scene: Scene<State> = {
       g.addColorStop(0.5, rgba(pal.ink, 0.85 * flare));
       g.addColorStop(1, rgba(pal.ink, 0));
       for (let k = -1; k <= 1; k++) {
-        ctx.strokeStyle = k ? (k < 0 ? pal.crimson : pal.blue) : g;
-        ctx.globalAlpha = k ? 0.2 * flare : 1;
+        ctx.strokeStyle = k ? (k < 0 ? HUE.warm : HUE.air) : g;
+        ctx.globalAlpha = k ? 0.22 * flare : 1;
         ctx.lineWidth = k ? 1 : 1.2;
         ctx.beginPath();
         ctx.moveTo(fx - len * (k ? 0.5 : 1), fy + k * 1.6);
         ctx.lineTo(fx + len * (k ? 0.5 : 1), fy + k * 1.6);
         ctx.stroke();
       }
-      ctx.strokeStyle = pal.ink;
-      ctx.globalAlpha = 0.5 * flare;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(fx, fy - len * 0.2);
-      ctx.lineTo(fx, fy + len * 0.2);
-      ctx.stroke();
-      spark(f, fx, fy, 1.9, Math.min(1, flare * 1.3), pal.key);
+      spark(f, fx, fy, 1.9 * Math.max(0.7, mk), Math.min(1, flare * 1.3), HUE.warm);
       // two ghosts on the line through the centre, as a lens makes them
-      ctx.strokeStyle = pal.key;
+      ctx.strokeStyle = HUE.air;
       ctx.lineWidth = 1;
       for (let k = 0; k < 2; k++) {
         const along = k ? 1.36 : 0.52;
         ctx.globalAlpha = (k ? 0.16 : 0.1) * flare;
         ctx.beginPath();
-        ctx.arc(fx + (CX - fx) * along, fy + (CY - fy) * along, k ? 9 : 5, 0, TAU);
+        ctx.arc(fx + (CX - fx) * along, fy + (CY - fy) * along, (k ? 9 : 5) * mk, 0, TAU);
         ctx.stroke();
       }
       ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
     }
 
-    // ══ the tape's near side passes in front of the globe
-    tape(f, s, true, tapeOn, wTape, pPrint, dice(nPrint, 9) * TAU, clearX);
-
-    // ══ a comet circles the dial
-    if (pComet >= 0 && dialOn > 0.5) {
-      const head = dice(nComet, 41) * TAU + pComet * TAU * 1.2;
+    // ══ a comet circles the globe, just off its air
+    if (pComet >= 0 && formOn > 0.5) {
+      const head = dice(nComet, 41) * TAU - pComet * TAU * 1.2;
       const env = Math.pow(Math.sin(PI * pComet), 0.5);
       const n = lite ? 16 : 30;
       ctx.globalCompositeOperation = "lighter";
       ctx.strokeStyle = pal.key;
-      dp(head, RD);
+      fp(head, 1.075, 0);
       let x0 = X;
       let y0 = Y;
       const hx = X;
       const hy = Y;
       for (let k = 1; k <= n; k++) {
-        dp(head - k * (1.05 / n), RD);
+        fp(head + k * (1.05 / n), 1.075, 0);
         const fade = 1 - k / (n + 1);
-        if (Math.min(x0, X) > clearX) {
-          ctx.globalAlpha = env * fade * fade * 0.2;
-          ctx.lineWidth = 2 + 8 * fade;
-          ctx.beginPath();
-          ctx.moveTo(x0, y0);
-          ctx.lineTo(X, Y);
-          ctx.stroke();
-          ctx.globalAlpha = env * Math.pow(fade, 1.5) * 0.95;
-          ctx.lineWidth = 0.7 + 2.8 * fade;
-          ctx.beginPath();
-          ctx.moveTo(x0, y0);
-          ctx.lineTo(X, Y);
-          ctx.stroke();
-        }
+        ctx.globalAlpha = env * fade * fade * 0.2;
+        ctx.lineWidth = (2 + 8 * fade) * mk;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(X, Y);
+        ctx.stroke();
+        ctx.globalAlpha = env * Math.pow(fade, 1.5) * 0.95;
+        ctx.lineWidth = (0.7 + 2.8 * fade) * mk;
+        ctx.stroke();
         x0 = X;
         y0 = Y;
       }
-      if (hx > clearX) spark(f, hx, hy, 2.3, env, pal.key);
+      spark(f, hx, hy, 2.3 * Math.max(0.7, mk), env, pal.key);
       ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
     }
-    // the lamp of the present minute stands over everything on the dial
-    if (dialOn > 0.01) {
-      dp(nowA, RD);
-      if (X > clearX) {
-        ctx.globalCompositeOperation = "lighter";
-        spark(f, X, Y, 2.1, dialOn, pal.key);
-        ctx.globalCompositeOperation = "source-over";
-        ctx.globalAlpha = 1;
-      }
-    }
 
-    if (panes) {
-      // ══ the depth ladder: a pane of glass in the minor section, turned toward the globe
-      glass(f, L, ladOn, Math.max(wLadder * 0.6, onLad));
-      ctx.globalCompositeOperation = "lighter";
-      sheen(f, L, Math.max(pSheen, waking ? wLadder : 0), ladOn);
-      ctx.globalCompositeOperation = "source-over";
-      const N = ladN;
-      const stp = 0.41 / N;
+    // ══ the depth ladder: two fins of light that face each other across the globe, nearer the viewer
+    // than it is. Each level is a bar; the levels grow away from the middle, and breathe.
+    {
+      const NL = lite ? 3 : 4;
+      const step = 0.6 / NL;
       const side = dice(nSweep, 51) > 0.5 ? 1 : 0;
-      // the spine, with a mark for every level
-      line(ctx, L, 0.5, 0.06, 0.5, 0.94);
-      for (let i = 0; i < N * 2; i++) {
-        const v = i < N ? 0.47 - (i + 0.5) * stp : 0.53 + (i - N + 0.5) * stp;
-        pq(L, 0.485, v);
-        ctx.moveTo(X, Y);
-        pq(L, 0.515, v);
-        ctx.lineTo(X, Y);
-      }
-      ctx.strokeStyle = pal.ink;
-      ctx.globalAlpha = (0.24 + 0.2 * wLadder) * ladOn;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      for (let up = 0; up < 2; up++) {
-        ctx.fillStyle = up ? pal.ink : pal.key;
-        for (let i = 0; i < N; i++) {
-          const vc = up ? 0.53 + (i + 0.5) * stp : 0.47 - (i + 0.5) * stp;
-          // resting depth grows away from the middle, and breathes
-          let len = (0.3 + 0.7 * Math.pow((i + 1) / N, 0.75)) * (still ? 0.7 + 0.3 * f.rnd(i + up * 20 + 300) : 0.74 + 0.26 * Math.sin(t * (0.5 + 0.6 * f.rnd(i + up * 20 + 300)) + f.rnd(i + up * 20 + 340) * TAU));
+      const finLevel = onFin ? Math.round((CY - f.my) / (step * rpx)) : 99;
+      const finSide = f.mx > CX ? 1 : 0;
+      for (let k2 = 0; k2 < 2; k2++) {
+        const sgn = k2 ? 1 : -1;
+        fp(k2 ? 0 : PI, 1.17, -0.25);
+        const gx0 = X;
+        fp(k2 ? 0 : PI, 1.58, -0.25);
+        g = ctx.createLinearGradient(gx0, 0, X, 0);
+        g.addColorStop(0, rgba(k2 ? HUE.ask : HUE.bid, 0.95));
+        g.addColorStop(0.55, rgba(k2 ? HUE.ask : HUE.bid, 0.42));
+        g.addColorStop(1, rgba(k2 ? HUE.ask : HUE.bid, 0.02));
+        for (let k = -NL; k <= NL; k++) {
+          const y = k * step;
+          const inner = Math.sqrt(1.17 * 1.17 - y * y);
+          const far = Math.abs(k) / NL;
+          let len = (0.3 + 0.7 * Math.pow(far, 0.8)) * (still ? 0.72 + 0.28 * f.rnd(k + k2 * 20 + 310) : 0.74 + 0.26 * Math.sin(t * (0.5 + 0.6 * f.rnd(k + k2 * 20 + 310)) + f.rnd(k + k2 * 20 + 350) * TAU));
           let flash = 0;
-          if (pSweep >= 0 && up === side) {
+          if (pSweep >= 0 && k2 === side) {
             // the sweep takes each level as it passes, and the level refills behind it
-            const since = pSweep * 1.5 - i / N;
-            if (since > 0) {
-              const back = clamp(since / 0.5);
+            const gone = pSweep * 1.5 - far * 0.9;
+            if (gone > 0) {
+              const back = clamp(gone / 0.5);
               len *= 0.14 + 0.86 * back * back;
               flash = (1 - back) * (1 - back);
             }
           }
-          const near = onLad * clamp(1 - Math.abs(vc - ladV) / (stp * 1.6));
-          len = Math.min(1, len * (0.72 + 0.28 * wLadder) * (1 + 0.3 * near)) * ladOn;
-          const u0 = up ? 0.54 : 0.46 - len * 0.4;
+          const near = onFin && finSide === k2 && k === finLevel ? onFin : 0;
+          len = Math.min(1, len * (0.74 + 0.26 * wake) * (1 + 0.25 * near)) * 0.4 * formOn;
+          const z = -0.25 - near * 0.05;
+          // a blade: broad where it leaves the globe's air, drawn out to a fine edge
+          const h = step * 0.21 * R;
           ctx.beginPath();
-          quad(ctx, L, u0, vc - stp * 0.31, u0 + len * 0.4, vc + stp * 0.31, near * 0.05);
-          ctx.globalAlpha = Math.min(1, (0.42 + 0.3 * wLadder + 0.5 * flash + 0.4 * near) * (1 - (i / N) * 0.3) * ladOn);
+          pr(sgn * inner * R, y * R - h, z);
+          ctx.moveTo(X, Y);
+          pr(sgn * (inner + len) * R, y * R - h * 0.16, z);
+          ctx.lineTo(X, Y);
+          pr(sgn * (inner + len) * R, y * R + h * 0.16, z);
+          ctx.lineTo(X, Y);
+          pr(sgn * inner * R, y * R + h, z);
+          ctx.lineTo(X, Y);
+          ctx.closePath();
+          ctx.fillStyle = g;
+          ctx.globalAlpha = Math.min(1, (0.6 + 0.3 * wake + 0.4 * near) * formOn);
           ctx.fill();
-          if (flash > 0.05) {
+          ctx.globalCompositeOperation = "lighter";
+          ctx.globalAlpha = (0.22 + 0.2 * wake) * formOn;
+          ctx.fill();
+          ctx.globalCompositeOperation = "source-over";
+          if (flash > 0.05 || near > 0.05) {
             ctx.globalCompositeOperation = "lighter";
-            ctx.fillStyle = pal.gold;
-            ctx.globalAlpha = 0.5 * flash * ladOn;
+            ctx.fillStyle = HUE.gold;
+            ctx.globalAlpha = Math.min(1, 0.6 * flash + 0.5 * near) * formOn;
             ctx.fill();
-            ctx.fillStyle = up ? pal.ink : pal.key;
             ctx.globalCompositeOperation = "source-over";
           }
         }
       }
-      // the sweep's own line of light, and the level under the pointer
-      if (pSweep >= 0 && pSweep * 1.5 < 1.05) {
-        const v = side ? 0.53 + pSweep * 1.5 * 0.41 : 0.47 - pSweep * 1.5 * 0.41;
-        ctx.globalCompositeOperation = "lighter";
-        line(ctx, L, 0.04, v, 0.96, v);
-        ctx.strokeStyle = pal.gold;
-        bloom(ctx, 0.9 * ladOn * sm(pSweep * 12), 1.1);
-        ctx.globalCompositeOperation = "source-over";
-      }
-      if (onLad > 0.02 && ladV > 0.05 && ladV < 0.95) {
-        line(ctx, L, 0.02, ladV, 0.98, ladV, 0.05);
-        ctx.strokeStyle = pal.gold;
-        ctx.globalAlpha = 0.8 * onLad;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
       ctx.globalAlpha = 1;
-      pq(L, 0.5, 1);
-      text(f, part("DEPTH LADDER", wLadder * 1.3), X, Y - 11, 9, pal.ink2, 0.8 * wLadder * ladOn * shown(Y), "center");
-      pq(L, 0.5, 0);
-      text(f, part("ILLUSTRATION", wLadder * 1.3), X, Y + 11, 8, pal.ink3, 0.75 * wLadder * ladOn, "center");
+    }
 
-      // ══ the candle ribbon: a pane on the console under the ladder, leaning back
-      glass(f, B, ribOn, Math.max(wRibbon * 0.6, onRib));
-      ctx.globalCompositeOperation = "lighter";
-      sheen(f, B, Math.max(pSheen >= 0 ? pSheen * 1.2 - 0.2 : -1, waking ? wRibbon : 0), ribOn);
-      ctx.globalCompositeOperation = "source-over";
-      const M = ribM;
-      const du = 0.92 / M;
+    // ══ the candle ribbon: candles standing on an arc under the globe, moving along it
+    {
+      const a0 = 215 * DEG;
+      const a1 = 325 * DEG;
+      const M = lite ? 15 : 26;
+      const da = (a1 - a0) / M;
       const run = still ? 40.6 : t * 0.42;
       const n0 = Math.floor(run);
       const fr = run - n0;
       /** the ribbon's line: a few slow waves and a little grain. It is a drawing, and it carries no scale. */
       const val = (n: number) => 0.5 + 0.2 * Math.sin(n * 0.23 + 1.3) + 0.13 * Math.sin(n * 0.61 + 4.1) + 0.07 * Math.sin(n * 1.43 + 0.7) + 0.06 * (dice(n, 61) - 0.5);
-      const lit = (0.62 + 0.3 * wRibbon) * ribOn;
+      const canA = onCan ? pang + TAU : -9;
+      const lit = (0.7 + 0.3 * wake) * formOn;
+      // the arc they stand on, as a soft light
+      ctx.beginPath();
+      for (let i = 0; i <= 18; i++) {
+        fp(a0 + ((a1 - a0) * i) / 18, 1.13, -0.12);
+        if (i) ctx.lineTo(X, Y);
+        else ctx.moveTo(X, Y);
+      }
+      ctx.strokeStyle = pal.key;
+      ctx.globalAlpha = 0.1 * lit;
+      ctx.lineWidth = Math.max(3, rpx * 0.03);
+      ctx.stroke();
       // wicks, the rising bodies, the falling bodies; then the candle under the pointer, in champagne
-      for (let pass = 0; pass < (onRib > 0.02 ? 4 : 3); pass++) {
+      for (let pass = 0; pass < (onCan > 0.02 ? 4 : 3); pass++) {
         ctx.beginPath();
         for (let j = 0; j <= M; j++) {
           const n = n0 - (M - j);
-          const u = 0.04 + (j - fr + 0.5) * du;
-          if (u < 0.03 || u > 0.97) continue;
+          const a = a0 + (j - fr + 0.5) * da;
+          if (a < a0 + da * 0.3 || a > a1 - da * 0.3) continue;
+          // toward either end of the arc the candles settle onto it
+          const ef = sm((a - a0) / (da * 2.6)) * sm((a1 - a) / (da * 1.4));
           const o = val(n);
-          // the newest candle is still forming
           const grow = j === M ? fr : 1;
           const c = o + (val(n + 1) - o) * grow;
           const rise = c >= o;
           if (pass === 1 ? !rise : pass === 2 ? rise : false) continue;
-          const near = onRib * clamp(1 - Math.abs(u - ribU) / (du * 1.5));
+          const near = onCan * clamp(1 - Math.abs(a - canA) / (da * 1.2));
           if (pass === 3 && near < 0.34) continue;
-          const lift = near * 0.06;
-          const v0 = 0.14 + 0.72 * Math.min(o, c);
-          const v1 = 0.14 + 0.72 * Math.max(o, c);
+          const r0 = 1.16 + (0.5 + (Math.min(o, c) - 0.5) * ef) * 0.27;
+          const r1 = Math.max(r0 + 0.014, 1.16 + (0.5 + (Math.max(o, c) - 0.5) * ef) * 0.27);
+          const z = -0.12 - near * 0.06;
           if (pass === 0) {
-            const wick = grow * (0.02 + 0.07 * dice(n, 62));
-            const wick2 = grow * (0.02 + 0.07 * dice(n, 63));
-            if (!pq(B, u, clamp(v0 - wick2, 0.05, 0.95), lift)) continue;
+            if (!fp(a, r0 - grow * ef * (0.01 + 0.035 * dice(n, 63)), z)) continue;
             ctx.moveTo(X, Y);
-            pq(B, u, clamp(v1 + wick, 0.05, 0.95), lift);
+            fp(a, r1 + grow * ef * (0.01 + 0.035 * dice(n, 62)), z);
             ctx.lineTo(X, Y);
-          } else quad(ctx, B, u - du * 0.3, v0, u + du * 0.3, Math.max(v1, v0 + 0.03), lift);
+          } else {
+            fp(a - da * 0.34, r0, z);
+            ctx.moveTo(X, Y);
+            fp(a + da * 0.34, r0, z);
+            ctx.lineTo(X, Y);
+            fp(a + da * 0.34, r1, z);
+            ctx.lineTo(X, Y);
+            fp(a - da * 0.34, r1, z);
+            ctx.lineTo(X, Y);
+            ctx.closePath();
+          }
         }
         if (pass === 0) {
           ctx.strokeStyle = pal.ink;
-          ctx.globalAlpha = 0.55 * lit;
-          ctx.lineWidth = 1;
+          ctx.globalAlpha = 0.7 * lit;
+          ctx.lineWidth = Math.max(1, rpx * 0.007);
           ctx.stroke();
         } else {
-          ctx.fillStyle = pass === 1 ? pal.key : pass === 2 ? pal.ink2 : pal.gold;
-          ctx.globalAlpha = (pass === 2 ? 0.5 : 0.95) * lit;
+          ctx.fillStyle = pass === 1 ? HUE.up : pass === 2 ? HUE.down : HUE.gold;
+          ctx.globalAlpha = (pass === 2 ? 0.85 : 1) * lit;
           ctx.fill();
+          if (pass === 1) {
+            ctx.globalCompositeOperation = "lighter";
+            ctx.globalAlpha = 0.3 * lit;
+            ctx.fill();
+            ctx.globalCompositeOperation = "source-over";
+          }
         }
       }
-      if (onRib > 0.02) {
-        // a hairline follows the pointer along the ribbon
-        line(ctx, B, clamp(ribU, 0.02, 0.98), 0.04, clamp(ribU, 0.02, 0.98), 0.96, 0.06);
-        ctx.strokeStyle = pal.gold;
-        ctx.globalAlpha = 0.85 * onRib;
+      if (onCan > 0.02 && canA > a0 && canA < a1) {
+        // a hairline follows the pointer through the ribbon
+        fp(canA, 1.1, -0.18);
+        ctx.beginPath();
+        ctx.moveTo(X, Y);
+        fp(canA, 1.46, -0.18);
+        ctx.lineTo(X, Y);
+        ctx.strokeStyle = HUE.gold;
+        ctx.globalAlpha = 0.85 * onCan;
         ctx.lineWidth = 1;
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
-      pq(B, 0, 1);
-      text(f, part(mw >= 200 ? "CANDLE RIBBON" : "CANDLES", wRibbon * 1.3), X + 2, Y - 10, 9, pal.ink2, 0.8 * wRibbon * ribOn);
-      pq(B, 1, 1);
-      text(f, part("ILLUSTRATION", wRibbon * 1.3), X - 2, Y - 10, 8, pal.ink3, 0.75 * wRibbon * ribOn, "right");
+      // what these three are, said once, as the scene wakes
+      if (lettering && tower && wake > 0.02) {
+        const ny = b.y + H - band1 - 9;
+        text(f, part("TAPE · LADDER · CANDLES", wake * 1.3), b.x + inset + 2, ny - 10, 8, pal.ink2, 0.85 * wake * shown(ny));
+        text(f, part("ILLUSTRATION", wake * 1.3), b.x + inset + 2, ny, 8, pal.ink3, 0.85 * wake * shown(ny));
+      }
     }
 
     // ══ dust between the viewer and the instrument, in the field's own scale
     UU = fieldU;
-    motes(f, s, true, f.boot, clearX);
+    motes(f, s, true, f.boot, -1e6);
     UU = unit;
 
-    // ── the clock, and the region that carries the day: at the head of the minor section, or, in a
-    // frame with no panes, in the corner the globe leaves free
-    {
-      const hud = f.on(0.5, 0.4);
-      const clock = `${WEEK[f.now.getUTCDay()]} ${pad(hours)}:${pad(minutes)} UTC`;
-      const lit: number = f.region === "asia" ? 0 : f.region === "europe" ? 1 : f.region === "americas" ? 2 : -1;
-      if (!panes) {
-        if (H >= 90) {
-          text(f, clock.slice(0, 9), b.x + inset, b.y + H - inset - 16, 9, pal.ink, 0.85 * hud);
-          text(f, lit >= 0 ? `UTC · ${REGIONS[lit]}` : "UTC", b.x + inset, b.y + H - inset - 4, 8, pal.ink2, 0.8 * hud);
+    // ══ the words. In a tall frame they stand in the band over the globe, the clock to the left and
+    // the counts to the right; in a wide one they are a column beside it.
+    const hours = f.now.getUTCHours();
+    const minutes = f.now.getUTCMinutes();
+    const wordsOn = f.on(0.5, 0.4);
+    const bright = 0.82 + 0.18 * wake;
+    const ax = tower ? b.x + inset + 2 : colX;
+    const ay = b.y + inset + (lettering ? 9 : 7);
+    const big = tower ? clamp(band0 * 0.24, 15, 22) : lettering ? 18 : 14;
+    const small = !lettering ? 8 : tower && W >= 600 ? 10 : 9;
+    const k = sm(s.selK);
+    // (a frame with no room for words carries the globe alone)
+    if (tower || colW >= 96) {
+      // the clock, and the FX sessions open now
+      text(f, `${WEEK[f.now.getUTCDay()]} ${pad(hours)}:${pad(minutes)}`, ax, ay + 2, big, pal.ink, 0.95 * wordsOn, "left", 500, true);
+      ctx.font = `500 ${big}px ${pal.display}`;
+      text(f, "UTC", ax + ctx.measureText(`${WEEK[f.now.getUTCDay()]} ${pad(hours)}:${pad(minutes)}`).width + 6, ay + 4, 8, pal.ink3, 0.9 * wordsOn);
+      // on the timeline the pointer reads an hour: the reading takes the place of the FX line
+      let reading = "";
+      let readingNames = "";
+      if (inTl > 0.02) {
+        const m = clamp(((f.mx - axX) / axW) * SPAN - PAST + since, -PAST, SPAN - PAST);
+        const at = Math.round((hours * 60 + minutes + m - since) / 5) * 5;
+        reading = `${clockOf(at)} UTC`;
+        for (let i = 0; i < 4; i++) for (let j = 0; j < s.nfx[i]; j++) if (m >= s.fxb[i * 6 + j * 2] && m < s.fxb[i * 6 + j * 2 + 1]) readingNames += (readingNames ? " × " : "") + fxSessions[i].name.toUpperCase();
+        if (!readingNames) readingNames = "BETWEEN FX SESSIONS";
+      }
+      const fy = ay + big * 0.62 + ls * 0.75;
+      pair(f, inTl > 0.02 ? reading : "FX", inTl > 0.02 ? readingNames : s.fxWords, ax, fy, small, inTl > 0.02 ? pal.ink : pal.ink3, HUE.gold, bright * wordsOn);
+
+      // the counts; or, while a centre is under the pointer, that centre read out
+      const rightSide = tower;
+      const bx = tower ? b.x + W - inset - 2 : colX;
+      let by = tower ? ay : fy + ls * 1.25;
+      const idle = (1 - k) * bright * wordsOn;
+      if (idle > 0.01) {
+        if (H >= 160) {
+          // the region that carries the day
+          let rx = bx;
+          const lit = f.region === "asia" ? 0 : f.region === "europe" ? 1 : f.region === "americas" ? 2 : -1;
+          ctx.font = `600 8px ${pal.font}`;
+          for (let q = 0; q < 3; q++) {
+            const r = rightSide ? 2 - q : q;
+            const on = r === lit;
+            const w = ctx.measureText(REGIONS[r]).width;
+            const dotX = rightSide ? rx - w - 6 : rx + 2;
+            ctx.globalAlpha = (on ? 1 : 0.45) * idle;
+            ctx.fillStyle = on ? pal.key : pal.ink3;
+            ctx.beginPath();
+            ctx.arc(dotX, by, on ? 2.4 : 1.6, 0, TAU);
+            ctx.fill();
+            text(f, REGIONS[r], rightSide ? rx : rx + 8, by, 8, on ? pal.ink : pal.ink3, (on ? 0.95 : 0.55) * idle, rightSide ? "right" : "left");
+            rx += (rightSide ? -1 : 1) * (w + 18);
+          }
+          by += ls;
         }
-      } else {
-        const hx = b.x + b.w - inset - 2;
-        const hy = b.y + inset + 7;
-        text(f, clock, hx, hy, 11, pal.ink, 0.85 * hud, "right");
-        let rx = hx;
-        for (let k = 2; k >= 0; k--) {
-          // a narrow frame names only the region that carries the day
-          if (mw < 200 && k !== lit) continue;
-          const on = k === lit;
-          text(f, REGIONS[k], rx, hy + 16, 8, on ? pal.ink : pal.ink3, (on ? 0.95 : 0.4 + 0.25 * wDial) * hud, "right");
-          rx -= s.tw[NC + k] + 6;
-          ctx.globalAlpha = (on ? 1 : 0.4) * hud;
-          ctx.fillStyle = on ? pal.key : pal.ink3;
-          ctx.beginPath();
-          ctx.arc(rx, hy + 16, on ? 2.4 : 1.6, 0, TAU);
-          ctx.fill();
-          rx -= 12;
-        }
-        ctx.globalAlpha = 1;
+        pair(f, "OPEN NOW", `${s.nopen} OF ${NC}`, bx, by, small, pal.ink3, s.nopen ? HUE.open : pal.ink, idle, rightSide);
+        pair(f, "IN DAYLIGHT", `${s.nlit} OF ${NC}`, bx, by + ls, small, pal.ink3, HUE.city, idle, rightSide);
+        if (s.nextWords) pair(f, "NEXT OPEN", s.nextWords, bx, by + ls * 2, small, pal.ink3, pal.ink, idle, rightSide);
       }
-    }
-
-    if (rich) {
-      // ── the corners the dial leaves free in its square carry what the timetable says in words:
-      // the FX sessions open now, the centres in daylight, the next regular open, the centres open
-      const cornerA = f.on(0.6, 0.4) * (0.72 + 0.28 * wDial);
-      const tx0 = b.x + inset + 2;
-      const tx1 = mx0 - inset - 2;
-      const ty0 = b.y + inset + 7;
-      const ty1 = b.y + H - inset - 6;
-      const still0 = clamp(1 - onDial * 4);
-      text(f, "FX", tx0, ty0, 8, pal.ink3, 0.9 * cornerA * still0);
-      text(f, s.fxWords, tx0 + 15, ty0, 8, pal.gold, 0.95 * cornerA * still0);
-      text(f, `${s.nlit} OF ${NC}`, tx1, ty0, 8, pal.ink, 0.9 * cornerA, "right");
-      text(f, "IN DAYLIGHT", tx1 - 36, ty0, 8, pal.ink3, 0.9 * cornerA, "right");
-      if (s.nextWords) {
-        text(f, "NEXT OPEN", tx0, ty1, 8, pal.ink3, 0.9 * cornerA);
-        text(f, s.nextWords, tx0 + 55, ty1, 8, pal.ink, 0.9 * cornerA);
-      }
-      text(f, `${s.nopen} OF ${NC}`, tx1, ty1, 8, pal.ink, 0.9 * cornerA, "right");
-      text(f, "OPEN NOW", tx1 - 36, ty1, 8, pal.ink3, 0.9 * cornerA, "right");
-
-      // ── the hour under the pointer, read off the dial, and the FX windows it falls in: the reading
-      // stands in the corner of the globe's square
-      if (onDial > 0.02) {
-        const mins = Math.round(((scrubA / TAU) * 1440) / 5) * 5;
-        const a = (mins / 1440) * TAU;
-        ctx.strokeStyle = pal.gold;
-        ctx.beginPath();
-        dp(a, RD - 0.1);
-        ctx.moveTo(X, Y);
-        dp(a, RD + 0.1);
-        ctx.lineTo(X, Y);
-        ctx.globalAlpha = 0.9 * onDial;
-        ctx.lineWidth = 1.25;
-        ctx.stroke();
-        let names = "";
-        for (let k = 0; k < 4; k++) if ((((mins - s.fx[k * 2]) % 1440) + 1440) % 1440 < s.fx[k * 2 + 1]) names += (names ? " · " : "") + fxSessions[k].name.toUpperCase();
-        text(f, `${pad(Math.floor(mins / 60) % 24)}:${pad(mins % 60)} UTC`, b.x + inset + 2, b.y + inset + 7, 11, pal.ink, clamp(onDial * 3));
-        text(f, names || "BETWEEN FX WINDOWS", b.x + inset + 2, b.y + inset + 21, 8, pal.gold, 0.9 * clamp(onDial * 3));
-      }
-
-      // ── the readout of the centre under the pointer: its real local time and its regular session
-      if (sel >= 0 && s.st[sel]) {
+      if (sel >= 0 && s.st[sel] && k > 0.01) {
         const st = s.st[sel];
-        const k = sm(s.selK);
-        const x = s.px[sel];
-        const y = s.py[sel];
-        const tone = st.state === "open" ? pal.emerald : st.state === "closed" ? pal.ink3 : pal.gold;
-        const state = st.state === "open" ? "Regular session open" : st.state === "lunch" ? "Midday break" : st.state === "pre" ? "Pre-open" : "Regular session closed";
-        const note = `${state} · ${formatDuration(st.nextChangeIn)} ${st.nextLabel}`;
-        ctx.font = `500 10px ${pal.font}`;
         const c = st.centre;
-        const hoursLine = `Regular hours ${clockOf(c.open)} to ${clockOf(c.close)}${c.lunch ? `, break ${clockOf(c.lunch[0])} to ${clockOf(c.lunch[1])}` : ""}`;
+        const ry = tower ? ay : fy + ls * 1.25;
+        const tone = st.state === "open" ? HUE.open : st.state === "closed" ? pal.ink2 : HUE.gold;
+        const state = st.state === "open" ? "Regular session open" : st.state === "lunch" ? "Midday break" : st.state === "pre" ? "Pre-open" : "Regular session closed";
         const off = s.off[sel];
         const zone = `UTC${off < 0 ? "-" : "+"}${Math.floor(Math.abs(off) / 60)}${Math.abs(off) % 60 ? ":" + pad(Math.abs(off) % 60) : ""}`;
-        const sunLine = `Daylight ${clockOf(s.rise[sel] + off)} to ${clockOf(s.set[sel] + off)} · ${s.lit[sel] ? "sun up" : "sun down"}`;
-        const cw = Math.min(b.w - 16, Math.max(190, ctx.measureText(note).width + 38, ctx.measureText(hoursLine).width + 28));
-        const ch = 100;
-        // the card opens beside the centre, and always inside the frame
-        let bx = x + 20;
-        if (bx + cw > b.x + b.w - 8) bx = x - 20 - cw;
-        bx = clamp(bx, b.x + 8, b.x + b.w - cw - 8);
-        let by = y - ch - 16;
-        if (by < b.y + 8) by = y + 18;
-        by = Math.min(by, b.y + H - ch - 8) + (1 - k) * 8;
-        // a reticle on the centre and a leader to the card
-        ctx.strokeStyle = pal.gold;
-        ctx.globalAlpha = 0.9 * k;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(x, y, 8, t * 0.8, t * 0.8 + TAU * 0.78);
-        ctx.moveTo(x + (bx > x ? 8 : -8), y + (by < y ? -5 : 5));
-        ctx.lineTo(bx > x ? bx : bx + cw, by < y ? by + ch : by);
-        ctx.stroke();
-        ctx.globalAlpha = k;
-        ctx.fillStyle = rgba(pal.bg, 0.97);
-        ctx.fillRect(bx, by, cw, ch);
-        ctx.fillStyle = rgba(pal.key, 0.07);
-        ctx.fillRect(bx, by, cw, ch);
-        ctx.strokeStyle = rgba(pal.ink, 0.22);
-        ctx.strokeRect(bx + 0.5, by + 0.5, cw - 1, ch - 1);
-        ctx.fillStyle = tone;
-        ctx.fillRect(bx, by, cw, 2);
-        text(f, st.centre.city.toUpperCase(), bx + 13, by + 16, 10, pal.ink, 0.95 * k, "left", 700);
-        text(f, st.centre.venue, bx + cw - 13, by + 16, 10, pal.ink3, 0.9 * k, "right", 500);
-        text(f, part(st.local.label, k * 1.5), bx + 13, by + 36, 19, pal.ink, k, "left", 500, true);
-        ctx.font = `500 19px ${pal.display}`;
-        const lw = ctx.measureText(st.local.label).width;
-        text(f, `LOCAL TIME · ${zone}`, bx + 21 + lw, by + 38, 8, pal.ink3, 0.9 * k);
-        text(f, part(hoursLine, k * 1.3), bx + 13, by + 72, 10, pal.ink2, 0.9 * k, "left", 500);
-        text(f, part(sunLine, k * 1.3), bx + 13, by + 86, 10, pal.ink3, 0.95 * k, "left", 500);
-        ctx.globalAlpha = k;
-        ctx.fillStyle = tone;
-        ctx.beginPath();
-        ctx.arc(bx + 16, by + 55, 2.6, 0, TAU);
-        ctx.fill();
-        text(f, part(note, k * 1.3), bx + 25, by + 55.5, 10, pal.ink2, 0.95 * k, "left", 500);
-        ctx.globalAlpha = 1;
+        const a = k * wordsOn;
+        pair(f, c.city.toUpperCase(), `${c.venue} · ${zone}`, bx, ry, 10, pal.ink, pal.ink3, a, rightSide, 700);
+        pair(f, part(st.local.label, k * 1.5), "local time", bx, ry + ls * 1.25, 10, pal.ink, pal.ink3, a, rightSide);
+        pair(f, part(state, k * 1.3), `${formatDuration(st.nextChangeIn)} ${st.nextLabel}`, bx, ry + ls * 2.35, small, tone, pal.ink2, a, rightSide);
+        if (H >= 160) {
+          text(f, part(`Hours ${clockOf(c.open)} to ${clockOf(c.close)}${c.lunch ? `, break ${clockOf(c.lunch[0])} to ${clockOf(c.lunch[1])}` : ""}`, k * 1.3), bx, ry + ls * 3.35, small, pal.ink2, 0.92 * a, rightSide ? "right" : "left", 500, false, true);
+          text(f, part(`Daylight ${clockOf(s.rise[sel] + off)} to ${clockOf(s.set[sel] + off)}, ${s.lit[sel] ? "sun up" : "sun down"}`, k * 1.3), bx, ry + ls * 4.35, small, HUE.city, 0.85 * a, rightSide ? "right" : "left", 500, false, true);
+        }
+        // a line of light from the centre to its reading
+        if (s.pf[sel] > HOR && tower) {
+          const tx = bx - 40;
+          const ty = ry + ls * 5.1;
+          g = ctx.createLinearGradient(s.px[sel], s.py[sel], tx, ty);
+          g.addColorStop(0, rgba(HUE.gold, 0.8 * a));
+          g.addColorStop(1, rgba(HUE.gold, 0));
+          ctx.strokeStyle = g;
+          ctx.globalAlpha = 1;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(s.px[sel], s.py[sel]);
+          ctx.lineTo(tx, ty);
+          ctx.stroke();
+        }
       }
     }
     ctx.globalAlpha = 1;
-    if (waking && s.wake > 0.02) {
+
+    // ══ the timeline: three hours behind and twenty-one ahead, the centres' regular hours as bars of
+    // light, the four FX session windows over them, and the present moment
+    if (tlOn) {
+      const tlA = f.on(0.65, 0.35);
+      const nowX = minuteX(since);
+      const thick = clamp(rowH * 0.44, 2, 6);
+      // a soft floor of light under it
+      g = ctx.createLinearGradient(0, tlY - 6, 0, tlY + tlH);
+      g.addColorStop(0, rgba(pal.key, 0));
+      g.addColorStop(1, rgba(pal.key, 0.07 * tlA));
+      ctx.fillStyle = g;
+      ctx.fillRect(b.x, tlY - 6, W, tlH + 6 + inset);
+      // the hours, in UTC, every third one named; midnight carries the day
+      const first = Math.ceil((hours * 60 + minutes - PAST) / 180) * 180;
+      ctx.strokeStyle = pal.ink;
+      ctx.lineWidth = 1;
+      for (let m = first; m < hours * 60 + minutes - PAST + SPAN; m += 180) {
+        const x = axX + ((m - (hours * 60 + minutes) + PAST) / SPAN) * axW;
+        if (x < axX + 6 || x > axX + axW - 6) continue;
+        const hr = ((m / 60) % 24 + 24) % 24;
+        ctx.globalAlpha = 0.3 * tlA;
+        ctx.beginPath();
+        ctx.moveTo(x, tlY + tlH - 13);
+        ctx.lineTo(x, tlY + tlH - 9);
+        ctx.stroke();
+        text(f, hr === 0 ? WEEK[(f.now.getUTCDay() + Math.floor(m / 1440) + 7) % 7] : pad(hr), x, tlY + tlH - 3, 8, hr === 0 ? pal.ink : pal.ink3, (hr === 0 ? 0.85 : 0.7) * tlA, "center");
+      }
+      // the FX windows, in two lanes so that an overlap reads as one
+      text(f, "FX", tlX, tlY + 5, 8, pal.ink3, 0.8 * tlA);
+      ctx.lineCap = "butt";
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        for (let j = 0; j < s.nfx[i]; j++) {
+          ctx.moveTo(minuteX(s.fxb[i * 6 + j * 2]), tlY + 3 + (i % 2) * 4);
+          ctx.lineTo(minuteX(s.fxb[i * 6 + j * 2 + 1]), tlY + 3 + (i % 2) * 4);
+        }
+        ctx.strokeStyle = FX_HUE[i];
+        ctx.globalAlpha = (0.6 + 0.3 * wake) * tlA;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.lineCap = "round";
+      // a faint track for every row, so an empty stretch still reads as a timeline
+      ctx.beginPath();
+      let last = -PAST;
+      for (let i = 0; i < NC; i++) {
+        ctx.moveTo(axX, rowY + (i + 0.5) * rowH);
+        ctx.lineTo(axX + axW, rowY + (i + 0.5) * rowH);
+        for (let j = 0; j < s.nbar[i]; j++) last = Math.max(last, s.bars[i * 12 + j * 2 + 1]);
+      }
+      ctx.strokeStyle = HUE.air;
+      ctx.globalAlpha = 0.09 * tlA;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // where the window holds no regular session at all (a weekend), it says so, and when the next one opens
+      const gapX = minuteX(Math.max(last, since)) + 14;
+      if (axX + axW - gapX > 190 && SPAN - PAST - Math.max(last - since, 0) >= 420) {
+        const mid = (gapX + axX + axW) / 2;
+        text(f, "NO REGULAR SESSIONS IN THESE HOURS", mid, rowY + rowH * 3.6, 8, pal.ink3, 0.85 * tlA, "center");
+        if (s.nextWords) pair(f, "NEXT OPEN", s.nextWords, mid - 70, rowY + rowH * 3.6 + Math.max(12, rowH * 1.3), 9, pal.ink3, HUE.gold, 0.95 * tlA);
+      }
+      // the rows: what is past is dim, what is to come is blue, what is open now is emerald and glows
+      for (let pass = 0; pass < 3; pass++) {
+        ctx.beginPath();
+        for (let i = 0; i < NC; i++) {
+          const y = rowY + (i + 0.5) * rowH;
+          for (let j = 0; j < s.nbar[i]; j++) {
+            const from = s.bars[i * 12 + j * 2];
+            const to = s.bars[i * 12 + j * 2 + 1];
+            const kind = to <= since ? 0 : from <= since ? 2 : 1;
+            if (kind === pass) {
+              ctx.moveTo(Math.max(axX, minuteX(from)) + thick / 2, y);
+              ctx.lineTo(Math.max(axX + thick, Math.min(axX + axW, minuteX(to)) - thick / 2), y);
+            }
+          }
+        }
+        ctx.lineWidth = thick;
+        if (pass === 2) {
+          ctx.globalCompositeOperation = "lighter";
+          ctx.strokeStyle = HUE.open;
+          ctx.globalAlpha = 0.2 * tlA;
+          ctx.lineWidth = thick * 3;
+          ctx.stroke();
+          ctx.globalCompositeOperation = "source-over";
+          ctx.lineWidth = thick;
+          ctx.globalAlpha = 0.95 * tlA;
+        } else {
+          ctx.strokeStyle = HUE.air;
+          ctx.globalAlpha = (pass ? 0.5 + 0.25 * wake : 0.2) * tlA;
+        }
+        ctx.stroke();
+      }
+      // a glint runs along the bars that are open now
+      if (pGlint >= 0 && s.nopen) {
+        ctx.globalCompositeOperation = "lighter";
+        ctx.strokeStyle = pal.ink;
+        ctx.lineWidth = thick;
+        ctx.beginPath();
+        for (let i = 0; i < NC; i++) {
+          if (!s.open[i]) continue;
+          const y = rowY + (i + 0.5) * rowH;
+          for (let j = 0; j < s.nbar[i]; j++) {
+            const from = s.bars[i * 12 + j * 2];
+            const to = s.bars[i * 12 + j * 2 + 1];
+            if (from > since || to <= since) continue;
+            const x0 = Math.max(axX, minuteX(from));
+            const x1 = Math.min(axX + axW, minuteX(to));
+            const x = x0 + (x1 - x0) * pGlint;
+            ctx.moveTo(Math.max(x0, x - 9), y);
+            ctx.lineTo(Math.min(x1, x + 9), y);
+          }
+        }
+        ctx.globalAlpha = 0.8 * Math.sin(PI * pGlint) * tlA;
+        ctx.stroke();
+        ctx.globalCompositeOperation = "source-over";
+      }
+      // the names: the city, or its code where the timeline is narrow
+      for (let i = 0; i < NC; i++) {
+        const y = rowY + (i + 0.5) * rowH;
+        const mine = i === sel ? s.selK : 0;
+        if (mine > 0.02) {
+          ctx.fillStyle = HUE.gold;
+          ctx.globalAlpha = 0.1 * mine * tlA;
+          ctx.fillRect(tlX - 2, y - rowH / 2, tlW + 4, rowH);
+        }
+        text(f, tlName > 40 ? centres[i].city : CODES[i], tlX, y + 0.5, Math.min(9, Math.max(7, rowH * 0.82)), mine > 0.5 ? HUE.gold : s.open[i] ? pal.ink : pal.ink3, (s.open[i] ? 0.95 : 0.72) * tlA);
+      }
+      // the present moment: a line of light through all of it
+      g = ctx.createLinearGradient(0, tlY - 4, 0, tlY + tlH - 12);
+      g.addColorStop(0, rgba(HUE.gold, 0));
+      g.addColorStop(0.2, rgba(HUE.gold, 0.9 * tlA));
+      g.addColorStop(1, rgba(HUE.gold, 0.25 * tlA));
+      ctx.strokeStyle = g;
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.moveTo(nowX, tlY - 4);
+      ctx.lineTo(nowX, tlY + tlH - 12);
+      ctx.stroke();
+      ctx.globalCompositeOperation = "lighter";
+      spark(f, nowX, tlY + 1, 1.8, tlA, HUE.gold);
+      ctx.globalCompositeOperation = "source-over";
+      text(f, "NOW", nowX, tlY + tlH - 3, 8, HUE.gold, 0.9 * tlA, "center");
+      if (inTl > 0.02) {
+        // the hour under the pointer
+        const x = clamp(f.mx, axX, axX + axW);
+        ctx.strokeStyle = pal.ink;
+        ctx.globalAlpha = 0.55 * inTl;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, tlY - 2);
+        ctx.lineTo(x, tlY + tlH - 12);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    if (waking && wake > 0.02) {
       ctx.globalCompositeOperation = "lighter";
       ctx.strokeStyle = pal.key;
       ctx.beginPath();
       ctx.moveTo(b.x, scanY);
-      ctx.lineTo(b.x + b.w, scanY);
-      bloom(ctx, 0.7 * Math.sin(PI * clamp(s.wake * 1.1)), 1);
+      ctx.lineTo(b.x + W, scanY);
+      bloom(ctx, 0.7 * Math.sin(PI * clamp(wake * 1.1)), 1);
       ctx.globalAlpha = 1;
     }
     ctx.globalCompositeOperation = "source-over";
     ctx.restore();
+    if (tower) {
+      // the golden cuts of the frame's height, marked on its sides as the engine marks the cut of its width
+      ctx.strokeStyle = rgba(pal.gold, 0.85 * f.boot * (0.5 + f.hover * 0.5));
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (const y of [b.y + band0, b.y + H - band1]) {
+        ctx.moveTo(b.x - 4, y);
+        ctx.lineTo(b.x + 5, y);
+        ctx.moveTo(b.x + W - 5, y);
+        ctx.lineTo(b.x + W + 4, y);
+      }
+      ctx.stroke();
+    }
   },
   /** the engine hit-tests the pointer against this, clips its light to it and draws the champagne frame round it */
   frame: () => (BOXON ? BOX : null),

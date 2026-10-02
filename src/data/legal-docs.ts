@@ -1,4 +1,5 @@
 import { LOCAL_KEYS } from "@/lib/prefs";
+import { PULSE_STATEMENT } from "@/lib/pulse";
 
 /**
  * LEGAL & DOCUMENT CENTRE — the registry.
@@ -382,7 +383,7 @@ const privacy: LegalDoc = {
         p("You can manage cookie preferences through your browser settings."),
         {
           kind: "editor",
-          text: "One sentence was removed: it said cookies are used to analyse traffic and personalise content, which is not true of this website. This website sets no advertising or analytics cookies. What it does store in your browser is listed, key by key, in the Cookie & Storage Notice.",
+          text: "One sentence was removed: it said cookies are used to analyse traffic and personalise content, which is not true of this website. This website sets no advertising or analytics cookies. It does count page views, accepted forms and searches as daily totals, without a cookie or any identifier. What it stores in your browser, key by key, and what it counts are set out in the Cookie & Storage Notice.",
           href: "/legal/cookies",
           linkLabel: "Cookie & Storage Notice",
         },
@@ -468,16 +469,16 @@ const aml: LegalDoc = {
  */
 const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; why: string }> = {
   "gx:prefs": {
-    holds: "Theme, colour palette, density, motion, contrast, text size, effects, link underlining, time zone, remembered platform, and whether TradingView panels load automatically.",
+    holds: "Theme, colour palette, density, motion, contrast, text size, effects, link underlining, time zone, remembered platform, whether TradingView panels load automatically, whether your visits are counted, whether interface sounds are on and at which volume, whether the guided tour has been started or declined, and whether an offline copy may be kept.",
     why: "So the site looks and behaves the way you set it on your next visit.",
   },
   "gx:recent": {
-    holds: "Pages and searches you opened recently.",
-    why: "So the command bar can offer them again.",
+    holds: "The path and title of the last pages you opened, and the last searches you made on this website, once you have switched that list on from My desk.",
+    why: "So My desk can list them for you to return to. Until you switch the list on, this key does not exist and nothing about the pages you open is recorded; “Stop and clear this list” removes it again.",
   },
   "gx:saved": {
-    holds: "Pages you chose to save for later.",
-    why: "So your reading list is there when you return.",
+    holds: "The path and title of each article, lesson, glossary term or tool you chose to save for later.",
+    why: "So My desk can list them when you return.",
   },
   "gx:calc": {
     holds: "The figures you typed into the Trader Toolkit calculators.",
@@ -489,15 +490,23 @@ const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; wh
   },
   "gx:watch": {
     holds: "Instruments you added to a watchlist.",
-    why: "So the list survives a reload.",
+    why: "So My desk can list them when you return.",
+  },
+  "gx:morning-depth": {
+    holds: "The reading depth you chose in the Morning Room: quick, standard or deep.",
+    why: "So the Morning Room opens at the same depth on your next visit.",
   },
   "gx:boot": {
     holds: "The time the short start-up animation was shown in this browser.",
     why: "So the animation plays once and is not repeated on later pages or visits.",
   },
   "gx:learn": {
-    holds: "The glossary terms whose “Check yourself” question you answered correctly.",
-    why: "So the glossary can mark the terms you have checked and show how many. It can be cleared from the glossary with “Start over”.",
+    holds: "The glossary terms whose “Check yourself” question you answered correctly, and the Academy lessons you have completed by answering all three of their questions correctly.",
+    why: "So the glossary can mark the terms you have checked and show how many, and the Academy can mark the lessons you have completed and count them by level and by learning path. No score is kept. Each can be cleared where it is shown, with “Start over”: the terms from the glossary, the lessons from the Academy.",
+  },
+  "gx:sim": {
+    holds: "The state of the Practice desk simulation in Labs: its invented prices, the example account, example positions and orders, and the newest journal entries. No real prices, no real account and nothing about you.",
+    why: "So a practice session survives a reload. Written only if you tick “Keep this practice session in this browser” on that page, which is off by default; unticking it deletes the key.",
   },
 };
 
@@ -507,11 +516,11 @@ const cookies: LegalDoc = {
   title: "Cookie & Storage Notice",
   short: "Cookie Notice",
   category: "Privacy",
-  summary: "Everything this website stores in your browser, key by key, and how to clear it. There are no advertising or analytics cookies.",
-  version: "1.2",
-  updated: "2 October 2026",
+  summary: "Everything this website stores in your browser, key by key, and how to clear it. There are no advertising or analytics cookies; page views are counted as daily totals without a cookie or an identifier, and that can be switched off.",
+  version: "1.6",
+  updated: "3 October 2026",
   origin: "new",
-  keywords: ["cookies", "local storage", "tracking", "analytics", "advertising", "preferences", "consent"],
+  keywords: ["cookies", "local storage", "offline", "service worker", "cache storage", "tracking", "analytics", "advertising", "preferences", "consent"],
   sections: [
     {
       id: "summary",
@@ -522,9 +531,11 @@ const cookies: LegalDoc = {
           items: [
             "This website sets no advertising cookies and no analytics cookies.",
             "It loads no third-party scripts, so no third party can set a cookie through a script on these pages.",
+            "It counts page views, accepted forms and searches itself, as daily totals, with no cookie and no identifier of any kind. Counting is on by default; you can switch it off, and a Global Privacy Control or Do Not Track signal from your browser is honoured.",
             "It keeps a small number of display and convenience settings in your browser’s local storage. They stay on your device and are not sent to GIO4X.",
-            "For the length of a visit it may keep two items in session storage: an announcement you closed, and a live chat you started.",
+            "For the length of a visit it may keep three items in session storage: an announcement you closed, a live chat you started, and the stop a guided tour has reached.",
             "An authentication cookie is set only for GIO4X staff who sign in to the internal console. Visitors to the public site do not receive it.",
+            "So that the calculators and pages you have opened still open without a connection, it keeps copies of them in your browser’s cache storage. The copies are sent nowhere and can be removed or switched off.",
           ],
         },
       ],
@@ -539,7 +550,7 @@ const cookies: LegalDoc = {
           head: ["Cookie", "Who receives it", "Purpose"],
           rows: [["Staff authentication cookie", "GIO4X staff who sign in to the internal console", "Keeps a signed-in staff session. Not set for visitors to the public pages."]],
         },
-        p("That is the complete list. There is no advertising or analytics consent banner on this website because neither is used."),
+        p("That is the complete list. There is no consent banner on this website because it sets no advertising or analytics cookie. Visits are counted without a cookie, as described under “Counting visits” below."),
       ],
     },
     {
@@ -553,14 +564,18 @@ const cookies: LegalDoc = {
           head: ["Key", "What it holds", "Why"],
           rows: LOCAL_KEYS.map((k) => [k, LOCAL_KEY_PURPOSE[k].holds, LOCAL_KEY_PURPOSE[k].why]),
         },
-        p("A key is written only when you use the feature it belongs to. If you never change a setting or use a tool, nothing is stored."),
+        p("A key is written only when you use the feature it belongs to. If you never change a setting, use a tool or answer the invitation to the guided tour, nothing is stored."),
+        p(
+          "The My desk page gathers the watchlist, saved pages, recent list, calculator figures and learning progress on one screen. It reads them from this browser and sends them nowhere. From that page you can export these keys, with your display preferences, to a file that your browser saves on your device, and import such a file in another browser. The file is created and read inside your browser; it is not uploaded to GIO4X.",
+        ),
+        { kind: "link", href: "/desk", label: "My desk" },
       ],
     },
     {
       id: "session-storage",
       title: "Session storage",
       body: [
-        p("Session storage is like local storage, but the browser empties it when you close the tab. This website uses two keys there."),
+        p("Session storage is like local storage, but the browser empties it when you close the tab. This website uses three keys there."),
         {
           kind: "table",
           caption: "Session-storage keys used by this website",
@@ -572,9 +587,58 @@ const cookies: LegalDoc = {
               "The identifier and access token of a live chat you started.",
               "So the conversation continues when you move to another page. The token is sent to GIO4X’s database with each chat message, which is how the conversation is recognised as yours. It is removed when the chat ends.",
             ],
+            ["gx:tour", "The number of the stop a guided tour has reached.", "So the tour continues when it takes you to the next page, and after a reload. It is removed when the tour ends, and it is not sent anywhere."],
           ],
         },
-        p("Neither key is written unless you close an announcement or start a chat."),
+        p("None of the three is written unless you close an announcement, start a chat or start the guided tour."),
+      ],
+    },
+    {
+      // What public/sw.js does, in the visitor's words. Keep the two in step (docs/OFFLINE.md).
+      id: "offline-copy",
+      title: "Offline copy",
+      body: [
+        p(
+          "If you switch it on, a small program supplied by this website itself (a service worker) keeps copies in your browser’s cache storage, so that part of this website still opens without a connection. It is off until you switch it on, on the preferences page or My desk. Cache storage is a store inside your own browser, separate from cookies and from local storage.",
+        ),
+        p("What is kept:"),
+        {
+          kind: "list",
+          items: [
+            "The Trader Toolkit page and each calculator, the My desk page and the page shown when you are offline. These are fetched once, a few seconds after a page has loaded, and renewed about once a day.",
+            "A copy of each public page you open, up to the 50 most recent, without any query string. The system status page and the support pages are never kept.",
+            "This website’s own scripts, styles, fonts, logo and icons, so that a kept page can be displayed.",
+          ],
+        },
+        p("What it does not do:"),
+        {
+          kind: "list",
+          items: [
+            "Nothing is sent anywhere. The copies stay in your browser and are read only by your browser.",
+            "While you are connected you always receive the current page from the website. A copy is shown only when the request for a page fails.",
+            "It does not keep or intercept anything from the staff console, any form you submit, live chat, the counting of visits, or anything from another website such as TradingView.",
+          ],
+        },
+        p(
+          "To remove it: use “Remove the offline copy” on the preferences page, which also stops it being made again until you switch it back on (that choice is kept in the gx:prefs key); or clear this website’s data in your browser. “Clear everything stored by GIO4X on this device” empties the copies as well; with the offline copy still switched on, they are made again as you open pages.",
+        ),
+        p("The website can also be installed as an app from the My desk and preferences pages, where your browser offers that. The installed app is this website in its own window; it stores nothing beyond what this notice lists."),
+        { kind: "link", href: "/preferences#offline", label: "Offline copy: the control" },
+      ],
+    },
+    {
+      // The wording lives in src/lib/pulse.ts (PULSE_STATEMENT) and is shown to staff, word for word, above the figures in the console.
+      id: "counting-visits",
+      title: "Counting visits",
+      body: [
+        p(PULSE_STATEMENT.intro),
+        p("What is counted:"),
+        { kind: "list", items: [...PULSE_STATEMENT.counted] },
+        p("What is not collected:"),
+        { kind: "list", items: [...PULSE_STATEMENT.notCollected] },
+        p("Your choice:"),
+        { kind: "list", items: [...PULSE_STATEMENT.controls] },
+        { kind: "link", href: "/preferences#counting", label: "Count my visits: the switch" },
       ],
     },
     {
@@ -588,13 +652,17 @@ const cookies: LegalDoc = {
           "On the preferences page you can choose to have TradingView frames load automatically. That choice is off by default and is kept in the gx:prefs key with your display settings. While it is on, each frame loads as it scrolls into view, without a further question, and connects your browser to TradingView at that moment. Switching it off, or clearing what this website has stored, returns every frame to waiting for its button.",
         ),
         p("Reference exchange rates are fetched by GIO4X’s server, not by your browser, so the rate provider does not see your visit."),
+        p(
+          "The announcement line, live chat, the notices on the Status page and the support hours are read by your browser directly from GIO4X’s hosted database project. That host sits behind a network provider (Cloudflare), which may set its own short-lived security cookie on the database’s address, not on this website’s. This website cannot read it and does not use it.",
+        ),
       ],
     },
     {
       id: "your-controls",
       title: "Your controls",
       body: [
-        p("You can review and change every display setting, or clear everything this website has stored in your browser, from the preferences page. Clearing your browser’s site data has the same effect."),
+        p("You can review and change every display setting, switch the counting of your visits off, or clear everything this website has stored in your browser, from the preferences page. Clearing your browser’s site data has the same effect."),
+        p("The offline copy is removed, and switched off or on, from the same page. Single items (one watched instrument, one saved page, the recent list, the calculator figures) can be removed from My desk."),
         { kind: "link", href: "/preferences", label: "Display & privacy preferences" },
       ],
     },
@@ -602,7 +670,7 @@ const cookies: LegalDoc = {
       id: "changes",
       title: "Changes to this notice",
       body: [
-        p("If this website begins to store anything else in your browser, this notice will be updated before the change is released, and the date and version above will change with it."),
+        p("If this website begins to store anything else in your browser, or to count anything else, this notice will be updated before the change is released, and the date and version above will change with it."),
         p("Questions about this notice can be sent to info@gio4x.com."),
       ],
     },

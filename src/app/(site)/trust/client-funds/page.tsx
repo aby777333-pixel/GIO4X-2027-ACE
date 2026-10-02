@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { Reconcile } from "@/components/figures/extra/Reconcile";
 import { FigureNote } from "@/components/figures/Figure";
 import { NotedChapter } from "@/components/figures/trust/NotedChapter";
 import { SeparationWall } from "@/components/figures/trust/SeparationWall";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { AskGio4x, Chapter, Rows, Statement, Status } from "@/components/trust/Parts";
+import { AskGio4x, Rows, Statement, Status } from "@/components/trust/Parts";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { companyLine } from "@/config/legal";
 import { pageMeta } from "@/lib/meta";
@@ -96,7 +97,22 @@ export default function ClientFundsPage() {
         </div>
       </section>
 
-      <Chapter id="what-separation-means" eyebrow="In general terms" title="What holding funds separately means" lead="This is a general explanation of the practice. It is not a description of GIO4X’s specific arrangements, which are not yet published in detail." paper>
+      <NotedChapter
+        id="what-separation-means"
+        eyebrow="In general terms"
+        title="What holding funds separately means"
+        lead="This is a general explanation of the practice. It is not a description of GIO4X’s specific arrangements, which are not yet published in detail."
+        paper
+        note={
+          <FigureNote figure={<Reconcile />}>
+            These rows describe the practice in general. What GIO4X has published on each point is in the{" "}
+            <Link href="#questions" className="link">
+              questions below
+            </Link>
+            .
+          </FigureNote>
+        }
+      >
         <Rows
           items={[
             {
@@ -113,7 +129,7 @@ export default function ClientFundsPage() {
             },
           ]}
         />
-      </Chapter>
+      </NotedChapter>
 
       <NotedChapter
         id="what-it-does-not-do"

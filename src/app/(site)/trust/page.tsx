@@ -76,7 +76,7 @@ export default function TrustCentrePage() {
           <h2 id="trust-index" className="sr-only">
             Sections of the Trust Centre
           </h2>
-          <ol className="border-t border-line-strong">
+          <ol className="border-t border-line-strong" data-tour="trust">
             {sections.map((s, i) => (
               <li key={s.href} className="border-b border-line" data-reveal suppressHydrationWarning style={{ ["--i" as string]: Math.min(i, 5) }}>
                 <Link href={s.href} className="group grid items-baseline gap-x-21 gap-y-5 py-21 transition-colors duration-fast hover:bg-surface md:grid-cols-[minmax(0,1fr)_minmax(0,1.618fr)_5.5rem] md:px-13">

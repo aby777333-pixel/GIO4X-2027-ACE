@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { clearLearned, countLearned, useLearned } from "./learn";
+import { clearLearned, countLearned, countLessons, useLearned } from "./learn";
 
 /**
  * The visitor's progress through the glossary's questions, read from this
@@ -21,7 +21,7 @@ export function LearnCount({ total, className = "" }: { total: number; className
   if (n === 0) {
     return cleared ? (
       <p role="status" className={`text-sm text-ink-3 ${className}`}>
-        Progress cleared. Nothing is stored in this browser now.
+        {countLessons(learned) > 0 ? "Glossary progress cleared. The Academy lessons you completed are still kept in this browser; they can be cleared from the Academy page." : "Progress cleared. Nothing is stored in this browser now."}
       </p>
     ) : null;
   }

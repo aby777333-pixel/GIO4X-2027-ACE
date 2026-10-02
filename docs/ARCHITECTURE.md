@@ -90,7 +90,9 @@ Search-result pages are `noindex`.
 
 Display preferences (theme, accent, density, motion, contrast, text size, effects, underline links, time
 zone) live only in `localStorage` (`gx:prefs`) and are applied to `<html data-*>` by an inline boot script
-before first paint. There are no analytics or advertising scripts. `src/lib/analytics.ts` defines a
+before first paint. There are no advertising scripts and no third-party analytics. The site counts
+its own page views, accepted forms and searches as daily totals with no cookie and no identifier
+(`src/lib/pulse.ts`, `docs/SECURITY.md` section 11; switch: `countVisits` in `gx:prefs`). Separately, `src/lib/analytics.ts` defines a
 consent-gated event vocabulary that is inert until an approved tool is attached. `/preferences` lists every
 key the site stores and clears them in one action.
 

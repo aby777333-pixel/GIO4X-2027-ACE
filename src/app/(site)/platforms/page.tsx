@@ -38,7 +38,7 @@ export default function PlatformsPage() {
       />
 
       {/* two visual worlds, not two cards */}
-      <section aria-label="The two platforms" className="grid lg:grid-cols-2">
+      <section aria-label="The two platforms" className="grid lg:grid-cols-2" data-tour="platforms">
         <article className="on-night relative flex flex-col overflow-hidden" aria-labelledby="world-raptor">
           <div aria-hidden className="grid-field pointer-events-none absolute inset-0 opacity-80 [mask-image:linear-gradient(to_bottom,black,transparent_80%)]" />
           <div

@@ -34,6 +34,9 @@ export default function IntelligencePage() {
   const remaining = rest.slice(2);
   const analysis = remaining.filter((a) => a.format === "Analysis" || a.format === "Deep Dive" || a.format === "Research Note");
   const explainers = remaining.filter((a) => !analysis.includes(a));
+  // the section index is two columns wide, then three: the last section widens to close whichever row it ends on
+  const sectionCount = liveSections.length;
+  const lastSectionSpan = `${sectionCount % 2 === 1 ? "sm:max-lg:last:col-span-2" : ""} ${sectionCount % 3 === 1 ? "lg:last:col-span-3" : sectionCount % 3 === 2 ? "lg:last:col-span-2" : ""}`;
 
   return (
     <>
@@ -215,7 +218,7 @@ export default function IntelligencePage() {
                   {liveSections.map((s) => {
                     const n = articlesBySection(s).length;
                     return (
-                      <li key={s} className="border-b border-r border-line">
+                      <li key={s} className={`border-b border-r border-line ${lastSectionSpan}`}>
                         <Link href={sectionHref(s)} className="group flex min-h-[3.4375rem] items-baseline justify-between gap-13 p-13 transition-colors duration-fast hover:bg-surface sm:p-21">
                           <span className="font-medium transition-colors duration-fast group-hover:text-accent">{sectionLabels[s]}</span>
                           <span className="num text-xs text-ink-3">

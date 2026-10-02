@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { Rosette } from "@/components/brand/Rosette";
 import { loadSearchIndex } from "@/components/shell/CommandBar";
+import { sendSearch } from "@/lib/pulse-client";
 import { groupHits, parseIntent, search, type SearchEntry, type SearchGroup, type SearchHit } from "@/lib/search";
 
 type Outcome = {
@@ -16,6 +17,13 @@ type Outcome = {
   /** a direct action for prefixes that are not a list (verify:, φ, display commands) */
   action: { label: string; note: string; href: string } | null;
 };
+
+/**
+ * The query last counted as a search, in memory only. Kept outside the
+ * component so that the same results shown again (a remount, or coming back
+ * to them with the browser's back button) are not counted as a second search.
+ */
+let lastCounted: string | null = null;
 
 const SUGGESTIONS = ["EUR/USD", "gold", "define: slippage", "calc: margin", "leverage", "London session"];
 
@@ -111,6 +119,14 @@ export function SearchResults() {
       .catch(() => setFailed(true));
   };
   useEffect(load, []);
+
+  // One query shown on this page is one search, added to the day's total (src/lib/pulse-client.ts).
+  // What was typed is compared with the site's own terms in this browser and is not sent.
+  useEffect(() => {
+    if (!index || !q.trim() || lastCounted === q) return;
+    lastCounted = q;
+    sendSearch(q, index);
+  }, [index, q]);
 
   const outcome = useMemo(() => (index && q.trim() ? resolve(index, q) : null), [index, q]);
   const groups = useMemo(() => (outcome ? groupHits(outcome.hits) : []), [outcome]);

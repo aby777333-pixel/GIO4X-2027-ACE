@@ -56,7 +56,8 @@ whose theft bypasses row-level security. RLS is the security boundary.
 
 With the publishable key and no session, a caller **can**:
 - insert one row into `leads` or `newsletter_subscribers`, supplying only the visitor columns, passing every
-  CHECK constraint and the throttles.
+  CHECK constraint and the throttles;
+- add 1 to a visit-counter total by calling `pulse_hit`, `pulse_form_hit` or `pulse_search_hit` (section 11).
 
 They **cannot**: read any table; update or delete anything; set `status`, `assigned_to`, `created_at`,
 `updated_at` or `unsubscribed_at`; back-date consent; write notes; read or write `staff` or `audit_log`; call
@@ -138,7 +139,8 @@ Then run the Supabase security advisor on the project and read every finding.
   rules.
 - Honeypot filled, or submitted in under 2.5 s: the response is an ordinary 200 with a reference, and
   nothing is stored.
-- Not stored at all: IP address, user agent, query strings.
+- Not stored at all: IP address, user agent, query strings. (The visit counter, section 11, stores none of
+  them either.)
 
 ## 5. Rate limiting, three layers
 
@@ -217,3 +219,40 @@ need an inline bootstrap. A nonce-based policy would require rendering every pag
 7. Add email (acknowledgement and staff notification) with SPF, DKIM and DMARC configured first.
 8. Define retention periods and build the privacy-request workflow (access, correction, deletion).
 9. Before launch: an independent review of the policies and a penetration test.
+
+## 11. The visit counter (`0014_pulse.sql`, `src/lib/pulse.ts`, `src/lib/server/pulse.ts`)
+
+The website counts its own page views, accepted forms and searches. What exists is a set of daily totals
+and nothing else; the public statement is `/legal/cookies`, "Counting visits", and its wording is the constant
+`PULSE_STATEMENT`, shown word for word to staff at `/control/analytics`.
+
+**Stored:** `pulse_pages (day, path, ref_class, views)`, `pulse_forms (day, form, count)`,
+`pulse_search (day, term, count)`, and one throttle row in `pulse_state`. There is no row per visit and no
+column that could describe a visitor. A path is one of the site's published paths or `(other)`; a referrer is
+one of four words; a search term is one of the site's own words or `(unmatched)`.
+
+**Not stored, not logged:** IP address, user agent, referrer address, query string, fragment, time of day,
+any identifier. No cookie is read or set and nothing is written to the browser.
+
+**How a view arrives:** `src/components/shell/Pulse.tsx` (public shell only, never `/control`) sends one
+`POST /api/pulse` with `{ path, ref }` once the page is idle: no credentials, no `Referer`. The referrer is
+reduced to its class in the browser, so the referring address never reaches the server. A search sends
+`POST /api/pulse/search` with `{ term }`, where the term was matched in the browser against the site's own
+index; what was typed is not sent. Form totals are added on the server by `/api/contact`, `/api/support` and
+`/api/newsletter` at the moment a submission is stored, and cannot fail it.
+
+**Respecting a refusal:** nothing is sent when the browser reports Global Privacy Control or Do Not Track, or
+when "Count my visits" is off on `/preferences` (`countVisits` in `gx:prefs`, on by default). The server
+checks `Sec-GPC` and `DNT` again, for views, searches and form totals.
+
+| Abuse case | Controls | Honest limit |
+|---|---|---|
+| Storing something personal through the counter | Exact field allow-list (an extra field is a 400); path checked against the site's own pages, query and fragment removed; term checked against the site's own vocabulary; the database repeats a strict character set and length, which excludes `@`, `?`, `=`, `&`, `%` and upper case | Anyone holding the publishable key can call `pulse_hit`, `pulse_form_hit` and `pulse_search_hit` directly, skipping the API's allow-lists. They can then store a lower-case path-shaped or word-shaped string of their own choosing (bounded: 120 and 48 characters), and inflate any total. The figures are counts for orientation, not audited figures, and the console says so. |
+| Filling the tables | Per-address limiter in the API (240 views and 60 searches per 10 minutes); a global database throttle of 600 counted events a minute; at most 1500 distinct paths and 1000 distinct terms a day, the rest added to `(other)`; rows older than 400 days deleted | Under a flood the counter drops events (it does not queue them), so real views in that minute are under-counted. |
+| Another site making a visitor's browser count | `Origin` must be this site and `Sec-Fetch-Site`, when present, must be `same-origin` | A non-browser client can send any header. |
+| Reading the totals | No table privilege and no policy for any API role; `pulse_summary()` requires `analytics.read` (admin, sales, compliance) | |
+| Learning what was counted | Every accepted request is answered `204` with no body, whether it was counted, skipped or could not be recorded | In development only, a response header `X-Pulse-Debug` states the decision so that it can be tested. |
+
+The counter also runs in development against the same database, for browsers that are not automated.
+Checks: `node scripts/test-pulse.mjs` (the path normaliser and the term matcher, against the real index and
+sitemaps) and `supabase/tests/0014_pulse.sql`.

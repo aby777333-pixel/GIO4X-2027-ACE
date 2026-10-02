@@ -45,11 +45,18 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/customers`, `/control/customers/[key]` | Everyone who has contacted GIO4X, one record per address: enquiries, tickets, subscription. Not client accounts. The key is a hash, so no address appears in a URL | `customers.read` |
 | `/control/compliance` | Register of complaints, privacy requests and security reports, drawn from tickets and enquiries, oldest open first | `compliance.read` |
 | `/control/reports` | Counts over 7, 30, 90 or 365 days: enquiries, support, chat, newsletter, follow-ups | `reports.read` |
+| `/control/analytics` | The website's own visit counts over 7, 30, 90 or 365 UTC days: page views per day, most viewed pages, kind of referrer, forms accepted against views of their page, searches and the site terms searched for. Daily totals only: nothing about any visitor, no third-party tracker (see `docs/SECURITY.md`, section 11) | `analytics.read` |
 | `/control/reports/leads-export` (POST) | CSV export of enquiries, recorded in the audit log | `subscribers.export` |
+| `/control/reports/summary?month=YYYY-MM` | One calendar month (UTC) in counts, laid out for print on A4; the browser's Print, then "Save as PDF", makes the file. The current month and the eleven before it. Counts only | `reports.read` |
+| `/control/reports/summary-export` (POST) | The same month as a CSV file of `section,metric,value`, recorded in the audit log before it is sent. Scheduled delivery by e-mail is not built: there is no sending domain | `reports.read` |
+| `/control/activity` | Team activity: per member of staff over 7, 30 or 90 days, what the console recorded (tickets, live chat, enquiries, last audit entry), with each column defined on the page. Counts of events, not a measure of quality. Without `activity.read` a member of staff sees their own figures only | `activity.read` (own row: any staff) |
 | `/control/command` | What needs attention now, across every section | `command.read` |
 | `/control/config` | The website's announcement line, the live-chat switch, support hours, and notices for the public Status page | `config.manage` |
 | `/control/blog`, `/control/blog/new`, `/control/blog/[id]` | The daily blog's CMS: write in restricted Markdown, preview, SEO fields (title, description, canonical, noindex, share picture), cover picture with alt text, caption, credit and size, schedule and publish, corrections | `blog.read` (write: `blog.write`; publish, unpublish, archive, edit a published post: `blog.publish`) |
 | `/control/blog/upload` (POST) | Picture upload to the public `blog` storage bucket: 4 MB, JPEG, PNG, WebP or AVIF, checked by content | `blog.write` |
+| `/control/media` | The media library: every picture in the `blog` bucket, newest first, 48 per page, with the posts that use each (cover, share picture, body), copy path and copy Markdown, filters by use and month. Nothing can be deleted: no role has that right. A second, read-only tab lists the pictures shipped in `public/` (from `src/data/generated/site-images.json`, made by `scripts/site-images.mjs` before each build) | `blog.read` (upload: `blog.write`, through `/control/blog/upload`) |
+| `/control/media/list` (GET) | The newest pictures as JSON, for the blog editor's "Choose from the library" picker. Never cached | `blog.read` |
+| `/control/seo` | SEO health: the website's own pages, sitemaps, feeds and robots.txt, fetched anonymously from the request's own host (GET only, never `/control` or `/api`, bounded, read in parts kept for ten minutes), with titles, descriptions, h1, canonical, broken internal links, sitemap entries that 404, redirect chains and noindex; and what published posts are missing. Redirects are shown read-only from `src/config/redirects.json` | `blog.read` |
 | `/control/leads/new` | An enquiry entered by staff (telephone, event, referral). Marked as staff-entered; stores no consent | `leads.write` |
 | `/control/<section>` | The sections not built yet (KYC, Funds, Fee Engine, General Ledger, IB, Copy, PAMM, Trade Log, Broker Controls, Event Bus, Document Builder, Bulk Emailer): what each will do and what it is waiting for | staff |
 
@@ -62,6 +69,7 @@ from it. The screens, the access rules and the database are this project's.
 | The announcement line under the header | Configuration |
 | "Notices from GIO4X" on `/status` | Incidents in Configuration, when published. Written by staff; not monitoring |
 | Support hours on `/support` | Configuration |
+| (The other direction) page views, accepted forms and searches on the public pages | Counted by the website and read in Analytics. What is counted is published at `/legal/cookies`, "Counting visits" |
 
 Times are shown in UTC, for everyone.
 
@@ -82,7 +90,7 @@ API role can read or write. A new module adds its capabilities with an `INSERT` 
 
 Capabilities: `leads.read`, `leads.write`, `leads.assign`, `tasks.write`, `subscribers.read`,
 `subscribers.export`, `audit.read`, `staff.read`, `staff.manage`, `tickets.read`, `tickets.write`,
-`chats.read`, `chats.write`, `customers.read`, `compliance.read`, `reports.read`, `command.read`,
+`chats.read`, `chats.write`, `customers.read`, `compliance.read`, `reports.read`, `analytics.read`, `command.read`,
 `config.manage`, `blog.read`, `blog.write`, `blog.publish`. The TypeScript list is
 `CAPABILITIES` in `src/lib/server/constants.ts`; the console's menu is filtered by them in
 `src/components/control/nav-items.ts`.
@@ -179,6 +187,12 @@ Files, in order:
     words in front of the public or change them once there, and the public `blog` picture bucket.
 12. `supabase/migrations/0012_manual_leads.sql`: enquiries entered by staff: `origin`, `added_by`, no
     consent evidence, and `lead_add_manual()`.
+14. `supabase/migrations/0014_pulse.sql`: the website's visit counter: daily totals of page views, accepted
+    forms and searches, the functions that add to them, and `pulse_summary()` for `analytics.read` (admin,
+    sales, compliance). Tests: `supabase/tests/0014_pulse.sql`.
+15. `supabase/migrations/0015_activity.sql`: no table, five functions: `staff_activity()` for `activity.read`
+    (admin, compliance), `my_activity()` for the caller's own row, `report_month()` and
+    `record_report_download()` for `reports.read`. Tests: `supabase/tests/0015_activity.sql`.
 
 Apply them as the `postgres` role (the Supabase SQL editor, `supabase db push`, or the Supabase MCP
 `apply_migration`). `0002` stops with a clear error if the applying role cannot bypass RLS, because the

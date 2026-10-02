@@ -3,16 +3,26 @@ import { FaqBrowser } from "@/components/knowledge/FaqBrowser";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { site } from "@/config/site";
-import { faqCategories, faqs } from "@/data/faqs";
+import { faqPlainText } from "@/lib/faq";
 import { pageMeta } from "@/lib/meta";
 import { faqSchema } from "@/lib/schema";
+import { publicFaq } from "@/lib/server/faq";
 import "@/components/knowledge/knowledge.css";
 
 const description = "Help and frequently asked questions about trading with GIO4X: margin and leverage, orders, costs, funding and identity checks. Searchable, and honest about what is not yet published.";
 
 export const metadata = pageMeta({ title: "Help & FAQ", description, path: "/faq" });
 
-export default function FaqPage() {
+// The questions in the code, with what staff changed in the console (GIO4X
+// Control › Content › FAQ) applied on top. The page is rendered ahead of time
+// and read again at most once a minute, so a change shows without a deploy.
+// Must be a literal for Next.js: it equals FAQ_REVALIDATE.
+export const revalidate = 60;
+
+export default async function FaqPage() {
+  // never fails and is never empty: without the database it is the code's FAQ as written
+  const { items: faqs, categories: faqCategories } = await publicFaq();
+
   // Structured data describes only what is on the page, and only settled answers:
   // an entry that says "not yet published" is not offered to search engines as an answer.
   const settled = faqs.filter((f) => f.kind === "answer");
@@ -20,13 +30,18 @@ export default function FaqPage() {
 
   return (
     <>
-      <JsonLd data={faqSchema(settled.map((f) => ({ q: f.q, a: f.a })))} />
+      {/* an answer written in the console carries marks (bold, links); structured data carries the words */}
+      <JsonLd data={faqSchema(settled.map((f) => ({ q: f.q, a: f.md ? faqPlainText(f.a) : f.a })))} />
       <PageHero
         quiet
         crumbs={[{ name: "Help & FAQ", href: "/faq" }]}
         eyebrow="Help"
         title="Questions, answered plainly."
-        lead={`${settled.length} answers on how trading works and how an account is opened and funded. ${open} more questions are listed with an honest “not yet published”: where earlier answers disagreed, they were withdrawn instead of guessed.`}
+        lead={
+          open > 0
+            ? `${settled.length} answers on how trading works and how an account is opened and funded. ${open} more ${open === 1 ? "question is" : "questions are"} listed with an honest “not yet published”: where earlier answers disagreed, they were withdrawn instead of guessed.`
+            : `${settled.length} answers on how trading works and how an account is opened and funded.`
+        }
       />
 
       <FaqBrowser categories={faqCategories} items={faqs} />

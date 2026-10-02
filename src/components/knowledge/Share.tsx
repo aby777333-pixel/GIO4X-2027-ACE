@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SaveButton } from "@/components/desk/Buttons";
 
 /** Copy a string to the clipboard and confirm it, quietly, in place. */
 export function CopyButton({ text, label, done = "Copied", className = "btn btn-ghost btn-sm" }: { text: string; label: string; done?: string; className?: string }) {
@@ -63,6 +64,8 @@ export function Share({ url, title, compact = false }: { url: string; title: str
   return (
     <div className="no-print">
       <div className="flex flex-wrap items-center gap-8">
+        {/* articles, lessons and blog posts: keeps the page on My desk (/desk), in this browser only */}
+        <SaveButton href={url} title={title} />
         <CopyButton text={url} label="Copy link" done="Link copied" />
         {native && (
           <button

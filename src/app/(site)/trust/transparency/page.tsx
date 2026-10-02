@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { PegBoard } from "@/components/figures/extra/PegBoard";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { DISCLOSURE_GROUPS, LEDGER_REVIEWED, disclosures, pendingCount, publishedCount } from "@/components/trust/disclosures";
 import { AskGio4x, Chapter, Status } from "@/components/trust/Parts";
@@ -49,6 +51,11 @@ export default function TransparencyPage() {
               Last checked against the site on <span className="num">{LEDGER_REVIEWED}</span>.
             </p>
           </div>
+        }
+        companion={
+          <HeroCompanion layout="beside" label="Reading it" figure={<PegBoard rows={DISCLOSURE_GROUPS.map((g) => disclosures.filter((d) => d.group === g).map((d) => d.status === "published"))} />}>
+            “Published” means you can read the item on the linked page today. It does not mean a third party has verified it. Anything not yet published can be requested directly.
+          </HeroCompanion>
         }
       />
 

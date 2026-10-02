@@ -75,16 +75,22 @@ export const CAPABILITIES = [
   "staff.manage",
   "tickets.read",
   "tickets.write",
+  "tickets.manage",
   "chats.read",
   "chats.write",
   "customers.read",
   "compliance.read",
   "reports.read",
+  "analytics.read",
   "command.read",
+  "activity.read",
   "config.manage",
   "blog.read",
   "blog.write",
   "blog.publish",
+  "content.read",
+  "content.write",
+  "content.publish",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
 

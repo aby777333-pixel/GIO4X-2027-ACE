@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { RouteScene } from "@/components/cockpit/RouteScene";
+import { ClassSelector } from "@/components/figures/extra/ClassSelector";
+import { Headroom } from "@/components/figures/extra/Headroom";
 import { FigureNote } from "@/components/figures/Figure";
 import { ProofSheet } from "@/components/figures/product/ProofSheet";
 import { BeatRail } from "@/components/platforms/BeatRail";
@@ -239,15 +241,28 @@ export default function RaptorPage() {
                       <h3 className="h2 mt-13">{monitor.title}</h3>
                       <p className="lead mt-21 max-w-[52ch]">{monitor.body}</p>
                     </div>
-                    <ul className="flex flex-wrap gap-x-21 gap-y-8 lg:justify-end">
-                      {monitor.links.map((l) => (
-                        <li key={l.href}>
-                          <Link href={l.href} className="link text-sm">
-                            {l.label}
+                    <div>
+                      {/* beside the chapter on wide screens: what it says is watched, drawn without a figure in it */}
+                      <div className="hidden lg:block">
+                        <Headroom />
+                        <p className="mt-13 text-xs leading-relaxed text-ink-3">
+                          A drawing with no figures in it. The distance it measures is{" "}
+                          <Link href="/glossary/free-margin" className="link">
+                            free margin
                           </Link>
-                        </li>
-                      ))}
-                    </ul>
+                          : equity less the margin in use.
+                        </p>
+                      </div>
+                      <ul className="flex flex-wrap gap-x-21 gap-y-8 lg:mt-13 lg:justify-end">
+                        {monitor.links.map((l) => (
+                          <li key={l.href}>
+                            <Link href={l.href} className="link text-sm">
+                              {l.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                   <Frame className="mt-34">
                     <div className="scroll-x">
@@ -329,6 +344,13 @@ export default function RaptorPage() {
             <p className="mt-21">
               <NotPublished>An instrument-by-instrument list for Raptor is not yet published</NotPublished>
             </p>
+            <FigureNote figure={<ClassSelector names={assetClasses.map((a) => a.name)} ratio={2.8} />}>
+              These are the classes GIO4X lists across the site. Which instruments within each are offered on Raptor is the part still open, and the{" "}
+              <Link href="/platforms/compare" className="link">
+                comparison
+              </Link>{" "}
+              shows the same blank for both platforms.
+            </FigureNote>
           </div>
           <ul className="border-t border-line-strong">
             {assetClasses.map((a, i) => (

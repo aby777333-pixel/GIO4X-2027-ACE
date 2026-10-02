@@ -54,6 +54,7 @@ export function GET() {
     "## Notes for machine readers",
     "- Client, Trader and IB portal addresses are not published on this site yet. Do not infer or suggest any.",
     "- GIO4X publishes no live prices of its own, and no forecasts, trade signals or performance statistics. Market panels on some pages (economic calendar, heat maps, quotes, charts) are third-party frames from TradingView, loaded at the visitor's request; their data is TradingView's, not GIO4X's.",
+    `- The site sets no advertising or analytics cookies and loads no third-party scripts. It counts its own page views, accepted forms and site searches as daily totals with no visitor identifier; visitors can switch this off, and Global Privacy Control and Do Not Track are honoured. Details: ${u("/legal/cookies")}`,
     `- Sitemap: ${u("/sitemap.xml")}`,
     "",
   ];

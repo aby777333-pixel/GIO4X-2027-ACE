@@ -2,8 +2,10 @@
  * ANALYTICS DATA LAYER
  *
  * One consistent vocabulary of meaningful events, pushed to `window.dataLayer`
- * ONLY when the visitor has consented to analytics. No analytics or tag
- * manager is loaded by this site today: the layer exists so that an approved
+ * ONLY when the visitor has consented to analytics. No third-party analytics
+ * or tag manager is loaded by this site today (its own cookieless page-view
+ * counter is a separate thing and does not use this layer: src/lib/pulse.ts):
+ * the layer exists so that an approved
  * tool can be attached later in one place, without scattering scripts through
  * components and without ever sending sensitive values.
  *

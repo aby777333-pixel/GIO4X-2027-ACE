@@ -8,14 +8,16 @@ type LocalKey = (typeof LOCAL_KEYS)[number];
 
 /** What each key is for, in the visitor's language. Every key in LOCAL_KEYS must be described. */
 const KEY_INFO: Record<LocalKey, { name: string; purpose: string }> = {
-  "gx:prefs": { name: "Display preferences", purpose: "Your appearance, accent, density, comfort and time-zone choices from this page, and whether TradingView panels load automatically, so the site looks and behaves the same on your next visit." },
-  "gx:recent": { name: "Recently viewed", purpose: "A short list of the pages and searches you opened most recently, so you can return to them." },
-  "gx:saved": { name: "Saved items", purpose: "Articles, terms or tools you chose to keep for later." },
+  "gx:prefs": { name: "Display preferences", purpose: "Your appearance, accent, density, comfort and time-zone choices from this page, whether TradingView panels load automatically, whether your visits are counted, whether interface sounds are on and how loud, whether you have started or declined the guided tour, and whether an offline copy may be kept, so the site looks and behaves the same on your next visit." },
+  "gx:recent": { name: "Recently viewed", purpose: "A short list of the pages and searches you opened most recently, so you can return to them from My desk. Kept only after you switch the list on there." },
+  "gx:saved": { name: "Saved items", purpose: "Articles, lessons, terms or tools you chose to keep for later. Listed on My desk, which can also export these items to a file you keep." },
   "gx:calc": { name: "Calculator inputs", purpose: "The last figures you typed into the Trader Toolkit, so that one tool can hand its inputs to the next." },
   "gx:consent": { name: "Privacy choice", purpose: "Your answer to a privacy or cookie question, so it is not asked again." },
   "gx:watch": { name: "Watchlist", purpose: "The instruments you chose to keep an eye on." },
+  "gx:morning-depth": { name: "Morning Room depth", purpose: "Whether you read the Morning Room at Quick, Standard or Deep, so it opens the same way next time." },
   "gx:boot": { name: "Start-up shown", purpose: "A note that the short start-up animation has already played on this device, so it is not shown again." },
-  "gx:learn": { name: "Glossary progress", purpose: "Which glossary terms you have answered the “Check yourself” question for correctly, so the glossary can mark them and count them. No score is kept." },
+  "gx:learn": { name: "Glossary and Academy progress", purpose: "Which glossary terms you have answered the “Check yourself” question for correctly, and which Academy lessons you have completed by answering all three of their questions correctly, so the glossary and the Academy can mark them and count them. No score is kept." },
+  "gx:sim": { name: "Practice desk session", purpose: "The state of the trading simulation in Labs (its invented prices, example account, example positions and journal), kept only if you tick “Keep this practice session in this browser” there, so it is still there after a reload. Unticking the box deletes it." },
 };
 
 const COMMON_ZONES = [
@@ -190,6 +192,9 @@ export function PrivacyControls() {
       </div>
       <p className="mt-13 max-w-measure text-xs text-ink-3">
         All of it is kept in this browser’s local storage. None of it is sent to GIO4X, and none of it identifies you. Items marked “Nothing stored” are only created when you use the feature they belong to.
+      </p>
+      <p className="mt-8 max-w-measure text-xs text-ink-3">
+        The offline copy of pages and tools is kept separately, in this browser’s cache storage, and has its own control further down this page. The button below empties it as well.
       </p>
 
       <div className="mt-34 flex flex-wrap items-center gap-x-21 gap-y-13 border-t border-line-strong pt-21">

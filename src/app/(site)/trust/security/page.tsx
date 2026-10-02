@@ -26,9 +26,9 @@ const siteFacts: { t: string; d: string; check: string }[] = [
     check: "Read the Content-Security-Policy response header: script-src lists only ‘self’. The Network panel shows no script loaded from another domain.",
   },
   {
-    t: "No advertising trackers",
-    d: "There are no advertising tags, tracking pixels or analytics scripts on these pages, and no advertising or analytics cookies.",
-    check: "Open the Network panel and reload. Open the storage panel and look at the cookies for this site.",
+    t: "No advertising, no third-party trackers",
+    d: "There are no advertising tags, tracking pixels or third-party analytics scripts on these pages, and no advertising or analytics cookies. The site counts its own page views as daily totals: one request to its own address per page, carrying the page’s path and one word for where you came from, with no cookie and no identifier. You can switch it off in your preferences, and a Global Privacy Control or Do Not Track signal is honoured.",
+    check: "Open the Network panel and reload: the only counting request is one POST to /api/pulse on this site, and its body shows the two fields. Open the storage panel and look at the cookies for this site.",
   },
   {
     t: "Forms go to GIO4X only",
@@ -39,6 +39,11 @@ const siteFacts: { t: string; d: string; check: string }[] = [
     t: "Display preferences stay on your device",
     d: "Theme, density, time zone and similar choices are kept in your browser’s local storage. They are not sent to a server.",
     check: "The Cookie & Storage Notice lists every key. The preferences page shows and clears them.",
+  },
+  {
+    t: "An offline copy that stays on your device",
+    d: "If you switch it on in your preferences, a service worker supplied by this website keeps the calculators and the pages you have opened in your browser’s cache storage, so they open without a connection. It is off by default. It is this site’s own script. It answers only requests for this site’s public pages and static files, never the staff console, a form or another site, and it sends nothing anywhere.",
+    check: "In your browser’s developer tools, the Application or Storage panel lists the service worker (sw.js) and its caches, each named gx-…. The preferences page removes them and switches the copy off.",
   },
   {
     t: "Third-party panels only on request",

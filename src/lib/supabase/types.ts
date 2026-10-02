@@ -149,7 +149,49 @@ export type TicketRow = {
   first_response_at: string | null;
   solved_at: string | null;
   last_customer_at: string | null;
+  /** when a member of staff escalated it for being past its first-reply target (0013); set only by ticket_escalate() */
+  escalated_at: string | null;
 };
+
+/** A canned reply (0013): a starting text for a reply, with optional changes offered alongside it. Retired, never deleted. */
+export type TicketMacroRow = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+  updated_by: string | null;
+  title: string;
+  body: string;
+  set_status: TicketStatus | null;
+  set_priority: TicketPriority | null;
+  set_category: TicketCategory | null;
+  active: boolean;
+};
+
+/** An assignment rule (0013). `position` is the order, lowest first; an empty `when_…` means "any". */
+export type TicketRuleRow = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+  updated_by: string | null;
+  position: number;
+  name: string;
+  when_category: TicketCategory | null;
+  when_priority: TicketPriority | null;
+  assign_to: string | null;
+  set_priority: TicketPriority | null;
+  active: boolean;
+};
+
+/** One row of tickets_overdue() (0013): an open ticket with no first reply, past its internal target. */
+export type TicketOverdueRow = Pick<
+  TicketRow,
+  "id" | "reference" | "created_at" | "name" | "email" | "category" | "subject" | "status" | "priority" | "assigned_to" | "first_response_at" | "last_customer_at" | "escalated_at"
+> & { target_hours: number; due_at: string; hours_overdue: number };
+
+type TicketMacroWritable = Pick<TicketMacroRow, "title" | "body" | "set_status" | "set_priority" | "set_category" | "active">;
+type TicketRuleWritable = Pick<TicketRuleRow, "name" | "when_category" | "when_priority" | "assign_to" | "set_priority" | "active">;
 
 export type TicketInsert = {
   id: string;
@@ -297,6 +339,32 @@ type BlogWritable = Pick<
   | "cover_path" | "cover_alt" | "cover_caption" | "cover_credit" | "cover_width" | "cover_height"
 >;
 
+/** Must equal `faq_entries_category_valid` in 0016_faq.sql and the category keys in src/data/generated/faqs.json. */
+export type FaqCategoryKey = "getting-started" | "accounts" | "trading-basics" | "margin-leverage" | "orders" | "platforms" | "funding" | "security" | "partners";
+/** Must equal `faq_entries_status_valid` in 0016_faq.sql. */
+export type FaqStatus = "draft" | "published" | "hidden";
+
+/** A change to the website's FAQ made in the console (0016): a replacement for a question in the code, or a new question. */
+export type FaqEntryRow = {
+  id: string;
+  /** the id of the question in src/data/faqs.ts that this row replaces or hides; null for a new question */
+  base_id: string | null;
+  category: FaqCategoryKey;
+  question: string;
+  /** the restricted Markdown that src/components/blog/BlogBody.tsx renders */
+  answer: string;
+  position: number;
+  status: FaqStatus;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** The columns the anonymous role may read (0016): what the page shows or hides, nothing about who edited. */
+export const FAQ_PUBLIC_COLUMNS = "id, base_id, category, question, answer, position, status" as const;
+export type FaqEntryPublic = Pick<FaqEntryRow, "id" | "base_id" | "category" | "question" | "answer" | "position" | "status">;
+
 export type IncidentUpdateRow = { id: number; incident_id: string; created_at: string; author: string | null; status: IncidentStatus; body: string };
 
 /** One row of people_list(): everyone who has written in, one record per address. Not client accounts. */
@@ -335,6 +403,80 @@ export type ReportSummary = {
   chats: { total: number; answered: number };
   subscribers: { new: number; unsubscribed: number; active: number };
   follow_ups: { created: number; completed: number };
+};
+
+/**
+ * One row of staff_activity() and of my_activity() (0015): what the console recorded about one member of
+ * staff over a period. Counts of events, not a measure of quality. The definitions are in the migration's header.
+ */
+export type StaffActivityRow = {
+  user_id: string;
+  display_name: string;
+  role: StaffRole;
+  active: boolean;
+  tickets_assigned: number;
+  tickets_replied: number;
+  first_replies: number;
+  /** null when no first reply of theirs falls in the period */
+  first_reply_median_minutes: number | null;
+  tickets_solved: number;
+  ticket_notes: number;
+  chats_claimed: number;
+  chat_messages: number;
+  chats_closed: number;
+  leads_assigned: number;
+  lead_notes: number;
+  tasks_completed: number;
+  stage_changes: number;
+  /** the latest audit entry by this person at any time, not only in the period */
+  last_activity: string | null;
+};
+
+/** What report_month() returns (0015): one calendar month (UTC) in counts. No personal data. */
+export type ReportMonth = {
+  /** "YYYY-MM" */
+  month: string;
+  from: string;
+  to: string;
+  generated_at: string;
+  /** false while the month has not ended: it is counted up to `generated_at` */
+  complete: boolean;
+  leads: { total: number; spam: number; by_topic: Tally; by_stage: Tally; by_source: Tally; other_sources: number };
+  tickets: { opened: number; answered: number; solved: number; first_response_median_minutes: number | null };
+  chats: { started: number; answered: number };
+  subscribers: { joined: number; left: number };
+  follow_ups: { created: number; completed: number };
+  blog: { published: number };
+  incidents: { created: number; published: number };
+};
+
+/**
+ * What pulse_summary() returns (0014_pulse.sql): the website's own visit
+ * counts over a period of UTC days. Totals only; there is nothing about a
+ * visitor to return. The tables behind it (pulse_pages, pulse_forms,
+ * pulse_search) are not listed under `Tables` below because no API role can
+ * read or write them: they are reached only through the pulse_* functions.
+ */
+export type PulseSummary = {
+  days: number;
+  /** first and last UTC day of the period, as YYYY-MM-DD */
+  since: string;
+  until: string;
+  /** the first day anything was counted, or null on a new installation */
+  first_day: string | null;
+  views: {
+    total: number;
+    /** distinct published pages viewed in the period */
+    paths: number;
+    /** one entry per day of the period, zeros included */
+    by_day: { day: string; count: number }[];
+    by_path: { key: string; count: number }[];
+    by_ref: { key: string; count: number }[];
+    /** views of the pages that hold a form, for the conversion figure */
+    form_pages: { key: string; count: number }[];
+  };
+  forms: { key: string; count: number }[];
+  search: { total: number; unmatched: number; other: number; by_term: { key: string; count: number }[] };
 };
 
 /** What command_summary() returns. */
@@ -383,6 +525,18 @@ export type Database = {
         Update: { [_ in never]: never };
         Relationships: [];
       };
+      ticket_macros: {
+        Row: TicketMacroRow;
+        Insert: Partial<TicketMacroWritable> & { title: string; body: string };
+        Update: Partial<TicketMacroWritable>;
+        Relationships: [];
+      };
+      ticket_rules: {
+        Row: TicketRuleRow;
+        Insert: Partial<TicketRuleWritable> & { name: string };
+        Update: Partial<TicketRuleWritable>;
+        Relationships: [];
+      };
       chat_conversations: {
         Row: ChatConversationRow;
         Insert: { [_ in never]: never };
@@ -411,6 +565,12 @@ export type Database = {
         Row: BlogPostRow;
         Insert: Partial<BlogWritable> & { slug: string; title: string };
         Update: Partial<BlogWritable & Pick<BlogPostRow, "corrected_at" | "correction_note">>;
+        Relationships: [];
+      };
+      faq_entries: {
+        Row: FaqEntryRow;
+        Insert: Pick<FaqEntryRow, "category" | "question" | "answer"> & Partial<Pick<FaqEntryRow, "base_id" | "position" | "status">>;
+        Update: Partial<Pick<FaqEntryRow, "category" | "question" | "answer" | "position" | "status">>;
         Relationships: [];
       };
       incidents: {
@@ -467,6 +627,10 @@ export type Database = {
       site_setting_set: { Args: { p_key: string; p_value: Json }; Returns: undefined };
       ticket_view: { Args: { p_reference: string; p_email: string }; Returns: Json | null };
       ticket_reply: { Args: { p_reference: string; p_email: string; p_body: string }; Returns: string };
+      tickets_overdue: { Args: { [_ in never]: never }; Returns: TicketOverdueRow[] };
+      ticket_escalate: { Args: { p_id: string }; Returns: string };
+      ticket_assignees: { Args: { [_ in never]: never }; Returns: { user_id: string; display_name: string }[] };
+      ticket_rule_move: { Args: { p_id: string; p_up: boolean }; Returns: boolean };
       chat_available: { Args: { [_ in never]: never }; Returns: boolean };
       chat_start: { Args: { p_name: string; p_page: string; p_body: string }; Returns: Json };
       chat_send: { Args: { p_id: string; p_token: string; p_body: string }; Returns: string };
@@ -479,8 +643,16 @@ export type Database = {
       people_list: { Args: { p_search?: string; p_limit?: number; p_offset?: number }; Returns: PersonListRow[] };
       person_view: { Args: { p_key: string }; Returns: Json | null };
       report_summary: { Args: { p_days?: number }; Returns: Json };
+      pulse_hit: { Args: { p_path: string; p_ref?: string }; Returns: boolean };
+      pulse_form_hit: { Args: { p_form: string }; Returns: boolean };
+      pulse_search_hit: { Args: { p_term?: string }; Returns: boolean };
+      pulse_summary: { Args: { p_days?: number }; Returns: Json };
       command_summary: { Args: { [_ in never]: never }; Returns: Json };
       record_leads_export: { Args: { row_count: number }; Returns: undefined };
+      staff_activity: { Args: { p_days?: number }; Returns: StaffActivityRow[] };
+      my_activity: { Args: { p_days?: number }; Returns: StaffActivityRow[] };
+      report_month: { Args: { p_month: string }; Returns: Json };
+      record_report_download: { Args: { p_month: string }; Returns: undefined };
       lead_add_manual: {
         Args: { p_name: string; p_email: string; p_phone: string | null; p_country: string | null; p_topic: string; p_message: string; p_how: string };
         Returns: string;

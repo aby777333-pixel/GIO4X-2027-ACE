@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ControlHead, Notice } from "@/components/control/bits";
 import { fmtDateTime } from "@/components/control/format";
+import { MonthSummaryCard } from "@/components/control/views/MonthSummaryCard";
 import { LEAD_STAGE_LABEL, LEAD_STATUS_LABEL, LOST_REASON_LABEL, TICKET_CATEGORY_LABEL, TICKET_STATUS_LABEL } from "@/lib/server/constants";
 import type { ReportSummary } from "@/lib/supabase/types";
 
@@ -217,6 +218,9 @@ export function ReportsView({ days, summary, canExport }: ReportsViewProps) {
                 />
               </Card>
             </div>
+
+            {/* a calendar month, whatever period is chosen above: printable, or as a CSV file */}
+            <MonthSummaryCard />
 
             {canExport && (
               <Card title="Export">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SaveButton } from "@/components/desk/Buttons";
 import { TermLinks } from "@/components/figures/company/TermLinks";
 import { FigureNote } from "@/components/figures/Figure";
 import { TermDiagram } from "@/components/glossary/diagrams/TermDiagram";
@@ -220,6 +221,7 @@ export default async function TermPage({ params }: Params) {
             )}
 
             <div className="no-print mt-34 flex flex-wrap items-center gap-13">
+              <SaveButton href={path} title={t.term} />
               <CopyButton text={absoluteUrl(path)} label="Copy link" done="Link copied" />
               <CopyButton text={`${t.term}: ${t.definition} (GIO4X Financial Glossary, ${absoluteUrl(path)})`} label="Copy definition" done="Definition copied" className="btn btn-quiet btn-sm" />
             </div>

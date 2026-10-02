@@ -1,9 +1,15 @@
 import Link from "next/link";
+import { escalateTicket } from "@/app/control/actions-ticket-tools";
 import { ControlHead, Empty, Notice, Pager } from "@/components/control/bits";
 import { fmtDateTime } from "@/components/control/format";
+import { SubmitButton } from "@/components/control/SubmitButton";
 import { ReplyDue, ticketAssignee, TicketPriorityBadge, TicketStatusBadge, type TicketListItem } from "@/components/control/ticket-bits";
+import { overdueText } from "@/components/control/ticket-tools";
 import { TICKET_CATEGORIES, TICKET_CATEGORY_LABEL, TICKET_PRIORITIES, TICKET_PRIORITY_LABEL, TICKET_STATUSES, TICKET_STATUS_LABEL, TICKET_TARGET_HOURS } from "@/lib/server/constants";
 import type { TicketCategory, TicketPriority, TicketStatus } from "@/lib/supabase/types";
+
+/** What tickets_overdue() said about one ticket: how far past its target it is, and whether it has been escalated. */
+export type LateInfo = { hours: number; escalatedAt: string | null };
 
 export type TicketsViewProps = {
   /** "" is the default queue: open and waiting for the customer together */
@@ -13,6 +19,19 @@ export type TicketsViewProps = {
   /** "" is everyone */
   who: "mine" | "unassigned" | "";
   q: string;
+  /** only tickets past their reply target (the list then comes from tickets_overdue(), longest overdue first) */
+  overdue: boolean;
+  /** how many tickets are past their target, counted by the database; null when it could not be read */
+  overdueCount: number | null;
+  /** the database returned as many rows as it will in one answer, so there may be more */
+  overdueCapped: boolean;
+  /** by ticket id, for the tickets on this page that are past their target */
+  late: Map<string, LateInfo>;
+  /** may escalate (tickets.write) */
+  writable: boolean;
+  /** may manage canned replies and assignment rules (tickets.manage) */
+  manage: boolean;
+  notice?: string;
   error?: string;
   failed: boolean;
   pastEnd: boolean;
@@ -27,10 +46,34 @@ export type TicketsViewProps = {
 };
 
 /** Presentation only. The filters shown here were validated by the page before they reached the database. */
-export function TicketsView({ status, category, priority, who, q, error, failed, pastEnd, tickets, names, me, now, total, page, pageCount }: TicketsViewProps) {
-  const filtered = !!(status || category || priority || who || q);
+export function TicketsView({
+  status,
+  category,
+  priority,
+  who,
+  q,
+  overdue,
+  overdueCount,
+  overdueCapped,
+  late,
+  writable,
+  manage,
+  notice,
+  error,
+  failed,
+  pastEnd,
+  tickets,
+  names,
+  me,
+  now,
+  total,
+  page,
+  pageCount,
+}: TicketsViewProps) {
+  const filtered = !!(status || category || priority || who || q || overdue);
   const href = (p: number) => {
     const sp = new URLSearchParams();
+    if (overdue) sp.set("overdue", "1");
     if (status) sp.set("status", status);
     if (category) sp.set("category", category);
     if (priority) sp.set("priority", priority);
@@ -40,17 +83,64 @@ export function TicketsView({ status, category, priority, who, q, error, failed,
     const s = sp.toString();
     return s ? `/control/tickets?${s}` : "/control/tickets";
   };
-  const caption = filtered ? "Tickets matching the current filters, newest customer activity first" : "Tickets that need work, newest customer activity first";
+  const caption = overdue
+    ? "Tickets past their reply target, the longest overdue first"
+    : filtered
+      ? "Tickets matching the current filters, newest customer activity first"
+      : "Tickets that need work, newest customer activity first";
+  const overdueHeading =
+    overdueCount === null
+      ? "The number of overdue tickets could not be read"
+      : overdueCount === 0
+        ? "No ticket is past its reply target"
+        : `${overdueCount}${overdueCapped ? " or more" : ""} ${overdueCount === 1 ? "ticket is" : "tickets are"} past ${overdueCount === 1 ? "its" : "their"} reply target`;
 
   return (
     <>
-      <ControlHead title="Tickets" lead="Requests for help opened on the website. The ones a customer wrote on most recently come first." />
+      <ControlHead
+        title="Tickets"
+        lead="Requests for help opened on the website. The ones a customer wrote on most recently come first."
+        actions={
+          manage ? (
+            <>
+              <Link href="/control/tickets/macros" className="btn btn-ghost">
+                Canned replies
+              </Link>
+              <Link href="/control/tickets/rules" className="btn btn-ghost">
+                Assignment rules
+              </Link>
+            </>
+          ) : undefined
+        }
+      />
 
-      {error && (
-        <div className="mt-21">
-          <Notice title={error} tone="error" />
+      {(notice || error) && (
+        <div className="mt-21 grid gap-13">
+          {notice && !error && <Notice title={notice} tone="ok" />}
+          {error && <Notice title={error} tone="error" />}
         </div>
       )}
+
+      <section aria-labelledby="tickets-overdue" className="gxc-card mt-21 px-21 py-13">
+        <div className="flex flex-wrap items-center justify-between gap-x-21 gap-y-8">
+          <h2 id="tickets-overdue" className={`text-sm font-semibold ${overdueCount ? "text-neg" : "text-ink"}`}>
+            {overdueHeading}
+          </h2>
+          {overdue ? (
+            <Link href="/control/tickets" className="btn btn-ghost btn-sm">
+              Back to the whole queue
+            </Link>
+          ) : overdueCount ? (
+            <Link href="/control/tickets?overdue=1" className="btn btn-ghost btn-sm">
+              Show overdue tickets
+            </Link>
+          ) : null}
+        </div>
+        <p className="mt-5 max-w-measure text-xs text-ink-3">
+          Overdue means open, not yet answered, and past the internal target for its priority. Nothing escalates by itself: there is no timed job, so a ticket is escalated when a person presses Escalate. The Command Centre shows the
+          same late count.
+        </p>
+      </section>
 
       <form method="get" action="/control/tickets" role="search" aria-label="Filter tickets" className="mt-21 grid gap-13 border-b border-line pb-21 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
         <div className="field sm:col-span-2 lg:col-span-4">
@@ -99,6 +189,13 @@ export function TicketsView({ status, category, priority, who, q, error, failed,
             <option value="unassigned">Nobody yet</option>
           </select>
         </div>
+        <label className="check sm:col-span-2 lg:col-span-4">
+          <input type="checkbox" name="overdue" value="1" defaultChecked={overdue} />
+          <span>
+            <span className="font-medium text-ink">Overdue only</span>
+            <span className="block text-xs text-ink-3">Past the reply target, the longest overdue first. Overdue tickets are always Open, so Status is not used while this is ticked.</span>
+          </span>
+        </label>
         <div className="flex flex-wrap items-center gap-8 sm:col-span-2 lg:col-span-4">
           <button type="submit" className="btn btn-primary">
             Apply
@@ -112,19 +209,36 @@ export function TicketsView({ status, category, priority, who, q, error, failed,
         </div>
       </form>
 
+      {overdue && writable && !failed && tickets.length > 0 && (
+        <p className="mt-13 max-w-measure text-sm text-ink-2">
+          <span className="font-semibold text-ink">What Escalate does:</span> it raises the ticket’s priority one step (Low, Normal, High, Urgent), marks it as escalated, and records both with your name and the time. It can be done once
+          per ticket. It does not assign the ticket or notify anyone.
+        </p>
+      )}
+
       <div className="mt-13">
         {failed ? (
           <Notice title="The tickets could not be read" tone="error">
             The database did not answer. Reload the page; if this continues, check that the migrations have been applied.
           </Notice>
         ) : tickets.length ? (
-          <TicketsTable tickets={tickets} names={names} me={me} now={now} caption={caption} />
+          <TicketsTable tickets={tickets} names={names} me={me} now={now} caption={caption} overdue={overdue} late={late} writable={writable} />
         ) : pastEnd ? (
           <Empty title="There is no such page">
             <p>
               <Link href={href(1)} className="link">
                 Go to the first page
               </Link>
+            </p>
+          </Empty>
+        ) : overdue ? (
+          <Empty title={category || priority || who || q ? "Nothing overdue matches these filters" : "Nothing is overdue"}>
+            <p>
+              No open ticket that is still waiting for a first reply is past its target{category || priority || who || q ? " with these filters" : ""}.{" "}
+              <Link href="/control/tickets" className="link">
+                Go back to what needs work
+              </Link>
+              .
             </p>
           </Empty>
         ) : filtered ? (
@@ -162,15 +276,58 @@ export function TicketsView({ status, category, priority, who, q, error, failed,
   );
 }
 
+/** How late, and either that it has been escalated or the button that escalates it. Only in the overdue list. */
+function Escalation({ ticket, info, writable }: { ticket: TicketListItem; info: LateInfo | undefined; writable: boolean }) {
+  if (!info) return null;
+  return (
+    <div className="grid justify-items-start gap-5 text-xs">
+      <span className="font-semibold text-neg">Late by {overdueText(info.hours)}</span>
+      {info.escalatedAt ? (
+        <span className="text-ink-2">
+          <span className="font-semibold text-ink">Escalated</span> <span className="num">{fmtDateTime(info.escalatedAt)}</span>
+        </span>
+      ) : writable ? (
+        <form action={escalateTicket}>
+          <input type="hidden" name="id" value={ticket.id} />
+          <input type="hidden" name="from" value="queue" />
+          <SubmitButton pending="Escalating…" className="btn btn-ghost btn-sm">
+            Escalate<span className="sr-only"> {ticket.reference}</span>
+          </SubmitButton>
+        </form>
+      ) : (
+        <span className="text-ink-3">Not escalated</span>
+      )}
+    </div>
+  );
+}
+
 /**
  * Tickets as a table from `md` up and as stacked rows on a phone: the same
  * facts, composed for the width rather than squeezed into it.
  */
-function TicketsTable({ tickets, names, me, now, caption }: { tickets: TicketListItem[]; names: Map<string, string>; me: string; now: number; caption: string }) {
+function TicketsTable({
+  tickets,
+  names,
+  me,
+  now,
+  caption,
+  overdue,
+  late,
+  writable,
+}: {
+  tickets: TicketListItem[];
+  names: Map<string, string>;
+  me: string;
+  now: number;
+  caption: string;
+  overdue: boolean;
+  late: Map<string, LateInfo>;
+  writable: boolean;
+}) {
   return (
     <>
       <div className="scroll-x hidden md:block">
-        <table className="table-gx min-w-[56rem] text-sm">
+        <table className={`table-gx text-sm ${overdue ? "min-w-[66rem]" : "min-w-[56rem]"}`}>
           <caption className="sr-only">{caption}</caption>
           <thead>
             <tr>
@@ -181,6 +338,7 @@ function TicketsTable({ tickets, names, me, now, caption }: { tickets: TicketLis
               <th scope="col">Status</th>
               <th scope="col">Assigned</th>
               <th scope="col">Opened</th>
+              {overdue && <th scope="col">Escalation</th>}
             </tr>
           </thead>
           <tbody>
@@ -207,6 +365,8 @@ function TicketsTable({ tickets, names, me, now, caption }: { tickets: TicketLis
                   <span className="mt-5 block empty:hidden">
                     <ReplyDue ticket={ticket} now={now} stacked />
                   </span>
+                  {/* in the whole queue an escalated ticket says so; the overdue list has its own column */}
+                  {!overdue && late.get(ticket.id)?.escalatedAt && <span className="mt-3 block text-xs font-semibold text-ink-2">Escalated</span>}
                 </td>
                 <td className="whitespace-nowrap align-top text-ink-2">{ticketAssignee(ticket.assigned_to, names, me)}</td>
                 <td className="num align-top text-ink-2">
@@ -219,6 +379,11 @@ function TicketsTable({ tickets, names, me, now, caption }: { tickets: TicketLis
                       </span>
                     ))}
                 </td>
+                {overdue && (
+                  <td className="align-top">
+                    <Escalation ticket={ticket} info={late.get(ticket.id)} writable={writable} />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -244,8 +409,15 @@ function TicketsTable({ tickets, names, me, now, caption }: { tickets: TicketLis
                 <span>{TICKET_CATEGORY_LABEL[ticket.category]}</span>
                 <span>{ticketAssignee(ticket.assigned_to, names, me)}</span>
                 <span className="num">Opened {fmtDateTime(ticket.created_at)}</span>
+                {!overdue && late.get(ticket.id)?.escalatedAt && <span className="font-semibold text-ink-2">Escalated</span>}
               </span>
             </Link>
+            {/* outside the link: a button cannot live inside one */}
+            {overdue && late.has(ticket.id) && (
+              <div className="pb-13">
+                <Escalation ticket={ticket} info={late.get(ticket.id)} writable={writable} />
+              </div>
+            )}
           </li>
         ))}
       </ul>

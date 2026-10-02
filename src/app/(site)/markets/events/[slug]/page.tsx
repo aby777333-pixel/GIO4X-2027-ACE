@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Compiled } from "@/components/figures/extra/Compiled";
+import { SideNote } from "@/components/figures/extra/SideNote";
 import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { ReleaseRipple } from "@/components/figures/markets/ReleaseRipple";
 import { banksForEvent, eventHref, resolveAll } from "@/components/markets/graph";
@@ -88,6 +90,14 @@ export default async function EventPage({ params }: Params) {
             <h2 className="h3 mt-55">Why markets watch it.</h2>
             <p className="mt-13 text-md text-ink-2">{e.why}</p>
             <p className="mt-21 border-l-2 border-line-strong pl-13 text-sm text-ink-3">An explanation of why the release is followed, not a view on what any market will do when it is published. {educationalNote}</p>
+            {/* the list beside this column is the longer of the two on every event page: one figure for the template */}
+            <SideNote figure={<Compiled ratio={3} />} label="Before it is published" className="lg:!mt-21">
+              A release is compiled first: a basket priced, a survey collected or a vote taken. The method itself is set out by the publisher, listed under{" "}
+              <a href="#pub-title" className="link">
+                Who publishes it
+              </a>
+              .
+            </SideNote>
           </div>
 
           <div className="lg:pt-55">

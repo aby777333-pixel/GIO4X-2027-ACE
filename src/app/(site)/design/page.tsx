@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { GoldenGrid, TokenSwatch } from "@/components/company/DesignKit";
+import { GreyProof } from "@/components/figures/extra/GreyProof";
+import { FigureNote } from "@/components/figures/Figure";
 import { GoldenHead } from "@/components/figures/stage/GoldenHead";
 import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { DataNote, NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
@@ -422,6 +424,9 @@ export default function DesignPage() {
             <Link href="/preferences" className="go mt-21">
               Comfort settings
             </Link>
+            <FigureNote figure={<GreyProof />}>
+              The drawings on this site keep to the same rules. Under reduced motion each is a single still picture, and none carries a meaning that the text beside it does not also state.
+            </FigureNote>
           </div>
           <dl className="grid border-l border-t border-line sm:grid-cols-2">
             {access.map((a, i) => (

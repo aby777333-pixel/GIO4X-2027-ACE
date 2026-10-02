@@ -44,7 +44,8 @@ export function Questions({ items }: { items: string[] }) {
   return (
     <ol className="grid gap-x-55 md:grid-cols-2">
       {items.map((q, i) => (
-        <li key={q} className="grid grid-cols-[2.125rem_1fr] gap-x-8 border-t border-line py-21" data-reveal style={{ ["--i" as string]: Math.min(i, 6) }}>
+        // an odd last question takes the whole row, so the second column never ends on an empty cell
+        <li key={q} className="grid grid-cols-[2.125rem_1fr] gap-x-8 border-t border-line py-21 md:[&:last-child:nth-child(odd)]:col-span-2" data-reveal style={{ ["--i" as string]: Math.min(i, 6) }}>
           <span className="num pt-[0.3rem] text-xs font-semibold text-ink-3">{i + 1}</span>
           <p className="font-display text-lg leading-snug text-ink">{q}</p>
         </li>

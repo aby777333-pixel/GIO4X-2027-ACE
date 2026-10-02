@@ -76,7 +76,7 @@ export function ExplainerList({ items }: { items: Article[] }) {
   return (
     <ol className="grid border-t border-line-strong md:grid-cols-2 md:gap-x-55">
       {items.map((a, i) => (
-        <li key={a.slug} className="border-b border-line" data-reveal style={{ ["--i" as string]: i }}>
+        <li key={a.slug} className="border-b border-line md:[&:last-child:nth-child(odd)]:col-span-2" data-reveal style={{ ["--i" as string]: i }}>
           <Link href={articleHref(a)} className="group grid min-h-[2.75rem] grid-cols-[2.125rem_1fr] gap-x-8 py-21">
             <span className="num pt-3 text-xs font-semibold tracking-[0.1em] text-prestige-ink">{String(i + 1).padStart(2, "0")}</span>
             <span>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
+import { Unplugged } from "@/components/figures/extra/Unplugged";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { IncidentFeed } from "@/components/status/IncidentFeed";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { site } from "@/config/site";
@@ -40,6 +42,11 @@ export default function StatusPage() {
               None of the <span className="num font-medium text-ink">{services.length}</span> services listed below has an automated check reporting to this page. No uptime percentage is published.
             </p>
           </div>
+        }
+        companion={
+          <HeroCompanion layout="beside" figure={<Unplugged ratio={2.1} />}>
+            “Not monitored” is not a statement that a service is up or down. The notices below are written by GIO4X staff, not by a monitor.
+          </HeroCompanion>
         }
       />
 

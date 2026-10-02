@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AcademyProgress, LessonMark, LessonsCount } from "@/components/academy/Progress";
 import { TwoRoutes } from "@/components/figures/academy/TwoRoutes";
 import { BoundedScale } from "@/components/figures/company/BoundedScale";
 import { RollingMean } from "@/components/figures/company/RollingMean";
@@ -51,6 +52,7 @@ function PathSteps({ path }: { path: LearningPath }) {
                       <Link href={`/academy/${l.slug}`} className="link inline-flex min-h-[2.125rem] items-center text-[0.9375rem]">
                         {l.title}
                       </Link>
+                      <LessonMark slug={l.slug} />
                     </li>
                   ))}
                 </ul>
@@ -108,7 +110,7 @@ export default function AcademyPage() {
         title="Learn how markets work, in order."
         lead="Mechanics and concepts, taught responsibly: from what a currency pair is to how professionals size risk. No certificates, no streaks, and no promise that study leads to profit."
         aside={
-          <aside aria-labelledby="start-here" className="border-t-2 border-ink pt-13">
+          <aside aria-labelledby="start-here" className="border-t-2 border-ink pt-13" data-tour="academy">
             <div className="flex items-baseline justify-between gap-13">
               <h2 id="start-here" className="label text-ink">
                 {startHere.title}
@@ -160,6 +162,8 @@ export default function AcademyPage() {
             <p className="lead mt-13 max-w-[58ch]">
               {lessons.length} lessons are published. Where a module has no lesson yet, it says so and shows its outline instead.
             </p>
+            {/* rendered only after mount, and only when this browser holds a completed lesson */}
+            <AcademyProgress slugs={lessons.map((l) => l.slug)} className="mt-13 max-w-[58ch]" />
           </div>
           <div className="mt-55 border-t border-line-strong">
             {academyLevels.map((lv, i) => {
@@ -171,6 +175,7 @@ export default function AcademyPage() {
                     <p className="num text-xs font-semibold tracking-[0.1em] text-ink-3">Level {String(i + 1).padStart(2, "0")}</p>
                     <h3 className="h3 mt-8">{lv.level}</h3>
                     <p className="mt-13 max-w-[38ch] text-ink-2">{lv.line}</p>
+                    <LessonsCount slugs={mods.flatMap((m) => lessonsOf(m).map((l) => l.slug))} className="mt-13" />
                     {lv.level === "Beginner" && (
                       <p className="mt-21 hidden max-w-[38ch] text-sm leading-relaxed text-ink-3 lg:block">
                         New to currency markets? Begin with the{" "}
@@ -237,7 +242,10 @@ export default function AcademyPage() {
                                   <Link href={`/academy/${l.slug}`} className="group grid min-h-[3.4375rem] grid-cols-[2.125rem_1fr_auto] items-baseline gap-x-8 py-13 transition-colors duration-fast hover:bg-[var(--brand-soft)]">
                                     <span className="num text-xs text-ink-3">{String(n + 1).padStart(2, "0")}</span>
                                     <span>
-                                      <span className="block font-medium text-ink transition-colors duration-fast group-hover:text-accent">{l.title}</span>
+                                      <span className="block font-medium text-ink transition-colors duration-fast group-hover:text-accent">
+                                        {l.title}
+                                        <LessonMark slug={l.slug} />
+                                      </span>
                                       <span className="mt-2 block text-sm text-ink-3">{l.description}</span>
                                     </span>
                                     <span className="num hidden whitespace-nowrap pl-13 text-xs text-ink-3 sm:block">
@@ -268,7 +276,7 @@ export default function AcademyPage() {
       {/* ── Learning paths ──────────────────────────────────────────────── */}
       <section className="section hairline bg-paper" aria-labelledby="paths-title">
         <div className="wrap">
-          <SectionHead eyebrow="Learning paths" title={<span id="paths-title">Two routes through the same material.</span>} lead="A path is a suggested order, nothing more. There is no enrolment, no timetable and nothing to complete." />
+          <SectionHead eyebrow="Learning paths" title={<span id="paths-title">Two routes through the same material.</span>} lead="A path is a suggested order, nothing more. There is no enrolment and no timetable. Each lesson ends with three questions; this browser remembers the lessons whose questions you have answered, and nothing is sent anywhere." />
           <div className="mt-34 grid gap-55 lg:grid-cols-2 lg:gap-89">
             {[startHere, ...otherPaths].map((p) => (
               <article key={p.key} aria-labelledby={`p-${p.key}`}>
@@ -276,6 +284,7 @@ export default function AcademyPage() {
                   {p.title}
                 </h3>
                 <p className="mt-8 max-w-[52ch] text-ink-2">{p.summary}</p>
+                <LessonsCount slugs={[...new Set(p.steps.flatMap((s) => s.lessons))].filter((slug) => getLesson(slug) !== undefined)} className="mt-13" />
                 <PathSteps path={p} />
                 {p.key === startHere.key && longer && meet && meet.shared > 0 && (
                   <aside className="mt-34 hidden lg:block">
@@ -349,7 +358,7 @@ export default function AcademyPage() {
             ]}
           />
           <p className="mt-34 max-w-measure text-sm text-ink-3">
-            The Academy explains how things work. It does not issue certificates, score your progress, or suggest that finishing it makes trading profitable: most of what is here is about cost, mechanics and risk. Modules listed: {modules.length}; lessons published: {lessons.length}.
+            The Academy explains how things work. It does not issue certificates, grade you, or suggest that finishing it makes trading profitable: most of what is here is about cost, mechanics and risk. The questions at the end of a lesson are a self-check, and which lessons you have completed is kept in your browser only. Modules listed: {modules.length}; lessons published: {lessons.length}.
           </p>
         </div>
       </section>

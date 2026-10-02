@@ -2,14 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useId, useMemo, useState } from "react";
-import type { Faq, FaqCategory } from "@/data/faqs";
+import { BlogBody } from "@/components/blog/BlogBody";
+import type { FaqCategory } from "@/data/faqs";
+import type { PublicFaq } from "@/lib/faq";
 
 /**
  * Help, searchable. Every question is in the HTML as a native disclosure, so
  * the page works without JavaScript; search and the category rail only hide
  * what does not match. A link to a question (`/faq#id`) opens it.
+ *
+ * An answer from the code is plain text. An answer written in the console
+ * (`md`) is restricted Markdown and goes through the blog's renderer: it is
+ * never inserted as HTML, and a link in it goes to a page on this site or to
+ * an https address.
  */
-export function FaqBrowser({ categories, items }: { categories: FaqCategory[]; items: Faq[] }) {
+export function FaqBrowser({ categories, items }: { categories: FaqCategory[]; items: PublicFaq[] }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
   const inputId = useId();
@@ -121,7 +128,7 @@ export function FaqBrowser({ categories, items }: { categories: FaqCategory[]; i
                           </summary>
                           <div className="max-w-measure pb-21">
                             {f.kind === "open" && <p className="chip mb-13">Not yet published</p>}
-                            <p className="text-ink-2">{f.a}</p>
+                            {f.md ? <BlogBody source={f.a} className="!text-[length:inherit] !leading-[inherit]" /> : <p className="text-ink-2">{f.a}</p>}
                             {f.links && f.links.length > 0 && (
                               <p className="mt-13 flex flex-wrap gap-x-21 gap-y-5 text-sm">
                                 {f.links.map((l) => (

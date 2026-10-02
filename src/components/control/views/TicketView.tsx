@@ -1,10 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { addTicketNote, addTicketReply, assignTicket, setTicketCategory, setTicketPriority, setTicketStatus } from "@/app/control/actions-tickets";
+import { escalateTicket } from "@/app/control/actions-ticket-tools";
+import { addTicketNote, assignTicket, setTicketCategory, setTicketPriority, setTicketStatus } from "@/app/control/actions-tickets";
 import { ControlHead, Facts, Notice } from "@/components/control/bits";
 import { fmtDateTime, jsonPairs } from "@/components/control/format";
 import { SubmitButton } from "@/components/control/SubmitButton";
-import { ReplyDue, ticketAssignee, TicketPriorityBadge, TicketStatusBadge } from "@/components/control/ticket-bits";
+import { replyDue, ReplyDue, ticketAssignee, TicketPriorityBadge, TicketStatusBadge } from "@/components/control/ticket-bits";
+import { overdueText, type MacroOption } from "@/components/control/ticket-tools";
+import { TicketReplyForm } from "@/components/control/views/TicketReplyForm";
 import { TICKET_CATEGORIES, TICKET_CATEGORY_LABEL, TICKET_PRIORITIES, TICKET_PRIORITY_LABEL, TICKET_STATUSES, TICKET_STATUS_LABEL, TICKET_TARGET_HOURS } from "@/lib/server/constants";
 import type { AuditRow, TicketCategory, TicketMessageRow, TicketPriority, TicketRow, TicketStatus } from "@/lib/supabase/types";
 
@@ -16,7 +19,13 @@ const AUDIT_LABEL: Record<string, string> = {
   "ticket.reply": "Reply sent to the customer",
   "ticket.note": "Internal note added",
   "ticket.customer_reply": "The customer wrote",
+  "ticket.escalate": "Escalated: late against the reply target",
+  "ticket.rule": "An assignment rule was applied on arrival",
+  "ticket.rule_failed": "An assignment rule failed and was skipped",
 };
+
+/** One step up, as ticket_escalate() raises it. Urgent has nowhere to go. */
+const NEXT_PRIORITY: Record<TicketPriority, TicketPriority> = { low: "normal", normal: "high", high: "urgent", urgent: "urgent" };
 
 /** What each status means for the person choosing it. */
 const STATUS_NOTE: Record<TicketStatus, string> = {
@@ -48,6 +57,11 @@ export type TicketViewProps = {
   writable: boolean;
   /** may give the ticket to somebody else (leads.assign) */
   canAssign: boolean;
+  /** active canned replies for the reply form (read only for people who can reply) */
+  macros: MacroOption[];
+  macrosFailed: boolean;
+  /** may manage canned replies and rules (tickets.manage) */
+  manage: boolean;
   notice?: string;
   error?: string;
 };
@@ -76,10 +90,18 @@ function Card({ id, title, aside, children, className = "" }: { id: string; titl
  * a plain card, a card with a solid edge set in from the left, and a dashed
  * card on a tinted ground.
  */
-export function TicketView({ ticket, messages, messagesFailed, audit, auditFailed, names, me, now, writable, canAssign, notice, error }: TicketViewProps) {
+export function TicketView({ ticket, messages, messagesFailed, audit, auditFailed, names, me, now, writable, canAssign, macros, macrosFailed, manage, notice, error }: TicketViewProps) {
   const staffName = (userId: string | null) => (!userId ? "Former member of staff" : userId === me ? "You" : (names.get(userId) ?? "Former member of staff"));
   const assignedName = ticketAssignee(ticket.assigned_to, names, me);
   const closed = ticket.status === "closed";
+  // Late by the page's clock, with the same rule the database uses (open, no
+  // first reply, past the target). Pressing Escalate asks the database, which
+  // decides with its own clock.
+  const due = replyDue(ticket, now);
+  const lateHours = due?.late ? (now - new Date(due.at).getTime()) / 3_600_000 : null;
+  // `escalated_at` is absent until 0013 is applied: absent reads as "not escalated"
+  const escalatedAt = ticket.escalated_at ?? null;
+  const raised = NEXT_PRIORITY[ticket.priority];
 
   return (
     <>
@@ -198,21 +220,20 @@ export function TicketView({ ticket, messages, messagesFailed, audit, auditFaile
                   </h2>
                   <span className="text-xs font-medium text-ink-2">The customer will read this</span>
                 </div>
-                <form action={addTicketReply} className="gxc-card-body grid gap-13">
-                  <input type="hidden" name="id" value={ticket.id} />
-                  <div className="field">
-                    <label htmlFor="reply-body">Your reply to {ticket.name}</label>
-                    <textarea id="reply-body" name="body" className="textarea" rows={6} maxLength={5000} required aria-describedby="reply-hint" />
-                    <p id="reply-hint" className="field-hint">
-                      Shown on the website without your name. Up to 5,000 characters. Never ask for or include passwords, card numbers or one-time codes.
-                      {ticket.status === "open" && <> Sending it moves this ticket to {TICKET_STATUS_LABEL.pending}{ticket.assigned_to ? "" : " and assigns it to you"}.</>}
-                      {closed && <> This ticket is closed: the customer can read your reply but cannot answer it. Reopen the ticket first if you expect an answer.</>}
-                    </p>
-                  </div>
-                  <div>
-                    <SubmitButton pending="Sending…">Send reply to the customer</SubmitButton>
-                  </div>
-                </form>
+                {/* keyed by the thread's length: once a reply is stored the form starts again, with nothing selected or offered */}
+                <TicketReplyForm
+                  key={messages.length}
+                  ticketId={ticket.id}
+                  name={ticket.name}
+                  reference={ticket.reference}
+                  status={ticket.status}
+                  priority={ticket.priority}
+                  category={ticket.category}
+                  assigned={!!ticket.assigned_to}
+                  macros={macros}
+                  macrosFailed={macrosFailed}
+                  manage={manage}
+                />
               </section>
 
               <section aria-labelledby="ticket-note" className="min-w-0 rounded-[16px] border border-dashed border-line-strong bg-surface-2">
@@ -259,17 +280,21 @@ export function TicketView({ ticket, messages, messagesFailed, audit, auditFaile
                           : (names.get(v) ?? "a member of staff")
                       : entry.action === "ticket.status" && isStatus(v)
                         ? TICKET_STATUS_LABEL[v]
-                        : entry.action === "ticket.priority" && isPriority(v)
+                        : (entry.action === "ticket.priority" || entry.action === "ticket.escalate") && isPriority(v)
                           ? TICKET_PRIORITY_LABEL[v]
                           : entry.action === "ticket.category" && isCategory(v)
                             ? TICKET_CATEGORY_LABEL[v]
                             : v;
                   // a customer's message has no member of staff behind it, and neither has the reopening it causes
-                  const actor = entry.actor ? staffName(entry.actor) : entry.action === "ticket.customer_reply" ? "The customer" : "Not a member of staff";
+                  // a rule has no person behind it either: the entry carries the rule's name (0013)
+                  const byRule = entry.action === "ticket.rule" || entry.action === "ticket.rule_failed";
+                  const ruleName = byRule ? pairs.find((d) => d.key === "rule")?.value : undefined;
+                  const actor = entry.actor ? staffName(entry.actor) : entry.action === "ticket.customer_reply" ? "The customer" : byRule ? "Assignment rules" : "Not a member of staff";
                   return (
                     <li key={entry.id} className="flex flex-wrap items-baseline justify-between gap-x-21 gap-y-3 border-b border-line py-8 text-sm">
                       <span className="text-ink">
                         {AUDIT_LABEL[entry.action] ?? entry.action}
+                        {ruleName !== undefined && <span className="text-ink-3"> · {ruleName}</span>}
                         {from !== undefined && to !== undefined && (
                           <span className="text-ink-3">
                             {" "}
@@ -288,14 +313,54 @@ export function TicketView({ ticket, messages, messagesFailed, audit, auditFaile
               <p className="text-sm text-ink-3">No changes recorded yet.</p>
             )}
             <p className="mt-13 text-xs text-ink-3">
-              Newest first. The database records each change of status, priority, category and assignment, and that a message was added, never its text. A change marked “Not a member of staff” followed a message from the customer, or
-              was made directly in the database.
+              Newest first. The database records each change of status, priority, category and assignment, and that a message was added, never its text. A change marked “Not a member of staff” followed a message from the customer, an
+              assignment rule applied as the ticket arrived, or was made directly in the database.
             </p>
           </Card>
         </div>
 
         {/* where it stands, who has it, who asked */}
         <div className="grid min-w-0 gap-21">
+          {(lateHours !== null || escalatedAt) && (
+            <Card id="ticket-target" title="Reply target" aside={<span className="text-xs font-semibold text-ink-2">{escalatedAt ? "Escalated" : "Late"}</span>}>
+              {lateHours !== null && due && (
+                <p className="text-sm text-ink">
+                  <span className="font-semibold text-neg">Late by {overdueText(lateHours)}.</span> A first reply was due <span className="num">{fmtDateTime(due.at)}</span>: {TICKET_TARGET_HOURS[ticket.priority]} hours after it was opened, the
+                  internal target for {TICKET_PRIORITY_LABEL[ticket.priority]}.
+                </p>
+              )}
+              {escalatedAt ? (
+                <p className={`text-sm text-ink-2 ${lateHours !== null ? "mt-8" : ""}`}>
+                  Escalated <span className="num">{fmtDateTime(escalatedAt)}</span>. A ticket can be escalated once; to raise it further, change the priority under Triage.
+                </p>
+              ) : writable ? (
+                <form action={escalateTicket} className="mt-13 grid gap-8">
+                  <input type="hidden" name="id" value={ticket.id} />
+                  <p id="escalate-what" className="text-sm text-ink-2">
+                    {ticket.priority === "urgent" ? (
+                      <>Escalating marks this ticket as escalated and records that with your name and the time. It is already {TICKET_PRIORITY_LABEL.urgent}, so the priority cannot go higher.</>
+                    ) : (
+                      <>
+                        Escalating raises the priority one step, from {TICKET_PRIORITY_LABEL[ticket.priority]} to {TICKET_PRIORITY_LABEL[raised]}, marks the ticket as escalated, and records both with your name and the time.
+                      </>
+                    )}{" "}
+                    It can be done once per ticket. It does not assign the ticket or notify anyone.
+                  </p>
+                  <div>
+                    <SubmitButton pending="Escalating…" className="btn btn-ghost">
+                      Escalate<span className="sr-only"> this ticket</span>
+                    </SubmitButton>
+                  </div>
+                </form>
+              ) : (
+                <p className="mt-8 text-sm text-ink-2">Someone who can work tickets can escalate it, which raises its priority one step.</p>
+              )}
+              <p className="mt-13 border-t border-line pt-8 text-xs text-ink-3">
+                Nothing escalates by itself: there is no timed job. It happens when a person presses the button. The Command Centre shows how many tickets are late. The target is internal and is never shown to the customer.
+              </p>
+            </Card>
+          )}
+
           <Card id="ticket-triage" title="Triage">
             {writable ? (
               <div className="grid gap-13">

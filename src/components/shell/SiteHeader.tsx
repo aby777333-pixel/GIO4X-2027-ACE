@@ -8,6 +8,7 @@ import { Logo } from "@/components/brand/Logo";
 import { AppearanceButton } from "@/components/shell/Appearance";
 import { openCommandBar } from "@/components/shell/CommandBar";
 import { LensButton } from "@/components/shell/Lens";
+import { NavGlyph, panelLight, rowFx } from "@/components/shell/nav-glyphs";
 
 /** Which URL prefixes belong to which primary section (a page is "in" exactly one). */
 const SECTION_PREFIXES: Record<string, string[]> = {
@@ -175,12 +176,13 @@ export function SiteHeader() {
 
       {/* mega-menu (desktop) */}
       <div
-        className={`absolute inset-x-0 top-full hidden overflow-hidden border-b border-line bg-paper shadow-2 transition-[opacity,visibility,transform] duration-[260ms] lg:block ${
+        className={`mg-panel absolute inset-x-0 top-full hidden overflow-hidden border-b border-line bg-paper shadow-2 transition-[opacity,visibility,transform] duration-[260ms] lg:block ${
           active ? "visible translate-y-0 opacity-100" : "invisible -translate-y-5 opacity-0"
         }`}
         onMouseEnter={() => window.clearTimeout(closeTimer.current)}
+        onPointerMove={panelLight}
       >
-        {nav.map((s) => (
+        {nav.map((s, si) => (
           <div key={s.key} id={`mega-${s.key}`} hidden={open !== s.key} className="wrap grid grid-cols-[minmax(0,1fr)_minmax(0,1.618fr)] gap-55 py-34">
             <div className="border-r border-line pr-55">
               <p className="eyebrow">{s.label}</p>
@@ -190,19 +192,23 @@ export function SiteHeader() {
               </Link>
             </div>
             <div className="grid gap-34" style={{ gridTemplateColumns: `repeat(${s.groups.length}, minmax(0, 1fr))` }}>
-              {s.groups.map((g) => (
-                <div key={g.title}>
+              {s.groups.map((g, gi) => (
+                <div key={g.title} data-mg-fx={rowFx(si, gi)}>
                   <p className="label">{g.title}</p>
                   <ul className="mt-13 grid gap-2">
                     {g.items.map((i) => (
                       <li key={i.href}>
+                        {/* the row's glyph and its hover treatment live in nav-glyphs.tsx and styles/menu.css */}
                         <Link
                           href={i.href}
-                          className="group -mx-8 block rounded-sm px-8 py-[0.4rem] transition-colors duration-fast hover:bg-brand-soft"
+                          className="mg-row group -mx-8 flex items-start gap-8 rounded-sm px-8 py-[0.4rem]"
                           aria-current={pathname === i.href ? "page" : undefined}
                         >
-                          <span className="text-[0.9375rem] font-medium text-ink">{i.label}</span>
-                          {i.note && <span className="block text-xs text-ink-3">{i.note}</span>}
+                          <NavGlyph href={i.href} section={s.key} />
+                          <span className="mg-text">
+                            <span className="mg-label text-[0.9375rem] font-medium text-ink">{i.label}</span>
+                            {i.note && <span className="mg-note block text-xs text-ink-3">{i.note}</span>}
+                          </span>
                         </Link>
                       </li>
                     ))}
@@ -250,9 +256,10 @@ export function SiteHeader() {
                         <div key={g.title}>
                           <p className="label">{g.title}</p>
                           <ul className="mt-8">
-                            {g.items.map((i) => (
+                            {g.items.map((i, ii) => (
                               <li key={i.href}>
-                                <Link href={i.href} className="block py-[0.45rem] text-base text-ink-2">
+                                <Link href={i.href} className="flex items-center gap-8 py-[0.45rem] text-base text-ink-2">
+                                  <NavGlyph href={i.href} section={s.key} once={ii} />
                                   {i.label}
                                 </Link>
                               </li>

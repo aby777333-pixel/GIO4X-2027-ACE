@@ -41,10 +41,15 @@ begins under it. The engine computes it (`f.box`), draws its champagne hairline,
 golden cut on its long sides, and places the scene's focal point at its centre. A scene cannot move its
 own focal point out of the frame. The homepage scene (`scenes/flightdeck.ts`) is `free: true` because
 its stage is taller and its statement larger, but it is framed like the rest: it composes its whole
-instrument inside its own golden rectangle, as large as fits beside the headline, clips it, and hands
-the rectangle to the engine through `Scene.frame`, which then hit-tests the pointer against it, clips
-the pointer's light to it and draws the same champagne frame round it. Only the faint field behind
-(deck, dust, horizon) runs on outside.
+instrument inside its own frame, clips it, and hands the rectangle to the engine through `Scene.frame`,
+which then hit-tests the pointer against it, clips the pointer's light to it and draws the same champagne
+frame round it. Beside the statement that frame uses the height of the stage (34px from the top, room
+for the caption below, right edge on the content column, left edge clear of the headline), and its height
+is cut at golden sections: the words take 1/phi^4 of it, the globe's field 1/phi, the session timeline
+1/phi^3. Below 1080px, with no room beside the headline, it stands above the statement and is wide: the
+globe in a square at its left, the words and the timeline beside it. Only the faint field behind (deck,
+dust, horizon) runs on outside. The scene keeps its own hues for the globe, for "open" and for champagne,
+so it holds its colour in every accent, Mono included.
 
 Over the frame, the pointer does four things to every scene without the scene doing anything: the camera
 swings further and leans in, the scene's clock runs faster, a light in the key colour follows the cursor,

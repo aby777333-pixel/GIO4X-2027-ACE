@@ -270,7 +270,7 @@ export default function Mt5Page() {
             <p className="label">Support will help with</p>
             <ul className="mt-13 grid grid-cols-1 border-l border-t border-line sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               {mt5Troubleshooting.map((t) => (
-                <li key={t} className="border-b border-r border-line">
+                <li key={t} className="border-b border-r border-line sm:max-lg:[&:last-child:nth-child(odd)]:col-span-2 xl:[&:last-child:nth-child(odd)]:col-span-2">
                   <Link href="/contact" className="flex min-h-[2.75rem] items-center justify-between gap-13 px-13 py-8 text-sm text-ink-2 transition-colors duration-fast hover:bg-surface hover:text-ink">
                     {t}
                     <span aria-hidden className="text-ink-3">

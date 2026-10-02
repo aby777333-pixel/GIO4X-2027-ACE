@@ -238,10 +238,41 @@ export default function DataMethodologyPage() {
           <div className="grid gap-13 text-ink-2" data-reveal suppressHydrationWarning>
             <p>A live label would be a claim that a figure is the market’s price at this moment. GIO4X has no source of its own that could support that claim, so the word is not used, and no GIO4X figure is animated to look as though it were ticking.</p>
             <p>The panels from TradingView are a different thing: they are TradingView’s own frames, they update as TradingView updates them, and each is labelled third party. GIO4X still publishes no prices of its own.</p>
+            <p>
+              One page shows a price that moves by itself: the <Link href="/labs/simulator" className="link">Practice desk</Link> in Labs. That price is invented in your browser by a seeded random walk, belongs to no instrument, and is marked as a simulation inside the drawing. It is not a quote and not a market.
+            </p>
             <p>If a licensed feed is connected in future, this page will name the provider, the delay if any and the instruments covered before the first live figure appears.</p>
           </div>
         </div>
       </section>
+
+      {/* figures about the site itself: not one of the five states, because they are never shown on these pages */}
+      <Chapter id="visit-counts" eyebrow="Figures about the site itself" title="Visit counts" paper>
+        <dl className="grid gap-x-34 gap-y-13 sm:grid-cols-2" data-reveal suppressHydrationWarning>
+          <div>
+            <dt className="label">What it covers</dt>
+            <dd className="mt-5 text-ink-2">Daily totals of page views by page, of forms accepted and of site searches. They are read by GIO4X staff and are not shown on this website.</dd>
+          </div>
+          <div>
+            <dt className="label">Source</dt>
+            <dd className="mt-5 text-ink-2">This website’s own counter. No analytics provider and no third-party script is involved.</dd>
+          </div>
+          <div>
+            <dt className="label">When it changes</dt>
+            <dd className="mt-5 text-ink-2">A total goes up by one when a page is viewed, a form is accepted or a search is made. Days are counted in UTC. Totals older than 400 days are deleted.</dd>
+          </div>
+          <div>
+            <dt className="label">What it is not</dt>
+            <dd className="mt-5 text-ink">
+              Not a record of any visitor: there is no cookie and no identifier, and one page view cannot be linked to another. Not a count of people, and not complete: visitors who have switched counting off, or whose browser asks not to be tracked, are left out. The{" "}
+              <Link href="/legal/cookies#counting-visits" className="link">
+                Cookie & Storage Notice
+              </Link>{" "}
+              says exactly what is counted.
+            </dd>
+          </div>
+        </dl>
+      </Chapter>
 
       <NextSteps
         items={[

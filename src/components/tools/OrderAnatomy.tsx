@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { DataNote } from "@/components/ui/Page";
 import { educationalNote } from "@/config/legal";
@@ -295,6 +296,13 @@ export function OrderAnatomy({ meta }: ToolProps) {
       <DataNote status="simulation" className="mt-21">
         A diagram driven by your own hand on an abstract scale: no market data. {educationalNote}
       </DataNote>
+      <p className="mt-13 max-w-measure text-xs text-ink-3">
+        This tool shows where an order rests and when it triggers. For what happens to one order before and after that, from the ticket to the balance, see{" "}
+        <Link href="/labs/trade-anatomy" className="link">
+          Trade Anatomy
+        </Link>{" "}
+        in Labs.
+      </p>
 
       <GapSimulation />
     </ToolLayout>

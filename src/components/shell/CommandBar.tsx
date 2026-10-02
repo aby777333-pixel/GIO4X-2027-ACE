@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Rosette } from "@/components/brand/Rosette";
 import { groupHits, parseIntent, search, type CommandId, type SearchEntry, type SearchHit } from "@/lib/search";
 import { readPrefs, resetLocal, writePrefs } from "@/lib/prefs";
+import { sendSearch } from "@/lib/pulse-client";
 
 const OPEN_EVENT = "gx:command";
 
@@ -131,8 +132,19 @@ export function CommandBar() {
     };
   }, [open]);
 
+  // what is in the box and the loaded index, readable from `go` without rebuilding it on every keystroke
+  const current = useRef<{ q: string; index: SearchEntry[] | null }>({ q: "", index: null });
+  useEffect(() => {
+    current.current = { q, index };
+  }, [q, index]);
+
   const go = useCallback(
     (href: string) => {
+      // Opening a result is one search, added to the day's total (src/lib/pulse-client.ts): what was
+      // typed is compared with the site's own terms here and is not sent. "Search everything" is
+      // counted by the results page it opens.
+      const { q: typed, index: entries } = current.current;
+      if (entries && typed.trim() && !href.startsWith("/search?")) sendSearch(typed, entries);
       setOpen(false);
       setQ("");
       router.push(href);

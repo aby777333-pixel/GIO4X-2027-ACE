@@ -1,0 +1,448 @@
+{
+  "generatedBy": "scripts/site-images.mjs",
+  "images": [
+    {
+      "path": "/apple-touch-icon.png",
+      "type": "image/png",
+      "bytes": 24732,
+      "width": 180,
+      "height": 180,
+      "refs": [
+        {
+          "file": "src/app/layout.tsx",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/brand/777-raptor-logo.png",
+      "type": "image/png",
+      "bytes": 55159,
+      "width": 474,
+      "height": 220,
+      "refs": [
+        {
+          "file": "src/config/site.ts",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/brand/777-raptor-logo.webp",
+      "type": "image/webp",
+      "bytes": 23356,
+      "width": 474,
+      "height": 220,
+      "refs": [
+        {
+          "file": "src/app/(site)/platforms/raptor/page.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/components/shell/SiteFooter.tsx",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/brand/gio4x-logo.png",
+      "type": "image/png",
+      "bytes": 75028,
+      "width": 960,
+      "height": 299,
+      "refs": [
+        {
+          "file": "next.config.mjs",
+          "how": "path"
+        },
+        {
+          "file": "src/app/(site)/media/page.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/components/brand/Logo.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/components/cockpit/Boot.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/lib/og.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/lib/schema.ts",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/brand/gio4x-logo.webp",
+      "type": "image/webp",
+      "bytes": 44064,
+      "width": 960,
+      "height": 299,
+      "refs": [
+        {
+          "file": "src/components/brand/Logo.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/components/cockpit/Boot.tsx",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/brand/gio4x-mark.png",
+      "type": "image/png",
+      "bytes": 76621,
+      "width": 512,
+      "height": 512,
+      "refs": [
+        {
+          "file": "src/app/(site)/media/page.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/components/brand/Logo.tsx",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/brand/gio4x-mark.webp",
+      "type": "image/webp",
+      "bytes": 48154,
+      "width": 512,
+      "height": 512,
+      "refs": [
+        {
+          "file": "src/components/brand/Logo.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/styles/console.css",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/icon-192.png",
+      "type": "image/png",
+      "bytes": 22130,
+      "width": 192,
+      "height": 192,
+      "refs": [
+        {
+          "file": "src/app/layout.tsx",
+          "how": "path"
+        },
+        {
+          "file": "src/app/manifest.ts",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/icon-512.png",
+      "type": "image/png",
+      "bytes": 65260,
+      "width": 512,
+      "height": 512,
+      "refs": [
+        {
+          "file": "src/app/manifest.ts",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/icon-maskable-192.png",
+      "type": "image/png",
+      "bytes": 14428,
+      "width": 192,
+      "height": 192,
+      "refs": [
+        {
+          "file": "src/app/manifest.ts",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/icon-maskable-512.png",
+      "type": "image/png",
+      "bytes": 48726,
+      "width": 512,
+      "height": 512,
+      "refs": [
+        {
+          "file": "src/app/manifest.ts",
+          "how": "path"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-order-depth-1600.jpg",
+      "type": "image/jpeg",
+      "bytes": 161811,
+      "width": 1600,
+      "height": 849,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-order-depth-1600.webp",
+      "type": "image/webp",
+      "bytes": 116202,
+      "width": 1600,
+      "height": 849,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-order-depth-800.jpg",
+      "type": "image/jpeg",
+      "bytes": 52744,
+      "width": 800,
+      "height": 424,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-order-depth-800.webp",
+      "type": "image/webp",
+      "bytes": 44668,
+      "width": 800,
+      "height": 424,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-terminal-1600.jpg",
+      "type": "image/jpeg",
+      "bytes": 213736,
+      "width": 1600,
+      "height": 1042,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-terminal-1600.webp",
+      "type": "image/webp",
+      "bytes": 144766,
+      "width": 1600,
+      "height": 1042,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-terminal-800.jpg",
+      "type": "image/jpeg",
+      "bytes": 74863,
+      "width": 800,
+      "height": 521,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/mt5-terminal-800.webp",
+      "type": "image/webp",
+      "bytes": 58548,
+      "width": 800,
+      "height": 521,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-emil-1504.jpg",
+      "type": "image/jpeg",
+      "bytes": 134281,
+      "width": 1504,
+      "height": 1188,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-emil-1504.webp",
+      "type": "image/webp",
+      "bytes": 76494,
+      "width": 1504,
+      "height": 1188,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-emil-800.jpg",
+      "type": "image/jpeg",
+      "bytes": 53220,
+      "width": 800,
+      "height": 632,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-emil-800.webp",
+      "type": "image/webp",
+      "bytes": 33462,
+      "width": 800,
+      "height": 632,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-hedge-engine-1600.jpg",
+      "type": "image/jpeg",
+      "bytes": 169446,
+      "width": 1600,
+      "height": 1085,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-hedge-engine-1600.webp",
+      "type": "image/webp",
+      "bytes": 109476,
+      "width": 1600,
+      "height": 1085,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-hedge-engine-800.jpg",
+      "type": "image/jpeg",
+      "bytes": 52424,
+      "width": 800,
+      "height": 543,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-hedge-engine-800.webp",
+      "type": "image/webp",
+      "bytes": 38916,
+      "width": 800,
+      "height": 543,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-workspace-1600.jpg",
+      "type": "image/jpeg",
+      "bytes": 125272,
+      "width": 1600,
+      "height": 840,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-workspace-1600.webp",
+      "type": "image/webp",
+      "bytes": 86958,
+      "width": 1600,
+      "height": 840,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-workspace-800.jpg",
+      "type": "image/jpeg",
+      "bytes": 44511,
+      "width": 800,
+      "height": 420,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    },
+    {
+      "path": "/platforms/raptor-workspace-800.webp",
+      "type": "image/webp",
+      "bytes": 35418,
+      "width": 800,
+      "height": 420,
+      "refs": [
+        {
+          "file": "src/components/platforms/Screenshot.tsx",
+          "how": "parts"
+        }
+      ]
+    }
+  ]
+}

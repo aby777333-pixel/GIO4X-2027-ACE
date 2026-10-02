@@ -53,6 +53,13 @@ export type FigureFrame = {
   pal: Palette;
   /** true when this is the one composed frame drawn under reduced motion */
   still: boolean;
+  /**
+   * 0 to 1, eased: how far the figure has "arrived" since it first scrolled
+   * into view (about a second). A figure may use it to assemble itself; the
+   * host also fades and lifts the whole figure in over the same moment.
+   * Always 1 in a still frame.
+   */
+  enter: number;
 };
 
 export type FigureDraw = (f: FigureFrame) => void;
@@ -89,6 +96,8 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
     const root = document.documentElement;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     const isStill = () => reduced.matches || root.dataset.motion === "reduced" || root.dataset.effects === "low";
+    // with motion reduced by the site's own switch there is no arrival: the figure is simply there
+    if (isStill()) canvas.parentElement?.setAttribute("data-arrived", "");
 
     let w = 1;
     let h = 1;
@@ -103,6 +112,9 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
     let mx = 0;
     let my = 0;
     let hover = 0;
+    /** 0 to 1: progress of the arrival since the figure first came into view */
+    let seen = 0;
+    let arrived = false;
 
     /** Any CSS colour, through the canvas's own parser, as numbers. */
     const parse = (value: string): Colour | null => {
@@ -159,7 +171,7 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
       if (w < 24 || h < 24) return;
       ctx.save();
       try {
-        drawRef.current({ ctx, w, h, t, dt, hover, mx, my, pal, still });
+        drawRef.current({ ctx, w, h, t, dt, hover, mx, my, pal, still, enter: still ? 1 : smooth(seen) });
       } finally {
         ctx.restore();
       }
@@ -180,6 +192,7 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
       last = now;
       // the clock runs a little faster under the pointer, as the page instruments do
       clock += dt * (1 + hover * 0.6);
+      if (arrived && seen < 1) seen = Math.min(1, seen + dt / 0.9);
       const k = 1 - Math.exp(-dt * 7);
       hover += ((over ? 1 : 0) - hover) * k;
       mx += (tx - mx) * k;
@@ -200,6 +213,11 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
     ro.observe(canvas);
     const io = new IntersectionObserver(([entry]) => {
       inView = entry?.isIntersecting ?? false;
+      // the first time it scrolls into view the figure arrives: the wrapper fades and lifts in (CSS below)
+      if (inView && !arrived) {
+        arrived = true;
+        canvas.parentElement?.setAttribute("data-arrived", "");
+      }
       if (inView) start();
     });
     io.observe(canvas);
@@ -254,7 +272,11 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
   }, []);
 
   return (
-    <div aria-hidden className={`relative w-full select-none ${className}`} style={{ aspectRatio: String(ratio) }}>
+    <div
+      aria-hidden
+      className={`relative w-full translate-y-[8px] select-none opacity-0 transition-[opacity,transform] duration-700 ease-out data-[arrived]:translate-y-0 data-[arrived]:opacity-100 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-reduce:transition-none ${className}`}
+      style={{ aspectRatio: String(ratio) }}
+    >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
     </div>
   );
