@@ -110,6 +110,12 @@ export type Frame = {
   aim(yaw: number, pitch: number, dist?: number, zoom?: number): void;
   /** world to screen; null when the point is behind the camera */
   P(x: number, y: number, z: number): Pt | null;
+  /**
+   * How much the pointer is on a world point: 0 to 1, already multiplied by
+   * `hover`, falling off over `radius` screen pixels (default 90). For "the
+   * part under the cursor lights up, lifts, opens".
+   */
+  near(p: V3, radius?: number): number;
   /** deterministic 0..1 noise for index i (varies with the page seed) */
   rnd(i: number): number;
   /** staggered power-on: 0..1 for the element at position `order` (0..1) */
@@ -323,6 +329,14 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
       if (z2 < 0.35) return null;
       const s = (cam.dist / z2) * cam.zoom;
       return { x: f.cx + x1 * s * f.u, y: f.cy - y1 * s * f.u, s, z: z2 };
+    },
+    near(p3, radius = 90) {
+      if (f.hover <= 0) return 0;
+      const p = f.P(p3[0], p3[1], p3[2]);
+      if (!p) return 0;
+      const d = Math.hypot(p.x - f.mx, p.y - f.my);
+      const k = 1 - d / radius;
+      return k <= 0 ? 0 : k * k * (3 - 2 * k) * f.hover;
     },
     rnd(i) {
       const n = Math.sin((i + 1) * 127.1 + seed * 0.000311) * 43758.5453;
