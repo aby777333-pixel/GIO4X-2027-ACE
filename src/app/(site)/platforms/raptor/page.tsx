@@ -5,11 +5,13 @@ import { BeatRail } from "@/components/platforms/BeatRail";
 import { NotPublished } from "@/components/platforms/FactState";
 import { RaptorTour } from "@/components/platforms/RaptorTour";
 import { LayoutStudies, RaptorWorkspace } from "@/components/platforms/RaptorWorkspace";
+import { Screenshot } from "@/components/platforms/Screenshot";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs, NextSteps, SectionHead } from "@/components/ui/Page";
 import { riskWarning } from "@/config/legal";
 import { site } from "@/config/site";
 import { assetClasses } from "@/data/instruments";
+import { shots, shotsNote } from "@/data/platform-shots";
 import { platforms, raptorBeats, raptorPending } from "@/data/platforms";
 import { pageMeta } from "@/lib/meta";
 import { softwareSchema } from "@/lib/schema";
@@ -134,7 +136,7 @@ export default function RaptorPage() {
           </div>
         </header>
 
-        {/* the workspace study: the first thing under the stage */}
+        {/* the workspace itself: the first thing under the stage */}
         <div className="relative overflow-hidden">
           <div aria-hidden className="grid-field pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
           <div
@@ -149,13 +151,10 @@ export default function RaptorPage() {
             <figure className="relative pt-55 lg:pt-89" style={{ animation: "gx-rise 1100ms var(--ease-out) 260ms both" }}>
               <figcaption className="mb-13 flex items-center justify-between gap-21 text-xs text-ink-3">
                 <span className="label">The workspace</span>
-                <span>Illustrative study, not a screenshot</span>
+                <span>Screenshot of a demo account</span>
               </figcaption>
-              <div className="[mask-image:linear-gradient(to_bottom,black_52%,transparent_98%)]">
-                <div className="rounded-t-md border border-b-0 border-line-strong bg-surface p-8 pb-0 shadow-3 sm:p-13 sm:pb-0">
-                  <RaptorWorkspace className="h-auto w-full" />
-                </div>
-              </div>
+              <Screenshot shot={shots.raptorWorkspace} sizes="(min-width: 1280px) 1200px, 100vw" eager />
+              <p className="mt-13 max-w-measure pb-34 text-xs text-ink-3 lg:pb-55">{shotsNote}</p>
             </figure>
           </div>
         </div>
@@ -255,6 +254,28 @@ export default function RaptorPage() {
                 </article>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* two panels, shown as they are */}
+        <section aria-labelledby="panels" className="relative border-t border-line">
+          <div className="wrap section">
+            <SectionHead
+              eyebrow="Inside the workspace"
+              title={<span id="panels">Two panels, as they appear.</span>}
+              lead="These are screenshots, not descriptions. What each panel does, and where its limits are, will be documented in the feature library before anything is claimed for it here."
+            />
+            <div className="mt-34 grid items-start gap-34 lg:mt-55 lg:grid-cols-2 lg:gap-55">
+              <div data-reveal>
+                <Screenshot shot={shots.raptorEmil} sizes="(min-width: 1024px) 50vw, 100vw" caption="The panel named EMIL, in its observing mode. Demo account." />
+              </div>
+              <div data-reveal style={{ ["--i" as string]: 1 }}>
+                <Screenshot shot={shots.raptorHedge} sizes="(min-width: 1024px) 50vw, 100vw" caption="The correlation hedging panel. Its own header reads: estimates only, never a guarantee. Demo account." />
+              </div>
+            </div>
+            <p className="mt-21 max-w-measure text-xs text-ink-3">
+              {shotsNote} See <a href="#intelligence" className="link">what is not published yet</a>.
+            </p>
           </div>
         </section>
 

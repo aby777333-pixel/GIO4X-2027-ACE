@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { TerminalStudy } from "@/components/brand/TerminalStudy";
 import { NotPublished } from "@/components/platforms/FactState";
+import { Screenshot } from "@/components/platforms/Screenshot";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { DataNote, NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
 import { riskWarning } from "@/config/legal";
 import { site } from "@/config/site";
 import { getTerm } from "@/data/glossary";
+import { shots, shotsNote } from "@/data/platform-shots";
 import { gioFacts, metaquotes, mt5Capabilities, mt5GettingStarted, mt5Learn, mt5Trademark, mt5Troubleshooting, platforms } from "@/data/platforms";
 import { getTool } from "@/data/tools";
 import { pageMeta } from "@/lib/meta";
@@ -37,12 +38,7 @@ export default function Mt5Page() {
           </>
         }
         aside={
-          <figure>
-            <div className="rounded-md border border-line bg-surface p-8 shadow-2 sm:p-13">
-              <TerminalStudy className="h-auto w-full" variant="mt5" />
-            </div>
-            <figcaption className="mt-8 text-xs text-ink-3">Illustrative study of a trading workspace, not a screenshot of MetaTrader 5.</figcaption>
-          </figure>
+          <Screenshot shot={shots.mt5Terminal} sizes="(min-width: 1024px) 40vw, 100vw" eager caption="The MetaTrader 5 desktop terminal on a MetaQuotes demo account. Not a GIO4X account, and not GIO4X prices." />
         }
       >
         <a href="#getting-started" className="btn btn-primary">
@@ -77,6 +73,22 @@ export default function Mt5Page() {
               is the primary source for everything in the specification below.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* the terminal itself */}
+      <section className="section hairline" aria-labelledby="looks">
+        <div className="wrap">
+          <SectionHead eyebrow="The terminal" title={<span id="looks">What you will be looking at.</span>} lead="Two screens from the desktop terminal, on a MetaQuotes demo account: the everyday layout, and the windows used to place and review orders." />
+          <div className="mt-34 grid items-start gap-34 lg:mt-55 lg:grid-cols-2 lg:gap-55">
+            <div data-reveal>
+              <Screenshot shot={shots.mt5Terminal} sizes="(min-width: 1024px) 50vw, 100vw" caption="Market Watch, Navigator, four charts and the Toolbox with open positions." />
+            </div>
+            <div data-reveal style={{ ["--i" as string]: 1 }}>
+              <Screenshot shot={shots.mt5Order} sizes="(min-width: 1024px) 50vw, 100vw" caption="Depth of Market, the order window set to a pending order, and account history." />
+            </div>
+          </div>
+          <p className="mt-21 max-w-measure text-xs text-ink-3">{shotsNote} MetaTrader 5 and its interface are the property of MetaQuotes.</p>
         </div>
       </section>
 

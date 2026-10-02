@@ -312,7 +312,7 @@ export const raptorPending: { id: string; label: string; body: string }[] = [
   { id: "requirements", label: "System requirements", body: "Supported operating systems, browsers and devices." },
   { id: "downloads", label: "Downloads", body: "Official installers and app-store listings. Until they are published here, treat any Raptor download link you are sent with caution." },
   { id: "features", label: "Detailed feature library", body: "Chart tools, order types, indicators and settings, each documented rather than merely named." },
-  { id: "intelligence", label: "Raptor Intelligence", body: "Earlier GIO4X material described AI-assisted features. None of it has been verified for publication, so none of it is described here." },
+  { id: "intelligence", label: "Raptor Intelligence", body: "Earlier GIO4X material described AI-assisted features. Two such panels are shown on this page as screenshots of a demo account; what they do, and their limits, has not been documented for publication, so neither is described here." },
 ];
 
 /* ── MetaTrader 5 ───────────────────────────────────────────────────────── */

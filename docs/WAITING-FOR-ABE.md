@@ -80,3 +80,16 @@ If any of these can be evidenced, send the evidence and it will be added with it
 | F6 | First administrator for GIO4X Control | Create the user in Supabase Auth, then run the one-line SQL in `docs/CONTROL.md` |
 | F7 | TT Norms web-font licence confirmation | The supplied TT Norms files are served as Latin-subset WOFF2 from this repository, which is public on GitHub. Please confirm the licence covers web embedding, or make the repository private. |
 | F8 | Google Search Console / Bing Webmaster verification tokens | `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION` |
+
+## G. Platform screenshots (added 2 October 2026)
+
+Five of the six screenshots supplied are published on `/platforms`, `/platforms/raptor` and
+`/platforms/metatrader-5` (files in `public/platforms/`, captions in `src/data/platform-shots.ts`). Each is
+captioned as a demo-account screenshot. Open points:
+
+| # | Item | Why it is open |
+|---|---|---|
+| G1 | The MT5 "devices" image (laptop and two phones with the MT5 logo) is **not** published | The browser bars in it show another broker's address (`xbzbroker.com`), and it carries the MetaTrader 5 logo and browser logos. Send a version with a GIO4X address, or MetaQuotes' own artwork, and it goes on the MT5 page. |
+| G2 | The two MetaTrader 5 terminal screenshots are MetaQuotes material | Confirm GIO4X's MetaQuotes licence covers using their screenshots, or replace them with captures of a GIO4X terminal. |
+| G3 | The Raptor workspace screenshot shows a CNBC video tile and a news headline | Third-party marks inside a product screenshot. A capture with that panel closed would be cleaner. |
+| G4 | The EMIL and hedging panels are shown, not described | Section E still applies: Raptor Intelligence is not described until its documentation is approved. The EMIL capture shows a directional lean, a trade plan and a win rate from the demo; the caption says so, but a capture without them would sit better beside "no signals" on `/trust/ai`. |

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { TerminalStudy } from "@/components/brand/TerminalStudy";
+import { Screenshot } from "@/components/platforms/Screenshot";
+import { shots } from "@/data/platform-shots";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { mt5Trademark, platforms } from "@/data/platforms";
 import { pageMeta } from "@/lib/meta";
@@ -55,9 +56,7 @@ export default function PlatformsPage() {
               </h2>
               <p className="h3 mt-8 text-ink-3">{r.tagline}</p>
             </div>
-            <div className="rounded-md border border-line bg-surface p-8 shadow-3 sm:p-13">
-              <TerminalStudy className="h-auto w-full" variant="raptor" />
-            </div>
+            <Screenshot shot={shots.raptorWorkspace} crop="16 / 9" sizes="(min-width: 1024px) 50vw, 100vw" eager />
             <div className="mt-auto">
               <p className="max-w-[34rem] text-md text-ink-2">{r.summary}</p>
               <Link href={r.href} className="btn btn-primary mt-34">
@@ -78,9 +77,7 @@ export default function PlatformsPage() {
               </h2>
               <p className="h3 mt-8 text-ink-3">{m.tagline}</p>
             </div>
-            <div className="rounded-md border border-line bg-surface p-8 shadow-2 sm:p-13">
-              <TerminalStudy className="h-auto w-full" variant="mt5" />
-            </div>
+            <Screenshot shot={shots.mt5Terminal} crop="16 / 9" sizes="(min-width: 1024px) 50vw, 100vw" eager />
             <div className="mt-auto">
               <p className="max-w-[34rem] text-md text-ink-2">{m.summary}</p>
               <Link href={m.href} className="btn btn-ghost mt-34">
@@ -91,7 +88,7 @@ export default function PlatformsPage() {
         </article>
       </section>
       <div className="wrap">
-        <p className="py-13 text-xs text-ink-3">Both workspace images are illustrative studies, not screenshots. They show the shape of a trading screen and nothing about prices or features.</p>
+        <p className="py-13 text-xs text-ink-3">Both images are screenshots of demo accounts, cropped to the same shape. The prices in them are what the demo showed when it was captured: not live data, and not GIO4X trading conditions.</p>
       </div>
 
       <section className="section hairline" aria-labelledby="choose">
