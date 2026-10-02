@@ -1,0 +1,246 @@
+/*
+  THE BREACH: the band on /platforms/raptor where the 777 Raptor logo is born
+  out of a supernova and flies at the viewer (src/components/platforms/
+  RaptorBreach.tsx, scene in breach/scene.ts).
+
+  The scene draws to a canvas and publishes three things on its host:
+    --breach-x     the centre of view, in pixels from the left
+    data-phase     orb · blast · logo · zoom · cover
+    data-haze      on while the orb quakes
+  Everything above the canvas (haze, flash, curtain, logo) is styled here from
+  those. The logo's birth, hot-to-cool colours and zoom are the pen's values.
+
+  Layout. From lg the scene fills the band behind the statement and looks to
+  the right of it; below lg it is its own block under the statement, centred.
+  Until the scene runs (and for anyone with reduced motion, low effects or no
+  WebGL) only the still logo is shown, where the scene's centre would be.
+
+  pointer-events: none throughout: the band's link must stay clickable.
+*/
+.gx-breach-band {
+  position: relative;
+  overflow: hidden;
+}
+.gx-breach-band > .wrap {
+  position: relative;
+  z-index: 1;
+}
+.gx-breach {
+  position: relative;
+  height: 24rem;
+  pointer-events: none;
+}
+.gx-breach-scene,
+.gx-breach-still {
+  position: absolute;
+  inset: 0;
+}
+.gx-breach-scene {
+  overflow: hidden;
+  opacity: 0;
+  background: #000;
+  transition: opacity 900ms ease;
+  --breach-logo-w: min(320px, 76vw);
+  /* the scene is black; the band is night. Let one become the other at the edges. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+.gx-breach[data-live] .gx-breach-scene {
+  opacity: 1;
+}
+.gx-breach-scene > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.gx-breach-still {
+  display: block;
+  transition: opacity 600ms ease;
+}
+.gx-breach-still img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: auto;
+  height: 5.5625rem;
+  opacity: 0.9;
+  translate: -50% -50%;
+}
+.gx-breach[data-live] .gx-breach-still {
+  opacity: 0;
+}
+
+@media (min-width: 1024px) {
+  .gx-breach-band {
+    min-height: 38rem;
+    display: grid;
+    align-items: center;
+  }
+  .gx-breach {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+  .gx-breach-scene {
+    --breach-logo-w: min(560px, 36vw);
+  }
+  /* a quiet shade behind the statement, under the logo, so the words stay easy to read through the blast */
+  .gx-breach-scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.4) 30%, transparent 52%);
+  }
+  /* the still logo sits where the scene looks: 72% across */
+  .gx-breach-still img {
+    left: 72%;
+    height: 7.5rem;
+  }
+}
+
+.gx-breach-haze {
+  position: absolute;
+  inset: -10%;
+  z-index: 1;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: repeating-radial-gradient(circle at var(--breach-x, 50%) 50%, transparent 0px, transparent 8px, rgba(80, 150, 255, 0.015) 10px, transparent 13px);
+}
+.gx-breach-scene[data-haze="on"] .gx-breach-haze {
+  animation: gx-breach-haze 0.12s linear infinite;
+}
+@keyframes gx-breach-haze {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.08;
+  }
+  50% {
+    transform: scale(1.015) rotate(0.2deg);
+    opacity: 0.18;
+  }
+}
+.gx-breach-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle at var(--breach-x, 50%) 50%,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(210, 235, 255, 0.96) 4%,
+    rgba(100, 190, 255, 0.78) 13%,
+    rgba(60, 80, 255, 0.48) 24%,
+    rgba(150, 30, 255, 0.25) 38%,
+    rgba(255, 20, 90, 0.12) 52%,
+    transparent 72%
+  );
+}
+.gx-breach-curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  opacity: 0;
+  background: #000;
+  transition: opacity 1.4s ease;
+}
+.gx-breach-scene[data-phase="cover"] .gx-breach-curtain {
+  opacity: 1;
+}
+.gx-breach-logo {
+  position: absolute;
+  z-index: 5;
+  left: var(--breach-x, 50%);
+  top: 50%;
+  width: var(--breach-logo-w);
+  height: auto;
+  max-height: 44%;
+  margin-left: calc(var(--breach-logo-w) / -2);
+  object-fit: contain;
+  opacity: 0;
+  translate: 0 -50%;
+  transform: scale(0.08);
+}
+/* Born: fades in and grows to full size in 1.2s, then holds still while the
+   cool-down finishes. No will-change: it would freeze the logo's raster at its
+   small starting size. */
+.gx-breach-scene[data-phase="logo"] .gx-breach-logo {
+  animation:
+    gx-breach-logo-birth 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    gx-breach-logo-cool 3.2s ease-out forwards;
+}
+/* Out of the screen at the viewer in 0.45s: transform and opacity only, so the
+   compositor runs it smoothly with the supernova drawing behind it. */
+.gx-breach-scene[data-phase="zoom"] .gx-breach-logo {
+  animation: gx-breach-logo-zoom 0.45s linear forwards;
+  filter: brightness(1) saturate(1) drop-shadow(0 0 12px rgba(100, 170, 255, 0.25));
+}
+.gx-breach-scene[data-phase="cover"] .gx-breach-logo {
+  opacity: 0;
+}
+@keyframes gx-breach-logo-birth {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+/* White-hot at birth, cooling through blue and violet to steel. */
+@keyframes gx-breach-logo-cool {
+  0% {
+    filter: brightness(9) saturate(1.2) drop-shadow(0 0 15px #fff) drop-shadow(0 0 45px #d7edff) drop-shadow(0 0 90px #49a8ff) drop-shadow(0 0 160px #513cff);
+  }
+  15% {
+    filter: brightness(6) saturate(1.5) drop-shadow(0 0 20px #d9f1ff) drop-shadow(0 0 60px #328cff) drop-shadow(0 0 120px #5c2cff);
+  }
+  32% {
+    filter: brightness(4) saturate(2) drop-shadow(0 0 25px #2588ff) drop-shadow(0 0 80px #752bff) drop-shadow(0 0 110px rgba(255, 30, 100, 0.45));
+  }
+  55% {
+    filter: brightness(2.2) saturate(2) drop-shadow(0 0 30px rgba(70, 120, 255, 0.8)) drop-shadow(0 0 55px rgba(150, 30, 255, 0.5));
+  }
+  78% {
+    filter: brightness(1.35) saturate(1.35) drop-shadow(0 0 20px rgba(70, 130, 255, 0.5));
+  }
+  100% {
+    filter: brightness(1) saturate(1) drop-shadow(0 0 12px rgba(100, 170, 255, 0.25));
+  }
+}
+@keyframes gx-breach-logo-zoom {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.7);
+  }
+  50% {
+    transform: scale(4);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(10);
+  }
+  88% {
+    opacity: 0.7;
+    transform: scale(22);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40);
+  }
+}
+
+@media print {
+  .gx-breach-scene {
+    display: none;
+  }
+}

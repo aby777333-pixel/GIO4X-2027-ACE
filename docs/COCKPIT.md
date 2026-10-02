@@ -23,6 +23,15 @@ This document describes how that is built, so it can be extended without breakin
 No dependency was added. There is no WebGL: the scenes are a few kilobytes each of Canvas 2D
 drawing code with a hand-written perspective camera, loaded as separate chunks after first paint.
 
+One exception, at the owner's request: the band "Technology provided by 777 Raptor" on
+`/platforms/raptor` runs the owner's pen THE BREACH (`src/components/platforms/RaptorBreach.tsx`,
+`breach/scene.ts`, `src/styles/breach.css`). An orb detonates, the 777 Raptor logo is born from the
+flash, cools, and flies out of the screen at the viewer; then it loops. It uses Three.js (WebGL), the
+project's only such dependency. The library is fetched only when that band comes near the viewport, and
+only on that page. Under reduced motion, low visual effects, no WebGL or a failed load, the still logo is
+shown instead. It was ported from the 777 Raptor site, where the changes from the pen are recorded
+(DECISIONS.md, 48).
+
 ## One height for every page
 
 `--hero-h` is `clamp(30rem, 100svh − header − 4.5rem, 60rem)`: the first viewport minus the

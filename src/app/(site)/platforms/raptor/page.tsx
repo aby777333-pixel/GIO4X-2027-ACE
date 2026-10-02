@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { RouteScene } from "@/components/cockpit/RouteScene";
 import { BeatRail } from "@/components/platforms/BeatRail";
 import { NotPublished } from "@/components/platforms/FactState";
+import { RaptorBreach } from "@/components/platforms/RaptorBreach";
 import { RaptorTour } from "@/components/platforms/RaptorTour";
 import { LayoutStudies, RaptorWorkspace } from "@/components/platforms/RaptorWorkspace";
 import { Screenshot } from "@/components/platforms/Screenshot";
@@ -381,9 +382,9 @@ export default function RaptorPage() {
       </section>
 
       {/* technology credit */}
-      <section className="on-night" aria-label="Technology credit">
-        <div className="wrap flex flex-col gap-21 py-55 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-[40rem]">
+      <section className="on-night gx-breach-band" aria-label="Technology credit">
+        <div className="wrap pb-21 pt-55 lg:py-55">
+          <div className="max-w-[40rem] lg:max-w-[min(40rem,46%)]">
             <p className="label">Technology</p>
             <p className="h3 mt-8">Technology provided by 777 Raptor.</p>
             <p className="mt-8 text-ink-2">The Raptor platform is built by 777 Raptor and offered to GIO4X clients as the house flagship.</p>
@@ -392,11 +393,9 @@ export default function RaptorPage() {
               <span className="sr-only"> (opens in a new tab)</span>
             </a>
           </div>
-          <picture>
-            <source srcSet="/brand/777-raptor-logo.webp" type="image/webp" />
-            <img src={site.technologyPartner.logo} alt="777 Raptor" width={site.technologyPartner.logoWidth} height={site.technologyPartner.logoHeight} loading="lazy" decoding="async" className="h-[5.5625rem] w-auto opacity-90" />
-          </picture>
         </div>
+        {/* the logo is born out of the owner's pen, THE BREACH, and flies at the viewer; a still logo stands in when motion is reduced */}
+        <RaptorBreach logo={site.technologyPartner.logo} logoWebp="/brand/777-raptor-logo.webp" width={site.technologyPartner.logoWidth} height={site.technologyPartner.logoHeight} />
       </section>
 
       <section className="section-quiet" aria-labelledby="raptor-risk">
