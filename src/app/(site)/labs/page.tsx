@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Constellation, STAGE_COMPACT } from "@/components/labs/Constellation";
 import { DotsDiagram } from "@/components/labs/DotsDiagram";
+import { KindMark } from "@/components/labs/glyph";
 import { computeLayout } from "@/components/labs/layout";
 import { EXAMPLE_PICKS, picksQuery } from "@/components/labs/picks";
 import { NextSteps, PageHero } from "@/components/ui/Page";
-import { connect, graphStats } from "@/data/graph";
+import { Tabs } from "@/components/ui/Tabs";
+import { connect, graphStats, KIND_LABEL, KIND_ORDER } from "@/data/graph";
 import { pageMeta } from "@/lib/meta";
 
 export const metadata = pageMeta({
@@ -16,6 +18,10 @@ export const metadata = pageMeta({
 
 const heroLayout = computeLayout("i:xau-usd", STAGE_COMPACT);
 const fedLayout = computeLayout("cb:fed", STAGE_COMPACT);
+// what the picture beside the tabs actually contains, read from the same layout that draws it
+const heroFocus = heroLayout.index.get(heroLayout.focus)?.node;
+const heroRing = heroLayout.ring1.map((id) => heroLayout.index.get(id)?.node).filter((n) => n !== undefined);
+const heroKinds = KIND_ORDER.filter((k) => k === heroFocus?.kind || heroRing.some((n) => n.kind === k));
 const example = connect(EXAMPLE_PICKS);
 
 const rules = [
@@ -41,10 +47,81 @@ export default function LabsPage() {
         title="Experiments, kept apart on purpose."
         lead="Labs is where GIO4X tries other ways of seeing markets. Experiments live here so that the core site stays calm: accounts, conditions and disclosures do not move because an idea did."
         aside={
-          <figure className="mx-auto max-w-[26rem] lg:mx-0 lg:ml-auto">
-            <Constellation layout={heroLayout} cfg={STAGE_COMPACT} ground="var(--bg)" />
-            <figcaption className="mt-8 text-center text-xs text-ink-3">Gold and what it is documented as related to. A still from the Market Universe.</figcaption>
-          </figure>
+          <div className="cx-wide grid gap-34 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start lg:gap-55">
+            <figure className="mx-auto w-full max-w-[26rem]">
+              <Constellation layout={heroLayout} cfg={STAGE_COMPACT} ground="var(--bg)" />
+              <figcaption className="mt-8 text-center text-xs text-ink-3">Gold and what it is documented as related to. A still from the Market Universe.</figcaption>
+            </figure>
+            <Tabs
+              label="About this picture"
+              minHeight="19rem"
+              tabs={[
+                {
+                  key: "shows",
+                  label: "What it shows",
+                  content: (
+                    <>
+                      <p className="max-w-measure text-sm text-ink-2">
+                        {heroFocus?.label ?? "Gold"} sits at the centre. On the first ring are the {heroRing.length} things this site documents it as directly related to; the outer ring holds what those are related to in turn.
+                      </p>
+                      <ul className="mt-13 grid gap-x-21 border-t border-line sm:grid-cols-2">
+                        {heroRing.map((n) => (
+                          <li key={n.id} className="border-b border-line">
+                            <Link href={n.href} className="flex min-h-[2.75rem] items-center gap-8 py-5 text-sm text-ink transition-colors duration-fast hover:text-accent">
+                              <KindMark kind={n.kind} />
+                              <span className="min-w-0 truncate">{n.label}</span>
+                              <span className="ml-auto shrink-0 text-xs text-ink-3">{KIND_LABEL[n.kind].one}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ),
+                },
+                {
+                  key: "read",
+                  label: "How to read it",
+                  content: (
+                    <>
+                      <p className="max-w-measure text-sm text-ink-2">Each kind of thing has its own shape, so the picture can be read without colour. A line means the site documents a relationship between the two; it does not say how strong it is or which way it runs.</p>
+                      <ul className="mt-13 grid gap-x-21 border-t border-line sm:grid-cols-2">
+                        {heroKinds.map((k) => (
+                          <li key={k} className="flex min-h-[2.75rem] items-center gap-8 border-b border-line py-5 text-sm text-ink">
+                            <KindMark kind={k} />
+                            {KIND_LABEL[k].one}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-13 text-xs text-ink-3">
+                        The whole graph holds <span className="num">{graphStats.nodes}</span> nodes and <span className="num">{graphStats.edges}</span> relations, built from the pages and reference data of this site.
+                      </p>
+                    </>
+                  ),
+                },
+                {
+                  key: "not",
+                  label: "What it is not",
+                  content: (
+                    <>
+                      <ul className="grid gap-13 text-sm text-ink-2">
+                        <li className="border-l border-accent pl-13">Not a forecast. It describes how things are connected, not how prices will move.</li>
+                        <li className="border-l border-accent pl-13">Not live. There are no prices, rates or volumes in it, and nothing in it changes during the trading day.</li>
+                        <li className="border-l border-accent pl-13">Not advice. A line between gold and the dollar is a documented relationship, not a reason to trade either.</li>
+                      </ul>
+                      <p className="mt-21 flex flex-wrap gap-x-21 gap-y-8">
+                        <Link href="/labs/market-universe" className="go">
+                          Open the full map
+                        </Link>
+                        <Link href="/labs/connect-the-dots" className="go">
+                          Connect the Dots
+                        </Link>
+                      </p>
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </div>
         }
       >
         <Link href="/labs/market-universe" className="btn btn-primary">

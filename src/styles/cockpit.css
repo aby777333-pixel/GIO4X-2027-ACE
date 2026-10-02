@@ -221,6 +221,10 @@
     width: min(100%, 46rem);
     margin-block: 2.125rem 3.4375rem;
   }
+  /* a pane that composes its own columns (a picture with tabs beside it) takes the full content width */
+  .cx-hero:not(.cx-home) .cx-aside:has(> .cx-wide) {
+    width: 100%;
+  }
   /* the frame clips the instrument, so the stage no longer fades it toward the statement */
   .cx-hero:not(.cx-home) .cx-scene {
     -webkit-mask-image: none;

@@ -12,6 +12,11 @@
  *
  * Nothing here is data. On a company page, that page's own blade is the one
  * picked out in champagne and named on the bezel.
+ *
+ * Under the pointer it is a turbine. The rotor spools up the way a jet engine
+ * does, slowly at first and then gathering speed over a few seconds, until the
+ * blades blur into a lit disc; when the pointer leaves it gives the speed up
+ * more slowly still and settles back to its idle turn.
  */
 import { TAU, clamp, easeOut, lerp, rgba, type Frame, type Pt, type Scene, type V3 } from "../engine";
 import { deck, lamp, orb, pool } from "../kit";
@@ -23,6 +28,12 @@ const SHROUD = R * G; // the golden ring
 const HUB = R * G * G * G;
 const DEPTH = 0.2; // how deep the bezel's barrel is
 const CY = 0.05; // the instrument hangs just clear of the deck
+/** idle: one turn in about five minutes. Full thrust: about two turns a second. Radians per second. */
+const IDLE = 0.02;
+const FULL = 13;
+/** the rotor's angle and speed, kept for each mounted scene (the state object is its key) */
+const ROTOR = new WeakMap<object, { a: number; w: number }>();
+
 /** the company pages: each one owns a blade */
 const PAGES: [slug: string, name: string][] = [
   ["about", "ABOUT"], ["why-gio4x", "WHY GIO4X"], ["what-we-are", "WHAT WE ARE"], ["careers", "CAREERS"],
@@ -210,27 +221,56 @@ const scene: Scene<State> = {
       return mix(stops[i], stops[(i + 1) % 3], t * t * (3 - 2 * t));
     };
 
-    // the rotor: clockwise, one turn in about five minutes
-    const spin = s.phase - f.t * 0.02 - f.px * 0.08;
+    // the rotor: clockwise, one turn in about five minutes at idle. It is heavy:
+    // under the pointer it gains speed over a few seconds, and gives it up more slowly.
+    let rotor = ROTOR.get(s);
+    if (!rotor) {
+      rotor = { a: 0, w: IDLE };
+      ROTOR.set(s, rotor);
+    }
+    if (!f.still) {
+      const target = IDLE + (FULL - IDLE) * f.hover * f.hover;
+      const rate = target > rotor.w ? 0.9 : 0.42;
+      rotor.w += (target - rotor.w) * Math.min(1, rate * f.dt);
+      rotor.a += rotor.w * f.dt;
+    }
+    /** 0 at idle, 1 at full speed */
+    const thrust = f.still ? 0 : clamp((rotor.w - IDLE) / (FULL - IDLE));
+    const spin = f.still ? s.phase - f.t * IDLE : s.phase - rotor.a - f.px * 0.08 * (1 - thrust);
     // powering on, the blades open one after another, clockwise from the top
     const wake = (a: number) => f.on(0.1 + 0.62 * round(a), 0.3);
     const blades: Blade[] = [];
+    /** where each blade was a moment ago, for the blur at speed */
+    const ghosts: { line: Line; colour: string; alpha: number }[] = [];
+    const smear = clamp(rotor.w * 0.02, 0, 0.16);
     for (let i = 0; i < s.n; i++) {
       const a = spin - (i / s.n) * TAU;
       const on = wake(a);
       if (on <= 0.01) continue;
-      const ca = Math.cos(a);
-      const sa = Math.sin(a);
       // each one grows out of the hub
-      const put = (p: V3): Pt | null => {
-        const x = s.root[0] + (p[0] - s.root[0]) * on;
-        const y = s.root[1] + (p[1] - s.root[1]) * on;
-        return f.P(x * ca - y * sa, CY + x * sa + y * ca, p[2] * on);
+      const at = (angle: number) => {
+        const ca = Math.cos(angle);
+        const sa = Math.sin(angle);
+        return (p: V3): Pt | null => {
+          const x = s.root[0] + (p[0] - s.root[0]) * on;
+          const y = s.root[1] + (p[1] - s.root[1]) * on;
+          return f.P(x * ca - y * sa, CY + x * sa + y * ca, p[2] * on);
+        };
       };
+      const put = at(a);
       const own = i === s.own;
       // the bezel faces a little left: blades on the right are nearer, and brighter
       const near = lerp(0.55, 1, (Math.cos(a + 0.3) + 1) / 2);
-      blades.push({ lead: s.lead.map(put), trail: s.trail.map(put), colour: own ? pal.gold : tint(a + 0.25), lit: on * near, own });
+      const colour = own ? pal.gold : tint(a + 0.25);
+      // at speed the single blades give way to the disc they sweep
+      blades.push({ lead: s.lead.map(put), trail: s.trail.map(put), colour, lit: on * near * (1 - 0.45 * thrust), own });
+      if (thrust > 0.04) for (let k = 1; k <= 3; k++) ghosts.push({ line: s.lead.map(at(a + smear * k)), colour, alpha: (0.34 * thrust * on * near) / k });
+    }
+    if (thrust > 0.01) {
+      // the swept disc, lit from the hub, and the air drawn in ahead of it
+      f.fill(s.lip, pal.key, 0.075 * thrust);
+      f.glow([0, CY, -0.05], R * (0.7 + 0.5 * thrust), pal.key, 0.3 * thrust);
+      for (const g of ghosts) stroke(f, g.line, g.colour, g.alpha, 1);
     }
     // glass first: where blades overlap the glass deepens, as in the emblem
     for (const b of blades) {
@@ -297,7 +337,8 @@ const scene: Scene<State> = {
       const side = Math.cos(turn);
       const name = PAGES[s.own][1];
       const room = side > 0.3 ? f.w - mark.x - name.length * 7.5 - 12 : 24;
-      const show = wake(turn) * clamp((side + 0.5) / 0.4);
+      // the name is for a rotor at rest: it goes as soon as the engine starts to turn in earnest
+      const show = wake(turn) * clamp((side + 0.5) / 0.4) * (1 - clamp(thrust * 8));
       f.line(polar(R * 1.014, turn), polar(R * 1.058, turn), pal.gold, 0.9 * show, 1.5);
       const align = side > 0.3 ? "left" : side < -0.3 ? "right" : "center";
       f.label(name, polar(R * 1.058, turn), { colour: pal.gold, alpha: 0.85 * show * clamp(room / 24), size: 10, align, dx: side * 9, dy: -Math.sin(turn) * 11 });
