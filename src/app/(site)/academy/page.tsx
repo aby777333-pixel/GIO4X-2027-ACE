@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AcademyProgress, LessonMark, LessonsCount } from "@/components/academy/Progress";
+import { MilestoneStrip } from "@/components/desk/Milestones";
 import { TwoRoutes } from "@/components/figures/academy/TwoRoutes";
 import { BoundedScale } from "@/components/figures/company/BoundedScale";
 import { RollingMean } from "@/components/figures/company/RollingMean";
@@ -14,6 +15,7 @@ import { articles } from "@/data/articles";
 import { books } from "@/data/books";
 import { faqs } from "@/data/faqs";
 import { glossary } from "@/data/glossary";
+import { milestoneData } from "@/data/milestones";
 import { getTool } from "@/data/tools";
 import { pageMeta } from "@/lib/meta";
 import { webPageSchema } from "@/lib/schema";
@@ -270,6 +272,8 @@ export default function AcademyPage() {
               );
             })}
           </div>
+          {/* rendered only after mount, from what this browser already records: the same milestones as on My desk */}
+          <MilestoneStrip data={milestoneData()} className="mt-34" />
         </div>
       </section>
 

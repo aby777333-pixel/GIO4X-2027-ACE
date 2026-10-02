@@ -4,6 +4,8 @@ import { ControlHead, Notice, Score, StageBadge, StatusBadge } from "@/component
 import { Icon, type IconName } from "@/components/control/icons";
 import type { LeadListItem } from "@/components/control/LeadsTable";
 import { TaskList, type TaskItem } from "@/components/control/TaskList";
+import { YourDesk } from "@/components/control/YourDesk";
+import type { DeskData } from "@/lib/server/personal";
 import type { LeadStage, LeadStatus } from "@/lib/supabase/types";
 
 export type OverviewProps = {
@@ -30,6 +32,10 @@ export type OverviewProps = {
   names: Map<string, string>;
   me: string;
   now: number;
+  /** "Your desk": the person's own figures and pinned views. Left out (or null), the section is not drawn */
+  desk?: DeskData | null;
+  /** the fixed code the desk's "Unpin" answered with */
+  deskOutcome?: string;
 };
 
 function Stat({ href, icon, label, value }: { href: string; icon: IconName; label: string; value: number }) {
@@ -61,7 +67,7 @@ function Card({ title, action, children }: { title: string; action?: ReactNode; 
  * cards. Presentation only: every figure arrives as a prop, already read from
  * real rows as the signed-in member of staff.
  */
-export function OverviewView({ signedInAs, failed, notice, error, leads, subscriberCount, staffToDecide, names, me, now }: OverviewProps) {
+export function OverviewView({ signedInAs, failed, notice, error, leads, subscriberCount, staffToDecide, names, me, now, desk, deskOutcome }: OverviewProps) {
   const nothing = !leads && subscriberCount === null && staffToDecide === null;
   const count = (status: LeadStatus) => leads?.counts.find((c) => c.status === status)?.count ?? 0;
   const total = leads ? leads.counts.reduce((sum, c) => sum + c.count, 0) : 0;
@@ -87,6 +93,8 @@ export function OverviewView({ signedInAs, failed, notice, error, leads, subscri
           </Notice>
         )}
       </div>
+
+      {desk && <YourDesk desk={desk} outcome={deskOutcome} />}
 
       {!failed && leads && (
         <>

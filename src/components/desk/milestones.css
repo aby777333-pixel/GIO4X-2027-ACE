@@ -1,0 +1,48 @@
+/*
+ * Milestones (Milestones.tsx): the medallion's frame and the moment a badge
+ * is newly earned. Tokens only. The strike is one short settle with a ring
+ * that widens and fades; with motion reduced the global rules end it at once
+ * and the badge is simply shown as new.
+ */
+.gx-medal-wrap {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  line-height: 0;
+}
+.gx-medal {
+  display: block;
+}
+
+@keyframes gx-medal-strike {
+  from {
+    transform: scale(1.34);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes gx-medal-ring {
+  from {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+[data-milestone-new] .gx-medal {
+  animation: gx-medal-strike var(--t-reveal) var(--ease-out) both;
+}
+[data-milestone-new] .gx-medal-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--prestige);
+  pointer-events: none;
+  animation: gx-medal-ring var(--t-cinematic) var(--ease-out) 160ms both;
+}

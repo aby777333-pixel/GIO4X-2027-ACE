@@ -6,6 +6,7 @@ import { lessons } from "@/data/academy";
 import { glossary } from "@/data/glossary";
 import { getLesson } from "@/data/glossary-learn";
 import { getAssetClass, instruments } from "@/data/instruments";
+import { milestoneData } from "@/data/milestones";
 import { pageMeta } from "@/lib/meta";
 import { formatFixingDate, getReferenceRates, RATE_CURRENCIES, RATES_SOURCE, type RateCurrency } from "@/lib/rates";
 
@@ -36,6 +37,7 @@ export default async function DeskPage() {
     instruments: instruments.map((i) => ({ id: `${i.class}/${i.slug}`, symbol: i.symbol, name: i.name, cls: getAssetClass(i.class)?.name ?? i.class, base: i.base, quote: i.quote })),
     terms: glossary.filter((t) => getLesson(t.slug) !== null).map((t) => ({ slug: t.slug, term: t.term })),
     lessons: lessons.map((l) => ({ slug: l.slug, title: l.title })),
+    milestones: milestoneData(),
     rates,
     ratesDate: rates.status === "ok" ? formatFixingDate(rates.date) : null,
     ratesSource: { name: "ECB", href: RATES_SOURCE.href },

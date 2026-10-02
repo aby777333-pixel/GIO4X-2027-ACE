@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TourButton } from "@/components/control/ConsoleTour";
 import { Icon } from "@/components/control/icons";
 import { LookSwitch } from "@/components/control/LookSwitch";
 import type { NavEntry } from "@/components/control/nav-items";
@@ -74,6 +75,7 @@ export function ControlMenu({ items }: { items: NavEntry[] }) {
           {/* above the list, not below it: the list is long, and its foot is a long way down on a phone */}
           <div className="gxc-sheet-look">
             <LookSwitch />
+            <TourButton onStart={() => setOpen(false)} />
           </div>
           <nav aria-label="Control">
             <Items items={items} onNavigate={() => setOpen(false)} />

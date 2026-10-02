@@ -16,7 +16,9 @@ type Item = { key: string; label: string; href: string; icon: IconName; exact?: 
 
 const NAV: Item[] = [
   { key: "dashboard", label: "Dashboard", href: "/control", icon: "dashboard", exact: true, built: true },
+  { key: "notifications", label: "Notifications", href: "/control/notifications", icon: "inbox", built: true },
   { key: "command", label: "Command Centre", href: "/control/command", icon: "command", cap: "command.read", built: true },
+  { key: "wall", label: "Wallboard", href: "/control/wall", icon: "dashboard", cap: "command.read", built: true },
   { key: "chats", label: "Live Chats", href: "/control/chats", icon: "chats", cap: "chats.read", built: true },
   { key: "tickets", label: "Tickets", href: "/control/tickets", icon: "tickets", cap: "tickets.read", built: true },
   { key: "leads", label: "Leads & CRM", href: "/control/leads", icon: "leads", cap: "leads.read", built: true },

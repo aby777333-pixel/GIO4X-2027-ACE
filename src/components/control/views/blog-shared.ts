@@ -242,3 +242,21 @@ export type BlogIntent = (typeof BLOG_INTENTS)[number];
 export function intentStatus(intent: BlogIntent, current: BlogStatus): BlogStatus {
   return intent === "keep" ? current : intent === "publish" ? "published" : intent;
 }
+
+/* -------------------------------------------------------------------------- */
+/* before a post can be in front of the public                                */
+/* -------------------------------------------------------------------------- */
+
+export type BlogPublishBlocker = "alt" | "body";
+
+/**
+ * What stops a post from being published or scheduled, or null when nothing
+ * does: a cover picture needs alt text (the database repeats this rule), and a
+ * post needs a body. One rule for every way of publishing: the editor's save
+ * (actions-blog.ts) and the calendar (actions-blog-calendar.ts) both ask here.
+ */
+export function blogPublishBlocker(post: { cover_path: string; cover_alt: string; body: string }): BlogPublishBlocker | null {
+  if (post.cover_path !== "" && post.cover_alt.trim().length < 3) return "alt";
+  if (post.body.trim() === "") return "body";
+  return null;
+}

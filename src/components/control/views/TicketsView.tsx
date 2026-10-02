@@ -1,15 +1,35 @@
 import Link from "next/link";
+import { bulkTickets } from "@/app/control/actions-bulk";
 import { escalateTicket } from "@/app/control/actions-ticket-tools";
 import { ControlHead, Empty, Notice, Pager } from "@/components/control/bits";
+import type { TicketBoardColumn } from "@/components/control/board-shared";
+import { BulkBar, BulkBox, BulkSelectAll } from "@/components/control/BulkBar";
+import type { BulkOp } from "@/components/control/bulk-shared";
 import { fmtDateTime } from "@/components/control/format";
 import { SubmitButton } from "@/components/control/SubmitButton";
 import { ReplyDue, ticketAssignee, TicketPriorityBadge, TicketStatusBadge, type TicketListItem } from "@/components/control/ticket-bits";
 import { overdueText } from "@/components/control/ticket-tools";
+import { TicketsBoard } from "@/components/control/TicketsBoard";
+import { ViewsControl, type ViewsProps } from "@/components/control/ViewsControl";
+import { viewParamsFrom } from "@/components/control/views-shared";
 import { TICKET_CATEGORIES, TICKET_CATEGORY_LABEL, TICKET_PRIORITIES, TICKET_PRIORITY_LABEL, TICKET_STATUSES, TICKET_STATUS_LABEL, TICKET_TARGET_HOURS } from "@/lib/server/constants";
 import type { TicketCategory, TicketPriority, TicketStatus } from "@/lib/supabase/types";
 
 /** What tickets_overdue() said about one ticket: how far past its target it is, and whether it has been escalated. */
 export type LateInfo = { hours: number; escalatedAt: string | null };
+
+/** The form the row boxes belong to (BulkBar.tsx). */
+const BULK_FORM = "bulk-tickets";
+
+/** What the bulk bar offers on this list. A colleague is offered only to people who may assign to others. */
+function bulkOps(names: Map<string, string>, me: string, canAssign: boolean): BulkOp[] {
+  const colleagues = canAssign ? [...names].filter(([id]) => id !== me).map(([id, name]) => ({ value: id, label: name })) : [];
+  return [
+    { key: "status", label: "Set status", field: "status", valueLabel: "Status", options: TICKET_STATUSES.map((s) => ({ value: s, label: TICKET_STATUS_LABEL[s] })) },
+    { key: "priority", label: "Set priority", field: "priority", valueLabel: "Priority", options: TICKET_PRIORITIES.map((p) => ({ value: p, label: TICKET_PRIORITY_LABEL[p] })) },
+    { key: "assign", label: "Assign", field: "assignee", valueLabel: "Assign to", options: [{ value: "me", label: "Me" }, ...colleagues, { value: "none", label: "Nobody (unassign)" }] },
+  ];
+}
 
 export type TicketsViewProps = {
   /** "" is the default queue: open and waiting for the customer together */
@@ -27,10 +47,19 @@ export type TicketsViewProps = {
   overdueCapped: boolean;
   /** by ticket id, for the tickets on this page that are past their target */
   late: Map<string, LateInfo>;
-  /** may escalate (tickets.write) */
+  /** may escalate, tick rows for the bulk bar and move cards on the board (tickets.write) */
   writable: boolean;
+  /** may give a ticket to somebody else (leads.assign) */
+  canAssign?: boolean;
+  /** the queue as a list (the default) or as a board, one column per status */
+  view?: "list" | "board";
+  /** the board's columns; read only when `view` is "board" */
+  board?: TicketBoardColumn[];
+  boardFailed?: boolean;
   /** may manage canned replies and assignment rules (tickets.manage) */
   manage: boolean;
+  /** the person's saved views for this screen; left out, the Views control is not drawn */
+  views?: ViewsProps;
   notice?: string;
   error?: string;
   failed: boolean;
@@ -57,7 +86,12 @@ export function TicketsView({
   overdueCapped,
   late,
   writable,
+  canAssign = false,
+  view = "list",
+  board,
+  boardFailed = false,
   manage,
+  views,
   notice,
   error,
   failed,
@@ -95,7 +129,8 @@ export function TicketsView({
         ? "No ticket is past its reply target"
         : `${overdueCount}${overdueCapped ? " or more" : ""} ${overdueCount === 1 ? "ticket is" : "tickets are"} past ${overdueCount === 1 ? "its" : "their"} reply target`;
 
-  return (
+  // what both views open with: the title, any outcome, the overdue count, and the List / Board switch
+  const top = (
     <>
       <ControlHead
         title="Tickets"
@@ -141,6 +176,57 @@ export function TicketsView({
           same late count.
         </p>
       </section>
+
+      <nav aria-label="How the tickets are shown" className="mt-21 flex flex-wrap items-center gap-x-13 gap-y-8">
+        <div className="seg">
+          <Link href={href(1)} aria-current={view === "list" ? "true" : undefined}>
+            List
+          </Link>
+          <Link href="/control/tickets?view=board" aria-current={view === "board" ? "true" : undefined}>
+            Board
+          </Link>
+        </div>
+        <p className="text-xs text-ink-3">{view === "board" ? "One column per status, every ticket. The filters belong to the list." : "The board shows the same tickets as columns, one per status."}</p>
+      </nav>
+    </>
+  );
+
+  if (view === "board") {
+    return (
+      <>
+        {top}
+        <div className="mt-13">
+          {boardFailed || !board ? (
+            <Notice title="The tickets could not be read" tone="error">
+              The database did not answer every query. Reload the page; if this continues, check that the migrations have been applied.
+            </Notice>
+          ) : (
+            <>
+              <p className="max-w-measure text-xs text-ink-3">
+                {writable
+                  ? "To change a status, drag a card to another column or use its “Move to” button; on a touch screen, press and hold the card first. "
+                  : "Your role can read the tickets but not change them. "}
+                The board shows a status and sets it, nothing more: a reply to the customer still moves an Open ticket to Waiting for customer by itself, and a message from the customer brings it back to Open.
+              </p>
+              <div className="mt-13">
+                <TicketsBoard columns={board} writable={writable} names={Object.fromEntries(names)} me={me} now={now} />
+              </div>
+              <p className="mt-13 max-w-measure text-xs text-ink-3">
+                “Reply due” is an internal target counted from when the ticket was opened: {[...TICKET_PRIORITIES].reverse().map((p) => `${TICKET_TARGET_HOURS[p]} hours for ${TICKET_PRIORITY_LABEL[p]}`).join(", ")}. It is shown until the
+                first reply to the customer, and is not a promise made to them. A card shows the ticket’s reference, subject, priority and who holds it; the customer’s name and address are on the ticket’s own page.
+              </p>
+            </>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {top}
+
+      {views && <ViewsControl screen="tickets" current={viewParamsFrom("tickets", { overdue: overdue ? "1" : "", status, category, priority, who })} searching={!!q} {...views} />}
 
       <form method="get" action="/control/tickets" role="search" aria-label="Filter tickets" className="mt-21 grid gap-13 border-b border-line pb-21 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
         <div className="field sm:col-span-2 lg:col-span-4">
@@ -222,7 +308,7 @@ export function TicketsView({
             The database did not answer. Reload the page; if this continues, check that the migrations have been applied.
           </Notice>
         ) : tickets.length ? (
-          <TicketsTable tickets={tickets} names={names} me={me} now={now} caption={caption} overdue={overdue} late={late} writable={writable} />
+          <TicketsTable tickets={tickets} names={names} me={me} now={now} caption={caption} overdue={overdue} late={late} writable={writable} selectForm={writable ? BULK_FORM : undefined} />
         ) : pastEnd ? (
           <Empty title="There is no such page">
             <p>
@@ -265,6 +351,9 @@ export function TicketsView({
       </div>
 
       {!failed && !pastEnd && total > 0 && <Pager page={page} pageCount={pageCount} total={total} noun={total === 1 ? "ticket" : "tickets"} href={href} />}
+
+      {/* appears once a row is ticked; kept in the page after the list so that nothing above it moves */}
+      {writable && !failed && tickets.length > 0 && <BulkBar formId={BULK_FORM} action={bulkTickets} ops={bulkOps(names, me, canAssign)} noun={["ticket", "tickets"]} />}
 
       {!failed && tickets.length > 0 && (
         <p className="mt-13 max-w-measure text-xs text-ink-3">
@@ -314,6 +403,7 @@ function TicketsTable({
   overdue,
   late,
   writable,
+  selectForm,
 }: {
   tickets: TicketListItem[];
   names: Map<string, string>;
@@ -323,14 +413,21 @@ function TicketsTable({
   overdue: boolean;
   late: Map<string, LateInfo>;
   writable: boolean;
+  /** the id of the bulk bar's form: with it, every row carries a box to tick */
+  selectForm?: string;
 }) {
   return (
     <>
       <div className="scroll-x hidden md:block">
-        <table className={`table-gx text-sm ${overdue ? "min-w-[66rem]" : "min-w-[56rem]"}`}>
+        <table className={`table-gx text-sm ${overdue ? "min-w-[66rem]" : selectForm ? "min-w-[59rem]" : "min-w-[56rem]"}`}>
           <caption className="sr-only">{caption}</caption>
           <thead>
             <tr>
+              {selectForm && (
+                <th scope="col" className="w-[2.125rem]">
+                  <BulkSelectAll formId={selectForm} />
+                </th>
+              )}
               <th scope="col">Reference and subject</th>
               <th scope="col">From</th>
               <th scope="col">Category</th>
@@ -344,6 +441,11 @@ function TicketsTable({
           <tbody>
             {tickets.map((ticket) => (
               <tr key={ticket.id}>
+                {selectForm && (
+                  <td className="align-top">
+                    <BulkBox formId={selectForm} id={ticket.id} reference={ticket.reference} />
+                  </td>
+                )}
                 <td className="max-w-[17rem] align-top">
                   <Link href={`/control/tickets/${ticket.id}`} className="link num whitespace-nowrap text-sm font-medium">
                     {ticket.reference}
@@ -390,9 +492,20 @@ function TicketsTable({
         </table>
       </div>
 
+      {selectForm && (
+        <div className="border-b border-line pb-13 md:hidden">
+          <BulkSelectAll formId={selectForm} showLabel />
+        </div>
+      )}
       <ul className="md:hidden" aria-label={caption}>
         {tickets.map((ticket) => (
-          <li key={ticket.id} className="border-b border-line">
+          <li key={ticket.id} className={`border-b border-line ${selectForm ? "grid grid-cols-[1.3125rem_minmax(0,1fr)] items-start gap-x-13" : ""}`}>
+            {selectForm && (
+              // outside the link: a box cannot live inside one
+              <span className="pt-13">
+                <BulkBox formId={selectForm} id={ticket.id} reference={ticket.reference} />
+              </span>
+            )}
             <Link href={`/control/tickets/${ticket.id}`} className="block py-13">
               <span className="flex items-center justify-between gap-13">
                 <span className="num text-sm font-medium text-accent">{ticket.reference}</span>
@@ -414,7 +527,7 @@ function TicketsTable({
             </Link>
             {/* outside the link: a button cannot live inside one */}
             {overdue && late.has(ticket.id) && (
-              <div className="pb-13">
+              <div className={selectForm ? "col-start-2 pb-13" : "pb-13"}>
                 <Escalation ticket={ticket} info={late.get(ticket.id)} writable={writable} />
               </div>
             )}

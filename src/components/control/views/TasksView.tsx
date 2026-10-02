@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ControlHead, Empty, Notice, Pager } from "@/components/control/bits";
 import { TaskList, type TaskItem } from "@/components/control/TaskList";
+import { ViewsControl, type ViewsProps } from "@/components/control/ViewsControl";
+import { viewParamsFrom } from "@/components/control/views-shared";
 
 export type TasksViewProps = {
   who: "mine" | "all";
@@ -16,12 +18,14 @@ export type TasksViewProps = {
   pageCount: number;
   failed: boolean;
   pastEnd: boolean;
+  /** the person's saved views for this screen; left out, the Views control is not drawn */
+  views?: ViewsProps;
   notice?: string;
   error?: string;
 };
 
 /** Presentation only. Open follow-ups are ordered by due time, so what is overdue is always at the top. */
-export function TasksView({ who, show, tasks, leads, names, me, now, writable, total, page, pageCount, failed, pastEnd, notice, error }: TasksViewProps) {
+export function TasksView({ who, show, tasks, leads, names, me, now, writable, total, page, pageCount, failed, pastEnd, views, notice, error }: TasksViewProps) {
   const href = (next: { who?: "mine" | "all"; show?: "open" | "done"; page?: number }) => {
     const sp = new URLSearchParams();
     const w = next.who ?? who;
@@ -43,6 +47,8 @@ export function TasksView({ who, show, tasks, leads, names, me, now, writable, t
         {notice && !error && <Notice title={notice} tone="ok" />}
         {error && <Notice title={error} tone="error" />}
       </div>
+
+      {views && <ViewsControl screen="tasks" current={viewParamsFrom("tasks", { who, show })} searching={false} {...views} />}
 
       <div className="mt-13 flex flex-wrap items-end justify-between gap-x-34 border-b border-line">
         <nav aria-label="Whose follow-ups" className="flex">

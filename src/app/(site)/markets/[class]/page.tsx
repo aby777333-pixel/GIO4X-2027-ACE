@@ -6,6 +6,7 @@ import { resolveEvents, resolveTerms, resolveTools, toneStyle } from "@/componen
 import { InstrumentTable } from "@/components/markets/InstrumentTable";
 import { RelatedColumn } from "@/components/markets/LinkRows";
 import { ClassPanels } from "@/components/markets/MarketPanels";
+import { InTheRound } from "@/components/markets/round/InTheRound";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { Head } from "@/components/markets/Head";
@@ -104,6 +105,9 @@ export default async function AssetClassPage({ params }: Params) {
           </div>
         </div>
       </section>
+
+      {/* the class as one object that can be turned, with facts from this page pinned to it */}
+      <InTheRound cls={cls} list={list} />
 
       {/* instruments */}
       <section className="section hairline scroll-mt-[var(--header-h)] bg-paper" id="instruments" aria-labelledby="instruments-title">

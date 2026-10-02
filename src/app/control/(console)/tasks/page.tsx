@@ -1,7 +1,9 @@
 import { NoAccess } from "@/components/control/bits";
 import { controlMeta, firstParam } from "@/components/control/format";
-import { TASK_COLUMNS, type TaskItem } from "@/components/control/TaskList";
+import type { TaskItem } from "@/components/control/TaskList";
 import { TasksView } from "@/components/control/views/TasksView";
+import { tasksFiltered } from "@/lib/server/lists/tasks";
+import { readViews } from "@/lib/server/personal";
 import { can, requireStaff, staffDirectory } from "@/lib/server/staff";
 import { leadsFor } from "@/lib/server/tasks";
 
@@ -32,14 +34,11 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
   const pageParam = Number.parseInt(firstParam(params.page), 10);
   const page = Number.isFinite(pageParam) && pageParam >= 1 && pageParam <= 100000 ? pageParam : 1;
 
-  let query = supabase
-    .from("lead_tasks")
-    .select(TASK_COLUMNS, { count: "exact" })
-    .eq("done", show === "done");
-  if (who === "mine") query = query.eq("assigned_to", ctx.userId);
+  // the filters are applied in src/lib/server/lists/tasks.ts, which a saved view's count on the dashboard uses too
+  let query = tasksFiltered(supabase, { who, show }, ctx.userId);
   query = show === "done" ? query.order("done_at", { ascending: false }) : query.order("due_at", { ascending: true });
 
-  const [result, names] = await Promise.all([query.range((page - 1) * PER_PAGE, page * PER_PAGE - 1), staffDirectory(supabase)]);
+  const [result, names, views] = await Promise.all([query.range((page - 1) * PER_PAGE, page * PER_PAGE - 1), staffDirectory(supabase), readViews(ctx, "tasks", params)]);
   const pastEnd = result.error?.code === "PGRST103";
   const failed = !!result.error && !pastEnd;
   const tasks = (result.data ?? []) as TaskItem[];
@@ -60,6 +59,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
       pageCount={Math.max(1, Math.ceil(total / PER_PAGE))}
       failed={failed}
       pastEnd={pastEnd}
+      views={views}
       notice={NOTICES[firstParam(params.notice)]}
       error={ERRORS[firstParam(params.error)]}
     />

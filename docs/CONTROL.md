@@ -17,6 +17,10 @@ from it. The screens, the access rules and the database are this project's.
   the default, Graphite, Emerald, Royal, Ocean, Mono), chosen with the switcher at the foot of the sidebar.
   It is kept per browser in `localStorage` under `gxc:look` and applied before paint
   (`src/components/control/look.ts`, `LookBoot.tsx`, `LookSwitch.tsx`).
+- The console keeps one more thing in the browser: `gxc:notify`, JSON `{ "browser": true }`, present only
+  while a member of staff has chosen "Also notify me on this computer" in the bell's panel, and removed
+  when they switch it off (`src/components/control/notify.ts`). It is never sent anywhere. There is no
+  push service and no service worker: a system notification can be raised only by an open console tab.
 - The menu is `src/components/control/nav-items.ts`: the Service Console's sections in their familiar
   order, plus Pipeline, Follow-ups, Subscribers and Audit log. Icons are drawn in
   `src/components/control/icons.tsx`; no icon package is installed.
@@ -42,7 +46,7 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/tickets` | Support requests opened on the website at `/support`: the queue, filters, reply-due marker against the internal target | `tickets.read` |
 | `/control/tickets/[id]` | One request: thread, reply to the customer, internal notes, status, priority, category, assignment, history | `tickets.read` (changes: `tickets.write`; assign a colleague: `leads.assign`) |
 | `/control/chats` | Live chat with website visitors. The website offers chat only while it is switched on in Configuration and someone has this screen open | `chats.read` (answer: `chats.write`) |
-| `/control/customers`, `/control/customers/[key]` | Everyone who has contacted GIO4X, one record per address: enquiries, tickets, subscription. Not client accounts. The key is a hash, so no address appears in a URL | `customers.read` |
+| `/control/customers`, `/control/customers/[key]` | Everyone who has contacted GIO4X, one record per address: enquiries, tickets, subscription. Not client accounts. The key is a hash, so no address appears in a URL. Each record opens on a timeline of that person's history (each kind of event only for a role that could see it on its own screen; live chats are not in it, because a chat carries no address) and holds internal notes with @mentions, which can be added and never changed (0019) | `customers.read` (write a note: `customers.note`) |
 | `/control/compliance` | Register of complaints, privacy requests and security reports, drawn from tickets and enquiries, oldest open first | `compliance.read` |
 | `/control/reports` | Counts over 7, 30, 90 or 365 days: enquiries, support, chat, newsletter, follow-ups | `reports.read` |
 | `/control/analytics` | The website's own visit counts over 7, 30, 90 or 365 UTC days: page views per day, most viewed pages, kind of referrer, forms accepted against views of their page, searches and the site terms searched for. Daily totals only: nothing about any visitor, no third-party tracker (see `docs/SECURITY.md`, section 11) | `analytics.read` |
@@ -53,11 +57,16 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/command` | What needs attention now, across every section | `command.read` |
 | `/control/config` | The website's announcement line, the live-chat switch, support hours, and notices for the public Status page | `config.manage` |
 | `/control/blog`, `/control/blog/new`, `/control/blog/[id]` | The daily blog's CMS: write in restricted Markdown, preview, SEO fields (title, description, canonical, noindex, share picture), cover picture with alt text, caption, credit and size, schedule and publish, corrections | `blog.read` (write: `blog.write`; publish, unpublish, archive, edit a published post: `blog.publish`) |
+| `/control/blog/calendar?month=YYYY-MM` | The editorial calendar: one month of UTC days with the posts published or scheduled on each, and a tray of drafts and posts ready for review. Drag a post onto a day to schedule it (09:00 UTC unless changed), onto another day to move it, back to the tray to unschedule it; every chip has a menu that does the same from the keyboard. A dialog states the exact date and time before anything is saved. A past day is refused: publishing immediately is the editor's job. Below 820px the month is an agenda list. A post already on the website is not the calendar's to move | `blog.read` (schedule, move, unschedule: `blog.publish`) |
+| `/control/blog/[id]`, "History of the text" | The post's revisions (who, when, what changed), a word-level comparison of any two or of one with what is in the editor, and "Restore", which copies a revision into the editor's fields as unsaved changes and saves nothing. Written by the database (`0020`): the latest 50 per post and the revision current at each publication | `blog.read` (restore: whoever may edit the post) |
 | `/control/blog/upload` (POST) | Picture upload to the public `blog` storage bucket: 4 MB, JPEG, PNG, WebP or AVIF, checked by content | `blog.write` |
 | `/control/media` | The media library: every picture in the `blog` bucket, newest first, 48 per page, with the posts that use each (cover, share picture, body), copy path and copy Markdown, filters by use and month. Nothing can be deleted: no role has that right. A second, read-only tab lists the pictures shipped in `public/` (from `src/data/generated/site-images.json`, made by `scripts/site-images.mjs` before each build) | `blog.read` (upload: `blog.write`, through `/control/blog/upload`) |
 | `/control/media/list` (GET) | The newest pictures as JSON, for the blog editor's "Choose from the library" picker. Never cached | `blog.read` |
 | `/control/seo` | SEO health: the website's own pages, sitemaps, feeds and robots.txt, fetched anonymously from the request's own host (GET only, never `/control` or `/api`, bounded, read in parts kept for ten minutes), with titles, descriptions, h1, canonical, broken internal links, sitemap entries that 404, redirect chains and noindex; and what published posts are missing. Redirects are shown read-only from `src/config/redirects.json` | `blog.read` |
 | `/control/leads/new` | An enquiry entered by staff (telephone, event, referral). Marked as staff-entered; stores no consent | `leads.write` |
+| "Views" on Leads, Tickets, Follow-ups and Blog | A person's own saved filters for that screen: save, rename, pin, delete; at most 30. A view is the screen's address with its filters; search text is never saved. Pinned views appear under "Your desk" on the dashboard with a live count, beside the person's own tickets, enquiries, follow-ups and chats waiting. Nobody sees a colleague's views | staff (the screen's own capability) |
+| `/control/notifications` | The person's notifications, 25 per page: a ticket, enquiry or follow-up assigned to them, a customer's reply on their ticket, a staff change or blog post waiting for them, a visitor waiting in chat. Written by database triggers; titles carry a reference, never a customer's name. Read ones are removed after 30 days, all after 90 | staff (own rows only) |
+| `/control/notifications/feed` (GET), `/control/notifications/read` (POST) | What the bell in the sidebar and the phone bar uses: the unread count and the latest 30, asked every 30 seconds while the tab is visible; and marking read. Never cached | staff (own rows only) |
 | `/control/<section>` | The sections not built yet (KYC, Funds, Fee Engine, General Ledger, IB, Copy, PAMM, Trade Log, Broker Controls, Event Bus, Document Builder, Bulk Emailer): what each will do and what it is waiting for | staff |
 
 ### How the console reaches the website
@@ -193,6 +202,14 @@ Files, in order:
 15. `supabase/migrations/0015_activity.sql`: no table, five functions: `staff_activity()` for `activity.read`
     (admin, compliance), `my_activity()` for the caller's own row, `report_month()` and
     `record_report_download()` for `reports.read`. Tests: `supabase/tests/0015_activity.sql`.
+18. `supabase/migrations/0018_personal.sql`: `staff_views` (a person's own saved filters, at most 30, readable
+    and writable by its owner only) and `staff_notifications` (written only by the `zz_notify_…` triggers,
+    which can never fail the action that fires them; read by the recipient only; marked read by
+    `notifications_mark_read()`, which also runs the retention). Tests: `supabase/tests/0018_personal.sql`.
+20. `supabase/migrations/0020_blog_revisions.sql`: `blog_revisions`, the words of a post after each saved
+    change to them, written only by the trigger `blog_posts_keep_revision` (which can never fail a save);
+    the latest 50 per post, plus the revision current at each publication; read with `blog.read`, written
+    by nobody through the API. Tests: `supabase/tests/0020_blog_revisions.sql`.
 
 Apply them as the `postgres` role (the Supabase SQL editor, `supabase db push`, or the Supabase MCP
 `apply_migration`). `0002` stops with a clear error if the applying role cannot bypass RLS, because the

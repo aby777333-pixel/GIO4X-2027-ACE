@@ -2,7 +2,9 @@ import { controlMeta, firstParam, ROLE_LABEL } from "@/components/control/format
 import { LEAD_LIST_COLUMNS, type LeadListItem } from "@/components/control/LeadsTable";
 import { TASK_COLUMNS, type TaskItem } from "@/components/control/TaskList";
 import { OverviewView } from "@/components/control/views/OverviewView";
+import { VIEW_OUTCOME_PARAM } from "@/components/control/views-shared";
 import { LEAD_STAGES, LEAD_STATUSES } from "@/lib/server/constants";
+import { readDesk } from "@/lib/server/personal";
 import { can, requireStaff, staffDirectory } from "@/lib/server/staff";
 import { leadsFor } from "@/lib/server/tasks";
 
@@ -39,6 +41,11 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
   const seesLeads = can(ctx, "leads.read");
   const seesSubscribers = can(ctx, "subscribers.read");
   const managesStaff = can(ctx, "staff.manage");
+
+  // "Your desk": started here so that it is read alongside the figures below, not after them. It never
+  // throws, and it is drawn only for somebody whose role includes at least one thing it could show.
+  const hasDesk = seesLeads || can(ctx, "tickets.read") || can(ctx, "chats.read") || can(ctx, "blog.read");
+  const deskWork = hasDesk ? readDesk(ctx, now) : null;
 
   const [byStatus, byStage, unassigned, newest, due, subscribers, pendingStaff, names] = await Promise.all([
     seesLeads ? Promise.all(LEAD_STATUSES.map((status) => supabase.from("leads").select("id", { count: "exact", head: true }).eq("status", status))) : null,
@@ -90,6 +97,8 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
       names={names}
       me={ctx.userId}
       now={now}
+      desk={await deskWork}
+      deskOutcome={firstParam(params[VIEW_OUTCOME_PARAM])}
     />
   );
 }

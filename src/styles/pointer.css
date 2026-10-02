@@ -1,0 +1,244 @@
+/* ==========================================================================
+   THE POINTER LAYER — a soft light under the pointer, buttons that lean
+   towards it, cards that tilt to it.
+
+   One script (components/shell/PointerLayer.tsx) listens to the pointer and
+   writes a handful of CSS variables; everything else is here. The script puts
+   `data-pointer-fx` on <html> only on a device with a mouse or pen, with
+   motion allowed, visual effects on and "Pointer effects" on at /preferences.
+   Every rule below hangs from that attribute, so without it (touch, reduced
+   motion, low effects, the switch off, no script) nothing here applies and the
+   page is exactly what the other sheets make it.
+
+   Nothing is drawn over text. The light is a layer of a band's own background;
+   a button's light sits between its surface and its label; a panel's and a
+   row's highlight is part of its background.
+
+   The tiles' own tilt and highlight (--mx, --my, --tx, --ty) stay in
+   cockpit.css; the same script now feeds them.
+   ========================================================================== */
+
+/* registered so they can ease, and so that writing them on a wide band restyles
+   that one element instead of everything inside it */
+@property --pl-x {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: -999px;
+}
+@property --pl-y {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: -999px;
+}
+@property --pl-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --mag-rp {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --mag-ra {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --mag-la {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+/* ---- 1. THE CURSOR LIGHT --------------------------------------------------
+   The band of the page under the pointer (a section, the footer, a night
+   chapter) is marked data-pl and told where the pointer is, measured from its
+   own corner. Only bands with no background picture of their own are marked,
+   so nothing an author drew is replaced. The light opens from the pointer and
+   closes again when the pointer moves on (--pl-r).
+
+   Ivory: a warm lift towards white, which can only add contrast to the text
+   on it, inside a wider breath of the accent at 4%. Night and the dark theme:
+   the key light at 8%. */
+:where(html[data-pointer-fx]) :where([data-pl]) {
+  transition: --pl-r var(--t-reveal) var(--ease-out);
+}
+html[data-pointer-fx] [data-pl] {
+  background-image:
+    radial-gradient(circle var(--pl-r) at var(--pl-x) var(--pl-y), rgba(255, 253, 246, 0.82), transparent 72%),
+    radial-gradient(circle calc(var(--pl-r) * 1.618) at var(--pl-x) var(--pl-y), color-mix(in srgb, var(--accent) 4%, transparent), transparent 72%);
+}
+html[data-pointer-fx][data-theme="dark"] [data-pl],
+html[data-pointer-fx] .on-night[data-pl],
+html[data-pointer-fx] .on-night [data-pl] {
+  background-image: radial-gradient(circle calc(var(--pl-r) * 1.25) at var(--pl-x) var(--pl-y), color-mix(in srgb, var(--cx-key, var(--accent)) 8%, transparent), transparent 72%);
+}
+html[data-pointer-fx] [data-pl="on"] {
+  --pl-r: 21rem;
+}
+
+/* ---- 2. MAGNETIC BUTTONS --------------------------------------------------
+   Within about 60px a filled or outlined button leans up to 4px towards the
+   pointer (the `translate` property, so the hover and press transforms of
+   depth.css still apply on top) and springs back when the pointer leaves.
+   Its box, and so the page around it, never changes size or place in the
+   layout; at 4px the place that takes the click has not left the pointer.
+
+   Two layers give it depth: the button itself, and a light on its surface
+   that travels further than the button does, under the label. */
+html[data-pointer-fx] :is(.btn-primary, .btn-accent, .btn-ghost) {
+  isolation: isolate;
+  /* the light's colour and its strength. 10% white is the most a white label
+     on the accent can carry and stay at 4.5:1 (accent-contrast.cjs), so the
+     ring of a press and the resting light never add up: see --mag-la. */
+  --mag-rgb: 255, 255, 255;
+  --mag-a: 0.1;
+  transition:
+    background-color var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-instant) var(--ease-out),
+    translate 560ms cubic-bezier(0.3, 1.7, 0.5, 1);
+}
+/* on a pale surface a white light would not show: the outlined button takes a soft shade instead */
+html[data-pointer-fx] .btn-ghost {
+  --mag-rgb: 98, 107, 115;
+}
+html[data-pointer-fx][data-theme="dark"] .btn-ghost,
+html[data-pointer-fx] :is(.on-night, header[data-site-header]) .btn-ghost {
+  --mag-rgb: 255, 255, 255;
+  --mag-a: 0.08;
+}
+html[data-pointer-fx] :is(.btn-primary, .btn-accent, .btn-ghost)[data-mag] {
+  translate: var(--mag-bx, 0px) var(--mag-by, 0px);
+  will-change: translate;
+  /* following the pointer is quick and plain; only the return is a spring */
+  transition:
+    background-color var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-instant) var(--ease-out),
+    translate var(--t-fast) var(--ease-out);
+}
+/* the light: above the button's surface, beneath its label (z-index -1 inside the isolated button) */
+html[data-pointer-fx] :is(.btn-primary, .btn-accent, .btn-ghost)::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at var(--mag-rx, 50%) var(--mag-ry, 50%), transparent calc(var(--mag-rp) - 0.8125rem), rgba(var(--mag-rgb), calc(var(--mag-a) * var(--mag-ra))) var(--mag-rp), transparent calc(var(--mag-rp) + 1px)),
+    radial-gradient(4.5rem circle at var(--mag-sx, 50%) var(--mag-sy, 0%), rgba(var(--mag-rgb), calc(var(--mag-a) * var(--mag-la))), transparent 72%);
+  transition: opacity var(--t-base) var(--ease-out);
+}
+html[data-pointer-fx] :is(.btn-primary, .btn-accent, .btn-ghost)[data-mag]::after {
+  opacity: 1;
+}
+/* keyboard: the same light, standing still at the top of the key; nothing moves */
+html[data-pointer-fx] :is(.btn-primary, .btn-accent, .btn-ghost):focus-visible::after {
+  opacity: 1;
+  background: radial-gradient(4.5rem circle at 50% 0%, rgba(var(--mag-rgb), var(--mag-a)), transparent 72%);
+}
+/* press: a ring of light runs out from where the button was pressed, and the
+   resting light gives way to it and returns as it fades (--mag-ra falls as
+   --mag-la rises, so together they never exceed the one strength). Two names
+   for one animation, so a second press restarts it without forcing a reflow. */
+html[data-pointer-fx] [data-ripple="a"]::after {
+  animation: gx-ripple-a 520ms var(--ease-out);
+}
+html[data-pointer-fx] [data-ripple="b"]::after {
+  animation: gx-ripple-b 520ms var(--ease-out);
+}
+@keyframes gx-ripple-a {
+  from {
+    opacity: 1;
+    --mag-rp: 0px;
+    --mag-ra: 1;
+    --mag-la: 0;
+  }
+  to {
+    opacity: 1;
+    --mag-rp: 13rem;
+    --mag-ra: 0;
+    --mag-la: 1;
+  }
+}
+@keyframes gx-ripple-b {
+  from {
+    opacity: 1;
+    --mag-rp: 0px;
+    --mag-ra: 1;
+    --mag-la: 0;
+  }
+  to {
+    opacity: 1;
+    --mag-rp: 13rem;
+    --mag-ra: 0;
+    --mag-la: 1;
+  }
+}
+
+/* ---- 3. CARD PARALLAX -----------------------------------------------------
+   The script marks the card under the pointer (data-pc) and writes the
+   pointer's place on it: --mx, --my (0..1 across it) and --tx, --ty (-1..1
+   from its centre).
+
+     tilt    a tile: cockpit.css tilts and lights it; here its content rides
+             2px above the surface.
+     flat    a tile holding a form control, a table, a canvas or a frame: it
+             keeps the lift and the highlight and does not tilt.
+     ptilt   a panel of text: tilts a degree or two, with a highlight.
+     plight  a panel too large to tilt gracefully: the highlight only.
+     row     a ledger row: the highlight only.
+
+   A panel that holds a form control, a table, a canvas, a frame or anything
+   that opens (a button, a disclosure) is never marked. */
+html[data-pointer-fx] [data-pc="tilt"] {
+  will-change: transform;
+}
+html[data-pointer-fx] [data-pc="tilt"] > :not(.absolute):not(.fixed):not(.sticky) {
+  translate: calc(var(--tx, 0) * 2px) calc(var(--ty, 0) * 2px);
+}
+html[data-pointer-fx] [data-pc="flat"]:hover {
+  transform: translateY(-5px) !important;
+}
+
+:where(html[data-pointer-fx]) :where(.panel, .panel-quiet) {
+  transition:
+    transform var(--t-slow) var(--ease-out),
+    box-shadow var(--t-slow) var(--ease-out);
+}
+html[data-pointer-fx] :is(.panel, .panel-quiet)[data-pc="ptilt"] {
+  transform: perspective(1200px) translateY(-3px) rotateX(calc(var(--ty, 0) * -1.5deg)) rotateY(calc(var(--tx, 0) * 2deg));
+  box-shadow: var(--depth-3);
+  will-change: transform;
+}
+html[data-pointer-fx] :is(.panel, .panel-quiet)[data-pc="ptilt"] > :not(.absolute):not(.fixed):not(.sticky) {
+  translate: calc(var(--tx, 0) * 2px) calc(var(--ty, 0) * 2px);
+}
+/* the panel's own two layers (depth.css), with the highlight laid over its surface */
+html[data-pointer-fx] :is(.panel, .panel-quiet):is([data-pc="ptilt"], [data-pc="plight"]) {
+  background:
+    radial-gradient(18rem circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.2) * 100%), color-mix(in srgb, var(--tone-1) 9%, transparent), transparent 62%) padding-box,
+    var(--grad-surface) padding-box,
+    linear-gradient(140deg, color-mix(in srgb, var(--tone-2) 50%, transparent), color-mix(in srgb, var(--tone-1) 34%, transparent) 34%, var(--line) 61.8%, color-mix(in srgb, var(--tone-3) 46%, transparent)) border-box;
+}
+/* the row's own wash (depth.css), with the highlight laid over it */
+html[data-pointer-fx] main li.border-b.border-line:not(.border-r):not(.flat)[data-pc="row"] {
+  background-image:
+    radial-gradient(16rem circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.5) * 100%), color-mix(in srgb, var(--dt) 9%, transparent), transparent 62%),
+    linear-gradient(90deg, color-mix(in srgb, var(--dt) 9%, transparent) 0%, transparent 38.2%, color-mix(in srgb, var(--dt-b) 4%, transparent) 100%);
+}
+
+/* print: paper has no pointer */
+@media print {
+  html[data-pointer-fx] [data-pl] {
+    background-image: none;
+  }
+}

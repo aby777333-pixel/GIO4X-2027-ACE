@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Score, StageBadge, StatusBadge } from "@/components/control/bits";
+import { BulkBox, BulkSelectAll } from "@/components/control/BulkBar";
 import { fmtDateTime } from "@/components/control/format";
 import type { LeadRow } from "@/lib/supabase/types";
 
@@ -16,15 +17,23 @@ function assignee(lead: LeadListItem, names: Map<string, string>, me: string): s
 /**
  * Leads as a table from `md` up and as stacked rows on a phone: the same
  * facts, composed for the width rather than squeezed into it.
+ *
+ * With `selectForm` (the id of a bulk bar's form, see BulkBar.tsx) every row
+ * also carries a box to tick; without it the list is exactly as it was.
  */
-export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[]; names: Map<string, string>; me: string; caption: string }) {
+export function LeadsTable({ leads, names, me, caption, selectForm }: { leads: LeadListItem[]; names: Map<string, string>; me: string; caption: string; selectForm?: string }) {
   return (
     <>
       <div className="scroll-x hidden md:block">
-        <table className="table-gx min-w-[58rem] text-sm">
+        <table className={`table-gx text-sm ${selectForm ? "min-w-[61rem]" : "min-w-[58rem]"}`}>
           <caption className="sr-only">{caption}</caption>
           <thead>
             <tr>
+              {selectForm && (
+                <th scope="col" className="w-[2.125rem]">
+                  <BulkSelectAll formId={selectForm} />
+                </th>
+              )}
               <th scope="col">Reference</th>
               <th scope="col">Received</th>
               <th scope="col">From</th>
@@ -38,6 +47,11 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
           <tbody>
             {leads.map((lead) => (
               <tr key={lead.id}>
+                {selectForm && (
+                  <td>
+                    <BulkBox formId={selectForm} id={lead.id} reference={lead.reference} />
+                  </td>
+                )}
                 <td>
                   <Link href={`/control/leads/${lead.id}`} className="link num text-sm font-medium">
                     {lead.reference}
@@ -66,9 +80,20 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
         </table>
       </div>
 
+      {selectForm && (
+        <div className="border-b border-line pb-13 md:hidden">
+          <BulkSelectAll formId={selectForm} showLabel />
+        </div>
+      )}
       <ul className="md:hidden" aria-label={caption}>
         {leads.map((lead) => (
-          <li key={lead.id} className="border-b border-line">
+          <li key={lead.id} className={`border-b border-line ${selectForm ? "grid grid-cols-[1.3125rem_minmax(0,1fr)] items-start gap-13" : ""}`}>
+            {selectForm && (
+              // outside the link: a box cannot live inside one
+              <span className="pt-13">
+                <BulkBox formId={selectForm} id={lead.id} reference={lead.reference} />
+              </span>
+            )}
             <Link href={`/control/leads/${lead.id}`} className="block py-13">
               <span className="flex items-center justify-between gap-13">
                 <span className="num text-sm font-medium text-accent">{lead.reference}</span>

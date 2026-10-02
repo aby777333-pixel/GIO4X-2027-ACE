@@ -1,0 +1,357 @@
+/*
+ * Academy lessons: the Read / Story bar and the story-mode layout
+ * (LessonStory.tsx). Tokens only: no colour is hard-coded here.
+ *
+ * Small screens are their own composition: each chapter's panel sits above its
+ * text and nothing is pinned. From 1080px the chapter rail takes a column at
+ * the left and each panel is pinned beside its chapter's text; the page's side
+ * column (module list, share, citation) moves under the lesson to make the
+ * room, which needs :has(), so a browser without it keeps the small-screen
+ * composition at every width.
+ */
+
+/* ---- the bar: Read / Story, and the listening buttons ------------------------- */
+.gx-lesson-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.8125rem;
+  padding-block: 0.5rem;
+  margin-bottom: 1.3125rem;
+  border-bottom: 1px solid var(--line);
+}
+.gx-lesson[data-lesson-mode="story"] .gx-lesson-bar {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 3;
+  margin-bottom: 0;
+  background: var(--bg);
+  /* the site header is a little shorter than the space kept for it once the page has scrolled: nothing shows through the gap */
+  box-shadow: 0 -1.3125rem 0 var(--bg);
+}
+.gx-lesson-opts {
+  padding-block: 0.8125rem;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---- chapters ------------------------------------------------------------------ */
+.gx-story-chapter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.3125rem;
+  padding-block: 2.125rem;
+  border-top: 1px solid var(--line);
+  /* on top of the page's own allowance for the site header: the height of the bar */
+  scroll-margin-top: 2.125rem;
+}
+.gx-story-chapter:first-child {
+  border-top: 0;
+}
+.gx-story-chapter:focus {
+  outline: none;
+}
+.gx-story-chapter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+/* the text of a chapter after the opening begins like any paragraph, not like a lead */
+.gx-story-text.prose-gx > :first-child {
+  margin-top: 0;
+}
+
+/* a panel arrives with its chapter */
+.gx-story-art-in {
+  opacity: 0;
+  transform: translateY(13px);
+  transition:
+    opacity var(--t-reveal) var(--ease-out),
+    transform var(--t-reveal) var(--ease-out);
+}
+.gx-story-chapter[data-in] .gx-story-art-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gx-story-art-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+[data-motion="reduced"] .gx-story-art-in,
+[data-effects="low"] .gx-story-art-in {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* the quiet panel: one sentence of the chapter */
+.gx-story-quote {
+  border-top: 2px solid var(--prestige);
+  padding-top: 0.8125rem;
+  max-width: 34rem;
+}
+.gx-story-quote-mark {
+  display: block;
+  height: 2.125rem;
+  font-size: 3.4375rem;
+  line-height: 1;
+  color: var(--prestige);
+}
+.gx-story-quote p {
+  font-size: 1.3125rem;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* ---- the rail: a strip that scrolls sideways on a small screen ------------------ */
+.gx-story-rail {
+  position: relative;
+  padding-bottom: 2px;
+}
+.gx-story-rail ol {
+  display: flex;
+  gap: 0.3125rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.gx-story-rail ol::-webkit-scrollbar {
+  display: none;
+}
+.gx-story-rail li {
+  flex: none;
+}
+.gx-story-rail ol a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  justify-content: center;
+  padding-inline: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--ink-3);
+  transition: color var(--t-fast) var(--ease-out);
+}
+.gx-story-rail ol a:hover {
+  color: var(--ink);
+}
+.gx-story-rail ol a[aria-current="true"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+/* the current chapter is a filled dot with a ring, the others hollow: never colour alone */
+.gx-story-dot {
+  flex: none;
+  width: 0.6875rem;
+  height: 0.6875rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+  background: var(--bg);
+  transition:
+    background-color var(--t-fast) var(--ease-out),
+    box-shadow var(--t-fast) var(--ease-out);
+}
+a[aria-current="true"] > .gx-story-dot {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+/* on the strip only the current chapter's title is written out; the others are still there for a screen reader */
+.gx-story-rail ol a:not([aria-current="true"]) > .gx-story-rail-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.gx-story-rail ol a[aria-current="true"] > .gx-story-rail-title {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gx-story-after {
+  display: none;
+}
+.gx-story-progress {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--line);
+}
+.gx-story-progress > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+}
+
+/* ---- narration: the block being read, and the sentence within it ---------------- */
+[data-story-text] [data-speaking],
+[data-story-head][data-speaking] {
+  background: var(--brand-soft);
+  box-shadow:
+    -0.5rem 0 0 var(--brand-soft),
+    -0.6875rem 0 0 var(--accent);
+}
+[data-story-text] tr[data-speaking] {
+  box-shadow: none;
+  outline: 1px solid var(--accent);
+}
+::highlight(gx-narration) {
+  background-color: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+/* ---- from 1080px: rail at the left, panel pinned beside the text ------------------ */
+@supports selector(:has(*)) {
+  @media (min-width: 1080px) {
+    /* the page's side column steps down under the lesson */
+    div:has(> #reading .gx-lesson[data-lesson-mode="story"]) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    #reading:has(.gx-lesson[data-lesson-mode="story"]) + aside {
+      border-left: 0;
+      padding-left: 0;
+      border-top: 1px solid var(--line);
+      padding-top: 2.125rem;
+    }
+    #reading:has(.gx-lesson[data-lesson-mode="story"]) + aside > div {
+      position: static;
+      max-height: none;
+      overflow: visible;
+      padding: 0;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: start;
+    }
+    /* "On this page" is the rail's job in story mode */
+    #reading:has(.gx-lesson[data-lesson-mode="story"]) + aside > div > nav {
+      display: none;
+    }
+
+    .gx-story {
+      display: grid;
+      grid-template-columns: 9rem minmax(0, 1fr);
+      column-gap: 2.125rem;
+      align-items: start;
+    }
+    .gx-story-rail {
+      position: sticky;
+      top: calc(var(--header-h) + 5.5rem);
+      max-height: calc(100dvh - var(--header-h) - 7rem);
+      overflow-y: auto;
+      padding: 0 0 0.5rem;
+      margin-top: 3.4375rem;
+    }
+    .gx-story-rail ol {
+      display: block;
+      overflow: visible;
+    }
+    .gx-story-rail ol a {
+      display: grid;
+      grid-template-columns: 0.6875rem minmax(0, 1fr);
+      align-items: start;
+      justify-content: start;
+      gap: 0.8125rem;
+      min-height: 0;
+      min-width: 0;
+      padding: 0.5rem 0;
+    }
+    .gx-story-dot {
+      margin-top: 0.1875rem;
+      position: relative;
+    }
+    .gx-story-rail ol a:not([aria-current="true"]) > .gx-story-rail-title,
+    .gx-story-rail ol a[aria-current="true"] > .gx-story-rail-title {
+      position: static;
+      width: auto;
+      height: auto;
+      max-width: none;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+    }
+    .gx-story-progress {
+      inset: 0.6875rem auto 0.6875rem 0.3125rem;
+      width: 1px;
+      height: auto;
+    }
+    .gx-story-progress > span {
+      transform-origin: 50% 0;
+      transform: scaleY(var(--p, 0));
+    }
+    .gx-story-after {
+      display: block;
+      margin-top: 0.8125rem;
+      margin-left: 1.5rem;
+      padding-top: 0.8125rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.8125rem;
+      line-height: 1.3;
+    }
+    .gx-story-after a {
+      display: block;
+      padding-block: 0.3125rem;
+      color: var(--ink-3);
+      transition: color var(--t-fast) var(--ease-out);
+    }
+    .gx-story-after a:hover {
+      color: var(--accent);
+    }
+
+    .gx-story-chapter {
+      grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: 2.125rem;
+      align-content: start;
+      min-height: calc(100dvh - var(--header-h) - 3.25rem);
+      padding-block: 3.4375rem;
+    }
+    .gx-story-head {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .gx-story-text {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .gx-story-art {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--header-h) + 5.5rem);
+    }
+    /* a chapter with no panel keeps the reading measure */
+    .gx-story-plain {
+      grid-template-columns: minmax(0, 34rem);
+    }
+  }
+  @media (min-width: 1320px) {
+    .gx-story {
+      grid-template-columns: 11rem minmax(0, 1fr);
+      column-gap: 3.4375rem;
+    }
+    .gx-story-chapter {
+      grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+      column-gap: 3.4375rem;
+    }
+  }
+}
+
+@media print {
+  /* on paper a story is the lesson: no pinned panels, no window-high chapters */
+  .gx-story-chapter {
+    display: block;
+    min-height: 0;
+    padding-block: 0.8125rem;
+  }
+  .gx-story-art {
+    display: none;
+  }
+}

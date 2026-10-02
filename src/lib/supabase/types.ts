@@ -262,6 +262,12 @@ export type ChatPublicPoll = {
 
 export type StaffPresenceRow = { user_id: string; chat_until: string };
 
+/** A member of staff's own saved filters for a list screen (0018_personal.sql). Filter choices only: never search text. */
+export type StaffViewRow = { id: string; owner: string; screen: string; name: string; params: Json; pinned: boolean; position: number; created_at: string; updated_at: string };
+
+/** One line in a person's notifications (0018_personal.sql). Written by database triggers only; the title carries no personal data. */
+export type StaffNotificationRow = { id: number; recipient: string; kind: string; title: string; entity: string; entity_id: string; created_at: string; read_at: string | null };
+
 export type SiteSettingKey = "announcement" | "chat" | "support";
 export type SiteSettingRow = { key: SiteSettingKey; value: Json; updated_at: string; updated_by: string | null };
 
@@ -339,6 +345,31 @@ type BlogWritable = Pick<
   | "cover_path" | "cover_alt" | "cover_caption" | "cover_credit" | "cover_width" | "cover_height"
 >;
 
+/** The five fields of a post that a revision records (0020_blog_revisions.sql). Must equal `blog_revisions_changed_valid`. */
+export type BlogRevisionField = "title" | "excerpt" | "body" | "seo_title" | "seo_description";
+
+/** The words of a post after one saved change to them (0020). Written only by a trigger on blog_posts; read with blog.read. */
+export type BlogRevisionRow = {
+  id: number;
+  post_id: string;
+  /** 1, 2, 3... within the post; numbers are not reused when old revisions are deleted */
+  revision: number;
+  saved_at: string;
+  /** null: the change was made in SQL */
+  saved_by: string | null;
+  title: string;
+  excerpt: string;
+  body: string;
+  seo_title: string;
+  seo_description: string;
+  /** where the post stood when these words were saved */
+  status: BlogStatus;
+  /** which fields differ from the revision before; empty for a post's first revision */
+  changed: BlogRevisionField[];
+  /** these were the post's words at a moment it became published: never deleted by the cap of 50 */
+  at_publication: boolean;
+};
+
 /** Must equal `faq_entries_category_valid` in 0016_faq.sql and the category keys in src/data/generated/faqs.json. */
 export type FaqCategoryKey = "getting-started" | "accounts" | "trading-basics" | "margin-leverage" | "orders" | "platforms" | "funding" | "security" | "partners";
 /** Must equal `faq_entries_status_valid` in 0016_faq.sql. */
@@ -391,6 +422,31 @@ export type PersonView = {
   subscription: { since: string; consent_version: string; unsubscribed_at: string | null } | null;
   marketing_consent: boolean;
 };
+
+/** An internal note about a person who has written in (0019), keyed by the person key, never by address. Append-only. */
+export type PersonNoteRow = { id: string; person_key: string; author: string | null; body: string; mentions: string[]; created_at: string };
+
+/**
+ * One row of person_timeline() (0019): one event in a person's history. `kind` is one of TIMELINE_KINDS in
+ * src/components/control/timeline.ts; `summary` is one line (message and note text is cut by the database);
+ * `has_older` is the same on every row of a page.
+ */
+export type PersonTimelineRow = {
+  id: string;
+  at: string;
+  kind: string;
+  summary: string;
+  actor: string | null;
+  actor_name: string | null;
+  entity: string;
+  entity_id: string | null;
+  reference: string | null;
+  detail: Json;
+  has_older: boolean;
+};
+
+/** One row of my_mentions() (0019): a note that mentions the caller. No note text. */
+export type MyMentionRow = { note_id: string; person_key: string; author_name: string | null; created_at: string };
 
 type Tally = { key: string; count: number }[];
 
@@ -555,6 +611,18 @@ export type Database = {
         Update: { [_ in never]: never };
         Relationships: [];
       };
+      staff_views: {
+        Row: StaffViewRow;
+        Insert: { screen: string; name: string; params?: Json; pinned?: boolean };
+        Update: { name?: string; pinned?: boolean; position?: number };
+        Relationships: [];
+      };
+      staff_notifications: {
+        Row: StaffNotificationRow;
+        Insert: { [_ in never]: never };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
       site_settings: {
         Row: SiteSettingRow;
         Insert: { [_ in never]: never };
@@ -565,6 +633,12 @@ export type Database = {
         Row: BlogPostRow;
         Insert: Partial<BlogWritable> & { slug: string; title: string };
         Update: Partial<BlogWritable & Pick<BlogPostRow, "corrected_at" | "correction_note">>;
+        Relationships: [];
+      };
+      blog_revisions: {
+        Row: BlogRevisionRow;
+        Insert: { [_ in never]: never };
+        Update: { [_ in never]: never };
         Relationships: [];
       };
       faq_entries: {
@@ -588,6 +662,12 @@ export type Database = {
       lead_notes: {
         Row: LeadNoteRow;
         Insert: { lead_id: string; body: string };
+        Update: { [_ in never]: never };
+        Relationships: [];
+      };
+      person_notes: {
+        Row: PersonNoteRow;
+        Insert: { person_key: string; body: string; mentions?: string[] };
         Update: { [_ in never]: never };
         Relationships: [];
       };
@@ -642,6 +722,9 @@ export type Database = {
       chat_staff_close: { Args: { p_id: string }; Returns: undefined };
       people_list: { Args: { p_search?: string; p_limit?: number; p_offset?: number }; Returns: PersonListRow[] };
       person_view: { Args: { p_key: string }; Returns: Json | null };
+      person_timeline: { Args: { p_key: string; p_limit?: number; p_before?: string | null; p_kinds?: string[] | null }; Returns: PersonTimelineRow[] };
+      my_mentions: { Args: { p_limit?: number }; Returns: MyMentionRow[] };
+      staff_mentionable: { Args: { [_ in never]: never }; Returns: { user_id: string; display_name: string }[] };
       report_summary: { Args: { p_days?: number }; Returns: Json };
       pulse_hit: { Args: { p_path: string; p_ref?: string }; Returns: boolean };
       pulse_form_hit: { Args: { p_form: string }; Returns: boolean };
@@ -653,10 +736,12 @@ export type Database = {
       my_activity: { Args: { p_days?: number }; Returns: StaffActivityRow[] };
       report_month: { Args: { p_month: string }; Returns: Json };
       record_report_download: { Args: { p_month: string }; Returns: undefined };
+      notifications_mark_read: { Args: { p_ids?: number[] | null }; Returns: number };
       lead_add_manual: {
         Args: { p_name: string; p_email: string; p_phone: string | null; p_country: string | null; p_topic: string; p_message: string; p_how: string };
         Returns: string;
       };
+      leads_import: { Args: { p_rows: Json }; Returns: Json };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

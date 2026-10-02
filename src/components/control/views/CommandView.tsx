@@ -110,7 +110,15 @@ export function CommandView({ summary }: CommandViewProps) {
       <ControlHead
         title="Command Centre"
         lead="What needs attention now, across every section that exists."
-        actions={summary ? <p className="num text-xs text-ink-3">As of {fmtDateTime(summary.at)}</p> : undefined}
+        actions={
+          <>
+            {summary && <p className="num text-xs text-ink-3">As of {fmtDateTime(summary.at)}</p>}
+            {/* the same counts as a board for a shared screen */}
+            <Link href="/control/wall" className="btn btn-ghost">
+              Wallboard
+            </Link>
+          </>
+        }
       />
 
       {!summary ? (

@@ -282,6 +282,8 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
   let stateFor = "";
   // the frame a free scene composed for itself on the last draw (Scene.frame), if any
   let own: { x: number; y: number; w: number; h: number } | null = null;
+  // the frame as last published on the canvas (data-frame), so the attribute is written only when it moves
+  let frameAt: string | null = null;
 
   const cam: Cam = { yaw: 0, pitch: 0.18, dist: 6, zoom: 1, parallax: 1 };
   // rotation terms, refreshed by `aim`
@@ -636,6 +638,14 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     }
 
     if (!canvas.dataset.on) canvas.dataset.on = "1";
+    // Where the champagne frame stands, in the canvas's own CSS pixels ("x,y,w,h"; empty when the scene
+    // has none). Read by the page-to-page transition and the first-visit intro (StageTransition, Boot),
+    // which must find the frame without drawing anything themselves. Written only when it changes.
+    const at = b ? `${Math.round(b.x)},${Math.round(b.y)},${Math.round(b.w)},${Math.round(b.h)}` : "";
+    if (at !== frameAt) {
+      frameAt = at;
+      canvas.dataset.frame = at;
+    }
 
     if (!still) {
       // adaptive quality: if the device cannot hold the frame, ask less of it

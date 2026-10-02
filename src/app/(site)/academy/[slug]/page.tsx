@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Lab } from "@/components/academy/labs";
 import { LessonQuiz } from "@/components/academy/LessonQuiz";
+import { LessonStory } from "@/components/academy/LessonStory";
+import { storyChapters } from "@/components/academy/story-panels";
 import { Dates, Reader, SideBlock } from "@/components/knowledge/Reader";
 import { conceptSlugs, renderProse, shortDate } from "@/components/knowledge/prose";
 import { resolveAll, resolveTools } from "@/components/markets/graph";
@@ -83,6 +85,8 @@ export default async function LessonPage({ params }: Params) {
         }
         toc={toc}
         html={html}
+        // the same HTML, cut at its headings: shown whole ("Read") or as chapters with a panel beside each ("Story")
+        body={<LessonStory chapters={storyChapters(l.slug, html)} after={toc.slice(l.toc.length)} />}
         url={url}
         citation={citation}
         aside={

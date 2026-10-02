@@ -6,11 +6,19 @@
  * <html data-*> by an inline boot script before first paint (see
  * PREFS_BOOT_SCRIPT) so there is no flash of the wrong theme.
  */
+import { ACCENT_BOOT_JS, DEFAULT_ACCENT_HUE, NO_SECOND_HUE, customAccentVars, setAccentVars } from "@/lib/accent";
+
 export const PREFS_KEY = "gx:prefs";
 
 export type Prefs = {
   theme: "light" | "dark" | "auto";
-  accent: "gio4x" | "ivory" | "midnight" | "ocean" | "emerald" | "royal" | "mono";
+  accent: "gio4x" | "ivory" | "midnight" | "ocean" | "emerald" | "royal" | "mono" | "custom";
+  /** the hue, 0 to 359 degrees, of the visitor's own accent; used only while `accent` is "custom" (src/lib/accent.ts) */
+  accentHue: number;
+  /** the hue of the supporting colour of the visitor's own accent, or -1: it then follows the first hue */
+  accentHue2: number;
+  /** true (the default): on a device with a mouse or pen, a soft light follows the pointer, buttons lean towards it and cards tilt; false: none of that (src/components/shell/PointerLayer.tsx) */
+  pointerFx: boolean;
   density: "relaxed" | "standard" | "pro";
   motion: "full" | "reduced";
   contrast: "default" | "high";
@@ -27,6 +35,8 @@ export type Prefs = {
   countVisits: boolean;
   /** true once the first-visit tour was started or declined: the invitation is not shown again */
   tourDone: boolean;
+  /** how an Academy lesson opens: "read" (the default) is the page as written; "story" lays it out as chapters with a panel beside each (src/components/academy/LessonStory.tsx) */
+  lessonMode: "read" | "story";
   /** interface sounds: off unless switched on at /preferences */
   sound: boolean;
   /** how loud the interface sounds are when they are on */
@@ -38,6 +48,9 @@ export type Prefs = {
 export const DEFAULT_PREFS: Prefs = {
   theme: "light",
   accent: "gio4x",
+  accentHue: DEFAULT_ACCENT_HUE,
+  accentHue2: NO_SECOND_HUE,
+  pointerFx: true,
   density: "standard",
   motion: "full",
   contrast: "default",
@@ -49,6 +62,7 @@ export const DEFAULT_PREFS: Prefs = {
   tvAuto: false,
   countVisits: true,
   tourDone: false,
+  lessonMode: "read",
   sound: false,
   soundLevel: "quiet",
   offline: false,
@@ -62,6 +76,7 @@ export const ACCENTS: { key: Prefs["accent"]; label: string; note: string }[] = 
   { key: "emerald", label: "Emerald", note: "Deep green and brass" },
   { key: "royal", label: "Royal", note: "Indigo, platinum and champagne" },
   { key: "mono", label: "Mono", note: "Graphite only" },
+  { key: "custom", label: "Custom", note: "A hue of your own, composed on the preferences page" },
 ];
 
 export function readPrefs(): Prefs {
@@ -93,7 +108,9 @@ export function applyPrefs(p: Prefs): void {
   d.text = p.text;
   d.effects = p.effects;
   d.links = p.links;
-  const meta = document.querySelector('meta[name="theme-color"]');
+  // the visitor's own accent: the variables a built-in accent takes from the stylesheets are written on <html>, and taken off again for any other accent
+  setAccentVars(document.documentElement, p.accent === "custom" ? customAccentVars(p.accentHue, p.accentHue2, d.theme === "dark" ? "dark" : "light") : null);
+  const meta =document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", d.theme === "dark" ? "#0b1014" : "#f6f4ee");
 }
 
@@ -153,4 +170,4 @@ export async function clearOfflineCopy(): Promise<number> {
  * Runs before paint. Kept tiny and dependency-free; mirrors applyPrefs().
  * Explicit visitor choice always wins; "auto" follows the OS setting.
  */
-export const PREFS_BOOT_SCRIPT = `(function(){try{var d=document.documentElement,s=d.dataset,p={};try{p=JSON.parse(localStorage.getItem("${PREFS_KEY}")||"{}")||{}}catch(e){}var t=p.theme||"light";s.themePref=t;s.theme=t==="auto"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):t;s.accent=p.accent||"gio4x";s.density=p.density||"standard";s.motion=p.motion||"full";s.contrast=p.contrast||"default";s.text=p.text||"default";s.effects=p.effects||"full";s.links=p.links||"default"}catch(e){}})();`;
+export const PREFS_BOOT_SCRIPT = `(function(){try{var d=document.documentElement,s=d.dataset,p={};try{p=JSON.parse(localStorage.getItem("${PREFS_KEY}")||"{}")||{}}catch(e){}var t=p.theme||"light";s.themePref=t;s.theme=t==="auto"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):t;s.accent=p.accent||"gio4x";s.density=p.density||"standard";s.motion=p.motion||"full";s.contrast=p.contrast||"default";s.text=p.text||"default";s.effects=p.effects||"full";s.links=p.links||"default";${ACCENT_BOOT_JS}}catch(e){}})();`;

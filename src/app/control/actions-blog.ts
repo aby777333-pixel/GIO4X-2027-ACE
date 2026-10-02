@@ -33,6 +33,7 @@ import { redirect } from "next/navigation";
 import {
   BLOG_INTENTS,
   blogDbError,
+  blogPublishBlocker,
   DEFAULT_BYLINE,
   intentStatus,
   isCanonical,
@@ -201,8 +202,10 @@ function readFields(formData: FormData): { values: Fields; bad: string[] } {
 
 /** What must be true of a post before it can be in front of the public. The database repeats the alt-text rule. */
 function publishProblem(values: Fields): BlogFormState | null {
-  if (values.cover_path !== "" && values.cover_alt.length < 3) return { error: "alt", fields: ["cover_alt"] };
-  if (values.body === "") return { error: "check", fields: ["body"] };
+  // the rule itself is in blog-shared.ts, so that the calendar's scheduling asks the same question
+  const blocker = blogPublishBlocker(values);
+  if (blocker === "alt") return { error: "alt", fields: ["cover_alt"] };
+  if (blocker === "body") return { error: "check", fields: ["body"] };
   return null;
 }
 

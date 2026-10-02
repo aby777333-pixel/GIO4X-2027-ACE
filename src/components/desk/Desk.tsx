@@ -7,9 +7,11 @@ import { countLearned, countLessons, LESSON_PREFIX, useLearned } from "@/compone
 import type { RatesProp } from "@/components/tools/calc";
 import { useCalc } from "@/components/tools/store";
 import { DataNote } from "@/components/ui/Page";
+import type { MilestoneData } from "@/data/milestones";
 import { isRateCurrency } from "@/lib/rates";
 import { DeskTransfer } from "./DeskTransfer";
 import { InstallApp } from "./InstallApp";
+import { Milestones } from "./Milestones";
 import {
   forgetCalc,
   MAX_RECENT_PAGES,
@@ -43,6 +45,8 @@ export type DeskData = {
   terms: { slug: string; term: string }[];
   /** Academy lessons, in course order */
   lessons: { slug: string; title: string }[];
+  /** what the milestones are measured against: glossary topics, Academy levels and learning paths */
+  milestones: MilestoneData;
   /** the latest ECB reference fixing, fetched by the server; never a live price */
   rates: RatesProp;
   /** the fixing date, already formatted */
@@ -527,6 +531,10 @@ export function Desk({ data }: { data: DeskData }) {
 
       <Block id="learning" title="Learning" lead="Glossary questions answered and Academy lessons completed.">
         <Learning data={data} />
+      </Block>
+
+      <Block id="milestones" title="Milestones" lead="Badges for glossary questions answered, lessons completed and the tour, read from the same record as Learning above. Nothing more is stored for them.">
+        <Milestones data={data.milestones} fallback={<Reading />} />
       </Block>
 
       <Block

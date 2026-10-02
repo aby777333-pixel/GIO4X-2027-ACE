@@ -1,8 +1,10 @@
 import { NoAccess } from "@/components/control/bits";
 import { controlMeta, firstParam } from "@/components/control/format";
 import { BLOG_FILTERS, type BlogFilter } from "@/components/control/views/blog-shared";
-import { BLOG_LIST_COLUMNS, BlogListView, type BlogCounts, type BlogListItem } from "@/components/control/views/BlogListView";
+import { BlogListView, type BlogCounts, type BlogListItem } from "@/components/control/views/BlogListView";
 import { BLOG_CATEGORIES } from "@/lib/blog";
+import { blogFiltered } from "@/lib/server/lists/blog";
+import { readViews } from "@/lib/server/personal";
 import { can, requireStaff } from "@/lib/server/staff";
 import { cleanSearch } from "@/lib/server/validate";
 import type { BlogCategory } from "@/lib/supabase/types";
@@ -50,21 +52,15 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
   const now = Date.now();
   const nowIso = new Date(now).toISOString();
 
-  let query = supabase.from("blog_posts").select(BLOG_LIST_COLUMNS, { count: "exact" });
-  if (status === "scheduled") query = query.eq("status", "published").gt("published_at", nowIso);
-  else if (status === "published") query = query.eq("status", "published").lte("published_at", nowIso);
-  else if (status) query = query.eq("status", status);
-  if (category) query = query.eq("category", category);
-  // each word contains only [A-Za-z0-9@._+-]; the quotes keep dots inside the value
-  for (const word of words) query = query.or(`title.ilike."%${word}%",slug.ilike."%${word}%"`);
-  query = query
+  // the filters are applied in src/lib/server/lists/blog.ts, which a saved view's count on the dashboard uses too
+  const query = blogFiltered(supabase, { status, category, words }, nowIso)
     .order("updated_at", { ascending: false })
     .order("id", { ascending: false })
     .range((page - 1) * PER_PAGE, page * PER_PAGE - 1);
 
   // the figures at the top: one count per state, from the rows themselves
   const count = () => supabase.from("blog_posts").select("id", { count: "exact", head: true });
-  const [result, all, draft, review, scheduled, live, archived] = await Promise.all([
+  const [result, all, draft, review, scheduled, live, archived, views] = await Promise.all([
     query,
     count(),
     count().eq("status", "draft"),
@@ -72,6 +68,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
     count().eq("status", "published").gt("published_at", nowIso),
     count().eq("status", "published").lte("published_at", nowIso),
     count().eq("status", "archived"),
+    readViews(ctx, "blog", params),
   ]);
   const tallies = [all, draft, review, scheduled, live, archived];
   // a figure that could not be counted is not shown as zero
@@ -98,6 +95,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
       pageCount={Math.max(1, Math.ceil(total / PER_PAGE))}
       failed={failed}
       pastEnd={pastEnd}
+      views={views}
       error={ERRORS[firstParam(params.error)]}
     />
   );

@@ -65,6 +65,8 @@ type ReaderProps = {
   toc: TocItem[];
   /** prepared HTML (see prose.ts) */
   html: string;
+  /** shown in place of the prepared HTML when given: an Academy lesson passes its own body, which can also lay the same text out as a story */
+  body?: ReactNode;
   /** canonical absolute URL, for sharing */
   url: string;
   /** a ready-made citation */
@@ -80,7 +82,7 @@ type ReaderProps = {
  * an editorial header, a 68-character measure, a side column that stays in
  * view on desktop and folds under the text on small screens.
  */
-export function Reader({ crumbs, kicker, title, lead, meta, notice, brief, toc, html, url, citation, aside, children }: ReaderProps) {
+export function Reader({ crumbs, kicker, title, lead, meta, notice, brief, toc, html, body, url, citation, aside, children }: ReaderProps) {
   return (
     <>
       <ReadingProgress target="reading" />
@@ -141,7 +143,7 @@ export function Reader({ crumbs, kicker, title, lead, meta, notice, brief, toc, 
               </details>
             )}
 
-            <div className="prose-gx editorial" dangerouslySetInnerHTML={{ __html: html }} />
+            {body ?? <div className="prose-gx editorial" dangerouslySetInnerHTML={{ __html: html }} />}
 
             <aside aria-label="Risk note" className="mt-55 max-w-measure border-t border-line pt-21 text-sm text-ink-3">
               <p className="text-ink-2">{educationalNote}</p>

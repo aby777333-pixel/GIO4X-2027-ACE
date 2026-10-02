@@ -86,6 +86,20 @@ html[data-accent]:not([data-accent="gio4x"]) .cx-stage::after {
   background: linear-gradient(90deg, var(--mood-2), var(--mood-1) 38.2%, var(--mood-3) 61.8%, transparent);
 }
 
+/* The eighth mood, "Custom", has no block of colours above: its hue is the
+   visitor's, so lib/accent.ts works the colours out and lib/prefs.ts writes
+   the same variables (--accent, --accent-ink, --accent-2, --accent-3,
+   --mood-1/2/3) on <html>, before first paint. Every rule above then applies
+   to it as to any other mood.
+
+   One thing is its own. A custom mood promises a readable label on the accent
+   for every hue, so where the accent is bright (the dark theme and the night
+   surfaces) a filled key carries the dark ink instead of white. */
+html[data-accent="custom"][data-theme="dark"] :is(.btn-accent, .btn-primary:hover, .seg > :is([aria-pressed="true"], [aria-selected="true"], [aria-current="true"])):not(.gx-console *),
+html[data-accent="custom"] :is(.on-night, .cx-hero, header[data-site-header]) :is(.btn-accent, .btn-primary:hover, .seg > :is([aria-pressed="true"], [aria-selected="true"], [aria-current="true"])) {
+  color: var(--accent-ink);
+}
+
 /* the console keeps its own palette whatever the mood */
 html[data-accent] .gx-console {
   --brand: #1b3a6b;

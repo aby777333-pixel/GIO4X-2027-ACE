@@ -6,6 +6,7 @@ import type { AuditRow } from "@/lib/supabase/types";
 
 const ACTION_LABEL: Record<string, string> = {
   "lead.add_manual": "Enquiry entered by staff",
+  "lead.import": "Enquiries imported from a file",
   "lead.status": "Lead status changed",
   "lead.assign": "Lead assignment changed",
   "lead.note": "Note added to a lead",
@@ -13,6 +14,7 @@ const ACTION_LABEL: Record<string, string> = {
   "lead.task": "Follow-up added to a lead",
   "lead.task_done": "Follow-up completed",
   "lead.task_reopened": "Follow-up reopened",
+  "person.note": "Internal note added to a customer record",
   "staff.request": "Staff change requested",
   "staff.apply": "Staff change applied",
   "staff.reject": "Staff change rejected",

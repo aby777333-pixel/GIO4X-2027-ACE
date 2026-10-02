@@ -153,6 +153,7 @@ const PREF_CHOICES: Record<string, readonly string[]> = {
   effects: ["full", "low"],
   links: ["default", "underline"],
   platform: ["none", "raptor", "mt5"],
+  lessonMode: ["read", "story"],
 };
 const ZONE = /^[A-Za-z0-9_+\-/]{1,64}$/;
 

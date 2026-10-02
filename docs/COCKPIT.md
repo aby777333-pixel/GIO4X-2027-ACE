@@ -18,7 +18,8 @@ This document describes how that is built, so it can be extended without breakin
 | The route map | `src/components/cockpit/routes.ts` | Which scene a path opens with, and the page's own subject (`tag`). |
 | The overhead panel | `header[data-site-header]` rules in `cockpit.css` | The site header as night switchgear: backlit keys that rise, light and press. |
 | Touch | `src/components/cockpit/CockpitFx.tsx`, section 3 of `cockpit.css` | Tiles answer the pointer with light and a few degrees of tilt; sections arrive with depth on scroll. |
-| The start-up | `src/components/cockpit/Boot.tsx`, `src/lib/boot.ts`, section 4 of `cockpit.css` | A power-on under two seconds, first visit only. |
+| The start-up | `src/components/cockpit/Boot.tsx`, `src/lib/boot.ts`, section 4 of `cockpit.css`, section 2 of `transition.css` | First visit only. On the homepage: the intro, the logo forming from particles and handing over to the hero. On any other page: a power-on under two seconds. |
+| Page to page | `src/components/cockpit/StageTransition.tsx`, `stage.ts`, section 1 of `transition.css` | Between two pages that both open with a stage, the old instrument turns into the new one instead of cutting. |
 
 No dependency was added. There is no WebGL: the scenes are a few kilobytes each of Canvas 2D
 drawing code with a hand-written perspective camera, loaded as separate chunks after first paint.
@@ -124,11 +125,49 @@ a schedule, not a data feed, and nothing on screen says otherwise.
 
 ## The start-up
 
-Shown once per browser, never under reduced motion or low effects. The flag is `gx:boot` in
-localStorage; it is listed with every other key in the Cookie & Storage Notice and cleared by the
-privacy reset on `/preferences`. The sequence is CSS and ends by itself, so it cannot block the
-site; any key, click, touch or wheel ends it at once. Its four lamps are the site's sections coming
-up, not connection claims.
+Shown once per browser, on the first page of the first visit, never under reduced motion or low
+effects. The flag is `gx:boot` in localStorage; it is listed with every other key in the Cookie &
+Storage Notice and cleared by the privacy reset on `/preferences`. It is written on that first page
+whether or not anything is shown (under reduced motion nothing is, and nothing is shown later
+either). The inline script in `lib/boot.ts` decides before first paint and sets `data-boot` on
+`<html>`: `intro` on the homepage, `run` anywhere else.
+
+**The intro (homepage).** About three seconds: particles drift in the night (0.6s), gather into the
+logo (1.15s), the mark stands while a glint crosses it (0.55s), then the night lifts and the
+particles stream to the hero's champagne frame and fade there (0.85s). The hero is running
+underneath throughout, so what is left is simply the hero. One Canvas 2D surface the size of the
+window, pixel ratio capped at 1.5, 2,600 particles (1,100 below 720px). The shape and the colours
+are the real logo's: `public/brand/gio4x-logo` is drawn once to an offscreen canvas and its opaque
+pixels read with a single `getImageData`. "Skip" is there from the first frame and has the keyboard;
+Escape, any other key, a click, a touch or the wheel also end it, in 220ms. The canvas is
+`aria-hidden`; a status line says "GIO4X". Focus is never held and is handed back when it ends.
+When it ends it dispatches `gx:intro-end` on `window` (`INTRO_END` in `lib/boot.ts`); the tour's
+invitation waits for that. If the script never takes over, the night lifts by itself in CSS.
+
+**The power-on (any other first page).** The sequence is CSS and ends by itself, so it cannot block
+the site; any key, click, touch or wheel ends it at once. Its four lamps are the site's sections
+coming up, not connection claims. A visitor who arrives here first does not see the intro later.
+
+## Page to page
+
+`StageTransition` is mounted once in the site shell. When the path changes and both pages have a
+stage, the picture in the old frame is kept on screen over the new stage, travels to where the new
+frame stands (382ms) and dissolves with a 1.0618 enlargement and a blur (618ms) while a line of
+light crosses the champagne frame and the new scene powers on underneath; the statement fades up
+on its own (382ms).
+
+- It never delays or intercepts navigation. It acts only once the new page is in the document: the
+  old canvas, detached by then, still holds its last picture, and that is copied. Links, the command
+  bar, the tour and back/forward are therefore all covered.
+- It waits at most 600ms for the new stage's first frame; after that the old picture just fades.
+- The overlay is one fixed element, `pointer-events: none`, placed with a transform (no layout
+  shift), clipped to the new stage, and removed when done.
+- Nothing is shown on first load, when either page has no stage, when the old frame was scrolled
+  out of view, in a hidden tab, or under reduced motion or low effects. Below 720px it is a plain
+  cross-fade.
+- The engine's part is one attribute: after each frame it writes the frame's rectangle to the
+  canvas as `data-frame="x,y,w,h"` (canvas CSS pixels; only when it changes). `stage.ts` reads it.
+  The existing `data-on` marks the first frame.
 
 ## Sound
 

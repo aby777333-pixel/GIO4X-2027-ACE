@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ControlHead, NoAccess, Notice } from "@/components/control/bits";
 import { controlMeta, firstParam } from "@/components/control/format";
+import { BLOG_REVISION_LIST_COLUMNS, BLOG_REVISIONS_MAX } from "@/components/control/views/blog-revisions-shared";
 import { BLOG_ERRORS } from "@/components/control/views/blog-shared";
 import { BlogEditorView } from "@/components/control/views/BlogEditorView";
 import { site } from "@/config/site";
@@ -38,10 +39,12 @@ export default async function BlogPostPage({ params, searchParams }: { params: P
   const { id } = await params;
   if (!isUuid(id)) notFound();
 
-  const [postResult, auditResult, names] = await Promise.all([
+  const [postResult, auditResult, names, revisionsResult] = await Promise.all([
     supabase.from("blog_posts").select("*").eq("id", id).maybeSingle(),
     supabase.from("audit_log").select("id, at, actor, action, detail").eq("entity", "blog_post").eq("entity_id", id).order("at", { ascending: false }).limit(50),
     staffDirectory(supabase),
+    // the revisions without their words (0020): the words are read only when two are compared
+    supabase.from("blog_revisions").select(BLOG_REVISION_LIST_COLUMNS).eq("post_id", id).order("revision", { ascending: false }).limit(BLOG_REVISIONS_MAX),
   ]);
 
   if (postResult.error) {
@@ -78,6 +81,8 @@ export default async function BlogPostPage({ params, searchParams }: { params: P
       canWrite={can(ctx, "blog.write")}
       canPublish={can(ctx, "blog.publish")}
       siteUrl={site.url}
+      // null: could not be read (the panel says so; the post is unaffected)
+      revisions={revisionsResult.error ? null : (revisionsResult.data ?? [])}
       notice={NOTICES[firstParam(sp.notice)]}
       error={Object.hasOwn(BLOG_ERRORS, errorCode) ? BLOG_ERRORS[errorCode as keyof typeof BLOG_ERRORS] : undefined}
     />

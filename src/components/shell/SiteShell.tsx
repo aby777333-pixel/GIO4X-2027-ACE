@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { CockpitBoot } from "@/components/cockpit/Boot";
 import { CockpitFx } from "@/components/cockpit/CockpitFx";
+import { StageTransition } from "@/components/cockpit/StageTransition";
 import { RecentRecorder } from "@/components/desk/RecentRecorder";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
@@ -8,6 +9,7 @@ import { ChatWidget } from "@/components/shell/ChatWidget";
 import { CommandBar } from "@/components/shell/CommandBar";
 import { Lens } from "@/components/shell/Lens";
 import { OfflineRegister } from "@/components/shell/OfflineRegister";
+import { PointerLayer } from "@/components/shell/PointerLayer";
 import { Pulse } from "@/components/shell/Pulse";
 import { ScrollArrows } from "@/components/shell/ScrollArrows";
 import { SiteFooter } from "@/components/shell/SiteFooter";
@@ -35,7 +37,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <CommandBar />
       <Lens />
       <CockpitFx />
+      {/* mouse and pen only: the cursor light, the magnetic buttons and the tilt of tiles and panels (off under reduced motion, low effects, or its switch at /preferences) */}
+      <PointerLayer />
       <CockpitBoot />
+      {/* between two pages that both open with a stage, the old instrument turns into the new one */}
+      <StageTransition />
       <ScrollArrows />
       {/* live chat: offered only while a member of staff is present to answer */}
       <ChatWidget />

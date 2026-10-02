@@ -2,12 +2,15 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createBlogPost, saveBlogCorrection, saveBlogPost, setBlogStatus } from "@/app/control/actions-blog";
+import { readBlogRevisions } from "@/app/control/actions-blog-revisions";
 import { BlogBody } from "@/components/blog/BlogBody";
 import { Notice } from "@/components/control/bits";
 import { fmtDateTime } from "@/components/control/format";
 import { LibraryButton, type LibraryChoice } from "@/components/control/MediaPicker";
 import { SubmitButton } from "@/components/control/SubmitButton";
+import { BlogHistory } from "@/components/control/views/BlogHistory";
 import { BlogStateBadge } from "@/components/control/views/BlogListView";
+import type { BlogRevisionMeta, BlogRevisionWords, LoadRevisions } from "@/components/control/views/blog-revisions-shared";
 import {
   BLOG_ERRORS,
   blogChecks,
@@ -40,6 +43,12 @@ export type BlogEditorProps = {
   now: number;
   /** the website's origin, for the previews */
   siteUrl: string;
+  /**
+   * The post's revisions (0020), newest first, for the "History of the text" panel; `revisions: null` when
+   * they could not be read. Left out, no panel is drawn. `load` reads a revision's words and is the
+   * server action unless a stand-in is given.
+   */
+  history?: { revisions: BlogRevisionMeta[] | null; load?: LoadRevisions };
 };
 
 /** Everything being typed. Saved values arrive in `post`; saving is the server action's job. */
@@ -302,7 +311,7 @@ const SYNTAX: { mark: string; means: string }[] = [
  * the server actions check the role again, and the database has the final
  * say. A refusal comes back as a fixed code and the form keeps what was typed.
  */
-export function BlogEditor({ post, canWrite, canPublish, now, siteUrl }: BlogEditorProps) {
+export function BlogEditor({ post, canWrite, canPublish, now, siteUrl, history }: BlogEditorProps) {
   const start = useMemo(() => initialValues(post), [post]);
   const [values, setValues] = useState<Values>(start);
   // a new post's address follows its title until the writer types an address of their own
@@ -325,6 +334,18 @@ export function BlogEditor({ post, canWrite, canPublish, now, siteUrl }: BlogEdi
   const bad = useMemo(() => new Set(state.fields ?? []), [state]);
 
   const set = <K extends keyof Values>(key: K, value: Values[K]) => setValues((v) => ({ ...v, [key]: value }));
+
+  // The five fields a revision records, as they stand in the form now: what the history panel compares against.
+  const revisionWords = useMemo<BlogRevisionWords>(
+    () => ({ title: values.title, excerpt: values.excerpt, body: values.body, seo_title: values.seoTitle, seo_description: values.seoDescription }),
+    [values.title, values.excerpt, values.body, values.seoTitle, values.seoDescription],
+  );
+  // A revision restored from the history panel: its words go into the same five fields as unsaved changes, on the
+  // form's "Write" side so that they are seen. Nothing is saved here; the address, the cover and the rest are left alone.
+  const restoreWords = (from: BlogRevisionWords) => {
+    setValues((v) => ({ ...v, title: from.title, excerpt: from.excerpt, body: from.body, seoTitle: from.seo_title, seoDescription: from.seo_description }));
+    setTab("write");
+  };
 
   // after a toolbar button changed the body, put the cursor where the writer expects it
   useEffect(() => {
@@ -1176,6 +1197,9 @@ export function BlogEditor({ post, canWrite, canPublish, now, siteUrl }: BlogEdi
           </Card>
         </div>
       )}
+
+      {/* what the words were, each time they were saved: compare, and put a revision back into the fields above */}
+      {post && history && <BlogHistory postId={post.id} revisions={history.revisions} current={revisionWords} dirty={dirty} canRestore={!ro} load={history.load ?? readBlogRevisions} onRestore={restoreWords} />}
 
       {/* a reader of a published post sees the note; so does anyone who can open it here */}
       {post && !canPublish && post.status === "published" && post.corrected_at && (

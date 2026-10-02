@@ -8,6 +8,8 @@ import "@/styles/accent.css";
 import "@/styles/breach.css";
 import "@/styles/console.css";
 import "@/styles/menu.css";
+import "@/styles/pointer.css";
+import "@/styles/transition.css";
 import { isProduction, site } from "@/config/site";
 import { BOOT_SCRIPT } from "@/lib/boot";
 import { PREFS_BOOT_SCRIPT } from "@/lib/prefs";
@@ -87,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Applies saved display preferences before first paint: no theme flash. */}
         <script dangerouslySetInnerHTML={{ __html: PREFS_BOOT_SCRIPT }} />
-        {/* First visit only: arms the cockpit start-up before first paint. */}
+        {/* First visit only: arms the start-up before first paint (the intro on the homepage, the short power-on elsewhere). */}
         <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
       </head>
       <body>{children}</body>

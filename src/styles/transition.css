@@ -1,0 +1,227 @@
+/* ==========================================================================
+   TRANSITION — two moments between things, and nothing else:
+     1. PAGE TO PAGE: the instrument of the page being left turns into the
+        next page's (components/cockpit/StageTransition.tsx)
+     2. THE INTRO: on the first visit to the homepage the logo forms from
+        particles and hands over to the hero (components/cockpit/Boot.tsx)
+
+   Both are overlays that take no part in layout. Neither exists under reduced
+   motion or "low visual effects", and neither prints.
+   ========================================================================== */
+
+/* ---- 1. PAGE TO PAGE -------------------------------------------------------
+   One fixed element over the new stage's frame, holding the old frame's
+   picture. It never takes the pointer and is removed by its script when done. */
+.st-layer {
+  position: fixed;
+  /* placed by a transform from the window's corner (and clipped to the new stage) by its script */
+  left: 0;
+  top: 0;
+  /* over the page, under the tour (36), the chat (39) and the header (40) */
+  z-index: 30;
+  pointer-events: none;
+  contain: layout style;
+  --st-gold: #d6bd82;
+}
+.st-move,
+.st-pic {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+.st-move {
+  transform-origin: 0 0;
+}
+/* the travel: from where the old frame stood to where the new one stands, in the golden section of the whole */
+.st-layer[data-phase="go"] .st-move {
+  animation: st-move 382ms var(--ease-inout) both;
+}
+/* the dissolve: the old picture grows by a golden step (1.0618) and softens as it goes */
+.st-layer[data-phase="go"] .st-pic {
+  animation: st-dissolve 618ms var(--ease-inout) both;
+  will-change: opacity, transform, filter;
+}
+/* the new stage did not draw in time: the old picture leaves quietly */
+.st-layer[data-phase="drop"] .st-pic {
+  animation: st-fade 240ms var(--ease-out) both;
+}
+/* a line of light crossing the champagne frame: a ring exactly on the frame's hairline */
+.st-sweep {
+  position: absolute;
+  inset: 6px;
+  padding: 1.5px;
+  opacity: 0;
+  background: linear-gradient(100deg, transparent 38%, var(--st-gold) 47%, #fff 50%, var(--st-gold) 53%, transparent 62%) no-repeat;
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.st-layer[data-phase="go"] .st-sweep {
+  animation: st-sweep 618ms var(--ease-inout) both;
+}
+/* phones: a plain cross-fade, nothing travelling, nothing blurred */
+.st-layer[data-simple][data-phase="go"] .st-move {
+  animation: none;
+}
+.st-layer[data-simple][data-phase="go"] .st-pic {
+  animation: st-fade 382ms var(--ease-inout) both;
+}
+.st-layer[data-simple] .st-sweep {
+  display: none;
+}
+/* the statement of the page arriving: a quick fade-up, apart from the instrument.
+   Transform and opacity only, so the words are in their final place throughout. */
+html[data-stage-turn] #main .cx-hero .cx-statement-body {
+  animation: st-rise 382ms var(--ease-out) both;
+}
+@keyframes st-move {
+  from {
+    transform: var(--st-from, none);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes st-dissolve {
+  0% {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+  38.2% {
+    opacity: 0.86;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.0618);
+    filter: blur(8px);
+  }
+}
+@keyframes st-fade {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes st-sweep {
+  0% {
+    opacity: 0;
+    background-position: 100% 0;
+  }
+  21% {
+    opacity: 1;
+  }
+  79% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: 0 0;
+  }
+}
+@keyframes st-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- 2. THE INTRO ----------------------------------------------------------
+   The markup is always in the page and always hidden. The inline boot script
+   (lib/boot) sets data-boot="intro" on <html> before first paint on the first
+   visit to the homepage, which raises the night; the component then takes the
+   timeline (data-boot="play") and draws on the canvas. Should the script never
+   arrive, the night lifts by itself: the page cannot be held back. */
+.gx-intro {
+  display: none;
+}
+:is([data-boot="intro"], [data-boot="play"]) .gx-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: block;
+  background: transparent;
+  transition: opacity 220ms var(--ease-out);
+}
+[data-boot="intro"] .gx-intro {
+  animation: gx-intro-out 4200ms linear forwards;
+}
+/* skipped, or handing over: the page underneath is the visitor's again at once */
+.gx-intro[data-out] {
+  pointer-events: none;
+}
+.gx-intro[data-out="skip"] {
+  opacity: 0;
+}
+.gx-intro-night {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 60% at 50% 46%, #101921 0%, #080c10 72%);
+  transition: opacity 680ms var(--ease-inout);
+}
+.gx-intro[data-out] .gx-intro-night {
+  opacity: 0;
+}
+.gx-intro-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+.gx-intro-skip {
+  position: absolute;
+  right: max(1.3125rem, env(safe-area-inset-right));
+  bottom: max(1.3125rem, env(safe-area-inset-bottom));
+  min-height: 2.75rem;
+  transition: opacity 220ms var(--ease-out);
+}
+.gx-intro[data-out] .gx-intro-skip {
+  opacity: 0;
+}
+@keyframes gx-intro-out {
+  0%,
+  90% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* ---- never under reduced motion or low effects; never on paper ---------- */
+[data-motion="reduced"] :is(.st-layer, .gx-intro),
+[data-effects="low"] :is(.st-layer, .gx-intro) {
+  display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-layer,
+  .gx-intro {
+    display: none !important;
+  }
+  html[data-stage-turn] #main .cx-hero .cx-statement-body {
+    animation: none;
+  }
+}
+@media print {
+  .st-layer,
+  .gx-intro {
+    display: none !important;
+  }
+}

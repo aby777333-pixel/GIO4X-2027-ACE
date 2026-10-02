@@ -32,6 +32,7 @@ import { useFooterLift } from "@/components/shell/ChatWidget";
 import { signalSound } from "@/components/sound/signal";
 import { TOUR_HASH, TOUR_KEY, TOUR_STOPS } from "@/components/tour/stops";
 import { usePrefs } from "@/hooks/usePrefs";
+import { INTRO_END, introPlaying } from "@/lib/boot";
 import { DEFAULT_PREFS, readPrefs, type Prefs } from "@/lib/prefs";
 
 /** Long enough for the start-up animation to finish and the page to be read for a moment. */
@@ -222,7 +223,14 @@ export function Tour() {
     // until the visitor has scrolled past it, and steps aside if they return.
     let waited = false;
     let past = false;
-    const show = () => setInvite(waited && past);
+    // a third, on the first visit only: the intro (cockpit/Boot) has the screen until it says it has ended
+    let clear = !introPlaying();
+    const show = () => setInvite(waited && past && clear);
+    const onIntroEnd = () => {
+      clear = true;
+      show();
+    };
+    window.addEventListener(INTRO_END, onIntroEnd);
     const timer = window.setTimeout(() => {
       waited = true;
       show();
@@ -252,6 +260,7 @@ export function Tour() {
     }
     return () => {
       window.clearTimeout(timer);
+      window.removeEventListener(INTRO_END, onIntroEnd);
       io?.disconnect();
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", queue);

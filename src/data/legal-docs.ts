@@ -469,7 +469,7 @@ const aml: LegalDoc = {
  */
 const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; why: string }> = {
   "gx:prefs": {
-    holds: "Theme, colour palette, density, motion, contrast, text size, effects, link underlining, time zone, remembered platform, whether TradingView panels load automatically, whether your visits are counted, whether interface sounds are on and at which volume, whether the guided tour has been started or declined, and whether an offline copy may be kept.",
+    holds: "Theme, colour palette (for a palette of your own, the one or two hue values you chose), density, motion, contrast, text size, effects, whether pointer effects are on, link underlining, time zone, remembered platform, whether TradingView panels load automatically, whether your visits are counted, whether interface sounds are on and at which volume, whether the guided tour has been started or declined, whether Academy lessons open as “Read” or as “Story”,and whether an offline copy may be kept.",
     why: "So the site looks and behaves the way you set it on your next visit.",
   },
   "gx:recent": {
@@ -497,8 +497,8 @@ const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; wh
     why: "So the Morning Room opens at the same depth on your next visit.",
   },
   "gx:boot": {
-    holds: "The time the short start-up animation was shown in this browser.",
-    why: "So the animation plays once and is not repeated on later pages or visits.",
+    holds: "The time the short start-up animation was shown in this browser, or was left out because reduced motion or low visual effects was on.",
+    why: "So the animation plays once at most, on the first page of your first visit, and is not shown on later pages or visits.",
   },
   "gx:learn": {
     holds: "The glossary terms whose “Check yourself” question you answered correctly, and the Academy lessons you have completed by answering all three of their questions correctly.",
@@ -517,7 +517,7 @@ const cookies: LegalDoc = {
   short: "Cookie Notice",
   category: "Privacy",
   summary: "Everything this website stores in your browser, key by key, and how to clear it. There are no advertising or analytics cookies; page views are counted as daily totals without a cookie or an identifier, and that can be switched off.",
-  version: "1.6",
+  version: "1.7",
   updated: "3 October 2026",
   origin: "new",
   keywords: ["cookies", "local storage", "offline", "service worker", "cache storage", "tracking", "analytics", "advertising", "preferences", "consent"],
@@ -551,6 +551,7 @@ const cookies: LegalDoc = {
           rows: [["Staff authentication cookie", "GIO4X staff who sign in to the internal console", "Keeps a signed-in staff session. Not set for visitors to the public pages."]],
         },
         p("That is the complete list. There is no consent banner on this website because it sets no advertising or analytics cookie. Visits are counted without a cookie, as described under “Counting visits” below."),
+        p("Besides that cookie, the staff console keeps the look a member of staff has chosen for it, and the state of its guided tour, in that member of staff’s own browser (local and session storage); neither is sent anywhere, and visitors to the public pages never receive them."),
       ],
     },
     {

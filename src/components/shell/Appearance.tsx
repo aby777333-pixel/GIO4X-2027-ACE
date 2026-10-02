@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import { AccentDesigner } from "@/components/shell/AccentDesigner";
 import { usePrefs } from "@/hooks/usePrefs";
+import { customAccent, oklchHex } from "@/lib/accent";
 import { ACCENTS, resetLocal, type Prefs } from "@/lib/prefs";
 
 const THEMES: { key: Prefs["theme"]; label: string }[] = [
@@ -11,7 +13,10 @@ const THEMES: { key: Prefs["theme"]; label: string }[] = [
   { key: "auto", label: "Auto" },
 ];
 
-const SWATCH: Record<Prefs["accent"], [string, string]> = {
+/** The swatch of the "Custom" accent before one has been composed: the wheel of hues it can be chosen from. */
+const WHEEL = `conic-gradient(${[0, 60, 120, 180, 240, 300, 360].map((h) => oklchHex(0.62, 0.14, h % 360)).join(", ")})`;
+
+const SWATCH: Record<Exclude<Prefs["accent"], "custom">, [string, string]> = {
   gio4x: ["#0870b8", "#089040"],
   ivory: ["#b39c6b", "#f6f4ee"],
   midnight: ["#1e3a5c", "#a0a8a8"],
@@ -40,7 +45,26 @@ export function AppearanceControls({ compact = false }: { compact?: boolean }) {
       <fieldset>
         <legend className="label">Accent</legend>
         <div className="mt-8 flex flex-wrap gap-8">
-          {ACCENTS.map((a) => (
+          {ACCENTS.map((a) =>
+            a.key === "custom" ? (
+              /* the eighth accent is composed, not picked: this leads to the designer on the preferences page */
+              <Link
+                key={a.key}
+                href="/preferences#accent-designer"
+                aria-current={prefs.accent === "custom" ? "true" : undefined}
+                title={a.note}
+                className={`group flex items-center gap-8 rounded-sm border px-8 py-5 text-xs font-medium transition-colors duration-fast ${
+                  prefs.accent === "custom" ? "border-ink text-ink" : "border-line text-ink-2 hover:border-line-strong"
+                }`}
+              >
+                <span
+                  aria-hidden
+                  className="h-[13px] w-[13px] rounded-full border border-line"
+                  style={{ background: prefs.accent === "custom" ? `linear-gradient(135deg, ${customAccent(prefs.accentHue, prefs.accentHue2).accent} 0 61.8%, ${customAccent(prefs.accentHue, prefs.accentHue2).accent2} 61.8% 100%)` : WHEEL }}
+                />
+                {a.label}…{prefs.accent === "custom" && <span className="sr-only"> (in use)</span>}
+              </Link>
+            ) : (
             <button
               key={a.key}
               type="button"
@@ -58,9 +82,12 @@ export function AppearanceControls({ compact = false }: { compact?: boolean }) {
               />
               {a.label}
             </button>
-          ))}
+            ),
+          )}
         </div>
       </fieldset>
+
+      {!compact && <AccentDesigner />}
 
       {!compact && (
         <fieldset>
@@ -85,7 +112,13 @@ export function AppearanceControls({ compact = false }: { compact?: boolean }) {
           {!compact && (
             <>
               <Toggle label="Low visual effects" hint="Turns off glass, canvas scenes and background animation." on={prefs.effects === "low"} onChange={(v) => update({ effects: v ? "low" : "full" })} />
-              <Toggle label="Underline links" on={prefs.links === "underline"} onChange={(v) => update({ links: v ? "underline" : "default" })} />
+              <Toggle
+                label="Pointer effects"
+                hint="With a mouse or pen: a soft light under the pointer, buttons that lean towards it, cards that tilt. Not used on touch screens, under reduced motion or with low visual effects."
+                on={prefs.pointerFx !== false}
+                onChange={(v) => update({ pointerFx: v })}
+              />
+              <Toggle label="Underline links"on={prefs.links === "underline"} onChange={(v) => update({ links: v ? "underline" : "default" })} />
             </>
           )}
         </div>

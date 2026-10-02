@@ -1,27 +1,29 @@
 import Link from "next/link";
-import { ControlHead, Notice, Score } from "@/components/control/bits";
-import { fmtDate, STAGE_NOTE } from "@/components/control/format";
-import type { LeadListItem } from "@/components/control/LeadsTable";
-import { LEAD_STAGE_LABEL } from "@/lib/server/constants";
-import type { LeadStage } from "@/lib/supabase/types";
+import { ControlHead, Notice } from "@/components/control/bits";
+import type { LeadBoardColumn } from "@/components/control/board-shared";
+import { PipelineBoard } from "@/components/control/PipelineBoard";
 
-export type PipelineColumn = { stage: LeadStage; count: number; leads: LeadListItem[] };
+export type PipelineColumn = LeadBoardColumn;
 
 export type PipelineViewProps = {
   columns: PipelineColumn[];
   failed: boolean;
   names: Map<string, string>;
   me: string;
+  /** may move an enquiry to another stage (leads.write); without it the board is read-only */
+  writable: boolean;
 };
 
 /**
- * The pipeline: one column per stage from `xl` up, one section per stage below
- * it. Each column shows a real count and its highest-scoring enquiries. A lead
- * is moved from its own page, where the change is recorded; nothing is dragged.
+ * The pipeline: a board with one column per stage, side by side from `xl` up
+ * and a rail that scrolls sideways below it. Each column shows a real count
+ * and its highest-scoring enquiries. People who may change enquiries can move
+ * a card to another stage by dragging it or with its "Move to" button; the
+ * change is the same one the stage form on the enquiry's own page makes, and
+ * it is recorded the same way.
  */
-export function PipelineView({ columns, failed, names, me }: PipelineViewProps) {
+export function PipelineView({ columns, failed, names, me, writable }: PipelineViewProps) {
   const total = columns.reduce((sum, c) => sum + c.count, 0);
-  const owner = (lead: LeadListItem) => (!lead.assigned_to ? "Unassigned" : lead.assigned_to === me ? "You" : (names.get(lead.assigned_to) ?? "Assigned"));
 
   return (
     <>
@@ -44,50 +46,16 @@ export function PipelineView({ columns, failed, names, me }: PipelineViewProps) 
         </div>
       ) : (
         <>
-          <p className="num mt-13 text-xs text-ink-3">
-            {total} {total === 1 ? "enquiry" : "enquiries"} in the pipeline
+          <p className="mt-13 max-w-measure text-xs text-ink-3">
+            <span className="num">
+              {total} {total === 1 ? "enquiry" : "enquiries"} in the pipeline.
+            </span>{" "}
+            {writable
+              ? "To change a stage, drag a card to another column or use its “Move to” button; on a touch screen, press and hold the card first. Moving to Lost asks for the reason before anything is saved."
+              : "Your role can read the pipeline but not change it."}
           </p>
-          <div className="mt-13 grid gap-34 md:grid-cols-2 xl:grid-cols-6 xl:gap-0 xl:border-l xl:border-line">
-            {columns.map((column) => (
-              <section key={column.stage} aria-labelledby={`stage-${column.stage}`} className="min-w-0 xl:border-r xl:border-line xl:px-13">
-                <div className="border-b border-line-strong pb-8">
-                  <div className="flex items-baseline justify-between gap-8">
-                    <h2 id={`stage-${column.stage}`} className="label">
-                      {LEAD_STAGE_LABEL[column.stage]}
-                    </h2>
-                    <span className="num text-sm font-medium text-ink">{column.count}</span>
-                  </div>
-                  <p className="mt-3 text-xs text-ink-3">{STAGE_NOTE[column.stage]}</p>
-                </div>
-                {column.leads.length ? (
-                  <ul>
-                    {column.leads.map((lead) => (
-                      <li key={lead.id} className="border-b border-line">
-                        <Link href={`/control/leads/${lead.id}`} className="block py-13 transition-colors duration-fast hover:bg-brand-soft xl:-mx-13 xl:px-13">
-                          <span className="flex items-center justify-between gap-8">
-                            <span className="num whitespace-nowrap text-xs font-medium text-accent">{lead.reference}</span>
-                            <Score value={lead.score} />
-                          </span>
-                          <span className="mt-5 block truncate text-sm text-ink">{lead.name}</span>
-                          <span className="block truncate text-xs text-ink-3">{lead.topic}</span>
-                          <span className="mt-3 flex flex-wrap gap-x-8 text-xs text-ink-3">
-                            <span className="num">{fmtDate(lead.created_at)}</span>
-                            <span>{owner(lead)}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="border-b border-line py-13 text-xs text-ink-3">Nobody here.</p>
-                )}
-                {column.count > column.leads.length && (
-                  <Link href={`/control/leads?stage=${column.stage}&sort=score`} className="go mt-8 min-h-[2.75rem] text-xs">
-                    All {column.count}
-                  </Link>
-                )}
-              </section>
-            ))}
+          <div className="mt-13">
+            <PipelineBoard columns={columns} writable={writable} names={Object.fromEntries(names)} me={me} />
           </div>
         </>
       )}

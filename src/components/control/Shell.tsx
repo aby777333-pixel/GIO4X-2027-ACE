@@ -2,12 +2,16 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { signOut } from "@/app/control/actions";
 import { Logo } from "@/components/brand/Logo";
+import { CommandPalette, PaletteButton } from "@/components/control/CommandPalette";
+import { ConsoleTour, TourButton } from "@/components/control/ConsoleTour";
 import { ROLE_LABEL } from "@/components/control/format";
 import { Icon } from "@/components/control/icons";
 import { LookBoot, LOOK_ROOT_PROPS } from "@/components/control/LookBoot";
 import { LookSwitch } from "@/components/control/LookSwitch";
 import { ControlMenu, ControlNav } from "@/components/control/Nav";
 import type { NavEntry } from "@/components/control/nav-items";
+import { NotifyBell } from "@/components/control/NotifyBell";
+import { Shortcuts } from "@/components/control/Shortcuts";
 import type { StaffRole } from "@/lib/supabase/types";
 
 function initialsOf(name: string): string {
@@ -62,11 +66,18 @@ export function Shell({ name, role, items, children }: { name: string; role: Sta
               <span className="block truncate text-sm font-semibold text-white">{name}</span>
               <span className="gxc-user-role block text-[0.6875rem] uppercase tracking-wide">{ROLE_LABEL[role]}</span>
             </span>
+            {/* the notifications bell: the unread count, and the panel it opens */}
+            <NotifyBell variant="side" />
           </div>
+        </div>
+        {/* the command palette's visible way in (Ctrl K does the same) */}
+        <div className="px-13 pt-13">
+          <PaletteButton variant="side" />
         </div>
         <ControlNav items={items} />
         <div className="border-t border-white/10 px-13 py-13">
           <LookSwitch />
+          <TourButton />
           <form action={signOut}>
             <button type="submit" className="gxc-nav-item gxc-signout w-full">
               <Icon name="signout" size={16} />
@@ -83,6 +94,8 @@ export function Shell({ name, role, items, children }: { name: string; role: Sta
             <Logo height={22} href={null} />
           </Link>
           <div className="flex items-center gap-5">
+            <PaletteButton variant="top" />
+            <NotifyBell variant="top" />
             <form action={signOut}>
               <button type="submit" className="gxc-top-button">
                 Sign out
@@ -96,6 +109,11 @@ export function Shell({ name, role, items, children }: { name: string; role: Sta
       <div className="min-w-0">
         <div className="mx-auto w-full max-w-[80rem] px-gutter pb-89 pt-21 lg:px-34 lg:pt-34">{children}</div>
       </div>
+
+      {/* the palette (Ctrl K), the keyboard shortcuts and the tour: each draws nothing until it is asked for */}
+      <CommandPalette items={items} />
+      <Shortcuts items={items} />
+      <ConsoleTour items={items} />
     </div>
   );
 }

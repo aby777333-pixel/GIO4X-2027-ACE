@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ControlHead, Notice } from "@/components/control/bits";
 import { fmtDateTime, jsonPairs } from "@/components/control/format";
+import type { BlogRevisionListRow, BlogRevisionMeta } from "@/components/control/views/blog-revisions-shared";
 import { BLOG_STATE_LABEL, blogState } from "@/components/control/views/blog-shared";
 import { BlogEditor } from "@/components/control/views/BlogEditor";
 import { BlogStateBadge } from "@/components/control/views/BlogListView";
@@ -23,6 +24,11 @@ export type BlogEditorViewProps = {
   canPublish: boolean;
   /** the website's origin, for the previews */
   siteUrl: string;
+  /**
+   * The post's revisions without their words, newest first (0020_blog_revisions.sql); null when they could not
+   * be read. Left out (a new post has none), the editor draws no history panel.
+   */
+  revisions?: BlogRevisionListRow[] | null;
   notice?: string;
   error?: string;
 };
@@ -62,9 +68,14 @@ function describe(entry: BlogEditorViewProps["audit"][number]): { what: string; 
  * its history. Presentation only; the editor itself (a client component) holds
  * what is being typed, and the server actions do the saving.
  */
-export function BlogEditorView({ post, audit, auditFailed, names, me, now, canWrite, canPublish, siteUrl, notice, error }: BlogEditorViewProps) {
+export function BlogEditorView({ post, audit, auditFailed, names, me, now, canWrite, canPublish, siteUrl, revisions, notice, error }: BlogEditorViewProps) {
   const who = (userId: string | null) => (!userId ? "Database (SQL)" : userId === me ? "You" : (names.get(userId) ?? "Former member of staff"));
   const state = post ? blogState(post, now) : null;
+  // who saved each revision, as a name: the editor is a client component and is never handed an id to look up
+  const history =
+    revisions === undefined
+      ? undefined
+      : { revisions: revisions && revisions.map(({ saved_by, ...rest }): BlogRevisionMeta => ({ ...rest, by: who(saved_by) })) };
 
   return (
     <>
@@ -99,7 +110,7 @@ export function BlogEditorView({ post, audit, auditFailed, names, me, now, canWr
 
       <div className="mt-13">
         {/* a saved post comes back with a new change time: the editor starts again from what was saved */}
-        <BlogEditor key={post ? `${post.id}:${post.updated_at}` : "new"} post={post} canWrite={canWrite} canPublish={canPublish} now={now} siteUrl={siteUrl} />
+        <BlogEditor key={post ? `${post.id}:${post.updated_at}` : "new"} post={post} canWrite={canWrite} canPublish={canPublish} now={now} siteUrl={siteUrl} history={history} />
       </div>
 
       {post && (

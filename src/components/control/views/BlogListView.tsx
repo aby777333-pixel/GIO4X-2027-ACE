@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ControlHead, Empty, Notice, Pager } from "@/components/control/bits";
 import { fmtDateTime } from "@/components/control/format";
 import { Icon, type IconName } from "@/components/control/icons";
+import { ViewsControl, type ViewsProps } from "@/components/control/ViewsControl";
+import { viewParamsFrom } from "@/components/control/views-shared";
 import { BLOG_FILTER_LABEL, BLOG_FILTERS, BLOG_STATE_LABEL, blogState, type BlogFilter, type BlogState } from "@/components/control/views/blog-shared";
 import { BLOG_CATEGORIES, BLOG_CATEGORY_LABEL, BLOG_PATH } from "@/lib/blog";
 import type { BlogCategory, BlogPostRow } from "@/lib/supabase/types";
@@ -30,6 +32,8 @@ export type BlogListViewProps = {
   pageCount: number;
   failed: boolean;
   pastEnd: boolean;
+  /** the person's saved views for this screen; left out, the Views control is not drawn */
+  views?: ViewsProps;
   error?: string;
 };
 
@@ -64,7 +68,7 @@ export function BlogStateBadge({ post, now, withTime = false }: { post: Pick<Blo
 }
 
 /** Presentation only. The filters shown here were validated by the page before they reached the database. */
-export function BlogListView({ status, category, q, posts, counts, now, canWrite, total, page, pageCount, failed, pastEnd, error }: BlogListViewProps) {
+export function BlogListView({ status, category, q, posts, counts, now, canWrite, total, page, pageCount, failed, pastEnd, views, error }: BlogListViewProps) {
   const filtered = !!(status || category || q);
   const href = (next: { status?: BlogFilter | ""; page?: number }) => {
     const sp = new URLSearchParams();
@@ -92,11 +96,16 @@ export function BlogListView({ status, category, q, posts, counts, now, canWrite
           </>
         }
         actions={
-          canWrite ? (
-            <Link href="/control/blog/new" className="btn btn-primary">
-              New post
+          <>
+            <Link href="/control/blog/calendar" className="btn btn-ghost">
+              Calendar
             </Link>
-          ) : undefined
+            {canWrite && (
+              <Link href="/control/blog/new" className="btn btn-primary">
+                New post
+              </Link>
+            )}
+          </>
         }
       />
 
@@ -128,6 +137,8 @@ export function BlogListView({ status, category, q, posts, counts, now, canWrite
           <Notice title="The posts could not be counted">The figures are left out rather than shown wrong. The list below is unaffected.</Notice>
         </div>
       )}
+
+      {views && <ViewsControl screen="blog" current={viewParamsFrom("blog", { status, category })} searching={!!q} {...views} />}
 
       <form method="get" action="/control/blog" role="search" aria-label="Filter posts" className="mt-21 grid gap-13 border-b border-line pb-21 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.618fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
         <div className="field sm:col-span-2 lg:col-span-1">
