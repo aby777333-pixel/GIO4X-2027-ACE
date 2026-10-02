@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { RouteScene } from "@/components/cockpit/RouteScene";
+import type { SceneId } from "@/components/cockpit/scenes";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema, type Crumb } from "@/lib/schema";
 import { Rosette } from "@/components/brand/Rosette";
@@ -44,35 +46,40 @@ type HeroProps = {
   children?: ReactNode;
   /** right-hand (38.2%) column: a visual, a data panel, a note */
   aside?: ReactNode;
-  /** compact pages (legal, utility) use the quiet variant */
+  /** compact pages (legal, utility) use the quieter heading size */
   quiet?: boolean;
-  /** dark "engine room" chapter */
+  /** kept for callers: every page opening is now a night stage */
   night?: boolean;
+  /** override the instrument the route would choose (see components/cockpit/routes.ts) */
+  scene?: SceneId;
 };
 
 /**
- * Inner-page opening. 61.8% statement / 38.2% aside on desktop; on mobile the
- * statement leads and the aside follows as its own composition.
+ * Page opening: the cockpit stage.
+ *
+ * Every page opens at the same height on the same night material, with the
+ * statement on the left and that page's own instrument (a canvas scene chosen
+ * by the route) on the right. An `aside` stands in the stage as a pane of
+ * smoked glass in the 38.2% column; below the desktop layout it follows the
+ * stage as its own block, so the stage keeps its one height on every page.
  */
-export function PageHero({ crumbs, eyebrow, title, lead, children, aside, quiet, night }: HeroProps) {
+export function PageHero({ crumbs, eyebrow, title, lead, children, aside, quiet, scene }: HeroProps) {
   return (
-    <header className={`relative overflow-hidden ${night ? "on-night" : "dna-light"} hairline-b`}>
-      {!aside && (
-        <div aria-hidden className="pointer-events-none absolute -right-[6%] top-1/2 hidden -translate-y-1/2 text-ink opacity-[0.11] lg:block">
-          <Rosette size={quiet ? 340 : 520} strokeWidth={1} bare />
-        </div>
-      )}
-      <div className={`wrap relative ${quiet ? "pb-34 pt-34 lg:pb-55 lg:pt-55" : "pb-55 pt-34 lg:pb-89 lg:pt-55"}`}>
-        {crumbs && <Breadcrumbs crumbs={crumbs} />}
-        <div className={`${crumbs ? "mt-34" : ""} ${aside ? "phi items-end" : ""}`}>
-          <div>
+    <header className={`cx-hero on-night ${aside ? "cx-has-aside" : ""}`}>
+      <div className="cx-stage" aria-hidden>
+        <RouteScene scene={scene} />
+      </div>
+      <div className="cx-main">
+        <div className="cx-statement">
+          {crumbs && <Breadcrumbs crumbs={crumbs} />}
+          <div className="cx-statement-body">
             {eyebrow && <p className="eyebrow">{eyebrow}</p>}
             <h1 className={`${quiet ? "h2" : "h1"} ${eyebrow ? "mt-21" : ""} max-w-[20ch]`}>{title}</h1>
             {lead && <p className="lead mt-21 max-w-[56ch]">{lead}</p>}
             {children && <div className="mt-34 flex flex-wrap items-center gap-13">{children}</div>}
           </div>
-          {aside && <div>{aside}</div>}
         </div>
+        {aside && <div className="cx-aside">{aside}</div>}
       </div>
     </header>
   );

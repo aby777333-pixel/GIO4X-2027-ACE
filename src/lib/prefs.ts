@@ -90,7 +90,7 @@ export function writePrefs(p: Prefs): void {
 }
 
 /** Everything GIO4X stores in this browser. Used by the privacy reset. */
-export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch"] as const;
+export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch", "gx:boot"] as const;
 
 export function resetLocal(): void {
   for (const k of LOCAL_KEYS) {

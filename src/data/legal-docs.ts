@@ -491,6 +491,10 @@ const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; wh
     holds: "Instruments you added to a watchlist.",
     why: "So the list survives a reload.",
   },
+  "gx:boot": {
+    holds: "The time the short start-up animation was shown in this browser.",
+    why: "So the animation plays once and is not repeated on later pages or visits.",
+  },
 };
 
 const cookies: LegalDoc = {

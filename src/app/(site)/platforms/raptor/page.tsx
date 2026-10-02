@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { RouteScene } from "@/components/cockpit/RouteScene";
 import { BeatRail } from "@/components/platforms/BeatRail";
 import { NotPublished } from "@/components/platforms/FactState";
 import { RaptorTour } from "@/components/platforms/RaptorTour";
@@ -100,34 +101,26 @@ export default function RaptorPage() {
 
       {/* ── The night chapter: hero, story, tour ─────────────────────────── */}
       <div className="on-night">
-        <header className="relative overflow-hidden">
-          <div aria-hidden className="grid-field pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%]"
-            style={{
-              background:
-                "radial-gradient(50% 60% at 50% 100%, color-mix(in srgb, var(--dna-blue) 22%, transparent), transparent 70%), radial-gradient(34% 44% at 72% 100%, color-mix(in srgb, var(--dna-emerald) 14%, transparent), transparent 70%), radial-gradient(34% 44% at 28% 100%, color-mix(in srgb, var(--dna-teal) 14%, transparent), transparent 70%)",
-            }}
-          />
-          <div className="wrap relative pt-34 lg:pt-55">
-            <Breadcrumbs
-              crumbs={[
-                { name: "Platforms", href: "/platforms" },
-                { name: "777 Raptor", href: p.href },
-              ]}
-            />
-            <div className="mt-55 grid items-end gap-34 lg:mt-89 lg:grid-cols-phi lg:gap-89">
-              <div style={{ animation: "gx-rise 680ms var(--ease-out) both" }}>
+        <header className="cx-hero on-night">
+          <div className="cx-stage" aria-hidden>
+            <RouteScene />
+          </div>
+          <div className="cx-main">
+            <div className="cx-statement">
+              <Breadcrumbs
+                crumbs={[
+                  { name: "Platforms", href: "/platforms" },
+                  { name: "777 Raptor", href: p.href },
+                ]}
+              />
+              <div className="cx-statement-body" style={{ animation: "gx-rise 680ms var(--ease-out) both" }}>
                 <p className="eyebrow">{p.role}</p>
                 <h1 className="h1 mt-21">
                   777 Raptor
                   <br />
                   <span className="text-ink-3">Built for the market.</span>
                 </h1>
-              </div>
-              <div style={{ animation: "gx-rise 680ms var(--ease-out) 160ms both" }}>
-                <p className="lead">{p.summary}</p>
+                <p className="lead mt-21 max-w-[52ch]">{p.summary}</p>
                 <div className="mt-34 flex flex-wrap items-center gap-13">
                   <a href="#tour" className="btn btn-primary">
                     Walk around it
@@ -138,8 +131,22 @@ export default function RaptorPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </header>
 
-            <figure className="relative mt-55 lg:mt-89" style={{ animation: "gx-rise 1100ms var(--ease-out) 260ms both" }}>
+        {/* the workspace study: the first thing under the stage */}
+        <div className="relative overflow-hidden">
+          <div aria-hidden className="grid-field pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent_78%)]" />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%]"
+            style={{
+              background:
+                "radial-gradient(50% 60% at 50% 100%, color-mix(in srgb, var(--dna-blue) 22%, transparent), transparent 70%), radial-gradient(34% 44% at 72% 100%, color-mix(in srgb, var(--dna-emerald) 14%, transparent), transparent 70%), radial-gradient(34% 44% at 28% 100%, color-mix(in srgb, var(--dna-teal) 14%, transparent), transparent 70%)",
+            }}
+          />
+          <div className="wrap relative">
+            <figure className="relative pt-55 lg:pt-89" style={{ animation: "gx-rise 1100ms var(--ease-out) 260ms both" }}>
               <figcaption className="mb-13 flex items-center justify-between gap-21 text-xs text-ink-3">
                 <span className="label">The workspace</span>
                 <span>Illustrative study, not a screenshot</span>
@@ -151,7 +158,7 @@ export default function RaptorPage() {
               </div>
             </figure>
           </div>
-        </header>
+        </div>
 
         {/* the five-beat narrative */}
         <section aria-labelledby="story" className="relative">

@@ -176,7 +176,7 @@ export function OrderAnatomy({ meta }: ToolProps) {
         <p id="order-kinds" className="label">
           Order type
         </p>
-        <div className="mt-13 grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-line-strong bg-line sm:grid-cols-4">
+        <div className="flat mt-13 grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-line-strong bg-line sm:grid-cols-4">
           {DEFS.map((d) => (
             <button
               key={d.kind}

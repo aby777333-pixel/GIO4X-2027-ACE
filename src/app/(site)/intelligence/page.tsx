@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RouteScene } from "@/components/cockpit/RouteScene";
 import { FixingMoment } from "@/components/knowledge/FixingMoment";
 import { AnalysisRows, articleHref, ExplainerList, liveSections, SectionNav, sectionHref, StoryMeta } from "@/components/knowledge/intelligence";
 import { EditionDate } from "@/components/knowledge/Today";
@@ -37,8 +38,12 @@ export default function IntelligencePage() {
       <JsonLd data={webPageSchema({ path: "/intelligence", name: "GIO4X Intelligence", description, type: "CollectionPage" })} />
 
       {/* ── Masthead ─────────────────────────────────────────────────────── */}
-      <header className="dna-light">
-        <div className="wrap pt-34 lg:pt-55">
+      <header className="cx-hero on-night">
+        <div className="cx-stage" aria-hidden>
+          <RouteScene />
+        </div>
+        <div className="cx-main">
+          <div className="cx-statement">
           <Breadcrumbs crumbs={[{ name: "Intelligence", href: "/intelligence" }]} />
           <div className="mt-34 flex flex-wrap items-center justify-between gap-x-34 gap-y-3 border-t-2 border-ink pt-8 text-xs text-ink-3">
             <EditionDate className="label text-ink-2" />
@@ -52,16 +57,17 @@ export default function IntelligencePage() {
               </a>
             </span>
           </div>
-          <div className="phi items-end pb-34 pt-34 lg:pb-55 lg:pt-55">
+          <div className="cx-statement-body">
             <h1 className="h1">
               GIO4X
               <br />
               Intelligence
             </h1>
-            <p className="lead max-w-[38ch]">A publication, not a blog. Analysis, explainers and guides for people who take markets seriously, written to explain and never to predict.</p>
+            <p className="lead mt-21 max-w-[38ch]">A publication, not a blog. Analysis, explainers and guides for people who take markets seriously, written to explain and never to predict.</p>
           </div>
           <hr className="dna-rule" />
           <SectionNav />
+          </div>
         </div>
       </header>
 

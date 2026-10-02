@@ -1,0 +1,637 @@
+/* ==========================================================================
+   COCKPIT — the owner's direction: the site is a precision financial
+   instrument the visitor steps into. Smoked glass, machined metal, lit
+   controls; calm, institutional, never a game.
+
+   This sheet is imported after depth.css. It adds four things and changes no
+   content or logic:
+     1. the STAGE: every page opens with the same night stage, at the same
+        height, carrying that page's own instrument (a canvas scene)
+     2. the OVERHEAD PANEL: the site header as backlit switchgear
+     3. TOUCH: tiles answer the pointer with light and a few degrees of tilt,
+        sections arrive with depth as the page scrolls
+     4. the START-UP: a sub-two-second power-on, first visit only
+
+   Everything here is progressive: without JavaScript, without canvas, under
+   reduced motion or "low visual effects", the page is complete and still.
+   ========================================================================== */
+
+:root {
+  /* One height for every page opening, the homepage included. The 4.5rem
+     keeps the first strip of content in view under the stage. */
+  --hero-h: clamp(30rem, calc(100svh - var(--header-h) - 4.5rem), 60rem);
+  /* key light: follows the trading region that is open on the visitor's clock
+     (set on <html data-session> by the shell; blue until it is known) */
+  --cx-key: #4ba6e2;
+  --cx-metal: linear-gradient(180deg, #1a232b 0%, #10171d 48%, #0b1014 100%);
+  --cx-edge: rgba(238, 240, 241, 0.1);
+}
+[data-session="asia"] {
+  --cx-key: #35c2b8;
+}
+[data-session="americas"] {
+  --cx-key: #3fb872;
+}
+
+/* ---- 1. THE STAGE -------------------------------------------------------- */
+.cx-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: [full-start] minmax(var(--gutter), 1fr) [content-start] minmax(0, var(--page)) [content-end] minmax(var(--gutter), 1fr) [full-end];
+  grid-template-rows: [stage-start] minmax(var(--hero-h), auto) [stage-end];
+  background: var(--night);
+  /* tokens the night material does not redefine, for visuals inside the stage */
+  --brand: #4ba6e2;
+  --info: #4ba6e2;
+  --warn: #dba84a;
+  --neutral: #8a949c;
+  --platinum: #a0a8a8;
+  --sunken: #080c0f;
+  --surface-2: #19222a;
+  --focus: rgba(90, 176, 232, 0.55);
+  --elev-1: 0 0 0 1px rgba(236, 238, 240, 0.05);
+  --elev-2: 0 0 0 1px rgba(236, 238, 240, 0.06), 0 13px 34px -13px rgba(0, 0, 0, 0.7);
+  --elev-3: 0 0 0 1px rgba(236, 238, 240, 0.08), 0 34px 89px -34px rgba(0, 0, 0, 0.85);
+  color-scheme: dark;
+}
+.cx-stage {
+  grid-column: full;
+  grid-row: stage;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  background:
+    radial-gradient(58% 78% at 71% 46%, color-mix(in srgb, var(--cx-key) 15%, transparent), transparent 70%),
+    radial-gradient(38% 58% at 97% 94%, rgba(63, 184, 114, 0.07), transparent 70%),
+    radial-gradient(46% 60% at 0% 0%, rgba(8, 112, 184, 0.07), transparent 72%),
+    linear-gradient(180deg, #090d12 0%, #0c1116 52%, #0e151b 100%);
+}
+/* the coordinate field, fine and almost subliminal, strongest where the instrument sits */
+.cx-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(238, 240, 241, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238, 240, 241, 0.045) 1px, transparent 1px);
+  background-size: 3.4375rem 3.4375rem;
+  -webkit-mask-image: radial-gradient(62% 78% at 70% 46%, #000, transparent 78%);
+  mask-image: radial-gradient(62% 78% at 70% 46%, #000, transparent 78%);
+}
+/* the glareshield: a lit edge where the stage meets the page */
+.cx-stage::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--dna-teal), var(--dna-blue) 38.2%, var(--dna-emerald) 61.8%, transparent);
+  opacity: 0.75;
+}
+/* the instrument: one canvas, decorative, faded in once its first frame exists */
+.cx-scene {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-cinematic) var(--ease-out);
+  /* the statement owns the left of the stage */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 16%, rgba(0, 0, 0, 0.22) 34%, #000 54%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 16%, rgba(0, 0, 0, 0.22) 34%, #000 54%);
+}
+.cx-scene[data-on] {
+  opacity: 1;
+}
+/* with a panel of content beside the statement, the instrument steps back behind it */
+.cx-has-aside .cx-scene[data-on] {
+  opacity: 0.5;
+}
+[data-effects="low"] .cx-scene {
+  transition: none;
+}
+
+.cx-main {
+  grid-column: content;
+  grid-row: stage;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  gap: clamp(2.125rem, 5vw, 5.5625rem);
+  /* the same inset above and below on every page, so a tall pane of content
+     beside the statement still fits the one stage height */
+  padding-block: 2.125rem;
+}
+.cx-statement {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* breadcrumbs stay at the top; the statement itself sits on the stage's centre line */
+.cx-statement-body {
+  margin-block: auto;
+  padding-block: 2.125rem;
+}
+.cx-statement:not(:has(> nav)) .cx-statement-body {
+  padding-top: 0;
+}
+/* backlit lettering: the headline is lit from behind, very slightly */
+.cx-hero :is(.h1, .h2, .display) {
+  text-shadow: 0 0 34px color-mix(in srgb, var(--cx-key) 22%, transparent);
+}
+.cx-hero .lead {
+  color: var(--on-night-2);
+}
+/* the stage is where the important actions live: its primary key is lit */
+.cx-hero .btn-primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 0 34px -8px color-mix(in srgb, var(--cx-key) 90%, transparent);
+}
+.cx-hero .btn-primary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0 0 1px color-mix(in srgb, var(--cx-key) 60%, transparent),
+    0 0 42px -6px var(--cx-key);
+}
+
+/* content beside the statement stands in the stage as a pane of smoked glass */
+.cx-aside {
+  align-self: center;
+  min-width: 0;
+  padding: 1.3125rem;
+  border: 1px solid var(--cx-edge);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(20, 28, 35, 0.72), rgba(12, 17, 22, 0.66));
+  -webkit-backdrop-filter: blur(13px) saturate(1.25);
+  backdrop-filter: blur(13px) saturate(1.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 34px 55px -30px rgba(0, 0, 0, 0.85),
+    0 0 55px -34px var(--cx-key);
+}
+[data-effects="low"] .cx-aside {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: #111920;
+}
+/* a pane inside the pane would be a frame inside a frame: let the glass be the frame */
+.cx-aside > :is(.panel, .panel-quiet):only-child {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.cx-aside:has(> :is(.panel, .panel-quiet):only-child) {
+  padding: 0;
+}
+
+@media (min-width: 1080px) {
+  .cx-has-aside .cx-main {
+    grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr);
+  }
+}
+
+/* Below the desktop layout the statement alone fills the stage, so the stage
+   keeps its one height on every page; the pane of content follows it as its
+   own block on the same night material. */
+@media (max-width: 1079px) {
+  .cx-hero {
+    grid-template-rows: [stage-start] minmax(var(--hero-h), auto) [stage-end aside-start] auto [aside-end];
+  }
+  .cx-main {
+    display: contents;
+  }
+  .cx-statement {
+    grid-column: content;
+    grid-row: stage;
+    position: relative;
+    z-index: 1;
+    padding-block: 2.125rem 3.4375rem;
+  }
+  .cx-aside {
+    grid-column: content;
+    grid-row: aside;
+    margin-block: 1.3125rem 2.125rem;
+  }
+  .cx-has-aside .cx-scene[data-on] {
+    opacity: 1;
+  }
+}
+@media (max-width: 1079px) {
+  /* phone and tablet: the statement sits low, the instrument is the sky above it */
+  .cx-statement-body {
+    margin-block: auto 0;
+  }
+  .cx-scene {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, rgba(0, 0, 0, 0.16) 76%, rgba(0, 0, 0, 0.1) 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 40%, rgba(0, 0, 0, 0.16) 76%, rgba(0, 0, 0, 0.1) 100%);
+  }
+  .cx-scene[data-on],
+  .cx-has-aside .cx-scene[data-on] {
+    opacity: 0.85;
+  }
+  .cx-stage::before {
+    -webkit-mask-image: radial-gradient(90% 60% at 60% 34%, #000, transparent 80%);
+    mask-image: radial-gradient(90% 60% at 60% 34%, #000, transparent 80%);
+  }
+}
+
+/* the homepage places the live globe of financial centres exactly on the
+   stage's focal point, inside the frame its scene draws around it */
+.cx-home {
+  --cx-u: min(20vw, calc(var(--hero-h) * 0.34));
+}
+/* the homepage statement is the largest on the site: it gives up padding, not height */
+.cx-home .cx-statement-body {
+  padding-block: 0;
+}
+.cx-home-sphere {
+  position: absolute;
+  left: 70%;
+  top: 50%;
+  width: calc(var(--cx-u) * 2.72);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.cx-home-note {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 0.8125rem;
+  max-width: 30rem;
+  text-align: right;
+}
+@media (max-width: 1079px) {
+  .cx-home {
+    --cx-u: min(40vw, calc(var(--hero-h) * 0.34));
+  }
+  .cx-home-sphere {
+    left: 62%;
+    top: 36%;
+    opacity: 0.72;
+    -webkit-mask-image: linear-gradient(to bottom, #000 34%, rgba(0, 0, 0, 0.22) 62%, transparent 90%);
+    mask-image: linear-gradient(to bottom, #000 34%, rgba(0, 0, 0, 0.22) 62%, transparent 90%);
+  }
+}
+
+/* ---- 2. THE OVERHEAD PANEL (site header) ---------------------------------
+   The header is night switchgear in both themes, like the footer is night in
+   both themes: the cabin (the page) changes with the theme, the instruments
+   do not. */
+header[data-site-header],
+#site-drawer {
+  --ink: var(--on-night);
+  --ink-2: var(--on-night-2);
+  --ink-3: #8a949c;
+  --line: var(--night-line);
+  --line-strong: rgba(238, 240, 241, 0.3);
+  --bg: var(--night);
+  --paper: #0f161c;
+  --surface: var(--night-2);
+  --accent: #5ab0e8;
+  --accent-ink: #071019;
+  --brand-soft: rgba(90, 176, 232, 0.13);
+  --glass: rgba(10, 14, 19, 0.9);
+  --grad-ink: linear-gradient(180deg, #ffffff 0%, #dfe3e6 100%);
+  --grad-accent: linear-gradient(135deg, #5ab4ee 0%, #3a9be0 45%, #2fb8ae 100%);
+  --grad-surface: linear-gradient(180deg, #1b252e 0%, #141b22 100%);
+  --grad-sunken: linear-gradient(180deg, #070b0e 0%, #0d1318 100%);
+  --hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --depth-1: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.04), 0 5px 13px -5px rgba(0, 0, 0, 0.6);
+  --depth-2: var(--hi), 0 0 0 1px rgba(236, 238, 240, 0.05), 0 13px 34px -13px rgba(0, 0, 0, 0.8), 0 0 34px -21px rgba(75, 166, 226, 0.5);
+  --focus: rgba(90, 176, 232, 0.55);
+  color: var(--on-night);
+}
+header[data-site-header] {
+  /* a colour, not a gradient: the change to glass below is then a true transition */
+  background-color: #0a0e13;
+  box-shadow:
+    inset 0 -1px 0 rgba(238, 240, 241, 0.07),
+    0 1px 0 rgba(0, 0, 0, 0.4);
+}
+/* once the page moves, the panel is smoked glass over whatever passes beneath */
+header[data-site-header].glass {
+  background-color: var(--glass);
+  box-shadow:
+    inset 0 -1px 0 rgba(238, 240, 241, 0.09),
+    0 13px 34px -21px rgba(0, 0, 0, 0.9);
+}
+header[data-site-header] .btn-primary {
+  color: var(--night);
+}
+header[data-site-header] .btn-primary:hover {
+  color: #06101a;
+}
+
+/* primary navigation: backlit switches. The hit area stays 44px; the keycap is
+   drawn inside it. */
+header[data-site-header] button[data-nav] {
+  isolation: isolate;
+  border-radius: 7px;
+  transition:
+    color var(--t-fast) var(--ease-out),
+    text-shadow var(--t-base) var(--ease-out),
+    transform var(--t-instant) var(--ease-out);
+}
+header[data-site-header] button[data-nav]::before {
+  content: "";
+  position: absolute;
+  inset: 0.3125rem 0.125rem;
+  z-index: -1;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.012));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition:
+    opacity var(--t-fast) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    background var(--t-base) var(--ease-out);
+}
+/* the indicator under each switch is a strip of light, not a rule */
+header[data-site-header] button[data-nav] > span[aria-hidden] {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--cx-key);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--cx-key) 85%, transparent);
+}
+header[data-site-header] button[data-nav]:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  color: #ffffff;
+  text-shadow: 0 0 13px color-mix(in srgb, var(--cx-key) 70%, transparent);
+}
+header[data-site-header] button[data-nav]:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  opacity: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03));
+  /* light spills onto the panel beneath the raised key */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.17),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+    0 2px 3px rgba(0, 0, 0, 0.6),
+    0 13px 21px -10px color-mix(in srgb, var(--cx-key) 65%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  header[data-site-header] button[data-nav]:is(:hover, [aria-expanded="true"]) {
+    transform: translateY(-1px);
+  }
+}
+header[data-site-header] button[data-nav]:active {
+  transform: translateY(1px);
+}
+header[data-site-header] button[data-nav]:active::before {
+  opacity: 1;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.02));
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* the important actions are the lit keys of the panel */
+header[data-site-header] .btn-primary,
+#site-drawer .btn-primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 0 21px -5px color-mix(in srgb, var(--cx-key) 90%, transparent);
+}
+header[data-site-header] .btn-primary:hover,
+#site-drawer .btn-primary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0 0 1px color-mix(in srgb, var(--cx-key) 60%, transparent),
+    0 0 34px -5px var(--cx-key);
+}
+header[data-site-header] .btn-quiet {
+  border-radius: 7px;
+  transition:
+    color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    text-shadow var(--t-base) var(--ease-out),
+    transform var(--t-instant) var(--ease-out);
+}
+header[data-site-header] .btn-quiet:is(:hover, :focus-visible) {
+  color: #ffffff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  text-shadow: 0 0 13px color-mix(in srgb, var(--cx-key) 60%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 2px 3px rgba(0, 0, 0, 0.55),
+    0 10px 18px -10px color-mix(in srgb, var(--cx-key) 60%, transparent);
+}
+/* the menu that opens beneath the panel is a tray of the same glass */
+header[data-site-header] > div.absolute {
+  background: linear-gradient(180deg, #0d1319 0%, #0f161c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 34px 55px -21px rgba(0, 0, 0, 0.85);
+}
+
+/* ---- 3. TOUCH ------------------------------------------------------------ */
+/* Sections arrive with depth: a few degrees and a little distance, settling
+   into the page. The end state is the element's own, so hover still works. */
+@keyframes cx-arrive {
+  from {
+    opacity: 0;
+    transform: perspective(900px) translate3d(0, 21px, -55px) rotateX(5deg);
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal] {
+      animation-name: cx-arrive;
+    }
+  }
+}
+
+/* Tiles answer the pointer. The shell writes the pointer position on the tile
+   under it (--mx, --my: 0..1 across the tile; --tx, --ty: -1..1 from its
+   centre); with no script the plain lift from depth.css applies. */
+:is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > *::after,
+.grid.border-l.border-t:not(.flat) > .border-b.border-r::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: inherit;
+  /* glass catching the light: a soft highlight that follows the pointer */
+  background: radial-gradient(15rem circle at calc(var(--mx, 0.5) * 100%) calc(var(--my, 0.2) * 100%), color-mix(in srgb, var(--dt, var(--tone-1)) 16%, rgba(255, 255, 255, 0.5)), transparent 62%);
+  mix-blend-mode: soft-light;
+  transition: opacity var(--t-base) var(--ease-out);
+}
+/* nested groups of tiles are not tiles */
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat)::after {
+  content: none;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :hover::after,
+  .grid.border-l.border-t:not(.flat) > .border-b.border-r:hover::after {
+    opacity: 1;
+  }
+  [data-cx-tilt] :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :hover,
+  [data-cx-tilt] .grid.border-l.border-t:not(.flat) > .border-b.border-r:hover {
+    transform: translateY(-5px) rotateX(calc(2deg + var(--ty, 0) * -2.5deg)) rotateY(calc(var(--tx, 0) * 3deg));
+  }
+  [data-motion="reduced"] :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :hover,
+  [data-motion="reduced"] .grid.border-l.border-t:not(.flat) > .border-b.border-r:hover,
+  [data-effects="low"] :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :hover,
+  [data-effects="low"] .grid.border-l.border-t:not(.flat) > .border-b.border-r:hover {
+    transform: none;
+  }
+}
+/* touch: a tile answers the finger by settling a fraction, like a key */
+@media (hover: none) {
+  :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :active,
+  .grid.border-l.border-t:not(.flat) > .border-b.border-r:active {
+    transform: scale(0.985);
+  }
+  :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :active::after,
+  .grid.border-l.border-t:not(.flat) > .border-b.border-r:active::after {
+    opacity: 1;
+  }
+}
+
+/* ---- 4. THE START-UP -------------------------------------------------------
+   Shown once per browser (the inline boot script sets data-boot on <html>
+   before first paint). Pure CSS: it ends by itself in under two seconds
+   whether or not any script runs, and any key, click or scroll ends it at
+   once. Never shown under reduced motion or low effects. */
+.cx-boot {
+  display: none;
+}
+[data-boot="run"] .cx-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(60% 60% at 50% 46%, #101921 0%, #080c10 72%);
+  color: var(--on-night);
+  animation: cx-boot-out 1700ms var(--ease-inout) forwards;
+}
+.cx-boot-inner {
+  display: grid;
+  justify-items: center;
+  gap: 1.3125rem;
+}
+.cx-boot-logo {
+  opacity: 0;
+  animation: cx-boot-in 420ms var(--ease-out) 60ms forwards;
+}
+.cx-boot-lamps {
+  display: flex;
+  gap: 1.3125rem;
+}
+.cx-boot-lamps > span {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--on-night-2);
+  opacity: 0.28;
+  animation: cx-boot-lamp 300ms var(--ease-out) forwards;
+  animation-delay: calc(260ms + var(--i) * 130ms);
+}
+.cx-boot-lamps > span::before {
+  content: "";
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.cx-boot-ready {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #ffffff;
+  opacity: 0;
+  text-shadow: 0 0 21px var(--cx-key);
+  animation: cx-boot-in 300ms var(--ease-out) 1000ms forwards;
+}
+.cx-boot-rule {
+  width: 13rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dna-teal), var(--dna-blue), var(--dna-emerald), transparent);
+  transform: scaleX(0);
+  animation: cx-boot-rule 900ms var(--ease-inout) 160ms forwards;
+}
+@keyframes cx-boot-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cx-boot-lamp {
+  to {
+    opacity: 1;
+    color: var(--cx-key);
+    filter: drop-shadow(0 0 5px var(--cx-key));
+  }
+}
+@keyframes cx-boot-rule {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes cx-boot-out {
+  0%,
+  78% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* ---- print: the stage is paper ------------------------------------------- */
+@media print {
+  .cx-hero,
+  .cx-hero.on-night {
+    display: block;
+    background: #fff !important;
+    color: #000;
+    --ink: #000;
+    --ink-2: #222;
+    --ink-3: #555;
+    --line: #ccc;
+    --line-strong: #888;
+    --accent: #064f84;
+  }
+  .cx-stage,
+  .cx-boot {
+    display: none !important;
+  }
+  .cx-main,
+  .cx-statement {
+    display: block;
+    padding: 0 0 1rem;
+  }
+  .cx-hero :is(.h1, .h2, .display) {
+    text-shadow: none;
+  }
+  .cx-hero .lead {
+    color: #222;
+  }
+  .cx-aside {
+    border: 1px solid #ccc;
+    background: none;
+    box-shadow: none;
+    margin-top: 1rem;
+  }
+}

@@ -72,7 +72,13 @@ function HeroFigure({ i, cls, rates }: { i: Instrument; cls: AssetClass; rates?:
             <dt className="label">{c.k}</dt>
             <dd className="num mt-8 font-display text-xl font-light sm:text-2xl">
               {c.v}
-              {c.u && <span className="ml-3 font-sans text-xs font-normal text-ink-3">{c.u}</span>}
+              {/* the space lets the unit drop below the figure when the cell is narrow, instead of touching its edge */}
+              {c.u && (
+                <span className="font-sans text-xs font-normal text-ink-3">
+                  {" "}
+                  {c.u}
+                </span>
+              )}
             </dd>
           </div>
         ))}

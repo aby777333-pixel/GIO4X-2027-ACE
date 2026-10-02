@@ -44,7 +44,7 @@ export default function EditorialStandardsPage() {
                 "No urgency: no countdowns, no “before it is too late”.",
                 "An article that mentions a GIO4X product says that it is a GIO4X product.",
               ].map((x) => (
-                <li key={x} className="relative border-b border-line py-13 pl-21 text-ink-2 before:absolute before:left-0 before:top-[1.6em] before:h-px before:w-8 before:bg-accent">
+                <li key={x} className="flat relative border-b border-line py-13 pl-21 text-ink-2 before:absolute before:left-0 before:top-[1.6em] before:h-px before:w-8 before:bg-accent">
                   {x}
                 </li>
               ))}

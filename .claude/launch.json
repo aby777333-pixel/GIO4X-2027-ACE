@@ -1,6 +1,11 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "gio4x-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }
+    {
+      "name": "gio4x-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--no-experimental-strip-types", "node_modules/next/dist/bin/next", "dev", "-p", "3000"],
+      "port": 3000
+    }
   ]
 }

@@ -3,7 +3,9 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
 import "@/styles/depth.css";
+import "@/styles/cockpit.css";
 import { isProduction, site } from "@/config/site";
+import { BOOT_SCRIPT } from "@/lib/boot";
 import { PREFS_BOOT_SCRIPT } from "@/lib/prefs";
 
 // INTER — interface, data, forms, long functional reading.
@@ -81,6 +83,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Applies saved display preferences before first paint: no theme flash. */}
         <script dangerouslySetInnerHTML={{ __html: PREFS_BOOT_SCRIPT }} />
+        {/* First visit only: arms the cockpit start-up before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
       </head>
       <body>{children}</body>
     </html>

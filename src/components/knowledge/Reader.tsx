@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { RouteScene } from "@/components/cockpit/RouteScene";
 import { Breadcrumbs } from "@/components/ui/Page";
 import { educationalNote, riskWarning } from "@/config/legal";
 import type { Crumb } from "@/lib/schema";
@@ -83,14 +84,19 @@ export function Reader({ crumbs, kicker, title, lead, meta, notice, brief, toc, 
   return (
     <>
       <ReadingProgress target="reading" />
-      <header className="dna-light hairline-b">
-        <div className="wrap pb-34 pt-34 lg:pb-55 lg:pt-55">
-          <Breadcrumbs crumbs={crumbs} />
-          <div className="mt-34 max-w-[56rem]">
-            <p className="eyebrow">{kicker}</p>
-            <h1 className="h2 mt-21 max-w-[26ch]">{title}</h1>
-            <p className="lead mt-21 max-w-[60ch]">{lead}</p>
-            <p className="mt-34 flex flex-wrap items-center gap-x-21 gap-y-5 text-sm text-ink-3">{meta}</p>
+      <header className="cx-hero on-night">
+        <div className="cx-stage" aria-hidden>
+          <RouteScene />
+        </div>
+        <div className="cx-main">
+          <div className="cx-statement">
+            <Breadcrumbs crumbs={crumbs} />
+            <div className="cx-statement-body max-w-[56rem]">
+              <p className="eyebrow">{kicker}</p>
+              <h1 className="h2 mt-21 max-w-[26ch]">{title}</h1>
+              <p className="lead mt-21 max-w-[60ch]">{lead}</p>
+              <p className="mt-34 flex flex-wrap items-center gap-x-21 gap-y-5 text-sm text-ink-3">{meta}</p>
+            </div>
           </div>
         </div>
       </header>

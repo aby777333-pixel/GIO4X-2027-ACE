@@ -14,6 +14,7 @@ const KEY_INFO: Record<LocalKey, { name: string; purpose: string }> = {
   "gx:calc": { name: "Calculator inputs", purpose: "The last figures you typed into the Trader Toolkit, so that one tool can hand its inputs to the next." },
   "gx:consent": { name: "Privacy choice", purpose: "Your answer to a privacy or cookie question, so it is not asked again." },
   "gx:watch": { name: "Watchlist", purpose: "The instruments you chose to keep an eye on." },
+  "gx:boot": { name: "Start-up shown", purpose: "A note that the short start-up animation has already played on this device, so it is not shown again." },
 };
 
 const COMMON_ZONES = [

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { InterestForm } from "@/components/company/InterestForm";
-import { Breadcrumbs } from "@/components/ui/Page";
+import { PageHero } from "@/components/ui/Page";
 import { portals } from "@/config/destinations";
 import { companyLine, riskWarning } from "@/config/legal";
 import { site } from "@/config/site";
@@ -37,22 +37,53 @@ export default function OpenAccountPage() {
   const configured = dest.status === "CONFIGURED";
 
   return (
-    <div className="bg-paper">
-      <div className="wrap pb-55 pt-34 lg:pb-89 lg:pt-55">
-        <Breadcrumbs crumbs={[{ name: "Open an account", href: "/open-account" }]} />
+    <>
+      {/* the stage: the explanation, and the one object to act on standing beside it */}
+      <PageHero
+        crumbs={[{ name: "Open an account", href: "/open-account" }]}
+        eyebrow="Open an account"
+        title="One step at a time."
+        quiet
+        lead={
+          configured
+            ? "The application is completed on the GIO4X account-opening portal. Have the two documents below to hand before you begin."
+            : "Online applications are being connected to this website and cannot be started from this page yet. Leave your details and we will write to you about opening an account."
+        }
+        aside={
+        <div className="panel p-21 shadow-2 sm:p-34">
+          {configured ? (
+            <>
+              <Rosette size={34} dna />
+              <h2 className="h3 mt-13">Continue to the application</h2>
+              <p className="mt-8 text-ink-2">You are about to leave this page for the GIO4X account-opening portal at the address below.</p>
+              <p className="mt-21 flex flex-wrap items-center gap-x-13 gap-y-5 border-y border-line py-13">
+                <span className="num font-medium text-ink">{hostnameOf(dest.url)}</span>
+                <span className="inline-flex items-center gap-5 text-xs font-medium text-pos">
+                  <span aria-hidden>{"✓"}</span> Verified GIO4X destination
+                </span>
+              </p>
+              <a href={dest.url} rel="noopener noreferrer" className="btn btn-primary btn-lg mt-21 w-full">
+                Start application
+              </a>
+            </>
+          ) : (
+            <>
+              <p className="state state-pre">Applications not connected yet</p>
+              <h2 className="h3 mt-13">Register your interest</h2>
+              <p className="mb-21 mt-8 text-ink-2">Four details, used only to write to you about opening an account.</p>
+              <InterestForm email={site.email} accountNames={accounts.map((a) => a.name)} restricted={restrictedJurisdictions} />
+            </>
+          )}
+        </div>
+        }
+      />
 
-        <div className="mt-34 grid gap-34 lg:mt-55 lg:grid-cols-phi-r lg:gap-89">
+      <div className="bg-paper">
+      <div className="wrap pb-55 pt-34 lg:pb-89 lg:pt-55">
+        <div className="grid gap-34 lg:grid-cols-phi-r lg:gap-89">
           {/* left: the calm explanation */}
           <div>
-            <p className="eyebrow">Open an account</p>
-            <h1 className="h2 mt-21 max-w-[14ch]">One step at a time.</h1>
-            {configured ? (
-              <p className="lead mt-21">The application is completed on the GIO4X account-opening portal. Have the two documents below to hand before you begin.</p>
-            ) : (
-              <p className="lead mt-21">Online applications are being connected to this website and cannot be started from this page yet. Leave your details and we will write to you about opening an account.</p>
-            )}
-
-            <h2 className="label mt-34 border-b border-line-strong pb-13">What you will need</h2>
+            <h2 className="label border-b border-line-strong pb-13">What you will need</h2>
             <ol>
               {needs.map((n, i) => (
                 <li key={n.t} className="grid grid-cols-[1.3125rem_1fr] gap-x-13 border-b border-line py-13">
@@ -83,36 +114,10 @@ export default function OpenAccountPage() {
             </Link>
           </div>
 
-          {/* right: the one object to act on */}
+          {/* right: the security cues, strong and quiet */}
           <div>
-            <div className="panel p-21 shadow-2 sm:p-34">
-              {configured ? (
-                <>
-                  <Rosette size={34} dna />
-                  <h2 className="h3 mt-13">Continue to the application</h2>
-                  <p className="mt-8 text-ink-2">You are about to leave this page for the GIO4X account-opening portal at the address below.</p>
-                  <p className="mt-21 flex flex-wrap items-center gap-x-13 gap-y-5 border-y border-line py-13">
-                    <span className="num font-medium text-ink">{hostnameOf(dest.url)}</span>
-                    <span className="inline-flex items-center gap-5 text-xs font-medium text-pos">
-                      <span aria-hidden>{"✓"}</span> Verified GIO4X destination
-                    </span>
-                  </p>
-                  <a href={dest.url} rel="noopener noreferrer" className="btn btn-primary btn-lg mt-21 w-full">
-                    Start application
-                  </a>
-                </>
-              ) : (
-                <>
-                  <p className="state state-pre">Applications not connected yet</p>
-                  <h2 className="h3 mt-13">Register your interest</h2>
-                  <p className="mb-21 mt-8 text-ink-2">Four details, used only to write to you about opening an account.</p>
-                  <InterestForm email={site.email} accountNames={accounts.map((a) => a.name)} restricted={restrictedJurisdictions} />
-                </>
-              )}
-            </div>
-
-            {/* security cues: strong, quiet */}
-            <ul className="mt-21 grid gap-8 text-sm text-ink-2">
+            <h2 className="label border-b border-line-strong pb-13">Before you type anything</h2>
+            <ul className="mt-13 grid gap-8 text-sm text-ink-2">
               <li className="grid grid-cols-[1.3125rem_1fr] gap-x-8">
                 <LockIcon />
                 <span>
@@ -161,7 +166,8 @@ export default function OpenAccountPage() {
           </section>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

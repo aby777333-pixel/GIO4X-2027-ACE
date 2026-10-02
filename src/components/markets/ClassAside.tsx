@@ -58,7 +58,7 @@ export function ClassAside({ cls, list }: { cls: AssetClass; list: Instrument[] 
       label = "The underlying week";
       body = (
         <div>
-          <ol className="grid grid-cols-7 border-l border-t border-line" aria-label="Days on which the underlying markets trade: every day of the week">
+          <ol className="flat grid grid-cols-7 border-l border-t border-line" aria-label="Days on which the underlying markets trade: every day of the week">
             {days.map((d) => (
               <li key={d} className="border-b border-r border-line py-8 text-center">
                 <span className="label block">{d}</span>

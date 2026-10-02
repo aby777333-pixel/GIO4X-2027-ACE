@@ -50,7 +50,7 @@ export default function TrustCentrePage() {
                 <dd className="num mt-13 font-display text-3xl font-light leading-none text-ink">{publishedCount}</dd>
               </div>
               <div className="bg-bg p-21">
-                <dt className="state state-off">Not yet published</dt>
+                <dt className="state state-off whitespace-normal">Not yet published</dt>
                 <dd className="num mt-13 font-display text-3xl font-light leading-none text-ink">{pendingCount}</dd>
               </div>
             </dl>

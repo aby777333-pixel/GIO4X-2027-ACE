@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { CockpitBoot } from "@/components/cockpit/Boot";
+import { CockpitFx } from "@/components/cockpit/CockpitFx";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CommandBar } from "@/components/shell/CommandBar";
 import { Lens } from "@/components/shell/Lens";
@@ -21,6 +23,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <SiteFooter />
       <CommandBar />
       <Lens />
+      <CockpitFx />
+      <CockpitBoot />
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
     </>
   );

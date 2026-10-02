@@ -25,11 +25,14 @@
 /* ---- blocks: the tile ----------------------------------------------------
    Any grid of sibling cells becomes a set of raised tiles. Two existing
    markup patterns are upgraded in place (hairline grids drawn with borders or
-   with a 1px gap), plus the explicit `.tiles` container. */
-.tiles,
-.grid.border-l.border-t,
-.gap-px.bg-line,
-.gap-px.bg-night-line {
+   with a 1px gap), plus the explicit `.tiles` container.
+
+   A grid that is really one control or one table (a segmented selector, a
+   week strip, a grid nested inside a tile) opts out with the class `flat`.
+
+   The cycling tone lives in --dt / --dt-b. It is deliberately not called
+   --tone: the Markets pages already use --tone for the asset-class colour. */
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) {
   border-width: 0;
   background: transparent;
   gap: 0.8125rem;
@@ -37,21 +40,19 @@
   border-radius: 0;
   perspective: 1200px;
   /* default tone; each child overrides it by position below */
-  --tone: var(--tone-1);
-  --tone-b: var(--tone-2);
+  --dt: var(--tone-1);
+  --dt-b: var(--tone-2);
 }
-.tiles > *,
-.grid.border-l.border-t > .border-b.border-r,
-.gap-px.bg-line > *,
-.gap-px.bg-night-line > * {
+:is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > *,
+.grid.border-l.border-t:not(.flat) > .border-b.border-r {
   position: relative;
-  border: 1px solid color-mix(in srgb, var(--tone) 26%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--dt) 26%, var(--line));
   border-radius: 8px;
-  background: linear-gradient(155deg, color-mix(in srgb, var(--tone) 11%, var(--surface)) 0%, var(--surface) 46%, color-mix(in srgb, var(--tone-b) 6%, var(--surface)) 100%);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--dt) 11%, var(--surface)) 0%, var(--surface) 46%, color-mix(in srgb, var(--dt-b) 6%, var(--surface)) 100%);
   box-shadow:
     var(--hi),
     0 1px 2px rgba(20, 25, 29, 0.06),
-    0 13px 26px -16px color-mix(in srgb, var(--tone) 70%, transparent),
+    0 13px 26px -16px color-mix(in srgb, var(--dt) 70%, transparent),
     0 5px 13px -9px rgba(20, 25, 29, 0.2);
   overflow: hidden;
   transition:
@@ -60,56 +61,74 @@
     border-color var(--t-base) var(--ease-out);
 }
 /* the coloured top edge */
-.tiles > *::before,
-.grid.border-l.border-t > .border-b.border-r::before,
-.gap-px.bg-line > *::before,
-.gap-px.bg-night-line > *::before {
+:is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > *::before,
+.grid.border-l.border-t:not(.flat) > .border-b.border-r::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--tone), var(--tone-b));
+  background: linear-gradient(90deg, var(--dt), var(--dt-b));
   pointer-events: none;
 }
+/* a grid of tiles nested in a grid of tiles is a group, not a tile: it stays
+   transparent and unclipped so its own tiles keep their edges and their lift */
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  transform: none;
+}
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat)::before {
+  content: none;
+}
 /* inner links must not paint over the tile */
-.tiles > * > a,
-.grid.border-l.border-t > .border-b.border-r > a,
-.gap-px.bg-line > * > a,
-.gap-px.bg-night-line > * > a {
+:is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > * > a,
+.grid.border-l.border-t:not(.flat) > .border-b.border-r > a {
   background: transparent !important;
 }
+/* a tile clips its contents, so the keyboard focus ring is drawn inside it */
+:is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > * :focus-visible,
+:is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :focus-visible,
+.grid.border-l.border-t:not(.flat) > .border-b.border-r :focus-visible {
+  outline-offset: -4px;
+  border-radius: 6px;
+}
 /* six tones, cycling */
-:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 2) {
-  --tone: var(--tone-2);
-  --tone-b: var(--tone-3);
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :nth-child(6n + 2) {
+  --dt: var(--tone-2);
+  --dt-b: var(--tone-3);
 }
-:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 3) {
-  --tone: var(--tone-3);
-  --tone-b: var(--tone-4);
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :nth-child(6n + 3) {
+  --dt: var(--tone-3);
+  --dt-b: var(--tone-4);
 }
-:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 4) {
-  --tone: var(--tone-4);
-  --tone-b: var(--tone-6);
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :nth-child(6n + 4) {
+  --dt: var(--tone-4);
+  --dt-b: var(--tone-6);
 }
-:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 5) {
-  --tone: var(--tone-5);
-  --tone-b: var(--tone-1);
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :nth-child(6n + 5) {
+  --dt: var(--tone-5);
+  --dt-b: var(--tone-1);
 }
-:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :nth-child(6n + 6) {
-  --tone: var(--tone-6);
-  --tone-b: var(--tone-5);
+:is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :nth-child(6n + 6) {
+  --dt: var(--tone-6);
+  --dt-b: var(--tone-5);
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :hover {
+  :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :hover,
+  .grid.border-l.border-t:not(.flat) > .border-b.border-r:hover {
     transform: translateY(-5px) rotateX(2.5deg);
-    border-color: color-mix(in srgb, var(--tone) 55%, var(--line));
+    border-color: color-mix(in srgb, var(--dt) 55%, var(--line));
     box-shadow:
       var(--hi),
       0 2px 3px rgba(20, 25, 29, 0.06),
-      0 26px 42px -18px color-mix(in srgb, var(--tone) 78%, transparent),
+      0 26px 42px -18px color-mix(in srgb, var(--dt) 78%, transparent),
       0 13px 21px -13px rgba(20, 25, 29, 0.24);
   }
-  [data-motion="reduced"] :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line, .gap-px.bg-night-line) > :hover {
+  [data-motion="reduced"] :is(.tiles, .gap-px.bg-line, .gap-px.bg-night-line):not(.flat) > :hover,
+  [data-motion="reduced"] .grid.border-l.border-t:not(.flat) > .border-b.border-r:hover {
     transform: none;
   }
 }
@@ -150,6 +169,21 @@
 }
 .seg > :active {
   transform: translateY(1px);
+}
+.seg {
+  max-width: 100%;
+}
+@media (max-width: 430px) {
+  .seg {
+    gap: 2px;
+  }
+  .seg > button,
+  .seg > a {
+    min-width: 0;
+    padding-inline: 0.4375rem !important;
+    font-size: 0.6875rem;
+    letter-spacing: 0.03em;
+  }
 }
 
 /* ---- buttons: keys with weight -------------------------------------------- */
@@ -210,6 +244,13 @@
   background: var(--grad-surface);
   box-shadow: var(--depth-1);
 }
+.chip[aria-pressed="true"],
+.chip[aria-selected="true"],
+.chip[aria-current="true"] {
+  background: var(--grad-ink);
+  color: var(--bg);
+  border-color: transparent;
+}
 .input,
 .select,
 .textarea {
@@ -230,45 +271,64 @@
 
 /* ---- rows: typographic lists become coloured ledgers ----------------------
    Sibling rows (li.border-b.border-line) carry a tone bar on the left,
-   cycling through the six tones, and lift on hover like the tiles. */
-main li.border-b.border-line {
-  --tone: var(--tone-1);
-  --tone-b: var(--tone-2);
+   cycling through the six tones, and lift on hover like the tiles.
+
+   The bar is 4px wide and sits inside the row, so the row itself is padded:
+   whatever a row contains (a numeral, a label, plain text, a link) starts
+   clear of the bar and stops short of the rounded right edge. A cell that is
+   already a tile (it also has border-r) is not a row, and `flat` opts out. */
+main li.border-b.border-line:not(.border-r):not(.flat) {
+  --dt: var(--tone-1);
+  --dt-b: var(--tone-2);
   position: relative;
   border-radius: 6px;
   margin-top: 5px;
   border-bottom-color: transparent;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--tone) 9%, var(--surface)) 0%, var(--surface) 38.2%, color-mix(in srgb, var(--tone-b) 4%, var(--surface)) 100%);
+  padding-left: 1.3125rem;
+  padding-right: 0.8125rem;
+  background-color: var(--surface);
+  background-image: linear-gradient(90deg, color-mix(in srgb, var(--dt) 9%, transparent) 0%, transparent 38.2%, color-mix(in srgb, var(--dt-b) 4%, transparent) 100%);
   box-shadow: var(--depth-1);
   transition:
     transform var(--t-base) var(--ease-out),
     box-shadow var(--t-base) var(--ease-out);
 }
-main li.border-b.border-line::before {
+main li.border-b.border-line:not(.border-r):not(.flat)::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
   width: 4px;
+  height: auto;
   border-radius: 6px 0 0 6px;
-  background: linear-gradient(180deg, var(--tone), var(--tone-b));
+  background: linear-gradient(180deg, var(--dt), var(--dt-b));
+  pointer-events: none;
 }
-main li.border-b.border-line > a {
+/* a row that marks its own state (the hot row, the active option) keeps that state */
+main li.border-b.border-line:not(.border-r):not(.flat).bg-brand-soft {
+  background-color: color-mix(in srgb, var(--accent) 13%, var(--surface));
+}
+/* when one link is the whole row, the link reaches both edges of the row and
+   its content lines up with every other row */
+main li.border-b.border-line:not(.border-r):not(.flat) > a:only-child:is(.group, .block, .flex, .grid) {
+  margin-left: -1.3125rem;
+  margin-right: -0.8125rem;
   padding-left: 1.3125rem;
+  padding-right: 0.8125rem;
   border-radius: 6px;
   background: transparent !important;
 }
-main li.border-b.border-line:nth-child(6n + 2) { --tone: var(--tone-2); --tone-b: var(--tone-3); }
-main li.border-b.border-line:nth-child(6n + 3) { --tone: var(--tone-3); --tone-b: var(--tone-4); }
-main li.border-b.border-line:nth-child(6n + 4) { --tone: var(--tone-4); --tone-b: var(--tone-6); }
-main li.border-b.border-line:nth-child(6n + 5) { --tone: var(--tone-5); --tone-b: var(--tone-1); }
-main li.border-b.border-line:nth-child(6n + 6) { --tone: var(--tone-6); --tone-b: var(--tone-5); }
+main li.border-b.border-line:not(.border-r):not(.flat):nth-child(6n + 2) { --dt: var(--tone-2); --dt-b: var(--tone-3); }
+main li.border-b.border-line:not(.border-r):not(.flat):nth-child(6n + 3) { --dt: var(--tone-3); --dt-b: var(--tone-4); }
+main li.border-b.border-line:not(.border-r):not(.flat):nth-child(6n + 4) { --dt: var(--tone-4); --dt-b: var(--tone-6); }
+main li.border-b.border-line:not(.border-r):not(.flat):nth-child(6n + 5) { --dt: var(--tone-5); --dt-b: var(--tone-1); }
+main li.border-b.border-line:not(.border-r):not(.flat):nth-child(6n + 6) { --dt: var(--tone-6); --dt-b: var(--tone-5); }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  main li.border-b.border-line:has(> a):hover {
+  main li.border-b.border-line:not(.border-r):not(.flat):has(> a:only-child):hover {
     transform: translateY(-3px);
     box-shadow:
       var(--hi),
       0 2px 3px rgba(20, 25, 29, 0.06),
-      0 21px 34px -18px color-mix(in srgb, var(--tone) 72%, transparent);
+      0 21px 34px -18px color-mix(in srgb, var(--dt) 72%, transparent);
   }
 }
 /* the night surface uses its own line token */

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { Rosette } from "@/components/brand/Rosette";
-import { Breadcrumbs } from "@/components/ui/Page";
+import { PageHero } from "@/components/ui/Page";
 import { portalMeta, portals, type PortalKey } from "@/config/destinations";
 import { pageMeta } from "@/lib/meta";
 
@@ -43,18 +42,14 @@ export default function SignInPage() {
   const anyUnconfigured = ORDER.some((k) => portals[k].status === "UNCONFIGURED");
 
   return (
-    <section className="dna-light relative overflow-hidden" aria-labelledby="signin-h">
-      <div className="wrap pb-89 pt-34 lg:pb-144 lg:pt-55">
-        <Breadcrumbs crumbs={[{ name: "Sign in", href: "/sign-in" }]} />
-
-        <div className="mx-auto mt-55 max-w-[38rem]">
-          <Rosette size={34} dna />
-          <h1 id="signin-h" className="h1 mt-21">
-            Welcome back
-          </h1>
-          <p className="lead mt-13">Choose your destination:</p>
-
-          <ul className="mt-34 border-t border-line-strong">
+    <PageHero
+      crumbs={[{ name: "Sign in", href: "/sign-in" }]}
+      eyebrow="Sign in"
+      title="Welcome back"
+      lead="Choose your destination:"
+      aside={
+        <div>
+          <ul className="border-t border-line-strong">
             {ORDER.map((key) => {
               const dest = portals[key];
               const meta = portalMeta[key];
@@ -115,7 +110,7 @@ export default function SignInPage() {
             </p>
           </div>
         </div>
-      </div>
-    </section>
+      }
+    />
   );
 }
