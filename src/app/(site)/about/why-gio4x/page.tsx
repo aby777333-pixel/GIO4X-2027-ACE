@@ -34,7 +34,7 @@ const reasons: Reason[] = [
   },
   {
     claim: "Every number says where it came from.",
-    detail: "Exchange rates are European Central Bank reference fixings, labelled with their date. Session times are schedules computed from your own clock. Nothing on the site is presented as a live price, because no live feed is connected to it.",
+    detail: "Exchange rates are European Central Bank reference fixings, labelled with their date. Session times are schedules computed from your own clock. GIO4X presents no figure of its own as a live price, because no live feed is connected to the site. The market panels from TradingView are third-party frames, loaded at your request and labelled as such.",
     proofs: [
       { label: "Data methodology", href: "/trust/data-methodology" },
       { label: "Currency strength", href: "/markets/currency-strength" },

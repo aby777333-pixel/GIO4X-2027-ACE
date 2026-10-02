@@ -3,6 +3,7 @@ import { EmptyCalendar } from "@/components/figures/markets/EmptyCalendar";
 import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { eventHref, firstSentence } from "@/components/markets/graph";
 import { Head } from "@/components/markets/Head";
+import { EconomicCalendar } from "@/components/markets/MarketPanels";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { econEvents } from "@/data/knowledge";
@@ -10,7 +11,7 @@ import { pageMeta } from "@/lib/meta";
 import { webPageSchema } from "@/lib/schema";
 
 const DESCRIPTION =
-  "Seven scheduled economic releases explained in plain language: what each one measures, how it is compiled, why markets commonly watch it and who publishes it. No dates are invented: each explainer links to the publisher’s own calendar.";
+  "Seven scheduled economic releases explained in plain language: what each one measures, how it is compiled, why markets commonly watch it and who publishes it. No dates are invented: each explainer links to the publisher’s own calendar, and a dated calendar from TradingView can be loaded on request.";
 
 export const metadata = pageMeta({ title: "Economic Events", description: DESCRIPTION, path: "/markets/events" });
 
@@ -42,10 +43,14 @@ export default function EventsPage() {
         lead={`${econEvents.length} scheduled releases that markets commonly watch, explained: what each measures, how it is compiled, and why it matters to prices.`}
         aside={
           <div className="border-l-2 border-warn pl-13">
-            <p className="label">Not a calendar</p>
-            <p className="mt-5 text-sm text-ink">A live economic calendar is not connected to this site yet, so no release dates, forecasts or outcomes are shown here.</p>
+            <p className="label">Explainers first, dates second</p>
+            <p className="mt-5 text-sm text-ink">GIO4X keeps no economic calendar of its own, so the explainers carry no release dates, forecasts or outcomes.</p>
             <p className="mt-5 text-sm text-ink-3">
-              For dates, use{" "}
+              For dates, load{" "}
+              <a href="#dated" className="link">
+                TradingView’s calendar
+              </a>{" "}
+              on this page, or use{" "}
               <a href="#calendars" className="link">
                 the publishers’ own calendars
               </a>
@@ -90,6 +95,19 @@ export default function EventsPage() {
         </div>
       </section>
 
+      {/* the dated view: TradingView's calendar, third party, loaded on request */}
+      <section className="section hairline scroll-mt-[var(--header-h)]" id="dated" aria-labelledby="dated-title">
+        <div className="wrap">
+          <Head
+            id="dated-title"
+            eyebrow="The dated view"
+            title="What is scheduled, from TradingView."
+            lead="GIO4X does not publish its own economic calendar. The panel below is TradingView’s, loaded at your request: release times, previous figures, forecasts and outcomes as TradingView reports them."
+          />
+          <EconomicCalendar className="mt-34" />
+        </div>
+      </section>
+
       {/* the honest calendar block */}
       <section className="section hairline scroll-mt-[var(--header-h)] bg-paper" id="calendars" aria-labelledby="calendars-title">
         <div className="wrap">
@@ -97,7 +115,7 @@ export default function EventsPage() {
             id="calendars-title"
             eyebrow="Where the dates are"
             title="The calendar belongs to the publishers."
-            lead="Release dates move, and a wrong date is worse than none. Until a licensed calendar feed is connected, the authoritative schedule for each release is the one kept by the body that publishes it."
+            lead="Release dates move, and a wrong date is worse than none. The calendar above is TradingView’s, not GIO4X’s; the authoritative schedule for each release is the one kept by the body that publishes it."
           />
           <div className="scroll-x mt-34">
             <table className="table-gx min-w-[40rem]">

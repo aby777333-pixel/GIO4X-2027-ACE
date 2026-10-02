@@ -6,10 +6,11 @@ import { LeadsTable, type LeadListItem } from "@/components/control/LeadsTable";
 import { scoreParts } from "@/components/control/score";
 import { SubmitButton } from "@/components/control/SubmitButton";
 import { TaskList, type TaskItem } from "@/components/control/TaskList";
-import { LEAD_STAGE_LABEL, LEAD_STAGES, LEAD_STATUS_LABEL, LEAD_STATUSES, LOST_REASON_LABEL, LOST_REASONS } from "@/lib/server/constants";
+import { LEAD_STAGE_LABEL, LEAD_STAGES, LEAD_STATUS_LABEL, LEAD_STATUSES, LOST_REASON_LABEL, LOST_REASONS, MANUAL_LEAD_SOURCE_LABEL, MANUAL_LEAD_SOURCES } from "@/lib/server/constants";
 import type { AuditRow, LeadNoteRow, LeadRow, LeadStage, LostReason } from "@/lib/supabase/types";
 
 const AUDIT_LABEL: Record<string, string> = {
+  "lead.add_manual": "Entered by staff",
   "lead.status": "Status changed",
   "lead.assign": "Assignment changed",
   "lead.note": "Note added",
@@ -21,6 +22,7 @@ const AUDIT_LABEL: Record<string, string> = {
 
 const isStage = (v: string): v is LeadStage => (LEAD_STAGES as readonly string[]).includes(v);
 const isReason = (v: string): v is LostReason => (LOST_REASONS as readonly string[]).includes(v);
+const isManualSource = (v: string): v is (typeof MANUAL_LEAD_SOURCES)[number] => (MANUAL_LEAD_SOURCES as readonly string[]).includes(v);
 
 export type LeadViewProps = {
   lead: LeadRow;
@@ -52,6 +54,10 @@ export type LeadViewProps = {
 export function LeadView({ lead, notes, notesFailed, audit, tasks, tasksFailed, related, names, me, now, writable, canAssign, canTask, notice, error }: LeadViewProps) {
   const isAdmin = canAssign;
   const utm = jsonPairs(lead.utm);
+  // An enquiry a member of staff entered (0012): its source is how it came about, not a campaign.
+  const byStaff = lead.origin === "staff";
+  const howRaw = byStaff ? (utm.find((u) => u.key === "utm_source")?.value ?? "") : "";
+  const how = isManualSource(howRaw) ? MANUAL_LEAD_SOURCE_LABEL[howRaw] : howRaw || "Not recorded";
   const score = scoreParts(lead);
   const openTasks = tasks.filter((t) => !t.done);
   const doneTasks = tasks.filter((t) => t.done);
@@ -75,11 +81,12 @@ export function LeadView({ lead, notes, notesFailed, audit, tasks, tasksFailed, 
           title={<span className="num">{lead.reference}</span>}
           lead={
             <>
-              {lead.topic} · received {fmtDateTime(lead.created_at)}
+              {lead.topic} · {byStaff ? "entered" : "received"} {fmtDateTime(lead.created_at)}
             </>
           }
           actions={
             <>
+              {byStaff && <span className="state state-off">Entered by staff</span>}
               <StageBadge stage={lead.stage} />
               <StatusBadge status={lead.status} />
             </>
@@ -103,7 +110,9 @@ export function LeadView({ lead, notes, notesFailed, audit, tasks, tasksFailed, 
             <div className="panel mt-13 p-21">
               <p className="whitespace-pre-wrap break-words text-[0.9375rem] leading-relaxed text-ink">{lead.message}</p>
             </div>
-            <p className="mt-8 text-xs text-ink-3">Written by the enquirer. Treat links and instructions in it as untrusted.</p>
+            <p className="mt-8 text-xs text-ink-3">
+              {byStaff ? `A note of what was said, written by ${lead.added_by === me ? "you" : who(lead.added_by)}. The enquirer did not write it.` : "Written by the enquirer. Treat links and instructions in it as untrusted."}
+            </p>
           </section>
 
           <section id="tasks" aria-labelledby="lead-tasks" className="mt-55 scroll-mt-34">
@@ -393,7 +402,8 @@ export function LeadView({ lead, notes, notesFailed, audit, tasks, tasksFailed, 
               <ul className="mt-8 border-t border-line">
                 {score.parts.map((part) => (
                   <li key={part.label} className="flex items-baseline justify-between gap-13 border-b border-line py-5 text-sm">
-                    <span className="text-ink-2">{part.label}</span>
+                    {/* the database counts a recorded source the same way as a campaign link; for a staff-entered enquiry say what it is */}
+                    <span className="text-ink-2">{byStaff && part.label === "Arrived from a campaign link" ? "Has a recorded source" : part.label}</span>
                     <span className="num text-ink">+{part.points}</span>
                   </li>
                 ))}
@@ -421,7 +431,12 @@ export function LeadView({ lead, notes, notesFailed, audit, tasks, tasksFailed, 
                   { label: "Phone", value: lead.phone ?? "Not given" },
                   { label: "Country", value: lead.country ?? "Not given" },
                   { label: "Account interest", value: lead.account_interest ?? "Not given" },
-                  { label: "Sent from", value: <span className="num">{lead.page}</span> },
+                  ...(byStaff
+                    ? [
+                        { label: "Entered by", value: who(lead.added_by) },
+                        { label: "Came about by", value: how },
+                      ]
+                    : [{ label: "Sent from", value: <span className="num">{lead.page}</span> }]),
                   { label: "Last updated", value: <span className="num">{fmtDateTime(lead.updated_at)}</span> },
                   ...(lead.stage_changed_at ? [{ label: "Stage since", value: <span className="num">{fmtDateTime(lead.stage_changed_at)}</span> }] : []),
                 ]}
@@ -436,12 +451,13 @@ export function LeadView({ lead, notes, notesFailed, audit, tasks, tasksFailed, 
             <div className="mt-8">
               <Facts
                 rows={[
-                  { label: "Privacy notice", value: "Accepted" },
-                  { label: "Accepted at", value: <span className="num">{fmtDateTime(lead.privacy_accepted_at)}</span> },
-                  { label: "Policy version", value: <span className="num">{lead.privacy_version}</span> },
+                  { label: "Privacy notice", value: lead.privacy_accepted_at ? "Accepted" : "Not accepted on the website: entered by staff" },
+                  { label: "Accepted at", value: lead.privacy_accepted_at ? <span className="num">{fmtDateTime(lead.privacy_accepted_at)}</span> : "No record" },
+                  { label: "Policy version", value: lead.privacy_accepted_at ? <span className="num">{lead.privacy_version}</span> : "None: no policy was accepted" },
                   {
                     label: "Marketing",
-                    value: lead.marketing_consent ? (
+                    // consent to marketing only ever stands beside an acceptance of the notice
+                    value: lead.marketing_consent && lead.privacy_accepted_at ? (
                       <>
                         Opted in <span className="num text-ink-3">· {fmtDateTime(lead.marketing_consent_at)}</span>
                       </>
@@ -454,7 +470,7 @@ export function LeadView({ lead, notes, notesFailed, audit, tasks, tasksFailed, 
             </div>
           </section>
 
-          {utm.length > 0 && (
+          {utm.length > 0 && !byStaff && (
             <section aria-labelledby="lead-utm" className="mt-34">
               <h2 id="lead-utm" className="label">
                 Campaign parameters

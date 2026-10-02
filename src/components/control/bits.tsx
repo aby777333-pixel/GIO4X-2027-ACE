@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Rosette } from "@/components/brand/Rosette";
 import { fmtDateTime } from "@/components/control/format";
 import { LEAD_STAGE_LABEL, LEAD_STATUS_LABEL } from "@/lib/server/constants";
 import type { LeadStage, LeadStatus } from "@/lib/supabase/types";
@@ -99,7 +98,8 @@ export function Notice({ title, children, tone = "info" }: { title: string; chil
 export function Empty({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="grid justify-items-start gap-13 border-b border-line py-34">
-      <Rosette size={34} blades={5} className="text-ink-3" />
+      {/* the GIO4X mark itself, whole and square, in the console's quiet ink (.gxc-empty-mark in console.css) */}
+      <span aria-hidden className="gxc-empty-mark" />
       <p className="h4">{title}</p>
       {children && <div className="max-w-measure text-sm text-ink-2">{children}</div>}
     </div>

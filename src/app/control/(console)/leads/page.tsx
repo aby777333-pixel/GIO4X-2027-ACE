@@ -59,5 +59,5 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const total = result.count ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / PER_PAGE));
 
-  return <LeadsView status={status} stage={stage} sort={sort} topic={topic} q={q} error={error} failed={failed} pastEnd={pastEnd} leads={leads} names={names} me={ctx.userId} total={total} page={page} pageCount={pageCount} />;
+  return <LeadsView status={status} stage={stage} sort={sort} topic={topic} q={q} error={error} failed={failed} pastEnd={pastEnd} leads={leads} names={names} me={ctx.userId} total={total} page={page} pageCount={pageCount} canAdd={can(ctx, "leads.write")} />;
 }

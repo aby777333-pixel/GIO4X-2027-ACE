@@ -39,9 +39,12 @@ under the headline or off the stage. From 1080px the frame is the right-hand 52%
 the statement keeps to the left 46%; below that it stands at the top of the stage and the statement
 begins under it. The engine computes it (`f.box`), draws its champagne hairline, corner marks and the
 golden cut on its long sides, and places the scene's focal point at its centre. A scene cannot move its
-own focal point out of the frame. The homepage is the one exception (`free: true` on its scene): it
-draws on the whole stage, unframed, and keeps its weight in the golden section to the right of the
-statement (`scenes/flightdeck.ts`: the globe, the dial, and the forms of a trading floor about them).
+own focal point out of the frame. The homepage scene (`scenes/flightdeck.ts`) is `free: true` because
+its stage is taller and its statement larger, but it is framed like the rest: it composes its whole
+instrument inside its own golden rectangle, as large as fits beside the headline, clips it, and hands
+the rectangle to the engine through `Scene.frame`, which then hit-tests the pointer against it, clips
+the pointer's light to it and draws the same champagne frame round it. Only the faint field behind
+(deck, dust, horizon) runs on outside.
 
 Over the frame, the pointer does four things to every scene without the scene doing anything: the camera
 swings further and leans in, the scene's clock runs faster, a light in the key colour follows the cursor,

@@ -61,7 +61,26 @@ export const academyLevels: { level: AcademyLevel; line: string }[] = [
   { level: "Professional concepts", line: "How risk is sized, measured and lived with: the part of the craft that outlasts any one strategy." },
 ];
 
-export const lessons: Lesson[] = data.lessons.slice().sort((a, b) => a.order - b.order);
+/**
+ * Corrections to carried lesson bodies, by slug: an exact passage is replaced
+ * at load, because generated/academy.json is never edited by hand.
+ * - introduction-to-forex-trading: quoted a daily turnover figure with no
+ *   source or date, which the editorial standards do not allow.
+ */
+const corrections: Record<string, { find: string; replace: string }[]> = {
+  "introduction-to-forex-trading": [
+    {
+      find: "The forex market is the largest and most liquid financial market in the world, with a daily trading volume exceeding $7 trillion.",
+      replace: "The forex market is the largest financial market in the world by turnover, which the Bank for International Settlements measures in a survey every three years.",
+    },
+  ],
+};
+const corrected = (l: Lesson): Lesson => {
+  const fixes = corrections[l.slug];
+  return fixes ? { ...l, body: fixes.reduce((body, f) => body.split(f.find).join(f.replace), l.body) } : l;
+};
+
+export const lessons: Lesson[] = data.lessons.map(corrected).sort((a, b) => a.order - b.order);
 export const modules: AcademyModule[] = data.modules;
 export const paths: LearningPath[] = data.paths;
 

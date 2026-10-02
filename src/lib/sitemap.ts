@@ -10,6 +10,7 @@ import { absoluteUrl } from "@/config/site";
  *   /sitemap-academy.xml      → lessons
  *   /sitemap-glossary.xml     → terms
  *   /sitemap-tools.xml        → calculators and visualisers
+ *   /sitemap-blog.xml         → the daily blog (read from the database, see its route)
  *
  * Only canonical, indexable URLs are listed. `lastmod` is a real date: the
  * article's own published/updated date, or the date the page template last
@@ -21,7 +22,7 @@ export const CONTENT_REVISED = "2026-10-01";
 
 export type SitemapEntry = { path: string; lastmod?: string };
 
-export const SITEMAP_NAMES = ["pages", "markets", "instruments", "intelligence", "academy", "glossary", "tools"] as const;
+export const SITEMAP_NAMES = ["pages", "markets", "instruments", "intelligence", "academy", "glossary", "tools", "blog"] as const;
 export type SitemapName = (typeof SITEMAP_NAMES)[number];
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");

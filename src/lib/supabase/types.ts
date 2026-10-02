@@ -27,10 +27,14 @@ export type LeadRow = {
   account_interest: string | null;
   page: string;
   utm: Json;
-  privacy_accepted_at: string;
+  /** empty for an enquiry a member of staff entered: nobody accepted the notice on the website */
+  privacy_accepted_at: string | null;
   privacy_version: string;
   marketing_consent: boolean;
   marketing_consent_at: string | null;
+  /** where the row came from: a form on the website, or a member of staff (0012) */
+  origin: "website" | "staff";
+  added_by: string | null;
   status: LeadStatus;
   assigned_to: string | null;
   stage: LeadStage;
@@ -244,6 +248,55 @@ export type IncidentRow = {
   published: boolean;
 };
 
+/** Must equal the checks in 0011_blog.sql. */
+export type BlogCategory = "market-notes" | "education" | "platform" | "company";
+export type BlogStatus = "draft" | "review" | "published" | "archived";
+
+export type BlogPostRow = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  /** the restricted Markdown that src/components/blog/BlogBody.tsx renders */
+  body: string;
+  category: BlogCategory;
+  tags: string[];
+  byline: string;
+  status: BlogStatus;
+  /** public once status is published AND this time has passed (a future time is a scheduled post) */
+  published_at: string | null;
+  corrected_at: string | null;
+  correction_note: string;
+  seo_title: string;
+  seo_description: string;
+  canonical_url: string;
+  noindex: boolean;
+  /** paths inside the public `blog` storage bucket ("" when there is none) */
+  og_image_path: string;
+  cover_path: string;
+  cover_alt: string;
+  cover_caption: string;
+  cover_credit: string;
+  cover_width: number | null;
+  cover_height: number | null;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** The columns the anonymous role may read (0011): everything on the page, nothing about who wrote the row. */
+export const BLOG_PUBLIC_COLUMNS =
+  "id, slug, title, excerpt, body, category, tags, byline, status, published_at, corrected_at, correction_note, seo_title, seo_description, canonical_url, noindex, og_image_path, cover_path, cover_alt, cover_caption, cover_credit, cover_width, cover_height, updated_at" as const;
+export type BlogPublicPost = Omit<BlogPostRow, "created_by" | "updated_by" | "created_at">;
+
+type BlogWritable = Pick<
+  BlogPostRow,
+  | "slug" | "title" | "excerpt" | "body" | "category" | "tags" | "byline" | "status" | "published_at"
+  | "seo_title" | "seo_description" | "canonical_url" | "noindex" | "og_image_path"
+  | "cover_path" | "cover_alt" | "cover_caption" | "cover_credit" | "cover_width" | "cover_height"
+>;
+
 export type IncidentUpdateRow = { id: number; incident_id: string; created_at: string; author: string | null; status: IncidentStatus; body: string };
 
 /** One row of people_list(): everyone who has written in, one record per address. Not client accounts. */
@@ -354,6 +407,12 @@ export type Database = {
         Update: { [_ in never]: never };
         Relationships: [];
       };
+      blog_posts: {
+        Row: BlogPostRow;
+        Insert: Partial<BlogWritable> & { slug: string; title: string };
+        Update: Partial<BlogWritable & Pick<BlogPostRow, "corrected_at" | "correction_note">>;
+        Relationships: [];
+      };
       incidents: {
         Row: IncidentRow;
         Insert: { title: string; component: IncidentComponent; severity: IncidentSeverity; status?: IncidentStatus; started_at?: string; published?: boolean };
@@ -422,6 +481,10 @@ export type Database = {
       report_summary: { Args: { p_days?: number }; Returns: Json };
       command_summary: { Args: { [_ in never]: never }; Returns: Json };
       record_leads_export: { Args: { row_count: number }; Returns: undefined };
+      lead_add_manual: {
+        Args: { p_name: string; p_email: string; p_phone: string | null; p_country: string | null; p_topic: string; p_message: string; p_how: string };
+        Returns: string;
+      };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

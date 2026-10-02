@@ -57,16 +57,16 @@ const states: DataState[] = [
     not: educationalNote,
   },
   {
-    chip: "Third-party chart",
-    name: "Third-party charts",
-    what: "Interactive price charts on some market pages.",
+    chip: "Third party",
+    name: "Third-party charts and panels",
+    what: "Interactive price charts on the instrument pages, and on the market pages and the Morning Room an economic calendar, heat maps, cross rates, quote tables, a market overview and a ticker tape.",
     source: (
       <>
-        Embedded frames from <Ext href="https://www.tradingview.com/">TradingView</Ext>, loaded only when you ask for one. The data, its timing and its accuracy are TradingView’s.
+        Embedded frames from <Ext href="https://www.tradingview.com/">TradingView</Ext>. Each one is loaded only when you ask for it, or as it scrolls into view if you have switched that on in your <Link href="/preferences#third-party" className="link">preferences</Link>. The data, its timing and its accuracy are TradingView’s. No TradingView script runs on GIO4X’s pages, and no panel showing ratings or trade ideas is used.
       </>
     ),
     when: "As TradingView supplies it. Depending on the instrument and exchange it may be delayed.",
-    not: "Not GIO4X prices, and not the prices at which a GIO4X order would be filled.",
+    not: "Not GIO4X prices, not the prices at which a GIO4X order would be filled, and not a GIO4X calendar or forecast.",
   },
 ];
 
@@ -132,7 +132,7 @@ export default function DataMethodologyPage() {
               </li>
             ))}
           </ol>
-          <p className="mt-21 max-w-measure text-sm text-ink-3">For the first four states, the label in the row is the one printed beside the data wherever it appears on the site, together with its source and date. Third-party charts carry TradingView’s own attribution.</p>
+          <p className="mt-21 max-w-measure text-sm text-ink-3">For the first four states, the label in the row is the one printed beside the data wherever it appears on the site, together with its source and date. Third-party charts and panels carry the label “Third party” and TradingView’s own attribution.</p>
         </div>
       </section>
 
@@ -236,7 +236,8 @@ export default function DataMethodologyPage() {
             </h2>
           </div>
           <div className="grid gap-13 text-ink-2" data-reveal suppressHydrationWarning>
-            <p>A live label would be a claim that a figure is the market’s price at this moment. This website has no source that could support that claim, so the word is not used, and no figure is animated to look as though it were ticking.</p>
+            <p>A live label would be a claim that a figure is the market’s price at this moment. GIO4X has no source of its own that could support that claim, so the word is not used, and no GIO4X figure is animated to look as though it were ticking.</p>
+            <p>The panels from TradingView are a different thing: they are TradingView’s own frames, they update as TradingView updates them, and each is labelled third party. GIO4X still publishes no prices of its own.</p>
             <p>If a licensed feed is connected in future, this page will name the provider, the delay if any and the instruments covered before the first live figure appears.</p>
           </div>
         </div>

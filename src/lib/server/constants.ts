@@ -82,8 +82,23 @@ export const CAPABILITIES = [
   "reports.read",
   "command.read",
   "config.manage",
+  "blog.read",
+  "blog.write",
+  "blog.publish",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
+
+/** How a staff-entered enquiry came about. Stored as the enquiry's source. Must match the pattern in lead_add_manual() (0012). */
+export const MANUAL_LEAD_SOURCES = ["telephone", "event", "referral", "walk-in", "email", "social", "other"] as const;
+export const MANUAL_LEAD_SOURCE_LABEL: Record<(typeof MANUAL_LEAD_SOURCES)[number], string> = {
+  telephone: "Telephone call",
+  event: "Event or meeting",
+  referral: "Referral",
+  "walk-in": "Visit to an office",
+  email: "E-mail",
+  social: "Social media",
+  other: "Something else",
+};
 
 /** Ticket categories. Must equal `tickets_category_valid` in 0007_support.sql. */
 export const TICKET_CATEGORIES = ["account", "platform", "funding", "technical", "complaint", "privacy", "security", "other"] as const;

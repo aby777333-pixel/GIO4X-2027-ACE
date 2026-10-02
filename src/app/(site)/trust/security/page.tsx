@@ -41,8 +41,8 @@ const siteFacts: { t: string; d: string; check: string }[] = [
     check: "The Cookie & Storage Notice lists every key. The preferences page shows and clears them.",
   },
   {
-    t: "Third-party charts only on request",
-    d: "Market charts from TradingView are embedded frames that load when you ask for one. No other site may be framed, and this site may not be framed by anyone.",
+    t: "Third-party panels only on request",
+    d: "Market charts, the economic calendar, heat maps and quote panels from TradingView are embedded frames. Each loads when you ask for it, or as it scrolls into view if you have switched that on in your preferences. No TradingView script runs on these pages, no other site may be framed, and this site may not be framed by anyone.",
     check: "The header lists TradingView under frame-src and sets frame-ancestors to ‘none’.",
   },
   {

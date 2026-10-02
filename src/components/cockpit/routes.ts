@@ -64,6 +64,7 @@ const ROUTES: [prefix: string, scene: SceneId, ownTag?: string][] = [
   ["/platforms/compare", "compare"],
   ["/platforms", "platforms"],
   ["/tools", "instrument"],
+  ["/intelligence/blog", "press"],
   ["/intelligence", "signal"],
   ["/morning-room", "horizon"],
   ["/labs", "constellation"],

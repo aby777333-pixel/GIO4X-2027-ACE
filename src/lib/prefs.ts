@@ -21,6 +21,8 @@ export type Prefs = {
   tz: string;
   /** remembered platform context, set only by an explicit choice */
   platform: "none" | "raptor" | "mt5";
+  /** true: TradingView frames load as they scroll into view; false: each waits for its button */
+  tvAuto: boolean;
 };
 
 export const DEFAULT_PREFS: Prefs = {
@@ -34,6 +36,7 @@ export const DEFAULT_PREFS: Prefs = {
   links: "default",
   tz: "local",
   platform: "none",
+  tvAuto: false,
 };
 
 export const ACCENTS: { key: Prefs["accent"]; label: string; note: string }[] = [
@@ -90,7 +93,7 @@ export function writePrefs(p: Prefs): void {
 }
 
 /** Everything GIO4X stores in this browser. Used by the privacy reset. */
-export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch", "gx:boot"] as const;
+export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch", "gx:boot", "gx:learn"] as const;
 
 /** The session-storage keys (emptied by the browser when the tab closes): a closed announcement, an open chat. */
 export const SESSION_KEYS = ["gx:announcement:dismissed", "gx:chat"] as const;

@@ -151,6 +151,13 @@ export type Scene<S = unknown> = {
    * composed with page elements placed over the stage (the homepage globe).
    */
   free?: boolean;
+  /**
+   * A free scene that frames itself. Called after each `draw`: the rectangle (canvas pixels) the scene
+   * composed its instrument in, or null when it drew none. The engine then treats it as it treats its own
+   * frame: the pointer counts as over the instrument only inside it, the pointer's light and reticle are
+   * clipped to it, and the champagne frame is drawn round it. Scenes without it are not affected.
+   */
+  frame?(f: Frame): { x: number; y: number; w: number; h: number } | null;
   /** called once, and again when the page seed or the size class changes */
   setup?(f: Frame): S;
   draw(f: Frame, state: S): void;
@@ -273,6 +280,8 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
   let frames = 0;
   let state: S | undefined;
   let stateFor = "";
+  // the frame a free scene composed for itself on the last draw (Scene.frame), if any
+  let own: { x: number; y: number; w: number; h: number } | null = null;
 
   const cam: Cam = { yaw: 0, pitch: 0.18, dist: 6, zoom: 1, parallax: 1 };
   // rotation terms, refreshed by `aim`
@@ -555,9 +564,16 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     focusLocked = framed;
     scene.draw(f, state as S);
     focusLocked = false;
+    own = !framed && scene.frame ? scene.frame(f) : null;
 
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
+    if (own) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(own.x, own.y, own.w, own.h);
+      ctx.clip();
+    }
     if (f.hover > 0) {
       // the pointer carries a light: what it passes over is lit from the key
       const R = f.u * 1.5;
@@ -588,11 +604,11 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
       ctx.arc(f.mx, f.my, 1.4, 0, TAU);
       ctx.fill();
     }
-    if (framed) {
-      ctx.restore();
+    if (framed || own) ctx.restore();
+    const b = framed ? f.box : own;
+    if (b) {
       // the frame itself: a hairline in champagne, heavier at the corners, with
       // the golden cut marked on its long sides. It brightens under the pointer.
-      const b = f.box;
       const lit = f.boot * (0.5 + f.hover * 0.5);
       ctx.lineWidth = 1;
       ctx.strokeStyle = rgba(f.pal.gold, 0.22 * lit);
@@ -681,7 +697,11 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     rmy = e.clientY - r.top;
     const b = f.box;
     const was = over;
-    over = scene.free ? rmx > r.width * 0.42 && rmy >= 0 && rmy <= r.height : rmx >= b.x && rmx <= b.x + b.w && rmy >= b.y && rmy <= b.y + b.h;
+    over = own
+      ? rmx >= own.x && rmx <= own.x + own.w && rmy >= own.y && rmy <= own.y + own.h
+      : scene.free
+        ? rmx > r.width * 0.42 && rmy >= 0 && rmy <= r.height
+        : rmx >= b.x && rmx <= b.x + b.w && rmy >= b.y && rmy <= b.y + b.h;
     if (over && !was && f.hover === 0) {
       // arrive where the pointer is, not from wherever it last was
       f.mx = rmx;

@@ -145,7 +145,11 @@ export default async function EventPage({ params }: Params) {
               <dd className="text-sm text-ink">{e.cadence}</dd>
               <dt className="text-sm text-ink-3">Dates</dt>
               <dd className="text-sm text-ink-2">
-                Not shown on this site: a live economic calendar is not connected yet.{" "}
+                Not shown on this page: GIO4X keeps no economic calendar of its own.{" "}
+                <Link href="/markets/events#dated" className="link">
+                  TradingView’s calendar
+                </Link>
+                {" · "}
                 <Link href="/markets/events#calendars" className="link">
                   All publishers’ pages
                 </Link>

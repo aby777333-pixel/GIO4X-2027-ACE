@@ -19,10 +19,12 @@ export type LeadsViewProps = {
   total: number;
   page: number;
   pageCount: number;
+  /** may add an enquiry by hand (leads.write) */
+  canAdd?: boolean;
 };
 
 /** Presentation only. The filters shown here were validated by the page before they reached the database. */
-export function LeadsView({ status, stage, sort, topic, q, error, failed, pastEnd, leads, names, me, total, page, pageCount }: LeadsViewProps) {
+export function LeadsView({ status, stage, sort, topic, q, error, failed, pastEnd, leads, names, me, total, page, pageCount, canAdd = false }: LeadsViewProps) {
   const filtered = !!(status || stage || sort || topic || q);
   const href = (p: number) => {
     const sp = new URLSearchParams();
@@ -38,7 +40,15 @@ export function LeadsView({ status, stage, sort, topic, q, error, failed, pastEn
 
   return (
     <>
-      <ControlHead eyebrow="Clients" title="Leads" lead={sort === "score" ? "Enquiries from the contact and account-interest forms, highest score first." : "Enquiries from the contact and account-interest forms, newest first."} />
+      <ControlHead eyebrow="Clients" title="Leads" lead={sort === "score" ? "Enquiries from the contact and account-interest forms, and those entered by staff, highest score first." : "Enquiries from the contact and account-interest forms, and those entered by staff, newest first."}
+        actions={
+          canAdd ? (
+            <Link href="/control/leads/new" className="btn btn-primary">
+              Add enquiry
+            </Link>
+          ) : undefined
+        }
+      />
 
       {error && (
         <div className="mt-21">
@@ -131,6 +141,15 @@ export function LeadsView({ status, stage, sort, topic, q, error, failed, pastEn
         ) : (
           <Empty title="No enquiries yet">
             <p>When someone sends the contact form or registers interest in an account, the enquiry appears here with its reference.</p>
+            {canAdd && (
+              <p className="mt-13">
+                Spoke to someone by telephone or at an event?{" "}
+                <Link href="/control/leads/new" className="link">
+                  Add the enquiry by hand
+                </Link>
+                .
+              </p>
+            )}
           </Empty>
         )}
       </div>

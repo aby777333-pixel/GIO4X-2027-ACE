@@ -5,6 +5,7 @@ import { ClassAside, ClassNav } from "@/components/markets/ClassAside";
 import { resolveEvents, resolveTerms, resolveTools, toneStyle } from "@/components/markets/graph";
 import { InstrumentTable } from "@/components/markets/InstrumentTable";
 import { RelatedColumn } from "@/components/markets/LinkRows";
+import { ClassPanels } from "@/components/markets/MarketPanels";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { Head } from "@/components/markets/Head";
@@ -117,6 +118,9 @@ export default async function AssetClassPage({ params }: Params) {
           </div>
         </div>
       </section>
+
+      {/* TradingView's panels for this class: third party, loaded on request */}
+      <ClassPanels cls={cls.key} name={cls.name} />
 
       {/* related */}
       <section className="section hairline" aria-labelledby="related-title">

@@ -38,9 +38,11 @@ export const approvedThirdParties: { host: string; label: string; why: string }[
   { host: "777raptor.com", label: "777 Raptor", why: "Technology provider of the 777 Raptor platform." },
   { host: "metatrader5.com", label: "MetaTrader 5", why: "Official MetaTrader 5 website, operated by MetaQuotes." },
   { host: "metaquotes.net", label: "MetaQuotes", why: "Developer of MetaTrader 5." },
-  { host: "tradingview.com", label: "TradingView", why: "Provider of the embedded market charts." },
+  { host: "tradingview.com", label: "TradingView", why: "Provider of the embedded market charts, economic calendar, heat maps and quote panels." },
   { host: "ecb.europa.eu", label: "European Central Bank", why: "Source of the euro foreign exchange reference rates." },
   { host: "frankfurter.dev", label: "Frankfurter", why: "Open API that republishes ECB reference rates." },
+  { host: "amazon.com", label: "Amazon", why: "Bookseller’s search results for titles on the Academy reading list. GIO4X sells no books and earns nothing from these links." },
+  { host: "worldcat.org", label: "WorldCat", why: "Library catalogue run by OCLC: search results for titles on the Academy reading list." },
 ];
 
 function hostOf(url: string): string | null {

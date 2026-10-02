@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TwoRoutes } from "@/components/figures/academy/TwoRoutes";
 import { BoundedScale } from "@/components/figures/company/BoundedScale";
 import { RollingMean } from "@/components/figures/company/RollingMean";
 import { FigureNote } from "@/components/figures/Figure";
@@ -64,9 +65,39 @@ function PathSteps({ path }: { path: LearningPath }) {
   );
 }
 
+/**
+ * What two paths have in common, for the figure and the sentence under the
+ * shorter one. Counted from the published lessons the steps link to, so it
+ * stays true when the paths change.
+ */
+function overlap(a: LearningPath, b: LearningPath) {
+  const published = (p: LearningPath) => p.steps.map((s) => s.lessons.filter((slug) => getLesson(slug) !== undefined));
+  const [sa, sb] = [published(a), published(b)];
+  // the row of lessons: the longer path's order, with the shorter path's own lessons slotted in after the one before them
+  const row = [...new Set(sb.flat())];
+  let after = -1;
+  for (const slug of sa.flat()) {
+    const at = row.indexOf(slug);
+    if (at >= 0) after = at;
+    else row.splice(++after, 0, slug);
+  }
+  const inA = new Set(sa.flat());
+  const inB = new Set(sb.flat());
+  return {
+    routes: [sa, sb].map((steps) => steps.map((step) => step.map((slug) => row.indexOf(slug)))),
+    lessons: row.length,
+    shared: row.filter((s) => inA.has(s) && inB.has(s)).length,
+    onlyB: row.filter((s) => inB.has(s) && !inA.has(s)).length,
+    emptyB: sb.filter((step) => step.length === 0).length,
+  };
+}
+
 export default function AcademyPage() {
   const first = getLesson(startHere.steps[0].lessons[0]) ?? lessons[0];
   const otherPaths = paths.filter((p) => p.key !== startHere.key);
+  // one short path beside one longer path leaves the short column empty under its last step
+  const longer = otherPaths.length === 1 && otherPaths[0].steps.length > startHere.steps.length ? otherPaths[0] : null;
+  const meet = longer ? overlap(startHere, longer) : null;
 
   return (
     <>
@@ -246,6 +277,20 @@ export default function AcademyPage() {
                 </h3>
                 <p className="mt-8 max-w-[52ch] text-ink-2">{p.summary}</p>
                 <PathSteps path={p} />
+                {p.key === startHere.key && longer && meet && meet.shared > 0 && (
+                  <aside className="mt-34 hidden lg:block">
+                    <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                      <TwoRoutes routes={meet.routes} lessons={meet.lessons} />
+                    </div>
+                    <p className="eyebrow mt-13">Where they meet</p>
+                    <p className="mt-5 max-w-[58ch] text-sm leading-relaxed text-ink-3">
+                      {meet.shared === 1 ? "One lesson appears" : `${cap(count(meet.shared))} lessons appear`} in both paths: the ringed dots.
+                      {meet.onlyB > 0 && ` ${longer.title} adds ${count(meet.onlyB)} that ${startHere.title} does not include`}
+                      {meet.onlyB > 0 && (meet.emptyB > 0 ? `, and ${count(meet.emptyB)} of its steps ${meet.emptyB === 1 ? "has" : "have"} no lesson published yet.` : ".")}
+                      {meet.onlyB === 0 && meet.emptyB > 0 && ` ${cap(count(meet.emptyB))} of the steps in ${longer.title} ${meet.emptyB === 1 ? "has" : "have"} no lesson published yet.`}
+                    </p>
+                  </aside>
+                )}
               </article>
             ))}
           </div>
@@ -298,7 +343,7 @@ export default function AcademyPage() {
             className="mt-21"
             items={[
               { href: "/glossary", kicker: "Glossary", title: `${glossary.length} terms, defined plainly`, note: "With examples, formulae and the tools that use them." },
-              { href: "/academy/books", kicker: "Reading list", title: `${books.length} books worth the time`, note: "A bibliography by subject. No ratings and no purchase links." },
+              { href: "/academy/books", kicker: "Reading list", title: `${books.length} books worth the time`, note: "A bibliography by subject. No ratings; each entry links to a bookseller search and a library catalogue." },
               { href: "/faq", kicker: "Help", title: `${faqs.length} questions answered`, note: "Searchable, and honest about what is not yet published." },
               ...(articles.length ? [{ href: "/intelligence", kicker: "Intelligence", title: "Analysis, explainers and guides", note: "The publication: one idea at a time, worked through." }] : []),
             ]}

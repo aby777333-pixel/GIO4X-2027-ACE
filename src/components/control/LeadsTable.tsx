@@ -3,9 +3,9 @@ import { Score, StageBadge, StatusBadge } from "@/components/control/bits";
 import { fmtDateTime } from "@/components/control/format";
 import type { LeadRow } from "@/lib/supabase/types";
 
-export type LeadListItem = Pick<LeadRow, "id" | "reference" | "created_at" | "name" | "email" | "topic" | "status" | "assigned_to" | "stage" | "score">;
+export type LeadListItem = Pick<LeadRow, "id" | "reference" | "created_at" | "name" | "email" | "topic" | "status" | "assigned_to" | "stage" | "score" | "origin">;
 
-export const LEAD_LIST_COLUMNS = "id, reference, created_at, name, email, topic, status, assigned_to, stage, score";
+export const LEAD_LIST_COLUMNS = "id, reference, created_at, name, email, topic, status, assigned_to, stage, score, origin";
 
 function assignee(lead: LeadListItem, names: Map<string, string>, me: string): string {
   if (!lead.assigned_to) return "Unassigned";
@@ -42,6 +42,7 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
                   <Link href={`/control/leads/${lead.id}`} className="link num text-sm font-medium">
                     {lead.reference}
                   </Link>
+                  {lead.origin === "staff" && <span className="mt-3 block whitespace-nowrap text-xs text-ink-3">Entered by staff</span>}
                 </td>
                 <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(lead.created_at)}</td>
                 <td className="max-w-[14rem]">
@@ -81,6 +82,7 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
               </span>
               <span className="mt-5 flex flex-wrap gap-x-13 text-xs text-ink-3">
                 <span>{lead.topic}</span>
+                {lead.origin === "staff" && <span>Entered by staff</span>}
                 <span className="num">{fmtDateTime(lead.created_at)}</span>
                 <span>{assignee(lead, names, me)}</span>
               </span>

@@ -30,23 +30,40 @@
  * What is real: clock times, time zones, the sun, which regular sessions are open.
  * Everything else is form, and the caption under the stage says so.
  *
- * Below the desk layout (1080px) the statement fills the lower stage, so the scene
- * is lighter: the globe, the dial, the flows and the tape stand in the sky above
- * the words (the scene measures where they begin) and fade where the words are.
- * The two panes of glass, the names and the readouts belong to the desk layout.
+ * The frame. Like every other page's instrument, all of it is composed inside one
+ * golden rectangle (1.618 : 1) and clipped to it; the engine draws the champagne
+ * frame round it (Scene.frame). On a desk screen the frame stands beside the
+ * statement: its right edge on the content column's, its left edge clear of the
+ * headline, as large as that allows, with an equal margin above and below. Below
+ * 1080px it stands at the top of the stage, beside the headline or above the
+ * statement (the scene measures where the words begin), whichever is larger.
+ * Inside it the golden sections place the parts: the globe and its dial fill the
+ * major section (a square), the ladder stands in the square of the minor section
+ * and the ribbon in what is left under it. A frame too small for the panes (a
+ * phone) carries the globe alone, on the golden cut. Only the faint field behind
+ * (the deck, the dust, the horizon) runs on outside the frame.
+ *
+ * What it says in words, all of it from the clock and the regular timetable: the
+ * day and the UTC time, the region that carries the day, the FX sessions open now
+ * (or how long until the FX week opens), how many centres are in daylight and how
+ * many are open, the next regular open and its countdown; and, for the centre
+ * under the pointer, its venue, local time, UTC offset, regular hours, time to its
+ * next change of state, and its sunrise and sunset (from its latitude, the sun's
+ * declination and the equation of time; good to a few minutes).
  */
 import { TAU, clamp, rgba, type Frame, type Scene } from "../engine";
 import { pool } from "../kit";
-import { allCentreStatus, centres, formatDuration, fxSessions, windowInUtc, type CentreStatus } from "../../../lib/sessions";
+import { allCentreStatus, centres, formatDuration, fxOverview, fxSessions, localTime, windowInUtc, type CentreStatus } from "../../../lib/sessions";
 
 const PI = Math.PI;
 const DEG = PI / 180;
+const PHI = (1 + Math.sqrt(5)) / 2;
 /** camera distance (world units) */
 const D = 6;
 /** the globe, the dial about it, the tape's orbit */
 const R = 0.8;
 const RD = 1;
-const RT = 1.27;
+const RT = 1.13;
 const FLOOR = -1.3;
 const NC = centres.length;
 /** a point of the globe faces the viewer when its facing is above this (perspective horizon) */
@@ -58,6 +75,14 @@ const SIN_R = Math.sin(-0.2);
 const COS_R = Math.cos(-0.2);
 const FX_TONE = ["teal", "blue", "blue", "emerald"] as const;
 const REGIONS = ["ASIA", "EUROPE", "AMERICAS"] as const;
+const WEEK = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
+/** the sun counts as up when its centre is 0.833 degrees under the horizon (refraction and its own radius) */
+const SUN_UP = Math.sin(-0.833 * DEG);
+/** minutes as a clock time, any day */
+const clockOf = (m: number) => {
+  const v = ((Math.round(m) % 1440) + 1440) % 1440;
+  return pad(Math.floor(v / 60)) + ":" + pad(v % 60);
+};
 
 /* ── the land, as outlines (longitude, latitude). Coarse on purpose: it is sampled into a field of points. */
 const LAND: number[][] = [
@@ -190,6 +215,10 @@ function ev(t: number, period: number, dur: number, salt: number): number {
   const p = (t - n * period - dice(n, salt + 7.3) * (period - dur)) / dur;
   return p >= 0 && p <= 1 ? p : -1;
 }
+
+/** the golden rectangle the instrument was last composed in (canvas pixels), and whether there was room for one */
+const BOX = { x: 0, y: 0, w: 0, h: 0 };
+let BOXON = false;
 
 /* ── projection without allocation: the last projected point is left in X, Y (pixels), S (scale) */
 let cyw = 1;
@@ -374,6 +403,26 @@ function glass(f: Frame, p: Float64Array, on: number, lit: number): void {
   ctx.stroke();
 }
 
+/** a band of reflected light crossing a pane: `k` runs 0..1 across it. Expects additive drawing. */
+function sheen(f: Frame, p: Float64Array, k: number, level: number): void {
+  if (k <= 0 || k >= 1 || level <= 0.01) return;
+  const { ctx } = f;
+  const u = -0.4 + 1.6 * k;
+  ctx.beginPath();
+  pq(p, clamp(u), 0);
+  ctx.moveTo(X, Y);
+  pq(p, clamp(u + 0.1), 0);
+  ctx.lineTo(X, Y);
+  pq(p, clamp(u + 0.34), 1);
+  ctx.lineTo(X, Y);
+  pq(p, clamp(u + 0.24), 1);
+  ctx.lineTo(X, Y);
+  ctx.closePath();
+  ctx.fillStyle = f.pal.ink;
+  ctx.globalAlpha = 0.075 * Math.sin(PI * k) * level;
+  ctx.fill();
+}
+
 /** start a path with one segment of a pane */
 function line(ctx: CanvasRenderingContext2D, p: Float64Array, u0: number, v0: number, u1: number, v1: number, lift = 0): void {
   ctx.beginPath();
@@ -473,6 +522,18 @@ type State = {
   face: number;
   fx: Float32Array;
   sun: Float32Array;
+  /** for each centre: its UTC offset (minutes), sunrise and sunset today (UTC minutes), whether the sun is up there */
+  off: Int16Array;
+  rise: Float32Array;
+  set: Float32Array;
+  lit: Uint8Array;
+  nlit: number;
+  /** the state each centre was last seen in, and the scene time at which it last changed */
+  was: Uint8Array;
+  turned: Float32Array;
+  /** in words: the FX sessions open now, and the centre whose regular session opens next */
+  fxWords: string;
+  nextWords: string;
   /** what moves */
   init: boolean;
   lon: number;
@@ -493,10 +554,14 @@ function refresh(f: Frame, s: State, cap: number): void {
   const now = f.now;
   s.at = now.getTime();
   s.st = allCentreStatus(now);
-  // the sun: declination from the day of the year, longitude from the UTC clock (mean sun)
+  // the sun: declination from the day of the year; longitude from the UTC clock, corrected by the
+  // equation of time (the usual three-term approximation, good to about a minute)
   const day = (s.at - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86_400_000;
   const decl = -23.44 * Math.cos((TAU * (day + 10)) / 365.24) * DEG;
-  const sunLon = (12 - (now.getUTCHours() + now.getUTCMinutes() / 60)) * 15;
+  const yr = (TAU * (day - 81)) / 365;
+  const eot = 9.87 * Math.sin(2 * yr) - 7.53 * Math.cos(yr) - 1.5 * Math.sin(yr);
+  const utc = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const sunLon = (720 - utc - now.getUTCSeconds() / 60 - eot) / 4;
   s.sun[0] = Math.cos(decl) * Math.sin(sunLon * DEG);
   s.sun[1] = Math.sin(decl);
   s.sun[2] = Math.cos(decl) * Math.cos(sunLon * DEG);
@@ -506,10 +571,27 @@ function refresh(f: Frame, s: State, cap: number): void {
   let wait = Infinity;
   s.nopen = 0;
   s.next = -1;
+  s.nlit = 0;
   for (let i = 0; i < NC; i++) {
     const st = s.st[i];
     s.open[i] = st.state === "open" ? 1 : 0;
     s.nopen += s.open[i];
+    // its UTC offset, from its own wall clock; sunrise and sunset from its latitude and the sun's declination
+    let off = st.local.minutes - utc;
+    if (off > 780) off -= 1440;
+    if (off < -660) off += 1440;
+    s.off[i] = off;
+    const lat = st.centre.lat * DEG;
+    const half = Math.acos(clamp((SUN_UP - Math.sin(lat) * Math.sin(decl)) / (Math.cos(lat) * Math.cos(decl)), -1, 1)) / DEG;
+    const noon = 720 - 4 * st.centre.lon - eot;
+    s.rise[i] = noon - 4 * half;
+    s.set[i] = noon + 4 * half;
+    s.lit[i] = CV[i * 3] * s.sun[0] + CV[i * 3 + 1] * s.sun[1] + CV[i * 3 + 2] * s.sun[2] > SUN_UP ? 1 : 0;
+    s.nlit += s.lit[i];
+    // a real change of state, seen between two readings of the timetable, is marked on the globe
+    const code = st.state === "open" ? 1 : st.state === "pre" ? 2 : st.state === "lunch" ? 3 : 0;
+    if (s.was[i] !== 255 && s.was[i] !== code && !f.still) s.turned[i] = f.t;
+    s.was[i] = code;
     if (st.state !== "closed") {
       sx += Math.cos(st.centre.lon * DEG);
       sy += Math.sin(st.centre.lon * DEG);
@@ -539,6 +621,15 @@ function refresh(f: Frame, s: State, cap: number): void {
   for (let i = 0; i < NC; i++) s.tw[i] = f.ctx.measureText(centres[i].city).width;
   f.ctx.font = `600 8px ${f.pal.font}`;
   for (let k = 0; k < 3; k++) s.tw[NC + k] = f.ctx.measureText(REGIONS[k]).width;
+  // in words: the FX sessions open now (or how long until the FX week opens), and the next regular open
+  const fx = fxOverview(now);
+  if (fx.weekOpen) s.fxWords = fx.open.length ? fx.open.map((x) => x.name.toUpperCase()).join(" × ") : "BETWEEN SESSIONS";
+  else {
+    const ny = localTime(now, "America/New_York");
+    const until = ny.weekday === 0 ? 1020 - ny.minutes : ny.weekday === 6 ? 2460 - ny.minutes : 3900 - ny.minutes;
+    s.fxWords = `WEEK CLOSED · OPENS IN ${formatDuration(Math.max(1, until))}`;
+  }
+  s.nextWords = s.next >= 0 ? `${centres[s.next].city.toUpperCase()} · ${formatDuration(s.st[s.next].nextChangeIn)}` : "";
   fxSessions.forEach((x, k) => {
     const w = windowInUtc(x.tz, x.open, x.close, now);
     s.fx[k * 2] = w.start;
@@ -727,6 +818,15 @@ const scene: Scene<State> = {
       face: 0,
       fx: new Float32Array(8),
       sun: new Float32Array(3),
+      off: new Int16Array(NC),
+      rise: new Float32Array(NC),
+      set: new Float32Array(NC),
+      lit: new Uint8Array(NC),
+      nlit: 0,
+      was: new Uint8Array(NC).fill(255),
+      turned: new Float32Array(NC).fill(-99),
+      fxWords: "",
+      nextWords: "",
       init: false,
       lon: 0,
       tilt: 20 * DEG,
@@ -747,13 +847,25 @@ const scene: Scene<State> = {
     const t = f.t;
     const desk = f.w >= 1080;
     const lite = f.mobile || f.q < 0.75;
+    let g: CanvasGradient;
 
-    // ── the layout. On a desk screen the globe stands on the stage's focal point; below that the
-    // statement fills the lower stage and the instrument is the sky above it.
-    let zoom = 1;
-    /** a wide stage below the desk layout: the instrument stands beside the statement instead of above it */
-    let beside = false;
-    if (!desk) {
+    // ── the frame. One golden rectangle (1.618 : 1) holds the whole instrument and clips it, as on every
+    // other page; only the faint field behind it (deck, dust, horizon) runs on outside. Its right edge is the
+    // content column's (the same sums as engine.ts); its left edge keeps clear of the headline.
+    const gutter = clamp(f.w * 0.042, 21, 55);
+    const contentW = Math.min(f.w - gutter * 2, 1320);
+    const right = (f.w + contentW) / 2;
+    const b = BOX;
+    const left = (f.clear > 0 ? f.clear : (f.w - contentW) / 2 + contentW * 0.48) + clamp(contentW * 0.026, 22, 34);
+    let bw = f.mobile ? 0 : right - left;
+    if (desk) {
+      // beside the statement, as large as fits, with an equal margin above and below it that is deep
+      // enough for the caption to sit under the frame
+      bw = Math.min(bw, (f.h - 2 * Math.max(76, f.h * 0.08)) * PHI);
+      b.w = bw;
+      b.x = right - bw;
+      b.y = (f.h - bw / PHI) / 2;
+    } else {
       // where the statement begins, measured now and then (it moves when the display face arrives)
       if (s.skyFor !== f.w * 4096 + f.h || t - s.skyAt > 2 || t < s.skyAt) {
         const body = ctx.canvas.closest(".cx-hero")?.querySelector(".cx-statement-body");
@@ -761,35 +873,105 @@ const scene: Scene<State> = {
         s.skyFor = f.w * 4096 + f.h;
         s.skyAt = t;
       }
-      const sky = clamp(s.sky, 96, f.h * 0.6);
-      let radius = clamp(Math.min(f.w * 0.27, sky * 0.62), 64, 190);
-      // the room to the right of the headline, where there is any
-      const free = f.mobile || !f.clear ? 0 : f.w - f.clear - 52;
-      const wide = Math.min(free / 2.8, f.h * 0.3, 190);
-      beside = wide > radius * 1.15;
-      if (beside) {
-        radius = wide;
-        f.cx = f.clear + 28 + free / 2;
-        f.cy = radius * 1.3 + 20 + f.scroll * f.h * 0.12;
+      // below the desk layout the stage fades toward the statement from 40% of its height. The frame
+      // stands at the top: beside the headline where the stage is wide, or above the statement as on
+      // the inner pages, whichever gives the larger frame.
+      bw = Math.min(bw, (f.h * 0.4 - 20) * PHI);
+      const over = Math.min(contentW, 560, (s.sky - 28) * PHI);
+      if (over > bw) {
+        b.w = over;
+        b.x = (f.w - over) / 2;
+        b.y = 14;
       } else {
-        f.cx = f.w * (f.mobile ? 0.62 : 0.66);
-        f.cy = Math.max(radius * 1.27 + 10, sky * 0.5) + f.scroll * f.h * 0.12;
+        b.w = bw;
+        b.x = right - bw;
+        b.y = 20;
       }
-      zoom = radius / (R * f.u * 1.01);
     }
-    f.cam.parallax = desk ? 1 : 0.6;
+    b.h = b.w / PHI;
+    BOXON = b.w >= 120;
+    const H = b.h;
+    /** what the frame has room for: the two panes of glass; the readouts; the names on the globe */
+    const panes = BOXON && H >= 200;
+    const rich = panes && !f.mobile && H >= 240;
+    const named = rich && H >= 300;
+    const inset = Math.max(9, H * 0.035);
+    // The major section of a golden rectangle is a square: the globe and its dial fill it. The minor
+    // section is cut again at its own golden section: the ladder in its square, the ribbon below.
+    // A frame too small for the panes carries the globe alone, centred on the golden cut.
+    const gx = panes ? b.x + H / 2 : b.x + b.w * 0.618;
+    const gy = b.y + H / 2;
+    const unit = (H / 2 - inset) / 1.15;
+    if (BOXON) {
+      f.cx = gx;
+      f.cy = gy;
+    }
+    f.cam.parallax = 0.6;
     const live = still ? 0 : 1;
     // the camera drifts by itself, and leans with the pointer (the engine adds that)
-    f.aim(Math.sin(t * 0.11 + 1.7) * 0.04 * live, 0.03 + Math.sin(t * 0.073 + 0.4) * 0.012 * live, D, zoom);
+    f.aim(Math.sin(t * 0.11 + 1.7) * 0.04 * live, 0.03 + Math.sin(t * 0.073 + 0.4) * 0.012 * live, D, 1 / (1 + f.scroll * 0.16));
     lens(f);
+
+    // ══ the field behind the frame: dust, the deck, the light spilled on it, the horizon
+    motes(f, s, false, f.boot, desk ? f.clear + 16 : -1e6);
+    deck(f, 0.12 * f.boot);
+    pool(f, [0, FLOOR, -0.2], 2.4, pal.key, (desk ? 0.15 : 0.11) * f.boot);
+    pool(f, [0, FLOOR, 60], 28, pal.key, 0.24 * f.boot);
+    if (pr(0, FLOOR, 4000)) {
+      const reach = f.on(0.05, 0.5);
+      beam(f, CX, CX + (f.w - CX) * reach, Y, 0.45 * reach, 0.1 * reach);
+      beam(f, CX, CX - 1.7 * UU * reach, Y, 0.45 * reach, 0);
+    }
+    ctx.globalAlpha = 1;
+    if (desk) {
+      // the statement owns the left of the stage: the field gives way to it
+      g = ctx.createLinearGradient(0, 0, f.w * 0.54, 0);
+      g.addColorStop(0, "rgba(0,0,0,1)");
+      g.addColorStop(0.3, "rgba(0,0,0,1)");
+      g.addColorStop(0.63, "rgba(0,0,0,0.78)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, f.w * 0.54, f.h);
+      ctx.globalCompositeOperation = "source-over";
+    }
+    if (!BOXON) return;
+
+    // ══ the frame: a pane of darker glass, and everything of the instrument clipped to it
+    const fieldU = UU;
+    UU = unit;
+    // (the engine sizes the pointer's light from this, as in its own frames)
+    f.u = Math.min(b.w / 3.9, H / 2.75);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(b.x, b.y, b.w, H);
+    ctx.clip();
+    ctx.fillStyle = "rgba(4, 8, 12, 0.5)";
+    ctx.fillRect(b.x, b.y, b.w, H);
+    if (panes) {
+      // the golden sections, engraved very lightly
+      ctx.strokeStyle = pal.gold;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.1 * f.boot;
+      ctx.beginPath();
+      ctx.moveTo(Math.round(b.x + H) + 0.5, b.y);
+      ctx.lineTo(Math.round(b.x + H) + 0.5, b.y + H);
+      ctx.moveTo(b.x + H, Math.round(b.y + H * 0.618) + 0.5);
+      ctx.lineTo(b.x + b.w, Math.round(b.y + H * 0.618) + 0.5);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
     const U = UU * ZOOM;
     const rpx = (R * U * D) / Math.sqrt(D * D - R * R);
-    const room = (f.w - CX) / U;
-    const clearX = desk || beside ? f.clear + 16 : -1e6;
+    const clearX = -1e6;
 
     // ── waking. Calm until the pointer enters; up in about a second, down in about two.
     const want = still ? 1 : f.hover > 0.5 ? 1 : 0;
     s.wake = still ? 1 : s.wake + (want - s.wake) * Math.min(1, f.dt * (want > s.wake ? 2.4 : 1.3));
+    // while it wakes, a line of light runs down the frame, and the lettering resolves as the line passes it
+    const waking = !still && want === 1 && s.wake < 0.96;
+    const scanY = b.y + H * s.wake * 1.1;
+    const shown = (y: number) => (waking ? sm((scanY - y) / 16 + 0.5) : 1);
     if (s.wake < 0.002) s.wake = 0;
     /** the instruments come up one after another: `order` 0..1 */
     const stage = (order: number) => sm((s.wake - order * 0.55) / 0.45);
@@ -802,7 +984,7 @@ const scene: Scene<State> = {
 
     // ── the timetable
     const nowMs = f.now.getTime();
-    if (!s.st.length || Math.abs(nowMs - s.at) > 20_000) refresh(f, s, desk ? 10 : 5);
+    if (!s.st.length || Math.abs(nowMs - s.at) > 20_000) refresh(f, s, rich ? 10 : 5);
 
     // ── the globe's attitude: it faces the trading region, drifts, and turns to face the pointer
     const dxp = clamp((f.mx - CX) / rpx, -1.7, 1.7) * f.hover;
@@ -841,65 +1023,48 @@ const scene: Scene<State> = {
     const pScan = still ? 0.46 : ev(t, 14, 6, 5);
     const pPrint = still ? 0.5 : ev(t, 5.5, 2.4, 6);
     const nPrint = still ? 1 : EVN;
+    const pSheen = still ? 0.42 : ev(t, 9, 1.9, 7);
 
     // where the pointer is, among the instruments
     const dPointer = Math.hypot(f.mx - CX, f.my - CY);
     // the two panes of glass stand nearest the viewer, so the pointer is theirs first
     const L = s.ladder;
     const B = s.ribbon;
-    const ladOn = desk ? f.on(0.55, 0.4) : 0;
-    // the ribbon keeps clear of the caption at the foot of the stage, and stands down on a stage too short for it
-    const foot = Math.min(1.2, (f.h * 0.5 - 72) / U);
-    const ribOn = desk ? f.on(0.7, 0.3) * sm((foot - 0.98) / 0.08) : 0;
+    const ladOn = panes ? f.on(0.55, 0.4) : 0;
+    const ribOn = panes ? f.on(0.7, 0.3) : 0;
     let onLad = 0;
     let ladV = 0;
     let onRib = 0;
     let ribU = 0;
-    if (desk) {
-      pane(L, Math.min(1.52, ((room - 0.07) * (D - 0.55)) / D - 0.2), 0.1 - (1 - ladOn) * 0.12, -0.55, 0.44, 1.2, 0.45, 0);
+    /** the minor section: its left edge, its width, and the height its clock takes at the top */
+    const mx0 = b.x + H;
+    const mw = b.w - H;
+    const hudH = mw >= 200 ? 38 : 31;
+    let ladN = 10;
+    let ribM = 34;
+    if (panes) {
+      const cut = b.y + H * 0.618;
+      const lt = b.y + inset + hudH + 19;
+      const lh = cut - 15 - lt;
+      const lw = Math.min(mw * 0.6, lh * 0.62);
+      ladN = lh < 140 ? 6 : 10;
+      // a pane is placed by the place it should take on screen, at its own depth
+      let k = (U * D) / (D - 0.35);
+      pane(L, (mx0 + mw / 2 - CX) / k, (CY - lt - lh / 2) / k - (1 - ladOn) * 0.08, -0.35, lw / (k * Math.cos(0.35)), lh / k, 0.35, 0);
       local(L, f.mx, f.my);
       onLad = LU > -0.15 && LU < 1.15 && LV > -0.05 && LV < 1.05 ? f.hover * ladOn : 0;
       ladV = LV;
-      pane(B, 0.1, -(foot - 0.21) / 1.13 - 0.02 - (1 - ribOn) * 0.1, -0.7, 1.5, 0.34, 0, 0.5);
+      const rt = cut + 17;
+      const rh = b.y + H - inset - rt;
+      const rw = mw - inset * 2;
+      ribM = clamp(Math.round(rw / 7.2), 14, 34);
+      k = (U * D) / (D - 0.3);
+      pane(B, (mx0 + mw / 2 - CX) / k, (CY - rt - rh / 2) / k - (1 - ribOn) * 0.08, -0.3, rw / k, rh / (k * Math.cos(0.42)), 0, 0.42);
       local(B, f.mx, f.my);
-      onRib = LU > -0.03 && LU < 1.03 && LV > -0.3 && LV < 1.3 ? f.hover * ribOn : 0;
+      onRib = LU > -0.03 && LU < 1.03 && LV > -0.15 && LV < 1.15 ? f.hover * ribOn : 0;
       ribU = LU;
     }
-    const onDial = desk && !onLad && !onRib ? f.hover * sm(1 - Math.abs(dPointer - RD * U) / (0.15 * U)) : 0;
-
-    // ══ far field: dust, the deck, the light the globe spills on it, the horizon
-    motes(f, s, false, f.boot, clearX);
-    deck(f, 0.13 * f.boot);
-    pool(f, [0, FLOOR, -0.2], 2.4, pal.key, (desk ? 0.2 : 0.14) * f.boot);
-    pool(f, [0, FLOOR, 60], 28, pal.key, 0.26 * f.boot);
-    // waking sends one ring of light out across the deck; settling draws it back in
-    const ringK = still ? 0 : s.wake * (1 - s.wake) * 4;
-    if (ringK > 0.02) {
-      const rr = 1.05 + 2.6 * s.wake;
-      ctx.beginPath();
-      let pen = false;
-      for (let i = 0; i <= 56; i++) {
-        const a = (i / 56) * TAU;
-        if (!pr(Math.cos(a) * rr, FLOOR, Math.sin(a) * rr) || X < clearX + 20) pen = false;
-        else if (pen) ctx.lineTo(X, Y);
-        else {
-          ctx.moveTo(X, Y);
-          pen = true;
-        }
-      }
-      ctx.globalCompositeOperation = "lighter";
-      ctx.strokeStyle = pal.key;
-      bloom(ctx, 0.55 * ringK * f.boot, 1.2);
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 1;
-    }
-    if (pr(0, FLOOR, 4000)) {
-      const hy = Y;
-      const edge = Math.sqrt(Math.max(1, (RD * U) ** 2 - (hy - CY) ** 2));
-      const reach = f.on(0.05, 0.5);
-      beam(f, CX + edge, CX + edge + (f.w - CX - edge) * reach, hy, 0.6 * reach, 0.1 * reach);
-      beam(f, CX - edge, CX - edge - 0.7 * U * reach, hy, (desk ? 0.5 : 0.7) * reach, 0);
-    }
+    const onDial = rich && !onLad && !onRib ? f.hover * sm(1 - Math.abs(dPointer - RD * U) / (0.15 * U)) : 0;
 
     // ══ the tape's far side passes behind the globe
     const tapeOn = f.on(0.4, 0.4);
@@ -924,7 +1089,7 @@ const scene: Scene<State> = {
       ctx.lineWidth = 1;
       ctx.stroke();
       // quarter hours resolve as the dial wakes; the hours are always engraved
-      const fine = desk ? wDial : 0;
+      const fine = rich ? wDial : 0;
       for (let pass = fine > 0.02 ? 0 : 1; pass < 3; pass++) {
         ctx.beginPath();
         const count = pass === 0 ? 96 : 24;
@@ -941,7 +1106,7 @@ const scene: Scene<State> = {
         ctx.globalAlpha = (pass === 0 ? 0.26 * fine : pass === 1 ? 0.34 + 0.2 * wDial : 0.62 + 0.3 * wDial) * dialOn;
         ctx.stroke();
       }
-      if (desk) {
+      if (rich) {
         for (let hr = 0; hr < 24; hr += 6) {
           dp((hr / 24) * TAU, RD - 0.105);
           if (X > clearX) text(f, pad(hr), X, Y, 9, pal.ink2, (0.5 + 0.35 * wDial) * dialOn, "center");
@@ -969,6 +1134,35 @@ const scene: Scene<State> = {
         ctx.lineWidth = 1.6;
         ctx.stroke();
       }
+      // the centre under the pointer writes its own day on the dial: its regular hours in champagne,
+      // and a mark where the sun rises and sets on it
+      if (rich && s.selK > 0 && s.sel >= 0) {
+        const c = centres[s.sel];
+        const a0 = ((c.open - s.off[s.sel]) / 1440) * TAU;
+        const span = ((c.close - c.open) / 1440) * TAU;
+        const steps = Math.max(4, Math.round(span / 0.09));
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          dp(a0 + (span * i) / steps, RD - 0.045);
+          if (i) ctx.lineTo(X, Y);
+          else ctx.moveTo(X, Y);
+        }
+        ctx.strokeStyle = pal.gold;
+        ctx.globalAlpha = 0.9 * s.selK * dialOn;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.strokeStyle = pal.ink;
+        ctx.lineWidth = 1;
+        for (let k = 0; k < 2; k++) {
+          const a = ((k ? s.set[s.sel] : s.rise[s.sel]) / 1440) * TAU;
+          dp(a, RD - 0.085);
+          ctx.beginPath();
+          // a rising sun is a whole disc, a setting one a half
+          ctx.arc(X, Y, 3, 0, k ? PI : TAU);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
       // the present minute
       ctx.strokeStyle = pal.ink;
       ctx.beginPath();
@@ -985,7 +1179,7 @@ const scene: Scene<State> = {
     // ══ the globe
     const globeOn = f.on(0, 0.5);
     ctx.globalCompositeOperation = "lighter";
-    let g = ctx.createRadialGradient(CX, CY, rpx * 0.94, CX, CY, rpx * 1.2);
+    g = ctx.createRadialGradient(CX, CY, rpx * 0.94, CX, CY, rpx * 1.2);
     g.addColorStop(0, rgba(pal.key, 0.3 * globeOn));
     g.addColorStop(0.35, rgba(pal.key, 0.09 * globeOn));
     g.addColorStop(1, rgba(pal.key, 0));
@@ -1126,6 +1320,37 @@ const scene: Scene<State> = {
     ctx.beginPath();
     ctx.arc(CX, CY, rpx, phi - 1.15, phi + 1.15);
     bloom(ctx, (0.55 + 0.2 * wGlobe) * sside * globeOn, 1.3);
+    // an aurora along the terminator: curtains of light standing off the surface where day meets night
+    {
+      const hl = Math.hypot(sux, suz) || 1;
+      const ax = -suz / hl;
+      const az = sux / hl;
+      const bx = suy * az;
+      const by = suz * ax - sux * az;
+      const bz = -suy * ax;
+      const n = lite ? 26 : 64;
+      ctx.lineWidth = lite ? 2 : 3.4;
+      for (let i = 0; i < n; i++) {
+        const th = (i / n) * TAU;
+        const c = Math.cos(th);
+        const d = Math.sin(th);
+        const ex = ax * c + bx * d;
+        const ey = by * d;
+        const ez = az * c + bz * d;
+        gp(ex, ey, ez, 1);
+        if (F < HOR) continue;
+        const x0 = X;
+        const y0 = Y;
+        const shimmer = 0.5 + 0.5 * Math.sin(t * 1.3 + i * 1.7 + 2 * Math.sin(t * 0.4 + i * 0.6));
+        gp(ex, ey, ez, 1.025 + 0.075 * shimmer);
+        ctx.strokeStyle = i % 3 === 0 ? pal.teal : i % 3 === 1 ? pal.emerald : pal.indigo;
+        ctx.globalAlpha = (0.04 + 0.2 * shimmer) * globeOn * (0.6 + 0.4 * wGlobe);
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(X, Y);
+        ctx.stroke();
+      }
+    }
     // the sun's glint on the glass, at the point where it stands overhead
     gp(sux, suy, suz, 1);
     if (F > HOR + 0.05) {
@@ -1157,7 +1382,7 @@ const scene: Scene<State> = {
 
     // ── the centres: where each stands on screen, and which one the pointer is nearest
     let cand = -1;
-    let best = desk ? rpx * 0.34 : 0;
+    let best = rich ? rpx * 0.34 : 0;
     for (let i = 0; i < NC; i++) {
       gp(CV[i * 3], CV[i * 3 + 1], CV[i * 3 + 2], 1);
       s.px[i] = X;
@@ -1336,6 +1561,16 @@ const scene: Scene<State> = {
         const open = st.state === "open";
         const tone = open ? pal.emerald : st.state === "closed" ? pal.ink3 : pal.gold;
         const mine = i === sel ? s.selK : 0;
+        // its session has just changed state (on the real timetable): a soft bloom opens from it
+        const born = (t - s.turned[i]) / 4;
+        if (born >= 0 && born < 1) {
+          ctx.globalCompositeOperation = "lighter";
+          ctx.strokeStyle = tone;
+          ctx.beginPath();
+          ctx.arc(x, y, (6 + 52 * born) * mk, 0, TAU);
+          bloom(ctx, (1 - born) * (1 - born) * 0.9 * depth, 1.5);
+          ctx.globalCompositeOperation = "source-over";
+        }
         // the travelling pulse lights each centre as it passes
         let flash = 0;
         if (pulseAt >= 0 && i !== pulseAt) {
@@ -1379,11 +1614,11 @@ const scene: Scene<State> = {
           ctx.fill();
         }
         // names on a desk screen; their local times resolve as the globe wakes
-        if (!desk || s.pf[i] < 0.3 || x < clearX + 40) continue;
+        if (!named || s.pf[i] < 0.3) continue;
         const name = st.centre.city;
         const tw = s.tw[i];
-        const right = x >= CX;
-        const lx = right ? x + 10 : x - 10 - tw;
+        // beside its point, on the side away from the globe's axis, and always inside the globe's square
+        const lx = (x >= CX ? x + 10 + tw < mx0 - 4 : x - 10 - tw < b.x + 5) ? x + 10 : x - 10 - tw;
         const BX = s.boxes;
         let clash = false;
         for (let k = 0; k < nb; k++) if (lx - 3 < BX[k * 4 + 2] && lx + tw + 3 > BX[k * 4] && y - 13 < BX[k * 4 + 3] && y + 13 > BX[k * 4 + 1]) clash = true;
@@ -1395,7 +1630,7 @@ const scene: Scene<State> = {
         nb++;
         const show = depth * (1 - mine);
         text(f, name, lx, y - 5, 11, pal.ink, (open ? 0.92 : 0.55 + 0.25 * wGlobe) * show, "left", 600, false, true);
-        text(f, part(st.local.label, wGlobe * 1.4), lx, y + 7, 10, pal.ink2, 0.85 * wGlobe * show, "left", 500, false, true);
+        text(f, part(st.local.label, wGlobe * 1.4), lx, y + 7, 10, pal.ink2, 0.85 * wGlobe * show * shown(y), "left", 500, false, true);
       }
     }
     ctx.globalAlpha = 1;
@@ -1406,7 +1641,7 @@ const scene: Scene<State> = {
       const up = Math.sin(phi - PI / 2) < Math.sin(phi + PI / 2) ? phi - PI / 2 : phi + PI / 2;
       const fx = CX + Math.cos(up) * rpx;
       const fy = CY + Math.sin(up) * rpx;
-      const len = U * (lite ? 0.36 : 0.62) * (0.75 + 0.25 * wGlobe);
+      const len = U * (lite ? 0.36 : 0.5) * (0.75 + 0.25 * wGlobe);
       ctx.globalCompositeOperation = "lighter";
       g = ctx.createRadialGradient(fx, fy, 0, fx, fy, U * 0.42);
       g.addColorStop(0, rgba(pal.ink, 0.5 * flare));
@@ -1503,10 +1738,13 @@ const scene: Scene<State> = {
       }
     }
 
-    if (desk) {
-      // ══ the depth ladder: a pane of glass standing to the right, turned toward the globe
+    if (panes) {
+      // ══ the depth ladder: a pane of glass in the minor section, turned toward the globe
       glass(f, L, ladOn, Math.max(wLadder * 0.6, onLad));
-      const N = 10;
+      ctx.globalCompositeOperation = "lighter";
+      sheen(f, L, Math.max(pSheen, waking ? wLadder : 0), ladOn);
+      ctx.globalCompositeOperation = "source-over";
+      const N = ladN;
       const stp = 0.41 / N;
       const side = dice(nSweep, 51) > 0.5 ? 1 : 0;
       // the spine, with a mark for every level
@@ -1573,13 +1811,16 @@ const scene: Scene<State> = {
       }
       ctx.globalAlpha = 1;
       pq(L, 0.5, 1);
-      text(f, part("DEPTH LADDER", wLadder * 1.3), X, Y - 11, 9, pal.ink2, 0.8 * wLadder * ladOn, "center");
+      text(f, part("DEPTH LADDER", wLadder * 1.3), X, Y - 11, 9, pal.ink2, 0.8 * wLadder * ladOn * shown(Y), "center");
       pq(L, 0.5, 0);
       text(f, part("ILLUSTRATION", wLadder * 1.3), X, Y + 11, 8, pal.ink3, 0.75 * wLadder * ladOn, "center");
 
-      // ══ the candle ribbon: a pane on the console below the globe, leaning back
+      // ══ the candle ribbon: a pane on the console under the ladder, leaning back
       glass(f, B, ribOn, Math.max(wRibbon * 0.6, onRib));
-      const M = 34;
+      ctx.globalCompositeOperation = "lighter";
+      sheen(f, B, Math.max(pSheen >= 0 ? pSheen * 1.2 - 0.2 : -1, waking ? wRibbon : 0), ribOn);
+      ctx.globalCompositeOperation = "source-over";
+      const M = ribM;
       const du = 0.92 / M;
       const run = still ? 40.6 : t * 0.42;
       const n0 = Math.floor(run);
@@ -1635,16 +1876,71 @@ const scene: Scene<State> = {
       }
       ctx.globalAlpha = 1;
       pq(B, 0, 1);
-      text(f, part("CANDLE RIBBON", wRibbon * 1.3), X + 2, Y - 10, 9, pal.ink2, 0.8 * wRibbon * ribOn);
+      text(f, part(mw >= 200 ? "CANDLE RIBBON" : "CANDLES", wRibbon * 1.3), X + 2, Y - 10, 9, pal.ink2, 0.8 * wRibbon * ribOn);
       pq(B, 1, 1);
       text(f, part("ILLUSTRATION", wRibbon * 1.3), X - 2, Y - 10, 8, pal.ink3, 0.75 * wRibbon * ribOn, "right");
     }
 
-    // ══ near field: dust between the viewer and the instruments
+    // ══ dust between the viewer and the instrument, in the field's own scale
+    UU = fieldU;
     motes(f, s, true, f.boot, clearX);
+    UU = unit;
 
-    if (desk) {
-      // ── the hour under the pointer, read off the dial, and the FX windows it falls in
+    // ── the clock, and the region that carries the day: at the head of the minor section, or, in a
+    // frame with no panes, in the corner the globe leaves free
+    {
+      const hud = f.on(0.5, 0.4);
+      const clock = `${WEEK[f.now.getUTCDay()]} ${pad(hours)}:${pad(minutes)} UTC`;
+      const lit: number = f.region === "asia" ? 0 : f.region === "europe" ? 1 : f.region === "americas" ? 2 : -1;
+      if (!panes) {
+        if (H >= 90) {
+          text(f, clock.slice(0, 9), b.x + inset, b.y + H - inset - 16, 9, pal.ink, 0.85 * hud);
+          text(f, lit >= 0 ? `UTC · ${REGIONS[lit]}` : "UTC", b.x + inset, b.y + H - inset - 4, 8, pal.ink2, 0.8 * hud);
+        }
+      } else {
+        const hx = b.x + b.w - inset - 2;
+        const hy = b.y + inset + 7;
+        text(f, clock, hx, hy, 11, pal.ink, 0.85 * hud, "right");
+        let rx = hx;
+        for (let k = 2; k >= 0; k--) {
+          // a narrow frame names only the region that carries the day
+          if (mw < 200 && k !== lit) continue;
+          const on = k === lit;
+          text(f, REGIONS[k], rx, hy + 16, 8, on ? pal.ink : pal.ink3, (on ? 0.95 : 0.4 + 0.25 * wDial) * hud, "right");
+          rx -= s.tw[NC + k] + 6;
+          ctx.globalAlpha = (on ? 1 : 0.4) * hud;
+          ctx.fillStyle = on ? pal.key : pal.ink3;
+          ctx.beginPath();
+          ctx.arc(rx, hy + 16, on ? 2.4 : 1.6, 0, TAU);
+          ctx.fill();
+          rx -= 12;
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    if (rich) {
+      // ── the corners the dial leaves free in its square carry what the timetable says in words:
+      // the FX sessions open now, the centres in daylight, the next regular open, the centres open
+      const cornerA = f.on(0.6, 0.4) * (0.72 + 0.28 * wDial);
+      const tx0 = b.x + inset + 2;
+      const tx1 = mx0 - inset - 2;
+      const ty0 = b.y + inset + 7;
+      const ty1 = b.y + H - inset - 6;
+      const still0 = clamp(1 - onDial * 4);
+      text(f, "FX", tx0, ty0, 8, pal.ink3, 0.9 * cornerA * still0);
+      text(f, s.fxWords, tx0 + 15, ty0, 8, pal.gold, 0.95 * cornerA * still0);
+      text(f, `${s.nlit} OF ${NC}`, tx1, ty0, 8, pal.ink, 0.9 * cornerA, "right");
+      text(f, "IN DAYLIGHT", tx1 - 36, ty0, 8, pal.ink3, 0.9 * cornerA, "right");
+      if (s.nextWords) {
+        text(f, "NEXT OPEN", tx0, ty1, 8, pal.ink3, 0.9 * cornerA);
+        text(f, s.nextWords, tx0 + 55, ty1, 8, pal.ink, 0.9 * cornerA);
+      }
+      text(f, `${s.nopen} OF ${NC}`, tx1, ty1, 8, pal.ink, 0.9 * cornerA, "right");
+      text(f, "OPEN NOW", tx1 - 36, ty1, 8, pal.ink3, 0.9 * cornerA, "right");
+
+      // ── the hour under the pointer, read off the dial, and the FX windows it falls in: the reading
+      // stands in the corner of the globe's square
       if (onDial > 0.02) {
         const mins = Math.round(((scrubA / TAU) * 1440) / 5) * 5;
         const a = (mins / 1440) * TAU;
@@ -1659,39 +1955,9 @@ const scene: Scene<State> = {
         ctx.stroke();
         let names = "";
         for (let k = 0; k < 4; k++) if ((((mins - s.fx[k * 2]) % 1440) + 1440) % 1440 < s.fx[k * 2 + 1]) names += (names ? " · " : "") + fxSessions[k].name.toUpperCase();
-        dp(a, RD + 0.15);
-        const right = Math.sin(a) >= 0;
-        const tx = clamp(X, clearX + 60, f.w - 12);
-        text(f, `${pad(Math.floor(mins / 60) % 24)}:${pad(mins % 60)} UTC`, tx, Y - 6, 11, pal.ink, onDial, right ? "left" : "right");
-        text(f, names || "BETWEEN FX WINDOWS", tx, Y + 7, 9, pal.gold, 0.9 * onDial, right ? "left" : "right");
+        text(f, `${pad(Math.floor(mins / 60) % 24)}:${pad(mins % 60)} UTC`, b.x + inset + 2, b.y + inset + 7, 11, pal.ink, clamp(onDial * 3));
+        text(f, names || "BETWEEN FX WINDOWS", b.x + inset + 2, b.y + inset + 21, 8, pal.gold, 0.9 * clamp(onDial * 3));
       }
-
-      // ── the clock, and the region that carries the day
-      const hud = f.on(0.5, 0.4);
-      const hx = CX + Math.min(room - 0.09, 1.56) * U;
-      const hy = CY - 1.3 * U;
-      text(f, `UTC ${pad(hours)}:${pad(minutes)}`, hx, hy, 11, pal.ink, 0.85 * hud, "right");
-      ctx.strokeStyle = pal.ink;
-      ctx.globalAlpha = 0.4 * hud;
-      ctx.lineWidth = 1.25;
-      ctx.beginPath();
-      ctx.moveTo(hx - 26, hy - 14);
-      ctx.lineTo(hx + 7, hy - 14);
-      ctx.lineTo(hx + 7, hy + 19);
-      ctx.stroke();
-      let rx = hx;
-      for (let k = 2; k >= 0; k--) {
-        const on = f.region === (k === 0 ? "asia" : k === 1 ? "europe" : "americas");
-        text(f, REGIONS[k], rx, hy + 17, 8, on ? pal.ink : pal.ink3, (on ? 0.95 : 0.4 + 0.25 * wDial) * hud, "right");
-        rx -= s.tw[NC + k] + 6;
-        ctx.globalAlpha = (on ? 1 : 0.4) * hud;
-        ctx.fillStyle = on ? pal.key : pal.ink3;
-        ctx.beginPath();
-        ctx.arc(rx, hy + 17, on ? 2.4 : 1.6, 0, TAU);
-        ctx.fill();
-        rx -= 12;
-      }
-      ctx.globalAlpha = 1;
 
       // ── the readout of the centre under the pointer: its real local time and its regular session
       if (sel >= 0 && s.st[sel]) {
@@ -1703,14 +1969,20 @@ const scene: Scene<State> = {
         const state = st.state === "open" ? "Regular session open" : st.state === "lunch" ? "Midday break" : st.state === "pre" ? "Pre-open" : "Regular session closed";
         const note = `${state} · ${formatDuration(st.nextChangeIn)} ${st.nextLabel}`;
         ctx.font = `500 10px ${pal.font}`;
-        const cw = Math.max(176, ctx.measureText(note).width + 36);
-        const ch = 68;
+        const c = st.centre;
+        const hoursLine = `Regular hours ${clockOf(c.open)} to ${clockOf(c.close)}${c.lunch ? `, break ${clockOf(c.lunch[0])} to ${clockOf(c.lunch[1])}` : ""}`;
+        const off = s.off[sel];
+        const zone = `UTC${off < 0 ? "-" : "+"}${Math.floor(Math.abs(off) / 60)}${Math.abs(off) % 60 ? ":" + pad(Math.abs(off) % 60) : ""}`;
+        const sunLine = `Daylight ${clockOf(s.rise[sel] + off)} to ${clockOf(s.set[sel] + off)} · ${s.lit[sel] ? "sun up" : "sun down"}`;
+        const cw = Math.min(b.w - 16, Math.max(190, ctx.measureText(note).width + 38, ctx.measureText(hoursLine).width + 28));
+        const ch = 100;
+        // the card opens beside the centre, and always inside the frame
         let bx = x + 20;
-        if (bx + cw > f.w - 12) bx = x - 20 - cw;
-        if (bx < clearX) bx = x + 20;
+        if (bx + cw > b.x + b.w - 8) bx = x - 20 - cw;
+        bx = clamp(bx, b.x + 8, b.x + b.w - cw - 8);
         let by = y - ch - 16;
-        if (by < 10) by = y + 18;
-        by += (1 - k) * 8;
+        if (by < b.y + 8) by = y + 18;
+        by = Math.min(by, b.y + H - ch - 8) + (1 - k) * 8;
         // a reticle on the centre and a leader to the card
         ctx.strokeStyle = pal.gold;
         ctx.globalAlpha = 0.9 * k;
@@ -1734,7 +2006,9 @@ const scene: Scene<State> = {
         text(f, part(st.local.label, k * 1.5), bx + 13, by + 36, 19, pal.ink, k, "left", 500, true);
         ctx.font = `500 19px ${pal.display}`;
         const lw = ctx.measureText(st.local.label).width;
-        text(f, "LOCAL TIME", bx + 21 + lw, by + 38, 8, pal.ink3, 0.9 * k);
+        text(f, `LOCAL TIME · ${zone}`, bx + 21 + lw, by + 38, 8, pal.ink3, 0.9 * k);
+        text(f, part(hoursLine, k * 1.3), bx + 13, by + 72, 10, pal.ink2, 0.9 * k, "left", 500);
+        text(f, part(sunLine, k * 1.3), bx + 13, by + 86, 10, pal.ink3, 0.95 * k, "left", 500);
         ctx.globalAlpha = k;
         ctx.fillStyle = tone;
         ctx.beginPath();
@@ -1745,19 +2019,20 @@ const scene: Scene<State> = {
       }
     }
     ctx.globalAlpha = 1;
-    if (!desk && !beside) {
-      // the statement stands in front of the lower part of the instrument: the light gives way to the words
-      const y0 = s.sky - 18;
-      const y1 = y0 + rpx * 0.7;
-      g = ctx.createLinearGradient(0, y0, 0, y1);
-      g.addColorStop(0, "rgba(0,0,0,0)");
-      g.addColorStop(1, "rgba(0,0,0,0.74)");
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = g;
-      ctx.fillRect(0, y0, f.w, f.h - y0);
+    if (waking && s.wake > 0.02) {
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = pal.key;
+      ctx.beginPath();
+      ctx.moveTo(b.x, scanY);
+      ctx.lineTo(b.x + b.w, scanY);
+      bloom(ctx, 0.7 * Math.sin(PI * clamp(s.wake * 1.1)), 1);
+      ctx.globalAlpha = 1;
     }
     ctx.globalCompositeOperation = "source-over";
+    ctx.restore();
   },
+  /** the engine hit-tests the pointer against this, clips its light to it and draws the champagne frame round it */
+  frame: () => (BOXON ? BOX : null),
 };
 
 export default scene;

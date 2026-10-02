@@ -150,10 +150,10 @@ export default function EditorialStandardsPage() {
         <div className="grid max-w-measure gap-21 text-ink-2" data-reveal suppressHydrationWarning>
           <p>
             GIO4X Intelligence follows the same rules as the rest of the site. A number in an article is a reference fixing with its date, a published trading condition marked as indicative, a figure from a named primary source, or a worked example labelled as one. Articles do not
-            quote live prices, because this site has no licensed source for them.
+            quote live prices, because GIO4X has no licensed source of its own for them.
           </p>
           <p>
-            Charts embedded from TradingView are attributed to TradingView. The full account of each kind of figure is in the{" "}
+            Charts and market panels embedded from TradingView are third-party frames, loaded at the reader’s request and attributed to TradingView. The full account of each kind of figure is in the{" "}
             <Link href="/trust/data-methodology" className="link">
               data methodology
             </Link>

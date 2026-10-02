@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PrivacyControls, TimeZonePreference } from "@/components/company/PrivacyControls";
+import { TradingViewPreference } from "@/components/markets/TradingViewPreference";
 import { AppearanceControls } from "@/components/shell/Appearance";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { pageMeta } from "@/lib/meta";
@@ -67,8 +68,18 @@ export default function PreferencesPage() {
                   <Link href="/legal/cookies" className="link">
                     Cookie Notice
                   </Link>{" "}
-                  will say so. Charts embedded from TradingView are served by TradingView under its own terms.
+                  will say so.
                 </p>
+              </div>
+              <div className="mt-21 scroll-mt-[var(--header-h)] border-l border-accent pl-13" id="third-party">
+                <p className="label">Third-party content</p>
+                <p className="mt-5 text-sm text-ink">
+                  Charts, the economic calendar, heat maps and quote panels embedded from TradingView are TradingView’s own pages, served under its own terms. A loaded frame may set TradingView’s own cookies, which this site cannot read.
+                </p>
+                <p className="mt-5 text-xs text-ink-3">By default each one stays unloaded until you press its button. This switch is the only standing choice, and it is kept with your display preferences.</p>
+                <div className="mt-13 max-w-narrow">
+                  <TradingViewPreference />
+                </div>
               </div>
             </div>
             <PrivacyControls />

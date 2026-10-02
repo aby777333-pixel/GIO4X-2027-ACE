@@ -5,6 +5,7 @@ import { isUuid } from "@/lib/server/validate";
 import type { AuditRow } from "@/lib/supabase/types";
 
 const ACTION_LABEL: Record<string, string> = {
+  "lead.add_manual": "Enquiry entered by staff",
   "lead.status": "Lead status changed",
   "lead.assign": "Lead assignment changed",
   "lead.note": "Note added to a lead",
@@ -26,6 +27,12 @@ const ACTION_LABEL: Record<string, string> = {
   "chat.claim": "Live chat taken",
   "chat.close": "Live chat closed",
   "config.set": "Site setting changed",
+  "blog.create": "Blog draft created",
+  "blog.publish": "Blog post published",
+  "blog.unpublish": "Blog post withdrawn",
+  "blog.archive": "Blog post archived",
+  "blog.status": "Blog post status changed",
+  "blog.edit_published": "Published blog post edited",
   "incident.open": "Incident created",
   "incident.update": "Incident update posted",
   "incident.publish": "Incident published",

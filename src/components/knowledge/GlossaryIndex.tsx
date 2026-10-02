@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useMemo, useState } from "react";
+import { LearnCount, LearnedMark } from "@/components/glossary/Progress";
 
 export type IndexTerm = { slug: string; term: string; first: string; letter: string; topic: string; aliases: string[] };
 
@@ -13,7 +14,7 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
  * reads, prints and indexes without JavaScript; the filter only hides rows.
  * `?q=` pre-fills the box, so a filtered view can be linked to.
  */
-export function GlossaryIndex({ terms, topics }: { terms: IndexTerm[]; topics: string[] }) {
+export function GlossaryIndex({ terms, topics, lessonLine, lessonTotal = 0 }: { terms: IndexTerm[]; topics: string[]; /** a sentence above the filter about the lessons the terms open as */ lessonLine?: string; /** how many terms have a lesson */ lessonTotal?: number }) {
   const [q, setQ] = useState("");
   const [topic, setTopic] = useState<string | null>(null);
   const inputId = useId();
@@ -76,6 +77,12 @@ export function GlossaryIndex({ terms, topics }: { terms: IndexTerm[]; topics: s
         </nav>
 
         <div className="min-w-0">
+          {lessonLine && (
+            <div className="mb-21 max-w-measure border-l border-accent pl-21">
+              <p className="text-ink-2">{lessonLine}</p>
+              <LearnCount total={lessonTotal} className="mt-8" />
+            </div>
+          )}
           <div className="field">
             <label htmlFor={inputId}>Filter the glossary</label>
             <input
@@ -143,7 +150,10 @@ export function GlossaryIndex({ terms, topics }: { terms: IndexTerm[]; topics: s
                     {list.map((t) => (
                       <li key={t.slug} className="border-b border-line">
                         <Link href={`/glossary/${t.slug}`} className="group grid gap-x-34 gap-y-3 py-13 transition-colors duration-fast hover:bg-[var(--brand-soft)] md:grid-cols-[minmax(0,1fr)_minmax(0,1.618fr)_8.5rem] md:items-baseline md:py-21">
-                          <span className="h4 transition-colors duration-fast group-hover:text-accent">{t.term}</span>
+                          <span className="h4 transition-colors duration-fast group-hover:text-accent">
+                            {t.term}
+                            <LearnedMark slug={t.slug} />
+                          </span>
                           <span className="text-[0.9375rem] text-ink-2">{t.first}</span>
                           <span className="label md:text-right">{t.topic}</span>
                         </Link>

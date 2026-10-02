@@ -19,6 +19,7 @@ const NOTICES: Record<string, string> = {
   task: "Follow-up added.",
   done: "Follow-up completed.",
   reopened: "Follow-up reopened.",
+  added: "Enquiry added. It carries no consent: do not add this person to any mailing.",
 };
 const ERRORS: Record<string, string> = {
   invalid: "That request was not valid. Nothing was changed.",

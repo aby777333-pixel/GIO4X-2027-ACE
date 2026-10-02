@@ -7,6 +7,7 @@ import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { DepthRoom, FxSessionsToday } from "@/components/knowledge/MorningRoom";
 import { EditionDate, Greeting, LocalClock } from "@/components/knowledge/Today";
 import { firstSentence } from "@/components/markets/graph";
+import { EconomicCalendar } from "@/components/markets/MarketPanels";
 import { SessionStrip } from "@/components/market/SessionStrip";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Change, Sparkline } from "@/components/ui/Data";
@@ -184,7 +185,7 @@ export default function MorningRoomPage() {
           n="03"
           id="mr-events"
           title="Scheduled events"
-          lead="What a calendar would show, and where each release is published."
+          lead="TradingView’s calendar, on request, and where each release is published."
           note={
             <div data-show="standard">
               <FigureNote figure={<Cadence />} label="How to read this list" className="!mt-21">
@@ -193,15 +194,13 @@ export default function MorningRoomPage() {
             </div>
           }
         >
-          <div className="panel-quiet p-21">
-            <p className="h4">The economic calendar feed is not connected yet.</p>
-            <p className="mt-8 max-w-measure text-sm text-ink-2">GIO4X does not have a licensed calendar feed on this site, so no release times, forecasts or results are shown here. Each publisher’s own calendar is the authority.</p>
-            <DataNote className="mt-13" status="unavailable">
-              <Link href="/markets/events" className="link inline-flex min-h-[2.75rem] items-center">
-                What the main releases measure
-              </Link>
-            </DataNote>
-          </div>
+          <p className="max-w-measure text-sm text-ink-2">
+            GIO4X does not publish its own economic calendar. The panel below is TradingView’s, loaded at your request; each publisher’s own calendar remains the authority.{" "}
+            <Link href="/markets/events" className="link">
+              What the main releases measure
+            </Link>
+          </p>
+          <EconomicCalendar compact className="mt-13" />
           <div className="mt-21" data-show="standard">
             <h3 className="label">Releases most calendars carry</h3>
             <ul className="mt-13 border-t border-line-strong">

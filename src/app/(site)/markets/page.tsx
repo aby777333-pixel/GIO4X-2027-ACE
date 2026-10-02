@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { SixDecks } from "@/components/figures/markets/SixDecks";
 import { DayRibbon } from "@/components/markets/DayRibbon";
+import { MarketOverviewPanel, TickerTapePanel } from "@/components/markets/MarketPanels";
 import { NowAside } from "@/components/markets/Now";
 import { RatesTable } from "@/components/markets/RatesTable";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -50,9 +51,9 @@ const desks = [
 ];
 
 const absent = [
-  { t: "Live quotes", d: "No streaming bid and ask prices are shown. The only exchange rates on this site are the ECB’s daily reference fixings, labelled as such." },
-  { t: "An economic calendar feed", d: "Release dates, forecasts and outcomes are not listed. The event explainers link to each publisher’s own calendar instead." },
-  { t: "Top movers and rankings", d: "There are no gainers, losers or heat lists. They would require a licensed real-time feed that is not connected." },
+  { t: "Live quotes of its own", d: "GIO4X shows no streaming bid and ask prices. The only exchange rates it publishes here are the ECB’s daily reference fixings, labelled as such. The quote panels are TradingView’s." },
+  { t: "A calendar of its own", d: "GIO4X lists no release dates, forecasts or outcomes itself. The dated calendar on the Economic Events page is TradingView’s, and the explainers link to each publisher’s own calendar." },
+  { t: "Movers and rankings of its own", d: "GIO4X compiles no gainers, losers or heat lists: that would require a licensed real-time feed that is not connected. The heat maps on the asset-class pages are TradingView’s." },
 ];
 
 export default async function MarketsPage() {
@@ -122,6 +123,27 @@ export default async function MarketsPage() {
         </div>
       </section>
 
+      {/* (c2) TradingView's overview: third party, loaded on request */}
+      <section className="section hairline scroll-mt-[var(--header-h)]" id="third-party" aria-labelledby="overview-title">
+        <div className="wrap">
+          <Head
+            eyebrow="Third-party view"
+            id="overview-title"
+            title={<>The markets now, as TradingView shows them.</>}
+            lead="GIO4X does not publish its own live prices here. The panels below are TradingView’s, loaded at your request: a tape of seven widely followed symbols, and an overview of forex, indices, commodities and crypto."
+            action={
+              <Link href="/trust/data-methodology" className="go py-13 md:py-0">
+                Data methodology
+              </Link>
+            }
+          />
+          <div className="mt-34 grid min-w-0 gap-21">
+            <TickerTapePanel />
+            <MarketOverviewPanel />
+          </div>
+        </div>
+      </section>
+
       {/* (d) asset classes */}
       <section className="section hairline scroll-mt-[var(--header-h)]" id="asset-classes" aria-labelledby="classes-title">
         <div className="wrap">
@@ -187,10 +209,10 @@ export default async function MarketsPage() {
           <div>
             <p className="eyebrow">Said plainly</p>
             <h2 id="absent-title" className="h3 mt-13 max-w-[22ch]">
-              What you will not find here yet.
+              What GIO4X does not publish itself.
             </h2>
             <p className="mt-13 max-w-measure text-ink-2">
-              GIO4X has no licensed market-data feed connected to this website. Until one is, the page shows only what can be sourced: reference fixings, published conditions and timetables. Nothing is estimated to fill a gap.
+              GIO4X has no licensed market-data feed connected to this website. Until one is, GIO4X itself shows only what can be sourced: reference fixings, published conditions and timetables. Nothing is estimated to fill a gap. Panels from TradingView are third-party frames, loaded at your request and labelled as such.
             </p>
             <Link href="/trust/data-methodology" className="go mt-8 py-13 md:mt-21 md:py-0">
               Data methodology

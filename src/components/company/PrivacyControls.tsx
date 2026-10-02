@@ -8,13 +8,14 @@ type LocalKey = (typeof LOCAL_KEYS)[number];
 
 /** What each key is for, in the visitor's language. Every key in LOCAL_KEYS must be described. */
 const KEY_INFO: Record<LocalKey, { name: string; purpose: string }> = {
-  "gx:prefs": { name: "Display preferences", purpose: "Your appearance, accent, density, comfort and time-zone choices from this page, so the site looks the same on your next visit." },
+  "gx:prefs": { name: "Display preferences", purpose: "Your appearance, accent, density, comfort and time-zone choices from this page, and whether TradingView panels load automatically, so the site looks and behaves the same on your next visit." },
   "gx:recent": { name: "Recently viewed", purpose: "A short list of the pages and searches you opened most recently, so you can return to them." },
   "gx:saved": { name: "Saved items", purpose: "Articles, terms or tools you chose to keep for later." },
   "gx:calc": { name: "Calculator inputs", purpose: "The last figures you typed into the Trader Toolkit, so that one tool can hand its inputs to the next." },
   "gx:consent": { name: "Privacy choice", purpose: "Your answer to a privacy or cookie question, so it is not asked again." },
   "gx:watch": { name: "Watchlist", purpose: "The instruments you chose to keep an eye on." },
   "gx:boot": { name: "Start-up shown", purpose: "A note that the short start-up animation has already played on this device, so it is not shown again." },
+  "gx:learn": { name: "Glossary progress", purpose: "Which glossary terms you have answered the “Check yourself” question for correctly, so the glossary can mark them and count them. No score is kept." },
 };
 
 const COMMON_ZONES = [

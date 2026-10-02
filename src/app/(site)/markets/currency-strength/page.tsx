@@ -5,6 +5,7 @@ import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { EightAround } from "@/components/figures/product/EightAround";
 import { bankHref, formatCorr, instrumentBySlug, ratePair } from "@/components/markets/graph";
 import { Head } from "@/components/markets/Head";
+import { ForexHeatMap } from "@/components/markets/MarketPanels";
 import { RatesUnavailable } from "@/components/markets/RatesTable";
 import { StrengthBoard, type StrengthPeriod } from "@/components/markets/StrengthBoard";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -164,6 +165,21 @@ export default async function CurrencyStrengthPage() {
           </div>
         </section>
       )}
+
+      {/* the intraday companion: TradingView's, loaded on request */}
+      <section className="section hairline" aria-labelledby="intraday-title">
+        <div className="wrap">
+          <Head
+            id="intraday-title"
+            eyebrow="Third-party view"
+            title="The same eight, during the day."
+            lead="The figures above are GIO4X’s arithmetic on the ECB’s daily reference fixings: one value per working day. The heat map below is TradingView’s intraday market data, so the two will not agree, and neither is a GIO4X price."
+          />
+          <div className="mt-34">
+            <ForexHeatMap note="Each cell is the day’s percentage change of the row currency against the column currency, as TradingView calculates it. It is a different measurement from the reference-rate figures on this page." />
+          </div>
+        </div>
+      </section>
 
       {/* method */}
       <section className="section-quiet hairline" aria-labelledby="method-title">

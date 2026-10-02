@@ -1,26 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { usePrefs } from "@/hooks/usePrefs";
-import { resolveTheme } from "@/lib/prefs";
+import { useTradingViewFrame } from "@/components/markets/TradingViewWidget";
 
 /**
  * A third-party chart, loaded only when the visitor asks for it.
  *
- * Nothing is requested from TradingView until "Load chart" is pressed: no
- * script, no cookie, no connection. The iframe is sandboxed, sends no
- * referrer and follows the visitor's current theme. The data inside it is
- * TradingView's, not GIO4X's, and the caption says so.
+ * Nothing is requested from TradingView until "Load chart" is pressed (or,
+ * if the visitor has chosen to load TradingView panels automatically, until
+ * the chart scrolls into view): no script, no cookie, no connection. The
+ * iframe is sandboxed, sends no referrer and follows the visitor's current
+ * theme. The data inside it is TradingView's, not GIO4X's, and the caption
+ * says so.
  */
 export function TradingViewChart({ symbol, tv, name }: { symbol: string; tv: string; name: string }) {
-  const [loaded, setLoaded] = useState(false);
-  const [prefs] = usePrefs();
-  const theme = resolveTheme(prefs.theme);
+  const { ref, loaded, load, theme } = useTradingViewFrame<HTMLDivElement>();
   const src = `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(tv)}&interval=D&hidesidetoolbar=1&symboledit=0&saveimage=0&theme=${theme}&style=2&timezone=Etc%2FUTC&locale=en`;
 
   return (
     <figure className="panel overflow-hidden">
-      <div className="relative h-[21rem] sm:h-[26rem] lg:h-[30rem]">
+      <div ref={ref} className="relative h-[21rem] sm:h-[26rem] lg:h-[30rem]">
         {loaded ? (
           <iframe
             key={theme}
@@ -47,7 +45,7 @@ export function TradingViewChart({ symbol, tv, name }: { symbol: string; tv: str
                 {symbol} on a daily chart
               </p>
               <p className="mt-8 text-sm text-ink-2">The chart is supplied by TradingView and stays unloaded until you ask for it. Loading it connects your browser to TradingView’s servers.</p>
-              <button type="button" className="btn btn-primary mt-21" onClick={() => setLoaded(true)}>
+              <button type="button" className="btn btn-primary mt-21" onClick={load}>
                 Load chart
               </button>
             </div>

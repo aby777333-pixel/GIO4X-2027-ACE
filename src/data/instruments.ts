@@ -290,7 +290,7 @@ export const instruments: Instrument[] = [
     slug: "natural-gas", symbol: "XNG/USD", code: "XNGUSD", name: "Natural Gas", class: "energy",
     aliases: ["natgas", "gas", "henry hub", "xngusd"],
     conditions: { spreadFrom: "0.005", leverage: "1:50", minLot: "0.1" },
-    contract: "CFD, quoted in US dollars per MMBtu", tv: "TVC:NATGAS",
+    contract: "CFD, quoted in US dollars per MMBtu", tv: "CAPITALCOM:NATURALGAS",
     about: "A CFD on US natural gas. Prices are strongly seasonal and sensitive to weather and storage data.",
     related: ["ccy:USD", "c:volatility"],
   },

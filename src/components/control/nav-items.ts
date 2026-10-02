@@ -36,6 +36,7 @@ const NAV: Item[] = [
   { key: "ledger", label: "General Ledger", href: "/control/ledger", icon: "ledger" },
   { key: "events", label: "Event Bus", href: "/control/events", icon: "events" },
   { key: "documents", label: "Document Builder", href: "/control/documents", icon: "documents" },
+  { key: "blog", label: "Blog", href: "/control/blog", icon: "documents", cap: "blog.read", built: true },
   { key: "emailer", label: "Bulk Emailer", href: "/control/emailer", icon: "emailer" },
   { key: "subscribers", label: "Subscribers", href: "/control/subscribers", icon: "subscribers", cap: "subscribers.read", built: true },
   { key: "config", label: "Configuration", href: "/control/config", icon: "config", cap: "config.manage", built: true },

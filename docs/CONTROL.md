@@ -48,6 +48,9 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/reports/leads-export` (POST) | CSV export of enquiries, recorded in the audit log | `subscribers.export` |
 | `/control/command` | What needs attention now, across every section | `command.read` |
 | `/control/config` | The website's announcement line, the live-chat switch, support hours, and notices for the public Status page | `config.manage` |
+| `/control/blog`, `/control/blog/new`, `/control/blog/[id]` | The daily blog's CMS: write in restricted Markdown, preview, SEO fields (title, description, canonical, noindex, share picture), cover picture with alt text, caption, credit and size, schedule and publish, corrections | `blog.read` (write: `blog.write`; publish, unpublish, archive, edit a published post: `blog.publish`) |
+| `/control/blog/upload` (POST) | Picture upload to the public `blog` storage bucket: 4 MB, JPEG, PNG, WebP or AVIF, checked by content | `blog.write` |
+| `/control/leads/new` | An enquiry entered by staff (telephone, event, referral). Marked as staff-entered; stores no consent | `leads.write` |
 | `/control/<section>` | The sections not built yet (KYC, Funds, Fee Engine, General Ledger, IB, Copy, PAMM, Trade Log, Broker Controls, Event Bus, Document Builder, Bulk Emailer): what each will do and what it is waiting for | staff |
 
 ### How the console reaches the website
@@ -80,7 +83,7 @@ API role can read or write. A new module adds its capabilities with an `INSERT` 
 Capabilities: `leads.read`, `leads.write`, `leads.assign`, `tasks.write`, `subscribers.read`,
 `subscribers.export`, `audit.read`, `staff.read`, `staff.manage`, `tickets.read`, `tickets.write`,
 `chats.read`, `chats.write`, `customers.read`, `compliance.read`, `reports.read`, `command.read`,
-`config.manage`. The TypeScript list is
+`config.manage`, `blog.read`, `blog.write`, `blog.publish`. The TypeScript list is
 `CAPABILITIES` in `src/lib/server/constants.ts`; the console's menu is filtered by them in
 `src/components/control/nav-items.ts`.
 
@@ -172,6 +175,10 @@ Files, in order:
    the record of an enquiries export.
 10. `supabase/migrations/0010_person_scope.sql`: a person's record lists enquiries and tickets only to
     roles that hold `leads.read` and `tickets.read`.
+11. `supabase/migrations/0011_blog.sql`: the daily blog's posts, the rule that only `blog.publish` may put
+    words in front of the public or change them once there, and the public `blog` picture bucket.
+12. `supabase/migrations/0012_manual_leads.sql`: enquiries entered by staff: `origin`, `added_by`, no
+    consent evidence, and `lead_add_manual()`.
 
 Apply them as the `postgres` role (the Supabase SQL editor, `supabase db push`, or the Supabase MCP
 `apply_migration`). `0002` stops with a clear error if the applying role cannot bypass RLS, because the

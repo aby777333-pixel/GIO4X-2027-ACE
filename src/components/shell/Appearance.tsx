@@ -105,7 +105,7 @@ export function AppearanceControls({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function Toggle({ label, hint, on, onChange }: { label: string; hint?: string; on: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({ label, hint, on, onChange }: { label: string; hint?: string; on: boolean; onChange: (v: boolean) => void }) {
   const id = useId();
   return (
     <div className="flex items-start justify-between gap-21">

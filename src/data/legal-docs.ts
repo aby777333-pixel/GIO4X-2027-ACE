@@ -468,8 +468,8 @@ const aml: LegalDoc = {
  */
 const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; why: string }> = {
   "gx:prefs": {
-    holds: "Theme, colour palette, density, motion, contrast, text size, effects, link underlining, time zone and remembered platform.",
-    why: "So the site looks the way you set it on your next visit.",
+    holds: "Theme, colour palette, density, motion, contrast, text size, effects, link underlining, time zone, remembered platform, and whether TradingView panels load automatically.",
+    why: "So the site looks and behaves the way you set it on your next visit.",
   },
   "gx:recent": {
     holds: "Pages and searches you opened recently.",
@@ -495,6 +495,10 @@ const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; wh
     holds: "The time the short start-up animation was shown in this browser.",
     why: "So the animation plays once and is not repeated on later pages or visits.",
   },
+  "gx:learn": {
+    holds: "The glossary terms whose “Check yourself” question you answered correctly.",
+    why: "So the glossary can mark the terms you have checked and show how many. It can be cleared from the glossary with “Start over”.",
+  },
 };
 
 const cookies: LegalDoc = {
@@ -504,7 +508,7 @@ const cookies: LegalDoc = {
   short: "Cookie Notice",
   category: "Privacy",
   summary: "Everything this website stores in your browser, key by key, and how to clear it. There are no advertising or analytics cookies.",
-  version: "1.1",
+  version: "1.2",
   updated: "2 October 2026",
   origin: "new",
   keywords: ["cookies", "local storage", "tracking", "analytics", "advertising", "preferences", "consent"],
@@ -578,7 +582,10 @@ const cookies: LegalDoc = {
       title: "Third-party content",
       body: [
         p(
-          "Some pages can show a market chart supplied by TradingView. The chart is an embedded frame that is loaded only when you ask for it. Once loaded, the frame is TradingView’s own page: it may set its own cookies under its own domain, governed by TradingView’s privacy policy, and this website cannot read them.",
+          "Some pages can show content supplied by TradingView: a price chart on each instrument page; an economic calendar on the Economic Events page and in the Morning Room; a market overview and a ticker tape on the Market Command page; and heat maps, cross rates and quote tables on the asset-class pages and the Currency Strength page. Each is an embedded frame that is loaded only when you ask for it. Once loaded, the frame is TradingView’s own page: it may set its own cookies under its own domain, governed by TradingView’s privacy policy, and this website cannot read them. No TradingView script runs on this website’s own pages.",
+        ),
+        p(
+          "On the preferences page you can choose to have TradingView frames load automatically. That choice is off by default and is kept in the gx:prefs key with your display settings. While it is on, each frame loads as it scrolls into view, without a further question, and connects your browser to TradingView at that moment. Switching it off, or clearing what this website has stored, returns every frame to waiting for its button.",
         ),
         p("Reference exchange rates are fetched by GIO4X’s server, not by your browser, so the rate provider does not see your visit."),
       ],

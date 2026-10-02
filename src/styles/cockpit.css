@@ -352,6 +352,14 @@
   max-width: 30rem;
   text-align: right;
 }
+@media (min-width: 1080px) {
+  /* the homepage instrument is framed and clipped like every other page's, so the stage no longer
+     fades it toward the statement (the scene fades its own background field instead) */
+  .cx-home .cx-scene {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
 @media (max-width: 1079px) {
   .cx-home {
     --cx-u: min(40vw, calc(var(--hero-h) * 0.34));

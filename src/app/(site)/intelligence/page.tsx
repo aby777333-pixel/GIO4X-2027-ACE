@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BlogLatest } from "@/components/blog/BlogLatest";
 import { RouteScene } from "@/components/cockpit/RouteScene";
 import { FixingMoment } from "@/components/knowledge/FixingMoment";
 import { AnalysisRows, articleHref, ExplainerList, liveSections, SectionNav, sectionHref, StoryMeta } from "@/components/knowledge/intelligence";
@@ -17,8 +18,9 @@ export const metadata = {
   alternates: { canonical: "/intelligence", types: { "application/rss+xml": [{ url: "/intelligence/feed.xml", title: "GIO4X Intelligence" }] } },
 };
 
-// The reference fixing in the data moment is refreshed hourly.
-export const revalidate = 3600;
+// The reference fixing in the data moment is refreshed hourly (its own fetch is cached for the hour).
+// The page itself is read again each minute, so that a post published in the console reaches "From the daily blog".
+export const revalidate = 60;
 
 /**
  * The front page of the publication. Its rhythm, top to bottom: masthead,
@@ -241,6 +243,8 @@ export default function IntelligencePage() {
           </section>
         </>
       )}
+
+      <BlogLatest />
 
       <NextSteps
         items={[

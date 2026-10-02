@@ -117,6 +117,7 @@ export const nav: NavSection[] = [
         title: "Read",
         items: [
           { label: "Latest", href: "/intelligence", note: "Analysis and explainers" },
+          { label: "Daily blog", href: "/intelligence/blog", note: "Short notes from the desks" },
           { label: "Morning Room", href: "/morning-room", note: "Today in sessions and schedule" },
         ],
       },
