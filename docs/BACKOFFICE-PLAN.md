@@ -42,8 +42,8 @@ Each phase is one or more numbered migrations plus its pages, and is usable on i
 
 | Phase | Modules (old console name in brackets) | Depends on |
 |---|---|---|
-| 0. Foundation | Capability-based roles (`staff_can('funds.approve')`), per-person staff accounts, MFA required for staff, staff management screen with four-eyes on role changes, sectioned navigation, phone layout | Nothing |
-| 1. CRM | Pipeline stages, lead scoring, assignment rules, tasks and follow-up reminders, Client 360 (Leads & CRM) | Phase 0 |
+| 0. Foundation | **Built (2 October 2026):** capability-based roles, per-person staff accounts with an on/off switch, staff management screen with four eyes, sectioned navigation, phone layout. **Still to do:** MFA required for staff (needs an enrolment screen, and a test account to check it) | Nothing |
+| 1. CRM | **Built:** pipeline stages with lost reasons, lead score with its reasons, follow-up tasks, other enquiries from the same address. **Still to do:** automatic assignment rules, e-mail reminders (needs the sending domain) | Phase 0 |
 | 2. Clients and KYC | Client records, document intake and viewer, per-document decisions, status derived from documents (Customers, KYC) | A client portal that creates clients: decision D2 |
 | 3. Money | Double-entry ledger as the only source of balances, deposit and withdrawal requests with holds, verified payout methods, four-eyes approval, fee engine (Funds & Settlement, Fee Engine, General Ledger) | Phase 2; D3 |
 | 4. Support | Tickets with SLAs and canned replies, live chat with handoff (Tickets, Live Chats) | Phase 2; e-mail domain |

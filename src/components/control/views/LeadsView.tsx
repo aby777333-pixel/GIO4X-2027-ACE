@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ControlHead, Empty, Notice, Pager } from "@/components/control/bits";
 import { LeadsTable, type LeadListItem } from "@/components/control/LeadsTable";
-import { CONTACT_TOPICS, LEAD_STATUS_LABEL, LEAD_STATUSES } from "@/lib/server/constants";
-import type { LeadStatus } from "@/lib/supabase/types";
+import { CONTACT_TOPICS, LEAD_STAGE_LABEL, LEAD_STAGES, LEAD_STATUS_LABEL, LEAD_STATUSES } from "@/lib/server/constants";
+import type { LeadStage, LeadStatus } from "@/lib/supabase/types";
 
 export type LeadsViewProps = {
   status: LeadStatus | "";
+  stage: LeadStage | "";
+  sort: "score" | "";
   topic: string;
   q: string;
   error?: string;
@@ -20,11 +22,13 @@ export type LeadsViewProps = {
 };
 
 /** Presentation only. The filters shown here were validated by the page before they reached the database. */
-export function LeadsView({ status, topic, q, error, failed, pastEnd, leads, names, me, total, page, pageCount }: LeadsViewProps) {
-  const filtered = !!(status || topic || q);
+export function LeadsView({ status, stage, sort, topic, q, error, failed, pastEnd, leads, names, me, total, page, pageCount }: LeadsViewProps) {
+  const filtered = !!(status || stage || sort || topic || q);
   const href = (p: number) => {
     const sp = new URLSearchParams();
     if (status) sp.set("status", status);
+    if (stage) sp.set("stage", stage);
+    if (sort) sp.set("sort", sort);
     if (topic) sp.set("topic", topic);
     if (q) sp.set("q", q);
     if (p > 1) sp.set("page", String(p));
@@ -34,7 +38,7 @@ export function LeadsView({ status, topic, q, error, failed, pastEnd, leads, nam
 
   return (
     <>
-      <ControlHead eyebrow="Clients" title="Leads" lead="Enquiries from the contact and account-interest forms, newest first." />
+      <ControlHead eyebrow="Clients" title="Leads" lead={sort === "score" ? "Enquiries from the contact and account-interest forms, highest score first." : "Enquiries from the contact and account-interest forms, newest first."} />
 
       {error && (
         <div className="mt-21">
@@ -42,8 +46,8 @@ export function LeadsView({ status, topic, q, error, failed, pastEnd, leads, nam
         </div>
       )}
 
-      <form method="get" action="/control/leads" role="search" aria-label="Filter leads" className="mt-21 grid gap-13 border-b border-line pb-21 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.618fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-        <div className="field sm:col-span-2 lg:col-span-1">
+      <form method="get" action="/control/leads" role="search" aria-label="Filter leads" className="mt-21 grid gap-13 border-b border-line pb-21 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
+        <div className="field sm:col-span-2 lg:col-span-4">
           <label htmlFor="leads-q">Reference or email</label>
           <input id="leads-q" name="q" type="search" className="input" defaultValue={q} maxLength={100} placeholder="GX-… or name@example.com" autoComplete="off" spellCheck={false} />
         </div>
@@ -59,6 +63,17 @@ export function LeadsView({ status, topic, q, error, failed, pastEnd, leads, nam
           </select>
         </div>
         <div className="field">
+          <label htmlFor="leads-stage">Stage</label>
+          <select id="leads-stage" name="stage" className="select" defaultValue={stage}>
+            <option value="">Any stage</option>
+            {LEAD_STAGES.map((s) => (
+              <option key={s} value={s}>
+                {LEAD_STAGE_LABEL[s]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
           <label htmlFor="leads-topic">Topic</label>
           <select id="leads-topic" name="topic" className="select" defaultValue={topic}>
             <option value="">Any topic</option>
@@ -69,7 +84,14 @@ export function LeadsView({ status, topic, q, error, failed, pastEnd, leads, nam
             ))}
           </select>
         </div>
-        <div className="flex gap-8 sm:col-span-2 lg:col-span-1">
+        <div className="field">
+          <label htmlFor="leads-sort">Order</label>
+          <select id="leads-sort" name="sort" className="select" defaultValue={sort}>
+            <option value="">Newest first</option>
+            <option value="score">Highest score first</option>
+          </select>
+        </div>
+        <div className="flex gap-8 sm:col-span-2 lg:col-span-4">
           <button type="submit" className="btn btn-primary">
             Apply
           </button>
@@ -99,7 +121,7 @@ export function LeadsView({ status, topic, q, error, failed, pastEnd, leads, nam
         ) : filtered ? (
           <Empty title="Nothing matches these filters">
             <p>
-              Try a different status or topic, or{" "}
+              Try a different status, stage or topic, or{" "}
               <Link href="/control/leads" className="link">
                 clear the filters
               </Link>

@@ -1,6 +1,7 @@
 import { controlMeta, firstParam } from "@/components/control/format";
 import { SubscribersView } from "@/components/control/views/SubscribersView";
-import { requireStaff } from "@/lib/server/staff";
+import { NoAccess } from "@/components/control/bits";
+import { can, requireStaff } from "@/lib/server/staff";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Subscribers", "/control/subscribers");
@@ -10,6 +11,7 @@ const PER_PAGE = 50;
 export default async function SubscribersPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const ctx = await requireStaff();
   if (!ctx) return null;
+  if (!can(ctx, "subscribers.read")) return <NoAccess title="Subscribers" />;
 
   const params = await searchParams;
   const pageParam = Number.parseInt(firstParam(params.page), 10);
@@ -27,5 +29,5 @@ export default async function SubscribersPage({ searchParams }: { searchParams: 
   const total = result.count ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / PER_PAGE));
 
-  return <SubscribersView rows={rows} total={total} page={page} pageCount={pageCount} failed={failed} pastEnd={pastEnd} isAdmin={ctx.role === "admin"} />;
+  return <SubscribersView rows={rows} total={total} page={page} pageCount={pageCount} failed={failed} pastEnd={pastEnd} isAdmin={can(ctx, "subscribers.export")} />;
 }

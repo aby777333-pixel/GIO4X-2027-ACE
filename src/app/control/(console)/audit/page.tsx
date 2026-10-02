@@ -1,6 +1,7 @@
 import { controlMeta, firstParam } from "@/components/control/format";
 import { AuditView } from "@/components/control/views/AuditView";
-import { requireStaff, staffDirectory } from "@/lib/server/staff";
+import { NoAccess } from "@/components/control/bits";
+import { can, requireStaff, staffDirectory } from "@/lib/server/staff";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Audit log", "/control/audit");
@@ -10,6 +11,7 @@ const PER_PAGE = 50;
 export default async function AuditPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const ctx = await requireStaff();
   if (!ctx) return null;
+  if (!can(ctx, "audit.read")) return <NoAccess title="Audit log" />;
 
   const params = await searchParams;
   const pageParam = Number.parseInt(firstParam(params.page), 10);

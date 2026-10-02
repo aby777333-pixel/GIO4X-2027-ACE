@@ -31,6 +31,51 @@ export const LEAD_STATUS_LABEL: Record<(typeof LEAD_STATUSES)[number], string> =
   spam: "Spam",
 };
 
+/** Pipeline stages. Must equal `leads_stage_valid` in 0005_crm.sql. */
+export const LEAD_STAGES = ["enquiry", "contacted", "qualified", "applying", "client", "lost"] as const;
+
+export const LEAD_STAGE_LABEL: Record<(typeof LEAD_STAGES)[number], string> = {
+  enquiry: "Enquiry",
+  contacted: "Contacted",
+  qualified: "Qualified",
+  applying: "Applying",
+  client: "Client",
+  lost: "Lost",
+};
+
+/** Why an enquiry was lost. Must equal `leads_lost_reason_valid` in 0005_crm.sql. */
+export const LOST_REASONS = ["no_response", "not_eligible", "chose_another", "not_interested", "duplicate", "other"] as const;
+
+export const LOST_REASON_LABEL: Record<(typeof LOST_REASONS)[number], string> = {
+  no_response: "No response",
+  not_eligible: "Not eligible",
+  chose_another: "Chose another provider",
+  not_interested: "Not interested",
+  duplicate: "Duplicate enquiry",
+  other: "Other",
+};
+
+/** Staff roles. Must equal `staff_role_valid` in 0004_capabilities.sql. */
+export const STAFF_ROLES = ["admin", "compliance", "finance", "dealing", "support", "sales", "agent", "viewer"] as const;
+
+/**
+ * What a member of staff may do. The database decides (`role_capabilities` and
+ * `staff_can()` in 0004_capabilities.sql); this list exists so that a
+ * misspelt capability fails to type-check.
+ */
+export const CAPABILITIES = [
+  "leads.read",
+  "leads.write",
+  "leads.assign",
+  "tasks.write",
+  "subscribers.read",
+  "subscribers.export",
+  "audit.read",
+  "staff.read",
+  "staff.manage",
+] as const;
+export type Capability = (typeof CAPABILITIES)[number];
+
 export const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"] as const;
 
 /**

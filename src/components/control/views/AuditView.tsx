@@ -8,6 +8,14 @@ const ACTION_LABEL: Record<string, string> = {
   "lead.status": "Lead status changed",
   "lead.assign": "Lead assignment changed",
   "lead.note": "Note added to a lead",
+  "lead.stage": "Lead stage changed",
+  "lead.task": "Follow-up added to a lead",
+  "lead.task_done": "Follow-up completed",
+  "lead.task_reopened": "Follow-up reopened",
+  "staff.request": "Staff change requested",
+  "staff.apply": "Staff change applied",
+  "staff.reject": "Staff change rejected",
+  "staff.cancel": "Staff change withdrawn",
   "subscribers.export": "Subscribers exported",
   "staff.grant": "Staff access granted",
   "staff.change": "Staff record changed",
@@ -94,7 +102,7 @@ export function AuditView({ rows, names, me, total, page, pageCount, failed, pas
           <Empty title="There is no such page" />
         ) : (
           <Empty title="Nothing recorded yet">
-            <p>Status changes, assignments, notes, subscriber exports and changes to staff access are recorded here as they happen.</p>
+            <p>Status and stage changes, assignments, notes, follow-ups, subscriber exports and changes to staff access are recorded here as they happen.</p>
           </Empty>
         )}
       </div>

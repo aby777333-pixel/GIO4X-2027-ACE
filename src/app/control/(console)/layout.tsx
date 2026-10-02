@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { signOut } from "@/app/control/actions";
+import { navFor } from "@/components/control/nav-items";
 import { Shell, Standalone } from "@/components/control/Shell";
 import { getAccess, SIGN_IN_PATH } from "@/lib/server/staff";
 
@@ -65,7 +66,7 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
           )}{" "}
           has not been given access to GIO4X Control.
         </p>
-        <p className="mt-13 text-sm text-ink-3">Access is granted by an administrator. If you expected to have it, ask them to add your account to the staff list, then sign in again.</p>
+        <p className="mt-13 text-sm text-ink-3">Access is granted by an administrator, and can be switched off by one. If you expected to have it, ask them to check the staff list, then sign in again.</p>
         <form action={signOut} className="mt-21">
           <button type="submit" className="btn btn-primary">
             Sign out
@@ -76,7 +77,7 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
   }
 
   return (
-    <Shell name={access.displayName} role={access.role}>
+    <Shell name={access.displayName} role={access.role} sections={navFor(access.caps)}>
       {children}
     </Shell>
   );

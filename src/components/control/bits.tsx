@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Rosette } from "@/components/brand/Rosette";
-import { LEAD_STATUS_LABEL } from "@/lib/server/constants";
-import type { LeadStatus } from "@/lib/supabase/types";
+import { fmtDateTime } from "@/components/control/format";
+import { LEAD_STAGE_LABEL, LEAD_STATUS_LABEL } from "@/lib/server/constants";
+import type { LeadStage, LeadStatus } from "@/lib/supabase/types";
 
 /** Page opening inside the console: one <h1>, sized for work rather than display. */
 export function ControlHead({ eyebrow, title, lead, actions }: { eyebrow?: string; title: ReactNode; lead?: ReactNode; actions?: ReactNode }) {
@@ -29,6 +30,54 @@ const STATE_CLASS: Record<LeadStatus, string> = {
 
 export function StatusBadge({ status }: { status: LeadStatus }) {
   return <span className={`state ${STATE_CLASS[status]} ${status === "spam" ? "line-through" : ""}`}>{LEAD_STATUS_LABEL[status]}</span>;
+}
+
+const STAGE_CLASS: Record<LeadStage, string> = {
+  enquiry: "state-pre",
+  contacted: "state-open",
+  qualified: "state-open",
+  applying: "state-open",
+  client: "state-overlap",
+  lost: "state-off",
+};
+
+export function StageBadge({ stage }: { stage: LeadStage }) {
+  return <span className={`state ${STAGE_CLASS[stage]}`}>{LEAD_STAGE_LABEL[stage]}</span>;
+}
+
+/** The score as a number out of 100 with a bar; the label carries the meaning, the bar only repeats it. */
+export function Score({ value }: { value: number }) {
+  const v = Math.max(0, Math.min(100, Math.round(value)));
+  return (
+    <span className="inline-flex items-center gap-8" title="Score out of 100, computed from what the enquirer told us">
+      <span className="num w-[1.75rem] text-right text-sm text-ink">{v}</span>
+      <span aria-hidden className="h-3 w-[2.125rem] overflow-hidden rounded-full bg-line">
+        <span className="block h-full bg-accent" style={{ width: `${v}%` }} />
+      </span>
+    </span>
+  );
+}
+
+/** A due time, with "Overdue" or "Today" said in words rather than by colour alone. */
+export function Due({ iso, state }: { iso: string; state: "overdue" | "today" | "later" }) {
+  return (
+    <span className="num whitespace-nowrap text-ink-2">
+      {state !== "later" && <span className={`mr-8 font-sans text-xs font-semibold ${state === "overdue" ? "text-neg" : "text-ink"}`}>{state === "overdue" ? "Overdue" : "Today"}</span>}
+      {fmtDateTime(iso)}
+    </span>
+  );
+}
+
+/** Shown in place of a section the caller's role does not include. */
+export function NoAccess({ title }: { title: string }) {
+  return (
+    <>
+      <ControlHead title={title} />
+      <div className="mt-21">
+        <Notice title="Your role does not include this section">If you need it for your work, ask an administrator to change your role on the Staff page.</Notice>
+      </div>
+    </>
+  );
 }
 
 /** A message from the system: what happened and what to do next. */

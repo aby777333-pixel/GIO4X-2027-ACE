@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { signOut } from "@/app/control/actions";
 import { Logo } from "@/components/brand/Logo";
 import { ControlNav } from "@/components/control/Nav";
+import type { NavSection } from "@/components/control/nav-items";
 import { ROLE_LABEL } from "@/components/control/format";
 import type { StaffRole } from "@/lib/supabase/types";
 
@@ -19,7 +20,7 @@ function Wordmark() {
  * The console frame: a left rail from `lg` up, a top bar with a scrolling
  * navigation row below it. Quiet by design; the work is in the centre.
  */
-export function Shell({ name, role, children }: { name: string; role: StaffRole; children: ReactNode }) {
+export function Shell({ name, role, sections, children }: { name: string; role: StaffRole; sections: NavSection[]; children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-bg lg:grid lg:grid-cols-[14.5625rem_minmax(0,1fr)]">
       {/* desktop rail */}
@@ -27,8 +28,8 @@ export function Shell({ name, role, children }: { name: string; role: StaffRole;
         <div className="px-21 pb-21 pt-21">
           <Wordmark />
         </div>
-        <ControlNav variant="rail" />
-        <div className="mt-auto border-t border-line p-21">
+        <ControlNav variant="rail" sections={sections} />
+        <div className="border-t border-line p-21">
           <p className="label">Signed in</p>
           <p className="mt-5 break-words text-sm font-medium text-ink">{name}</p>
           <p className="mt-2 text-xs text-ink-3">{ROLE_LABEL[role]}</p>
@@ -50,7 +51,7 @@ export function Shell({ name, role, children }: { name: string; role: StaffRole;
             </button>
           </form>
         </div>
-        <ControlNav variant="bar" />
+        <ControlNav variant="bar" sections={sections} />
       </header>
 
       <div className="min-w-0">

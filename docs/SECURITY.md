@@ -24,6 +24,11 @@ Related: `docs/CONTROL.md` (operating the console), `supabase/migrations/` (the 
 visitor's browser; anyone holding the publishable key (which is everyone: it ships to browsers); a signed-in
 Supabase user who is not staff; staff in the roles `viewer`, `agent`, `admin`; the owner with SQL access.
 
+Since migration `0004` there are eight roles, and what each may do is a set of capabilities checked by
+`staff_can()` rather than a list of role names in each policy; an inactive staff row grants nothing; and
+changes to staff made in the console need a second person. `viewer`, `agent` and `admin` behave exactly as
+described in this document. See `docs/CONTROL.md`, "Roles and capabilities" and "Staff changes and four eyes".
+
 **Main abuse cases and what answers them**
 
 | Abuse case | Controls |

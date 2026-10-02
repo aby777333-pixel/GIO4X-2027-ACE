@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { StatusBadge } from "@/components/control/bits";
+import { Score, StageBadge, StatusBadge } from "@/components/control/bits";
 import { fmtDateTime } from "@/components/control/format";
 import type { LeadRow } from "@/lib/supabase/types";
 
-export type LeadListItem = Pick<LeadRow, "id" | "reference" | "created_at" | "name" | "email" | "topic" | "status" | "assigned_to">;
+export type LeadListItem = Pick<LeadRow, "id" | "reference" | "created_at" | "name" | "email" | "topic" | "status" | "assigned_to" | "stage" | "score">;
 
-export const LEAD_LIST_COLUMNS = "id, reference, created_at, name, email, topic, status, assigned_to";
+export const LEAD_LIST_COLUMNS = "id, reference, created_at, name, email, topic, status, assigned_to, stage, score";
 
 function assignee(lead: LeadListItem, names: Map<string, string>, me: string): string {
   if (!lead.assigned_to) return "Unassigned";
@@ -21,7 +21,7 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
   return (
     <>
       <div className="scroll-x hidden md:block">
-        <table className="table-gx min-w-[46rem] text-sm">
+        <table className="table-gx min-w-[58rem] text-sm">
           <caption className="sr-only">{caption}</caption>
           <thead>
             <tr>
@@ -29,6 +29,8 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
               <th scope="col">Received</th>
               <th scope="col">From</th>
               <th scope="col">Topic</th>
+              <th scope="col">Stage</th>
+              <th scope="col">Score</th>
               <th scope="col">Status</th>
               <th scope="col">Assigned</th>
             </tr>
@@ -42,11 +44,17 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
                   </Link>
                 </td>
                 <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(lead.created_at)}</td>
-                <td className="max-w-[16rem]">
+                <td className="max-w-[14rem]">
                   <span className="block truncate text-ink">{lead.name}</span>
                   <span className="block truncate text-xs text-ink-3">{lead.email}</span>
                 </td>
                 <td className="whitespace-nowrap text-ink-2">{lead.topic}</td>
+                <td>
+                  <StageBadge stage={lead.stage} />
+                </td>
+                <td>
+                  <Score value={lead.score} />
+                </td>
                 <td>
                   <StatusBadge status={lead.status} />
                 </td>
@@ -67,6 +75,10 @@ export function LeadsTable({ leads, names, me, caption }: { leads: LeadListItem[
               </span>
               <span className="mt-5 block truncate text-sm text-ink">{lead.name}</span>
               <span className="block truncate text-xs text-ink-3">{lead.email}</span>
+              <span className="mt-8 flex items-center justify-between gap-13">
+                <StageBadge stage={lead.stage} />
+                <Score value={lead.score} />
+              </span>
               <span className="mt-5 flex flex-wrap gap-x-13 text-xs text-ink-3">
                 <span>{lead.topic}</span>
                 <span className="num">{fmtDateTime(lead.created_at)}</span>

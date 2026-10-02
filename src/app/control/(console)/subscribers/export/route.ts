@@ -13,7 +13,7 @@
  */
 import { toCsv } from "@/lib/server/csv";
 import { fail, isSameOrigin } from "@/lib/server/http";
-import { getAccess } from "@/lib/server/staff";
+import { can, getAccess } from "@/lib/server/staff";
 import type { SubscriberRow } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const access = await getAccess();
   if (access.state === "unconfigured" || access.state === "unavailable") return fail(503, "The export is not available just now.");
   if (access.state === "anonymous") return fail(401, "Sign in to continue.");
-  if (access.state !== "staff" || access.role !== "admin") return fail(403, "Only an administrator can export subscribers.");
+  if (access.state !== "staff" || !can(access, "subscribers.export")) return fail(403, "Only an administrator can export subscribers.");
 
   const rows: ExportRow[] = [];
   for (let from = 0; from < MAX_ROWS; from += PAGE) {
