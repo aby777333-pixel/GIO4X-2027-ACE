@@ -1,0 +1,426 @@
+/*
+  GIO4X Control in the Service Console's look (the owner's earlier staff
+  console): navy sidebar, pale slate ground, white rounded cards, sky accents,
+  Inter throughout. Only the look is taken from it; the screens, the access
+  rules and the database are this project's.
+
+  How it works. The console's root carries class `gx-console` and
+  data-theme="light", so the site's light tokens apply inside it whatever
+  theme the public site is set to. This sheet then replaces those tokens with
+  the console's palette, and flattens the public site's "depth" treatment
+  (gradient edges, tone-cycling tiles) into plain cards. Every component class
+  the views already use (.panel, .btn, .state, .table-gx, .field, .input …)
+  keeps working: it just reads different values.
+
+  Nothing here reaches outside `.gx-console`. Classes prefixed `gxc-` are the
+  console's own parts.
+*/
+.gx-console {
+  --navy: #1b3a6b;
+  --navy-dark: #0f2347;
+  --sky: #29abe2;
+
+  --bg: #f1f5f9;
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --sunken: #e8eef5;
+  --ink: #1b3a6b;
+  --ink-2: #475569;
+  --ink-3: #64748b;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+
+  --brand: #1b3a6b;
+  --brand-ink: #ffffff;
+  --brand-soft: rgba(41, 171, 226, 0.1);
+  /* sky, darkened until it passes AA as text on white */
+  --accent: #1479ad;
+  --accent-ink: #ffffff;
+  --prestige-ink: #1479ad;
+  --pos: #0b7a53;
+  --neg: #c0362c;
+  --warn: #a35f00;
+  --info: #1479ad;
+  --focus: rgba(41, 171, 226, 0.5);
+
+  --tone-1: #29abe2;
+  --tone-2: #29abe2;
+  --tone-3: #29abe2;
+  --tone-4: #29abe2;
+  --tone-5: #29abe2;
+  --tone-6: #29abe2;
+  --grad-surface: linear-gradient(#ffffff, #ffffff);
+  --grad-ink: linear-gradient(#1b3a6b, #1b3a6b);
+  --grad-accent: linear-gradient(#29abe2, #29abe2);
+  --hi: 0 0 0 transparent;
+  --depth-1: 0 1px 2px rgba(15, 35, 71, 0.05);
+  --depth-2: 0 1px 3px rgba(15, 35, 71, 0.07);
+  --depth-3: 0 8px 24px -12px rgba(15, 35, 71, 0.25);
+
+  background: var(--bg);
+  color: var(--ink-2);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---- sidebar ------------------------------------------------------------- */
+.gxc-side,
+.gxc-top {
+  background: var(--navy);
+  color: #fff;
+}
+.gxc-logo {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.5rem 0.75rem;
+}
+.gxc-logo-sm {
+  padding: 0.375rem 0.625rem;
+}
+.gxc-console-label {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+.gxc-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 0.75rem;
+}
+.gxc-avatar {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #29abe2, #34d399);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.gxc-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.78);
+  text-align: left;
+  transition:
+    background-color var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out);
+}
+.gxc-nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.gxc-nav-item.is-current {
+  background: #fff;
+  color: var(--navy);
+  font-weight: 600;
+}
+.gxc-nav-item:focus-visible,
+.gxc-top-button:focus-visible,
+.gxc-menu-button:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+/* not built yet: listed, quieter, and labelled in words */
+.gxc-nav-item.is-soon:not(.is-current) {
+  color: rgba(255, 255, 255, 0.55);
+}
+.gxc-soon {
+  flex-shrink: 0;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 0.375rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.gxc-signout:hover {
+  color: #fda4af;
+}
+.gxc-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+}
+
+/* ---- mobile top bar and menu sheet ---------------------------------------- */
+.gxc-top-button,
+.gxc-menu-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+.gxc-top-button:hover,
+.gxc-menu-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.gxc-sheet {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  max-height: calc(100dvh - 3.75rem);
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--navy);
+  padding: 0.75rem var(--gutter) 1.25rem;
+  box-shadow: 0 24px 40px -20px rgba(15, 35, 71, 0.6);
+}
+
+/* ---- type ------------------------------------------------------------------ */
+.gx-console :is(.h1, .h2, .h3, .h4) {
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.gx-console .h3 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+}
+.gx-console .h4 {
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.gx-console .label,
+.gx-console .field-label,
+.gx-console .field > label {
+  color: var(--ink-3);
+}
+.gx-console .font-display {
+  font-family: inherit;
+}
+.gx-console .link {
+  color: var(--accent);
+}
+
+/* ---- cards ----------------------------------------------------------------- */
+.gx-console .panel,
+.gx-console .panel-quiet,
+.gxc-card {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 35, 71, 0.05);
+}
+.gxc-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 1.25rem 1.5rem 0;
+}
+.gxc-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.gxc-card-link {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+.gxc-card-link:hover {
+  text-decoration: underline;
+}
+.gxc-card-body {
+  padding: 0.75rem 1.5rem 1.5rem;
+}
+@media (max-width: 639px) {
+  .gxc-card-head {
+    padding: 1rem 1rem 0;
+  }
+  .gxc-card-body {
+    padding: 0.5rem 1rem 1rem;
+  }
+}
+/* a notice keeps its coloured left edge on the new card */
+.gx-console .panel-quiet.border-l-2 {
+  border-left-width: 3px;
+  border-radius: 12px;
+}
+.gx-console .panel-quiet.border-l-accent {
+  border-left-color: var(--sky);
+}
+.gx-console .panel-quiet.border-l-pos {
+  border-left-color: var(--pos);
+}
+.gx-console .panel-quiet.border-l-neg {
+  border-left-color: var(--neg);
+}
+
+/* stat tiles */
+.gxc-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem;
+  transition:
+    border-color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out);
+}
+a.gxc-stat:hover {
+  border-color: rgba(41, 171, 226, 0.45);
+  background: rgba(41, 171, 226, 0.05);
+}
+.gxc-stat-icon {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(41, 171, 226, 0.1);
+  color: var(--accent);
+}
+.gxc-stat-label {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.gxc-stat-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+/* a row inside a card: the Service Console's ticket and chat rows */
+.gxc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  transition:
+    border-color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out);
+}
+a.gxc-row:hover {
+  border-color: rgba(41, 171, 226, 0.3);
+  background: rgba(41, 171, 226, 0.05);
+}
+
+/* the site's tone-cycling 3D tiles become plain cards here */
+.gx-console :is(.tiles, .grid.border-l.border-t, .gap-px.bg-line):not(.flat) {
+  perspective: none;
+}
+.gx-console :is(.tiles, .gap-px.bg-line):not(.flat) > *,
+.gx-console .grid.border-l.border-t:not(.flat) > .border-b.border-r {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+  transform: none !important;
+}
+.gx-console :is(.tiles, .gap-px.bg-line):not(.flat) > *::before,
+.gx-console :is(.tiles, .gap-px.bg-line):not(.flat) > *::after,
+.gx-console .grid.border-l.border-t:not(.flat) > .border-b.border-r::before,
+.gx-console .grid.border-l.border-t:not(.flat) > .border-b.border-r::after {
+  display: none;
+}
+
+/* ---- tables and lists sit on a card ----------------------------------------- */
+.gx-console .scroll-x:has(> .table-gx) {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 16px;
+  background: #fff;
+  padding: 0.25rem 1rem 0.5rem;
+  box-shadow: 0 1px 2px rgba(15, 35, 71, 0.05);
+}
+.gx-console .table-gx tr:hover td {
+  background: rgba(41, 171, 226, 0.05);
+}
+
+/* ---- controls --------------------------------------------------------------- */
+.gx-console .btn {
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: none;
+  transform: none;
+}
+.gx-console .btn-primary {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
+}
+.gx-console .btn-primary:hover {
+  border-color: var(--navy-dark);
+  background: var(--navy-dark);
+  color: #fff;
+}
+.gx-console .btn-ghost {
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: var(--ink);
+}
+.gx-console .btn-ghost:hover {
+  border-color: var(--sky);
+  background: rgba(41, 171, 226, 0.06);
+}
+.gx-console .btn::before,
+.gx-console .btn::after {
+  display: none;
+}
+.gx-console :is(.input, .select, .textarea) {
+  border-radius: 8px;
+  background-color: #fff;
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+.gx-console :is(.input, .select, .textarea):focus {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(41, 171, 226, 0.2);
+}
+
+/* ---- status badges: the Service Console's pills, shape cue kept --------------- */
+.gx-console .state {
+  border-radius: 999px;
+  padding: 0.125rem 0.625rem;
+  background: color-mix(in srgb, currentColor 11%, #fff);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.gx-console .go {
+  color: var(--accent);
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}

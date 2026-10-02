@@ -77,7 +77,7 @@ export default async function ConsoleLayout({ children }: { children: ReactNode 
   }
 
   return (
-    <Shell name={access.displayName} role={access.role} sections={navFor(access.caps)}>
+    <Shell name={access.displayName} role={access.role} items={navFor(access.caps)}>
       {children}
     </Shell>
   );

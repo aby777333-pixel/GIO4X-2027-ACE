@@ -2,70 +2,77 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { NavSection } from "@/components/control/nav-items";
+import { useEffect, useState } from "react";
+import { Icon } from "@/components/control/icons";
+import type { NavEntry } from "@/components/control/nav-items";
+
+function useCurrent() {
+  const pathname = usePathname();
+  return { pathname, isCurrent: (item: NavEntry) => (item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`)) };
+}
+
+function Items({ items, onNavigate }: { items: NavEntry[]; onNavigate?: () => void }) {
+  const { isCurrent } = useCurrent();
+  return (
+    <ul className="grid gap-1">
+      {items.map((item) => {
+        const current = isCurrent(item);
+        return (
+          <li key={item.key}>
+            <Link href={item.href} aria-current={current ? "page" : undefined} onClick={onNavigate} className={`gxc-nav-item ${current ? "is-current" : ""} ${item.soon ? "is-soon" : ""}`}>
+              <Icon name={item.icon} />
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {item.soon && <span className="gxc-soon">Soon</span>}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 /**
- * Console navigation. `rail` is the desktop left rail, grouped by section;
- * `bar` is the mobile row under the top bar (it scrolls sideways rather than
- * wrapping). Navigation is a convenience only: every destination checks access
- * itself.
+ * Console navigation: the sidebar's list from `lg` up. Navigation is a
+ * convenience only: every destination checks access itself.
  */
-export function ControlNav({ variant, sections }: { variant: "rail" | "bar"; sections: NavSection[] }) {
-  const pathname = usePathname();
-  const isCurrent = (href: string, exact: boolean) => (exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`));
+export function ControlNav({ items }: { items: NavEntry[] }) {
+  return (
+    <nav aria-label="Control" className="gxc-scroll mt-13 min-h-0 flex-1 overflow-y-auto px-13 pb-8">
+      <Items items={items} />
+    </nav>
+  );
+}
 
-  if (variant === "bar") {
-    return (
-      <nav aria-label="Control" className="scroll-x">
-        <ul className="flex min-w-max gap-5 px-gutter">
-          {sections
-            .flatMap((section) => section.items)
-            .map((item) => {
-              const current = isCurrent(item.href, item.exact);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={current ? "page" : undefined}
-                    className={`flex h-[2.75rem] items-center border-b-2 px-8 text-sm transition-colors duration-fast ${
-                      current ? "border-accent font-medium text-ink" : "border-transparent text-ink-3 hover:text-ink"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-        </ul>
-      </nav>
-    );
-  }
+/**
+ * Below `lg`: a menu button in the top bar that opens the same list as a
+ * sheet. It closes when a destination is chosen, on Escape, and whenever the
+ * path changes.
+ */
+export function ControlMenu({ items }: { items: NavEntry[] }) {
+  const [open, setOpen] = useState(false);
+  const { pathname } = useCurrent();
+
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
-    <nav aria-label="Control" className="min-h-0 flex-1 overflow-y-auto pb-13">
-      {sections.map((section, i) => (
-        <div key={section.label} className={i > 0 ? "mt-13" : ""}>
-          <p className="label px-21 pb-5">{section.label}</p>
-          <ul className="grid gap-1">
-            {section.items.map((item) => {
-              const current = isCurrent(item.href, item.exact);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={current ? "page" : undefined}
-                    className={`flex h-[2.75rem] items-center border-l-2 px-21 text-sm transition-colors duration-fast ${
-                      current ? "border-accent bg-brand-soft font-medium text-ink" : "border-transparent text-ink-2 hover:bg-surface-2 hover:text-ink"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </nav>
+    <>
+      <button type="button" className="gxc-menu-button" aria-expanded={open} aria-controls="gxc-menu" onClick={() => setOpen((v) => !v)}>
+        <Icon name={open ? "close" : "menu"} size={20} />
+        <span className="sr-only">{open ? "Close the menu" : "Open the menu"}</span>
+      </button>
+      {open && (
+        <nav id="gxc-menu" aria-label="Control" className="gxc-sheet gxc-scroll">
+          <Items items={items} onNavigate={() => setOpen(false)} />
+        </nav>
+      )}
+    </>
   );
 }

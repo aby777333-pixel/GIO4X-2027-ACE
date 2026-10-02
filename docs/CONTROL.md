@@ -5,6 +5,23 @@ follow-ups, reads newsletter subscriptions and the audit log, and manages who is
 those is the protection: access is decided on the server for every request and enforced again by the
 database. See `docs/SECURITY.md` for the model.
 
+## How it looks, and why
+
+At the owner's request Control wears the look of the earlier staff console, the "Service Console": a navy
+sidebar with the logo on a white card, the signed-in person, the full menu with icons and sign-out at the
+foot; white rounded cards on a pale slate ground; sky accents; Inter throughout. Only the look is taken
+from it. The screens, the access rules and the database are this project's.
+
+- The palette and component overrides are in `src/styles/console.css`, scoped to `.gx-console`. The
+  console is pinned to its light palette whatever theme the public site is set to.
+- The menu is `src/components/control/nav-items.ts`: the Service Console's sections in their familiar
+  order, plus Pipeline, Follow-ups, Subscribers and Audit log. Icons are drawn in
+  `src/components/control/icons.tsx`; no icon package is installed.
+- A section with no screens yet is listed with a "Soon" tag and opens a page that says what it will do and
+  what it is waiting for (`src/components/control/sections.ts`, route `/control/[section]`). Those pages
+  read nothing from the database and show no figures.
+- Below `lg` the sidebar becomes a navy top bar with a menu button.
+
 ## What is in it
 
 | Route | Purpose | Who |

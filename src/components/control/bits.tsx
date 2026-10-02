@@ -5,14 +5,18 @@ import { fmtDateTime } from "@/components/control/format";
 import { LEAD_STAGE_LABEL, LEAD_STATUS_LABEL } from "@/lib/server/constants";
 import type { LeadStage, LeadStatus } from "@/lib/supabase/types";
 
-/** Page opening inside the console: one <h1>, sized for work rather than display. */
-export function ControlHead({ eyebrow, title, lead, actions }: { eyebrow?: string; title: ReactNode; lead?: ReactNode; actions?: ReactNode }) {
+/**
+ * Page opening inside the console, as the Service Console had it: a bold
+ * title, one line beneath, actions to the right. `eyebrow` is accepted for
+ * the callers that pass one and is no longer drawn: the sidebar already says
+ * which section this is.
+ */
+export function ControlHead({ title, lead, actions }: { eyebrow?: string; title: ReactNode; lead?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="flex flex-col gap-21 border-b border-line pb-21 md:flex-row md:items-end md:justify-between">
+    <header className="flex flex-col gap-13 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
-        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <h1 className={`h3 ${eyebrow ? "mt-13" : ""}`}>{title}</h1>
-        {lead && <p className="mt-8 max-w-measure text-sm text-ink-2">{lead}</p>}
+        <h1 className="h3">{title}</h1>
+        {lead && <p className="mt-5 max-w-measure text-sm text-ink-3">{lead}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-13">{actions}</div>}
     </header>

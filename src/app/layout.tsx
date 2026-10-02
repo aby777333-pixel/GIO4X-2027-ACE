@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import "@/styles/depth.css";
 import "@/styles/cockpit.css";
 import "@/styles/breach.css";
+import "@/styles/console.css";
 import { isProduction, site } from "@/config/site";
 import { BOOT_SCRIPT } from "@/lib/boot";
 import { PREFS_BOOT_SCRIPT } from "@/lib/prefs";

@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ControlHead, Empty, Notice, StageBadge, StatusBadge } from "@/components/control/bits";
-import { STATUS_NOTE } from "@/components/control/format";
-import { LeadsTable, type LeadListItem } from "@/components/control/LeadsTable";
+import type { ReactNode } from "react";
+import { ControlHead, Notice, Score, StageBadge, StatusBadge } from "@/components/control/bits";
+import { Icon, type IconName } from "@/components/control/icons";
+import type { LeadListItem } from "@/components/control/LeadsTable";
 import { TaskList, type TaskItem } from "@/components/control/TaskList";
 import type { LeadStage, LeadStatus } from "@/lib/supabase/types";
 
@@ -31,157 +32,181 @@ export type OverviewProps = {
   now: number;
 };
 
-/** Presentation only: every figure arrives as a prop, already read from real rows. */
+function Stat({ href, icon, label, value }: { href: string; icon: IconName; label: string; value: number }) {
+  return (
+    <Link href={href} className="gxc-stat">
+      <span className="gxc-stat-icon">
+        <Icon name={icon} size={16} />
+      </span>
+      <span className="gxc-stat-label">{label}</span>
+      <span className="gxc-stat-value">{value}</span>
+    </Link>
+  );
+}
+
+function Card({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
+  return (
+    <section className="gxc-card min-w-0">
+      <div className="gxc-card-head">
+        <h2 className="gxc-card-title">{title}</h2>
+        {action}
+      </div>
+      <div className="gxc-card-body">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * The dashboard, laid out as the Service Console's was: four figures, then
+ * cards. Presentation only: every figure arrives as a prop, already read from
+ * real rows as the signed-in member of staff.
+ */
 export function OverviewView({ signedInAs, failed, notice, error, leads, subscriberCount, staffToDecide, names, me, now }: OverviewProps) {
-  const total = leads ? leads.counts.reduce((sum, c) => sum + c.count, 0) : 0;
   const nothing = !leads && subscriberCount === null && staffToDecide === null;
+  const count = (status: LeadStatus) => leads?.counts.find((c) => c.status === status)?.count ?? 0;
+  const total = leads ? leads.counts.reduce((sum, c) => sum + c.count, 0) : 0;
+
   return (
     <>
-      <ControlHead eyebrow="GIO4X Control" title="Overview" lead={signedInAs} />
+      <ControlHead title="Service Console" lead={<>Enquiries, follow-ups and the pipeline at a glance. {signedInAs}.</>} />
 
       <div className="mt-21 grid gap-13">
         {notice && !error && <Notice title={notice} tone="ok" />}
         {error && <Notice title={error} tone="error" />}
-      </div>
-
-      {failed ? (
-        <div className="mt-13">
+        {failed && (
           <Notice title="Some figures could not be read" tone="error">
             The database did not answer every query. Reload the page; if this continues, check that the migrations have been applied and that the project is running.
           </Notice>
-        </div>
-      ) : nothing ? (
-        <div className="mt-13">
-          <Notice title="Nothing for your role yet">The sections for your role have not been built. The audit log is open to you in the meantime.</Notice>
-        </div>
-      ) : (
+        )}
+        {!failed && nothing && <Notice title="Nothing for your role yet">The sections for your role have not been built. The audit log is open to you in the meantime.</Notice>}
+        {!failed && staffToDecide !== null && staffToDecide > 0 && (
+          <Notice title={staffToDecide === 1 ? "1 staff change is waiting for your decision" : `${staffToDecide} staff changes are waiting for your decision`}>
+            <Link href="/control/staff" className="link">
+              Review in Team &amp; Access
+            </Link>
+          </Notice>
+        )}
+      </div>
+
+      {!failed && leads && (
         <>
-          {staffToDecide !== null && staffToDecide > 0 && (
-            <div className="mt-13">
-              <Notice title={staffToDecide === 1 ? "1 staff change is waiting for your decision" : `${staffToDecide} staff changes are waiting for your decision`}>
-                <Link href="/control/staff" className="link">
-                  Review on the Staff page
+          <div className="mt-13 grid grid-cols-2 gap-13 lg:grid-cols-4">
+            <Stat href="/control/leads?status=new" icon="inbox" label="New enquiries" value={count("new")} />
+            <Stat href="/control/leads?status=open" icon="leads" label="Open enquiries" value={count("open")} />
+            <Stat href="/control/leads?status=new" icon="customers" label="Unassigned" value={leads.waitingForPickup} />
+            <Stat href="/control/tasks" icon="clock" label="Your follow-ups due" value={leads.taskTotal} />
+          </div>
+
+          <div className="mt-13 grid gap-13 lg:grid-cols-2">
+            <Card
+              title="Newest enquiries"
+              action={
+                <Link href="/control/leads" className="gxc-card-link">
+                  View all →
                 </Link>
-              </Notice>
-            </div>
-          )}
-
-          {leads && (
-            <>
-              <section aria-labelledby="ov-tasks" className="mt-21">
-                <div className="flex flex-wrap items-end justify-between gap-13">
-                  <h2 id="ov-tasks" className="h4">
-                    Your follow-ups, due now
-                  </h2>
-                  <Link href="/control/tasks" className="go">
-                    All follow-ups
-                  </Link>
-                </div>
-                <div className="mt-13">
-                  {leads.tasks.length ? (
-                    <>
-                      <TaskList tasks={leads.tasks} leads={leads.taskLeads} names={names} me={me} now={now} from="overview" writable={leads.canTask} label="Your follow-ups that are overdue or due within a day" />
-                      {leads.taskTotal > leads.tasks.length && <p className="num mt-8 text-xs text-ink-3">Showing the first {leads.tasks.length} of {leads.taskTotal}.</p>}
-                    </>
-                  ) : (
-                    <p className="border-y border-line py-13 text-sm text-ink-3">Nothing of yours is overdue or due in the next 24 hours.</p>
-                  )}
-                </div>
-              </section>
-
-              <section aria-labelledby="ov-stage" className="mt-55">
-                <div className="flex flex-wrap items-baseline justify-between gap-13">
-                  <h2 id="ov-stage" className="label">
-                    Pipeline
-                  </h2>
-                  <Link href="/control/pipeline" className="go">
-                    Open the pipeline
-                  </Link>
-                </div>
-                <ul className="mt-13 grid grid-cols-2 border-l border-t border-line sm:grid-cols-3 lg:grid-cols-6">
-                  {leads.stages.map(({ stage, count }) => (
-                    <li key={stage} className="border-b border-r border-line">
-                      <Link href={`/control/leads?stage=${stage}&sort=score`} className="block p-13 transition-colors duration-fast hover:bg-brand-soft">
-                        <span className="num block font-display text-xl font-light text-ink">{count}</span>
-                        <span className="mt-5 block">
-                          <StageBadge stage={stage} />
+              }
+            >
+              {leads.newest.length ? (
+                <ul className="grid gap-8">
+                  {leads.newest.slice(0, 6).map((lead) => (
+                    <li key={lead.id}>
+                      <Link href={`/control/leads/${lead.id}`} className="gxc-row">
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium text-ink">{lead.name}</span>
+                          <span className="num block truncate text-[0.6875rem] text-ink-3">
+                            {lead.reference} · {lead.topic}
+                          </span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-13">
+                          <span className="hidden sm:inline-flex">
+                            <Score value={lead.score} />
+                          </span>
+                          <StatusBadge status={lead.status} />
                         </span>
                       </Link>
                     </li>
                   ))}
                 </ul>
-              </section>
-
-              <section aria-labelledby="ov-status" className="mt-55">
-                <div className="flex flex-wrap items-baseline justify-between gap-13">
-                  <h2 id="ov-status" className="label">
-                    Enquiries by status
-                  </h2>
-                  <p className="num text-xs text-ink-3">{total} in total</p>
-                </div>
-                <ul className="mt-13 grid grid-cols-2 border-l border-t border-line sm:grid-cols-3 lg:grid-cols-5">
-                  {leads.counts.map(({ status, count }) => (
-                    <li key={status} className="border-b border-r border-line">
-                      <Link href={`/control/leads?status=${status}`} className="block p-21 transition-colors duration-fast hover:bg-brand-soft">
-                        <span className="num block font-display text-2xl font-light text-ink">{count}</span>
-                        <span className="mt-8 block">
-                          <StatusBadge status={status} />
-                        </span>
-                        <span className="mt-5 block text-xs text-ink-3">{STATUS_NOTE[status]}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              {leads.waitingForPickup > 0 && (
-                <div className="mt-21">
-                  <Notice title={leads.waitingForPickup === 1 ? "1 new enquiry has no owner yet" : `${leads.waitingForPickup} new enquiries have no owner yet`}>
-                    <Link href="/control/leads?status=new" className="link">
-                      Review new enquiries
-                    </Link>
-                  </Notice>
-                </div>
+              ) : (
+                <p className="py-21 text-center text-sm text-ink-3">No enquiries yet.</p>
               )}
+            </Card>
 
-              <section aria-labelledby="ov-newest" className="mt-55">
-                <div className="flex flex-wrap items-end justify-between gap-13">
-                  <h2 id="ov-newest" className="h4">
-                    Newest enquiries
-                  </h2>
-                  <Link href="/control/leads" className="go">
-                    All leads
-                  </Link>
-                </div>
-                <div className="mt-13">
-                  {leads.newest.length ? (
-                    <LeadsTable leads={leads.newest} names={names} me={me} caption="The eight most recent enquiries" />
-                  ) : (
-                    <Empty title="No enquiries yet">
-                      <p>When someone sends the contact form or registers interest in an account, the enquiry appears here with its reference.</p>
-                    </Empty>
+            <Card
+              title="Your follow-ups, due now"
+              action={
+                <Link href="/control/tasks" className="gxc-card-link">
+                  All follow-ups →
+                </Link>
+              }
+            >
+              {leads.tasks.length ? (
+                <>
+                  <TaskList tasks={leads.tasks} leads={leads.taskLeads} names={names} me={me} now={now} from="overview" writable={leads.canTask} label="Your follow-ups that are overdue or due within a day" />
+                  {leads.taskTotal > leads.tasks.length && (
+                    <p className="num mt-8 text-xs text-ink-3">
+                      Showing the first {leads.tasks.length} of {leads.taskTotal}.
+                    </p>
                   )}
-                </div>
-              </section>
-            </>
-          )}
+                </>
+              ) : (
+                <p className="py-21 text-center text-sm text-ink-3">Nothing of yours is overdue or due in the next 24 hours.</p>
+              )}
+            </Card>
+          </div>
 
-          {subscriberCount !== null && (
-            <section aria-labelledby="ov-subs" className="mt-55 flex flex-wrap items-baseline justify-between gap-13 border-t border-line pt-21">
-              <div>
-                <h2 id="ov-subs" className="label">
-                  Newsletter
-                </h2>
-                <p className="mt-8 text-sm text-ink-2">
-                  <span className="num font-medium text-ink">{subscriberCount}</span> active {subscriberCount === 1 ? "subscription" : "subscriptions"}
-                </p>
-              </div>
-              <Link href="/control/subscribers" className="go">
-                Subscribers
-              </Link>
-            </section>
-          )}
+          <div className="mt-13 grid gap-13 lg:grid-cols-2">
+            <Card
+              title="Pipeline"
+              action={
+                <Link href="/control/pipeline" className="gxc-card-link">
+                  Open the pipeline →
+                </Link>
+              }
+            >
+              <ul className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+                {leads.stages.map(({ stage, count: n }) => (
+                  <li key={stage}>
+                    <Link href={`/control/leads?stage=${stage}&sort=score`} className="gxc-row">
+                      <StageBadge stage={stage} />
+                      <span className="num text-sm font-semibold text-ink">{n}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            <Card title="Enquiries by status" action={<span className="num text-xs text-ink-3">{total} in total</span>}>
+              <ul className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+                {leads.counts.map(({ status, count: n }) => (
+                  <li key={status}>
+                    <Link href={`/control/leads?status=${status}`} className="gxc-row">
+                      <StatusBadge status={status} />
+                      <span className="num text-sm font-semibold text-ink">{n}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
         </>
+      )}
+
+      {!failed && subscriberCount !== null && (
+        <div className="mt-13">
+          <Card
+            title="Newsletter"
+            action={
+              <Link href="/control/subscribers" className="gxc-card-link">
+                Subscribers →
+              </Link>
+            }
+          >
+            <p className="text-sm text-ink-2">
+              <span className="num font-semibold text-ink">{subscriberCount}</span> active {subscriberCount === 1 ? "subscription" : "subscriptions"}
+            </p>
+          </Card>
+        </div>
       )}
     </>
   );
