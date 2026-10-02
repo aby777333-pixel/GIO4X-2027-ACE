@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Cadence } from "@/components/figures/company/Cadence";
 import { FigureNote } from "@/components/figures/Figure";
+import { DayWheel } from "@/components/figures/markets/DayWheel";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { DepthRoom, FxSessionsToday } from "@/components/knowledge/MorningRoom";
 import { EditionDate, Greeting, LocalClock } from "@/components/knowledge/Today";
 import { firstSentence } from "@/components/markets/graph";
@@ -153,6 +155,11 @@ export default function MorningRoomPage() {
             </p>
             <p className="mt-8 text-xs text-ink-3">Read from your device clock.</p>
           </aside>
+        }
+        companion={
+          <HeroCompanion layout="beside" label="By the date" figure={<DayWheel />}>
+            The lesson and the term further down are picked by the calendar date, in rotation, and change at 00:00 UTC. Nothing here is personalised, ranked or tracked.
+          </HeroCompanion>
         }
       />
       <SessionStrip />

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/control/icons";
+import { LookSwitch } from "@/components/control/LookSwitch";
 import type { NavEntry } from "@/components/control/nav-items";
 
 function useCurrent() {
@@ -45,8 +46,8 @@ export function ControlNav({ items }: { items: NavEntry[] }) {
 
 /**
  * Below `lg`: a menu button in the top bar that opens the same list as a
- * sheet. It closes when a destination is chosen, on Escape, and whenever the
- * path changes.
+ * sheet, with the look switcher above it. It closes when a destination is
+ * chosen, on Escape, and whenever the path changes.
  */
 export function ControlMenu({ items }: { items: NavEntry[] }) {
   const [open, setOpen] = useState(false);
@@ -69,9 +70,15 @@ export function ControlMenu({ items }: { items: NavEntry[] }) {
         <span className="sr-only">{open ? "Close the menu" : "Open the menu"}</span>
       </button>
       {open && (
-        <nav id="gxc-menu" aria-label="Control" className="gxc-sheet gxc-scroll">
-          <Items items={items} onNavigate={() => setOpen(false)} />
-        </nav>
+        <div id="gxc-menu" className="gxc-sheet gxc-scroll">
+          {/* above the list, not below it: the list is long, and its foot is a long way down on a phone */}
+          <div className="gxc-sheet-look">
+            <LookSwitch />
+          </div>
+          <nav aria-label="Control">
+            <Items items={items} onNavigate={() => setOpen(false)} />
+          </nav>
+        </div>
       )}
     </>
   );

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
 import { PendingRack } from "@/components/figures/product/PendingRack";
 import { SequenceRoute } from "@/components/figures/product/SequenceRoute";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
+import { TerminalLayers } from "@/components/figures/stage/TerminalLayers";
 import { NotPublished } from "@/components/platforms/FactState";
 import { Screenshot } from "@/components/platforms/Screenshot";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -42,6 +44,11 @@ export default function Mt5Page() {
         }
         aside={
           <Screenshot shot={shots.mt5Terminal} sizes="(min-width: 1024px) 40vw, 100vw" eager caption="The MetaTrader 5 desktop terminal on a MetaQuotes demo account. Not a GIO4X account, and not GIO4X prices." />
+        }
+        companion={
+          <HeroCompanion figure={<TerminalLayers />} label="One terminal">
+            MetaTrader 5 is one terminal for quotes, charts, technical analysis, order entry and automated trading. It is developed by MetaQuotes and made available by many brokers. GIO4X does not make it and does not present it as its own.
+          </HeroCompanion>
         }
       >
         <a href="#getting-started" className="btn btn-primary">
@@ -286,7 +293,7 @@ export default function Mt5Page() {
           </div>
           <div>
             <h2 className="label">Risk warning</h2>
-            <p className="mt-13 max-w-measure text-sm text-ink-2">{riskWarning}</p>
+            <p className="mt-13 text-sm text-ink-2">{riskWarning}</p>
             <Link href="/legal/risk" className="go mt-13 min-h-[2.75rem] md:min-h-0">
               Risk disclosure
             </Link>

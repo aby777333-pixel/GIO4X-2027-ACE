@@ -2,6 +2,8 @@ import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
 import { LeverBeam } from "@/components/figures/product/LeverBeam";
 import { WorkedLines } from "@/components/figures/product/WorkedLines";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
+import { SharedFigures } from "@/components/figures/stage/SharedFigures";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { HubMini } from "@/components/tools/HubMini";
@@ -50,6 +52,11 @@ export default function ToolsHub() {
         title="GIO4X Trader Toolkit"
         lead="Twelve calculators and visualisers that work as one system. Set a balance, an instrument or a risk figure in one and it is there in the next. Each shows its formula and the working with your own numbers. None of them tells you what to trade."
         aside={<HubMini />}
+        companion={
+          <HeroCompanion figure={<SharedFigures />} label="One set of figures">
+            Instrument, account currency, balance, lot size, leverage and risk are kept in your browser and shared by all twelve tools. Nothing is sent to GIO4X. Set a balance and a risk share here, open any tool below, and both are already in place.
+          </HeroCompanion>
+        }
       >
         <a href="#size" className="btn btn-primary">
           Browse the tools

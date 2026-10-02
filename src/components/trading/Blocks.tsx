@@ -117,7 +117,7 @@ export function RiskNote({ text }: { text: string }) {
       <div className="wrap grid gap-13 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-55">
         <h2 className="label pt-3">Risk warning</h2>
         <div>
-          <p className="max-w-measure text-sm text-ink-2">{text}</p>
+          <p className="text-sm text-ink-2">{text}</p>
           <Link href="/legal/risk" className="go mt-13 min-h-[2.75rem] md:min-h-0">
             Risk disclosure
           </Link>

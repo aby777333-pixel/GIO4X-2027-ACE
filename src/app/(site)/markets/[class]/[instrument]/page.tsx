@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
+import { InstrumentHelix } from "@/components/figures/markets/InstrumentHelix";
 import { firstSentence, ofKind, ratePair, resolveAll, resolveTerms, resolveTools, toneStyle } from "@/components/markets/graph";
 import { RelatedColumn } from "@/components/markets/LinkRows";
 import { MarketDna } from "@/components/markets/MarketDna";
@@ -128,6 +130,11 @@ export default async function InstrumentPage({ params }: Params) {
         }
         lead={i.about}
         aside={<HeroFigure i={i} cls={cls} rates={rates} />}
+        companion={
+          <HeroCompanion figure={<InstrumentHelix />} label="Market DNA">
+            Below, {i.symbol} is taken apart: its class, its contract, its hours and what is connected to it. Structure, not a signal.
+          </HeroCompanion>
+        }
         night={night}
       >
         <Link href="/open-account" className="btn btn-primary">

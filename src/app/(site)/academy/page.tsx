@@ -2,6 +2,8 @@ import Link from "next/link";
 import { BoundedScale } from "@/components/figures/company/BoundedScale";
 import { RollingMean } from "@/components/figures/company/RollingMean";
 import { FigureNote } from "@/components/figures/Figure";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
+import { TurningPages } from "@/components/figures/stage/TurningPages";
 import { ReadRows } from "@/components/knowledge/Reader";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
@@ -94,6 +96,19 @@ export default function AcademyPage() {
               ))}
             </ol>
           </aside>
+        }
+        companion={
+          <HeroCompanion figure={<TurningPages />} label="Beside the lessons">
+            The{" "}
+            <Link href="/glossary" className="link">
+              glossary
+            </Link>{" "}
+            defines the terms the lessons use, and the{" "}
+            <Link href="/tools" className="link">
+              visual tools
+            </Link>{" "}
+            let you watch the mechanics with your own inputs.
+          </HeroCompanion>
         }
       >
         <Link href={`/academy/${first.slug}`} className="btn btn-primary">

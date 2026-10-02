@@ -4,6 +4,8 @@ import { Logo } from "@/components/brand/Logo";
 import { site } from "@/config/site";
 import { Notice } from "@/components/control/bits";
 import { controlMeta, firstParam } from "@/components/control/format";
+import { LookBoot, LOOK_ROOT_PROPS } from "@/components/control/LookBoot";
+import { LookSwitch } from "@/components/control/LookSwitch";
 import { SubmitButton } from "@/components/control/SubmitButton";
 import { getAccess } from "@/lib/server/staff";
 
@@ -35,9 +37,13 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   const configured = access.state !== "unconfigured";
 
   return (
-    <div className="grid min-h-dvh bg-bg lg:grid-cols-[minmax(0,1fr)_minmax(0,1.618fr)]">
+    // A door to the console: it wears the public site's look by default, and the
+    // console's own once a look other than the default has been chosen in this
+    // browser (src/components/control/look.ts).
+    <div className="grid min-h-dvh bg-bg lg:grid-cols-[minmax(0,1fr)_minmax(0,1.618fr)]" data-gxc-door="" {...LOOK_ROOT_PROPS}>
+      <LookBoot />
       {/* the quiet side: what this door is */}
-      <aside className="on-night grid-field hidden flex-col justify-between p-55 lg:flex">
+      <aside className="on-night grid-field gxc-door-aside hidden flex-col justify-between p-55 lg:flex">
         <p className="label">GIO4X Control</p>
         <div>
           <p className="h3 max-w-[14ch]">The working side of the house.</p>
@@ -53,10 +59,14 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         <p className="text-xs text-ink-3">{site.tagline}</p>
       </aside>
 
-      <div className="grid place-items-center px-gutter py-55">
+      <div className="relative grid place-items-center px-gutter py-55">
+        {/* out of the flow, in the foot's margin, so nothing else on the page moves for it */}
+        <div className="gxc-door-look">
+          <LookSwitch variant="page" />
+        </div>
         <div className="w-full max-w-[26rem]">
           <div className="inline-flex items-center gap-13">
-            <Logo height={26} href={null} />
+            <Logo height={26} href={null} className="gxc-door-logo" />
             <span className="label border-l border-line-strong pl-13">Control</span>
           </div>
 

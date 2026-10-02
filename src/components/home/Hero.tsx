@@ -1,27 +1,27 @@
 import Link from "next/link";
 import { HeroScene } from "@/components/cockpit/HeroScene";
-import { MarketSphere } from "@/components/market/MarketSphere";
+import { CentreSummary } from "@/components/home/CentreSummary";
 import { site } from "@/config/site";
 
 /**
  * Homepage hero: entering the GIO4X cockpit.
  *
  * The same night stage, at the same height, as every other page. Its
- * instrument is the market sphere (the world's financial centres, lit by
- * their real regular trading hours), standing on the stage's focal point
- * inside the flight-deck frame that the scene draws around it. On a phone the
- * sphere is the sky above the statement rather than a second stacked block.
+ * instrument is the flight-deck scene (cockpit/scenes/flightdeck.ts): the
+ * globe of the world's financial centres, lit by their real regular trading
+ * hours and by the real sun, with the forms of a trading floor about it. On a
+ * phone it is the sky above the statement rather than a second stacked block.
+ * The canvas is decorative; <CentreSummary/> says the same real information in
+ * words, and the caption says what is real and what is only form.
  */
 export function Hero() {
   return (
     <section className="cx-hero cx-home on-night" aria-labelledby="hero-title">
       <div className="cx-stage">
         <HeroScene scene="flightdeck" seed="/" />
-        <div className="cx-home-sphere" style={{ animation: "gx-fade 1100ms var(--ease-out) 160ms both" }}>
-          <MarketSphere className="w-full" />
-        </div>
+        <CentreSummary />
         <p className="cx-home-note hidden text-xs text-ink-3 lg:block">
-          Financial centres by regular trading hours, live from your clock. Outer dial: 24h UTC with the four FX sessions.
+          Financial centres by regular trading hours, joined when open together, with day and night from your clock. Dial: 24h UTC and the four FX sessions. Ladder, candles and tape are forms only, not market data.
         </p>
       </div>
 

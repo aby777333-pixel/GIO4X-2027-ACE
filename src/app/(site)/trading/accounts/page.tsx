@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Backdrop } from "@/components/figures/Backdrop";
 import { FigureNote } from "@/components/figures/Figure";
 import { Documents } from "@/components/figures/trading/Documents";
 import { Residence } from "@/components/figures/trading/Residence";
@@ -201,7 +202,8 @@ export default function AccountsPage() {
       </section>
 
       {/* calm CTA */}
-      <section className="section hairline" aria-labelledby="ready">
+      <section className="section hairline relative" aria-labelledby="ready">
+        <Backdrop variant="orbits" />
         <div className="wrap flex flex-col gap-34 md:flex-row md:items-end md:justify-between">
           <div className="max-w-[40rem]">
             <h2 id="ready" className="h2">

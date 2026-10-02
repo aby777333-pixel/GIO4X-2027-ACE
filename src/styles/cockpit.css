@@ -161,6 +161,11 @@
     0 0 42px -6px var(--cx-key);
 }
 
+/* the pane's companion exists only where there is space beside the pane (1080px up, below) */
+.cx-companion {
+  display: none;
+}
+
 /* content beside the statement stands in the stage as a pane of smoked glass */
 .cx-aside {
   align-self: center;
@@ -199,6 +204,12 @@
    The statement keeps to the left of that frame (engine.ts: the frame is the
    right-hand 52% of the content column). The homepage composes its own stage
    and is left as it was. */
+/* Every stage but the homepage's is lower: the instrument's frame with an
+   equal margin above and below it, not a full window of night. The frame is
+   centred in the stage (engine.ts), so the height comes off both ends alike. */
+.cx-hero:not(.cx-home) {
+  --hero-h: clamp(26rem, calc(100svh - var(--header-h) - 16rem), 34rem);
+}
 @media (min-width: 1080px) {
   .cx-hero:not(.cx-home) {
     grid-template-rows: [stage-start] minmax(var(--hero-h), auto) [stage-end aside-start] auto [aside-end];
@@ -220,6 +231,21 @@
     justify-self: start;
     width: min(100%, 46rem);
     margin-block: 2.125rem 3.4375rem;
+  }
+  /* beside the pane, in the space it leaves: a figure and a line of related text, on the night material */
+  .cx-hero:not(.cx-home) .cx-companion {
+    display: block;
+    grid-column: content;
+    grid-row: aside;
+    justify-self: end;
+    align-self: center;
+    width: calc(100% - min(100%, 46rem) - 3.4375rem);
+    max-width: 30rem;
+    min-width: 0;
+    margin-block: 2.125rem 3.4375rem;
+  }
+  .cx-hero:not(.cx-home) .cx-aside:has(> .cx-wide) ~ .cx-companion {
+    display: none;
   }
   /* a pane that composes its own columns (a picture with tabs beside it) takes the full content width */
   .cx-hero:not(.cx-home) .cx-aside:has(> .cx-wide) {
@@ -320,7 +346,8 @@
 }
 .cx-home-note {
   position: absolute;
-  right: var(--gutter);
+  /* clear of the scroll arrows and the help button, which stand in the bottom-right corner */
+  right: calc(var(--gutter) + 4.25rem);
   bottom: 0.8125rem;
   max-width: 30rem;
   text-align: right;
@@ -688,5 +715,12 @@ header[data-site-header] > div.absolute {
     background: none;
     box-shadow: none;
     margin-top: 1rem;
+  }
+}
+
+/* Between 1080 and 1240 the space beside the pane is too narrow for a figure to read: no companion there. */
+@media (max-width: 1239px) {
+  .cx-hero:not(.cx-home) .cx-companion {
+    display: none;
   }
 }

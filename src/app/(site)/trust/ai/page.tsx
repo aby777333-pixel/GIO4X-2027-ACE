@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Backdrop } from "@/components/figures/Backdrop";
 import { FigureNote } from "@/components/figures/Figure";
 import { NotedChapter } from "@/components/figures/trust/NotedChapter";
 import { SevenBounds } from "@/components/figures/trust/SevenBounds";
@@ -109,7 +110,8 @@ export default function AiPage() {
         </div>
       </Chapter>
 
-      <section className="section-quiet hairline bg-paper" aria-labelledby="ai-change">
+      <section className="section-quiet hairline relative bg-paper" aria-labelledby="ai-change">
+        <Backdrop variant="ledger" />
         <div className="wrap flex flex-col gap-21 md:flex-row md:items-end md:justify-between">
           <div data-reveal suppressHydrationWarning>
             <p className="eyebrow">When this changes</p>

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Colonnade } from "@/components/figures/stage/Colonnade";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { LEDGER_REVIEWED, pendingCount, publishedCount } from "@/components/trust/disclosures";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -61,6 +63,11 @@ export default function TrustCentrePage() {
               Read the table
             </Link>
           </div>
+        }
+        companion={
+          <HeroCompanion figure={<Colonnade />}>
+            The Trust Centre has seven sections, and each one ends in something you can test yourself: an address, a header, a formula, a document. There are no seals, scores or shields here.
+          </HeroCompanion>
         }
       />
 

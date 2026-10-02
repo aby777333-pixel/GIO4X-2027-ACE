@@ -12,6 +12,8 @@ type Props = {
   lead: string;
   diagram: ReactNode;
   diagramCaption: string;
+  /** optional: what stands beside the diagram on the night stage, on wide screens */
+  companion?: ReactNode;
   what: string[];
   /** optional: something for the space under "What it is", beside the longer mechanics list */
   whatAside?: ReactNode;
@@ -50,6 +52,7 @@ export function Arrangement(p: Props) {
             <figcaption className="mt-8 text-xs text-ink-3">{p.diagramCaption}</figcaption>
           </figure>
         }
+        companion={p.companion}
       />
 
       <section className="section" aria-labelledby="arr-how">

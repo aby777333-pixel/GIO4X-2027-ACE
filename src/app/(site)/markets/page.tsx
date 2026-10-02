@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
+import { SixDecks } from "@/components/figures/markets/SixDecks";
 import { DayRibbon } from "@/components/markets/DayRibbon";
 import { NowAside } from "@/components/markets/Now";
 import { RatesTable } from "@/components/markets/RatesTable";
@@ -65,6 +67,14 @@ export default async function MarketsPage() {
         title="Market Command"
         lead={`One calm overview of ${assetClasses.length} asset classes and ${instruments.length} instruments: what is in session, where the major pairs last fixed, and how each market is built. Every figure carries its source and its date.`}
         aside={<NowAside />}
+        companion={
+          <HeroCompanion figure={<SixDecks decks={assetClasses.map((a) => ({ name: a.name, count: instrumentsByClass(a.key).length }))} />} label="Worth knowing">
+            Where a licensed feed is not connected, these pages say so: nothing is estimated to fill a gap.{" "}
+            <Link href="/trust/data-methodology" className="link">
+              Data methodology
+            </Link>
+          </HeroCompanion>
+        }
       >
         <a href="#asset-classes" className="btn btn-primary">
           Browse the markets

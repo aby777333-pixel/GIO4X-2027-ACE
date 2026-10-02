@@ -412,7 +412,7 @@ export default function RaptorPage() {
           <h2 id="raptor-risk" className="label">
             Risk warning
           </h2>
-          <p className="mt-13 max-w-measure text-sm text-ink-2">{riskWarning}</p>
+          <p className="mt-13 text-sm text-ink-2">{riskWarning}</p>
           <Link href="/legal/risk" className="go mt-21 min-h-[2.75rem] md:min-h-0">
             Risk disclosure
           </Link>

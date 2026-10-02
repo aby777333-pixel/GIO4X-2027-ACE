@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
+import { AllocationPrism } from "@/components/figures/stage/AllocationPrism";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { FourDiscs } from "@/components/figures/trading/FourDiscs";
 import { AskLine, NumberedRows, PendingList, RiskNote } from "@/components/trading/Blocks";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
@@ -58,6 +60,11 @@ export default function MoneyManagersPage() {
             </div>
             <figcaption className="mt-8 text-xs text-ink-3">Illustration of allocation. Proportions are arbitrary; no real account is shown.</figcaption>
           </figure>
+        }
+        companion={
+          <HeroCompanion figure={<AllocationPrism />} label="Authority, not custody">
+            The manager places a trade once and it is allocated across the accounts under management. In the usual structure the manager is given authority to trade, not custody of the money: clients do not transfer funds to the manager.
+          </HeroCompanion>
         }
       >
         <Link href="/contact" className="btn btn-primary">

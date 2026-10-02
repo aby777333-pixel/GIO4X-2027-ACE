@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
+import { CurrencyOrbits } from "@/components/figures/stage/CurrencyOrbits";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { ReturnLoop } from "@/components/figures/trading/ReturnLoop";
 import { AskLine, NumberedRows, PendingList, RiskNote } from "@/components/trading/Blocks";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
@@ -36,6 +38,15 @@ export default function FundingPage() {
             </ul>
             <p className="mt-8 text-xs text-ink-3">As listed on both previous GIO4X websites. Whether a given method supports a given currency is confirmed in your client area.</p>
           </div>
+        }
+        companion={
+          <HeroCompanion figure={<CurrencyOrbits />} label="On the way in">
+            Eleven currencies are accepted, but every payment still travels through a bank or payment provider, which may apply its own transfer or conversion charges.{" "}
+            <Link href="#path" className="link">
+              The path of a payment
+            </Link>{" "}
+            sets out the six steps.
+          </HeroCompanion>
         }
       />
 

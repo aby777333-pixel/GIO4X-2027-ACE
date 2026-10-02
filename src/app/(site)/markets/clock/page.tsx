@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
+import { Sundial } from "@/components/figures/markets/Sundial";
 import { ClockBoard } from "@/components/markets/ClockBoard";
 import { hhmm } from "@/components/markets/time";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -52,6 +54,11 @@ export default function ClockPage() {
             <p className="mt-5 text-sm text-ink">This is a timetable, not a data feed. {SCHEDULE_NOTE}</p>
             <p className="mt-5 text-sm text-ink-3">Before trading around a holiday, check the exchange’s own calendar.</p>
           </div>
+        }
+        companion={
+          <HeroCompanion layout="beside" figure={<Sundial />}>
+            The FX week runs from Monday morning in Sydney to 17:00 on Friday in New York. Between sessions, quotes continue with fewer participants.
+          </HeroCompanion>
         }
       />
 

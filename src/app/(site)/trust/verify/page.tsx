@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Backdrop } from "@/components/figures/Backdrop";
 import { FigureNote } from "@/components/figures/Figure";
 import { ColumnNote, NotedChapter } from "@/components/figures/trust/NotedChapter";
 import { PortalGates } from "@/components/figures/trust/PortalGates";
@@ -223,7 +224,8 @@ export default function VerifyPage() {
         />
       </NotedChapter>
 
-      <section className="section-quiet hairline" aria-labelledby="report">
+      <section className="section-quiet hairline relative" aria-labelledby="report">
+        <Backdrop variant="tape" />
         <div className="wrap flex flex-col gap-21 md:flex-row md:items-end md:justify-between">
           <div data-reveal suppressHydrationWarning>
             <p className="eyebrow">Something does not look right</p>

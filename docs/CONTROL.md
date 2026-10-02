@@ -13,7 +13,10 @@ foot; white rounded cards on a pale slate ground; sky accents; Inter throughout.
 from it. The screens, the access rules and the database are this project's.
 
 - The palette and component overrides are in `src/styles/console.css`, scoped to `.gx-console`. The
-  console is pinned to its light palette whatever theme the public site is set to.
+  console has its own look, independent of the public site's theme: light or dark, and six palettes (Navy,
+  the default, Graphite, Emerald, Royal, Ocean, Mono), chosen with the switcher at the foot of the sidebar.
+  It is kept per browser in `localStorage` under `gxc:look` and applied before paint
+  (`src/components/control/look.ts`, `LookBoot.tsx`, `LookSwitch.tsx`).
 - The menu is `src/components/control/nav-items.ts`: the Service Console's sections in their familiar
   order, plus Pipeline, Follow-ups, Subscribers and Audit log. Icons are drawn in
   `src/components/control/icons.tsx`; no icon package is installed.

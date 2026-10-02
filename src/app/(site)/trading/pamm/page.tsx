@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
+import { PoolBraid } from "@/components/figures/stage/PoolBraid";
 import { PeriodGate } from "@/components/figures/trading/PeriodGate";
 import { Vessels } from "@/components/figures/trading/Vessels";
 import { Arrangement } from "@/components/trading/Arrangement";
@@ -25,6 +27,15 @@ export default function PammPage() {
       lead="In a PAMM arrangement a manager trades a pooled account and every result is divided among the investors according to what each allocated. This page explains the mechanism before anything else."
       diagram={<PoolDiagram className="h-auto w-full" />}
       diagramCaption="Illustration of the mechanism. It shows no real manager and no results."
+      companion={
+        <HeroCompanion figure={<PoolBraid />} label="One pool">
+          It differs from{" "}
+          <Link href="/trading/copy-trading" className="link">
+            copy trading
+          </Link>{" "}
+          in one important way: the manager trades the pool, and an investor’s control is limited to allocating and withdrawing. Investors do not place or modify trades.
+        </HeroCompanion>
+      }
       what={pamm.what}
       whatAside={
         <FigureNote figure={<Vessels ratio={2.5} />} label="In practice">

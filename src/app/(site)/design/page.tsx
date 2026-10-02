@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { GoldenGrid, TokenSwatch } from "@/components/company/DesignKit";
+import { GoldenHead } from "@/components/figures/stage/GoldenHead";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { DataNote, NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
 import { pageMeta } from "@/lib/meta";
 
@@ -175,6 +177,11 @@ export default function DesignPage() {
             <GoldenSpiral />
             <figcaption className="mt-8 text-xs text-ink-3">1.618 : 1. Remove a square and the same rectangle remains.</figcaption>
           </figure>
+        }
+        companion={
+          <HeroCompanion figure={<GoldenHead />} label="One number">
+            Here each point is turned from the last by the golden fraction of a circle, and no two ever line up. Move the pointer off centre and spokes appear at once. Spacing, type, layout and even timing on this site step by the same number.
+          </HeroCompanion>
         }
       >
         <GoldenGrid />

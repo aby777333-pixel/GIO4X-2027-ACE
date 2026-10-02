@@ -4,6 +4,8 @@ import { signOut } from "@/app/control/actions";
 import { Logo } from "@/components/brand/Logo";
 import { ROLE_LABEL } from "@/components/control/format";
 import { Icon } from "@/components/control/icons";
+import { LookBoot, LOOK_ROOT_PROPS } from "@/components/control/LookBoot";
+import { LookSwitch } from "@/components/control/LookSwitch";
 import { ControlMenu, ControlNav } from "@/components/control/Nav";
 import type { NavEntry } from "@/components/control/nav-items";
 import type { StaffRole } from "@/lib/supabase/types";
@@ -35,13 +37,17 @@ function Brand() {
  * sign-out at the foot; the work on a pale slate ground to the right.
  * Below `lg` the sidebar becomes a navy top bar with a menu button.
  *
- * `data-theme="light"` pins the console to its light palette whatever theme
- * the public site is set to; src/styles/console.css then replaces the site's
- * ivory and graphite with the console's slate, navy and sky.
+ * `data-theme="light"` keeps the public site's theme out of the console;
+ * src/styles/console.css then replaces the site's ivory and graphite with the
+ * console's own colours. Which colours is the console's look (light or dark,
+ * and a palette): chosen in the sidebar's foot, remembered in this browser,
+ * and put on this root by <LookBoot /> before anything is painted. The
+ * default, light and Navy, is the Service Console's slate, navy and sky.
  */
 export function Shell({ name, role, items, children }: { name: string; role: StaffRole; items: NavEntry[]; children: ReactNode }) {
   return (
-    <div className="gx-console min-h-dvh lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]" data-theme="light">
+    <div className="gx-console min-h-dvh lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]" data-theme="light" {...LOOK_ROOT_PROPS}>
+      <LookBoot />
       {/* desktop sidebar */}
       <aside className="gxc-side sticky top-0 hidden h-dvh flex-col lg:flex">
         <div className="px-21 pb-13 pt-21">
@@ -54,12 +60,13 @@ export function Shell({ name, role, items, children }: { name: string; role: Sta
             </span>
             <span className="min-w-0 leading-tight">
               <span className="block truncate text-sm font-semibold text-white">{name}</span>
-              <span className="block text-[0.6875rem] uppercase tracking-wide text-white/60">{ROLE_LABEL[role]}</span>
+              <span className="gxc-user-role block text-[0.6875rem] uppercase tracking-wide">{ROLE_LABEL[role]}</span>
             </span>
           </div>
         </div>
         <ControlNav items={items} />
         <div className="border-t border-white/10 px-13 py-13">
+          <LookSwitch />
           <form action={signOut}>
             <button type="submit" className="gxc-nav-item gxc-signout w-full">
               <Icon name="signout" size={16} />
@@ -93,16 +100,26 @@ export function Shell({ name, role, items, children }: { name: string; role: Sta
   );
 }
 
-/** Centred single-column frame for the states outside the console (not authorised, not configured). */
+/**
+ * Centred single-column frame for the states outside the console (not
+ * authorised, not configured). Like the sign-in page it wears the public
+ * site's look by default (`data-gxc-door`), and the console's once a look
+ * other than the default has been chosen in this browser.
+ */
 export function Standalone({ children }: { children: ReactNode }) {
   return (
-    <div className="grid min-h-dvh place-items-center bg-bg px-gutter py-55">
+    <div className="relative grid min-h-dvh place-items-center bg-bg px-gutter py-55" data-gxc-door="" {...LOOK_ROOT_PROPS}>
+      <LookBoot />
       <div className="w-full max-w-[30rem]">
         <div className="inline-flex items-center gap-13">
-          <Logo height={26} href={null} />
+          <Logo height={26} href={null} className="gxc-door-logo" />
           <span className="label border-l border-line-strong pl-13">Control</span>
         </div>
         <div className="mt-34">{children}</div>
+      </div>
+      {/* out of the flow, in the foot's margin, so the notice stays where it was */}
+      <div className="gxc-door-look">
+        <LookSwitch variant="page" />
       </div>
     </div>
   );

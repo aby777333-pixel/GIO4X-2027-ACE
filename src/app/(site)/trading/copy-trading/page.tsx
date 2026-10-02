@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
+import { Formation } from "@/components/figures/stage/Formation";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { ScaledCopy } from "@/components/figures/trading/ScaledCopy";
 import { Arrangement } from "@/components/trading/Arrangement";
 import { CopyDiagram } from "@/components/trading/Diagrams";
@@ -24,6 +26,15 @@ export default function CopyTradingPage() {
       lead="Copy trading reproduces a provider’s trades in your own account, at your own scale and your own risk. This page explains the mechanism before anything else."
       diagram={<CopyDiagram className="h-auto w-full" />}
       diagramCaption="Illustration of the mechanism. It shows no real provider and no results."
+      companion={
+        <HeroCompanion figure={<Formation />} label="The delay">
+          A copied order reaches the market after the provider’s. In a fast market the difference in price, known as slippage, can be material. It is one of the{" "}
+          <Link href="#arr-risks" className="link">
+            risks
+          </Link>{" "}
+          set out below.
+        </HeroCompanion>
+      }
       what={copyTrading.what}
       whatAside={
         <FigureNote figure={<ScaledCopy ratio={2.6} />} label="In practice">

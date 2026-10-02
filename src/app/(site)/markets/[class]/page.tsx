@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ClassCompanion } from "@/components/figures/markets/ClassCompanion";
 import { ClassAside, ClassNav } from "@/components/markets/ClassAside";
 import { resolveEvents, resolveTerms, resolveTools, toneStyle } from "@/components/markets/graph";
 import { InstrumentTable } from "@/components/markets/InstrumentTable";
@@ -57,6 +58,7 @@ export default async function AssetClassPage({ params }: Params) {
         title={cls.name}
         lead={cls.line}
         aside={<ClassAside cls={cls} list={list} />}
+        companion={<ClassCompanion cls={cls} list={list} />}
         night={night}
       >
         <a href="#instruments" className="btn btn-primary">

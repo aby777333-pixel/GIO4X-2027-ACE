@@ -5,6 +5,7 @@ import type { SceneId } from "@/components/cockpit/scenes";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema, type Crumb } from "@/lib/schema";
 import { Rosette } from "@/components/brand/Rosette";
+import { Backdrop, type BackdropVariant } from "@/components/figures/Backdrop";
 
 /** Visible breadcrumbs backed by BreadcrumbList structured data. Humans first. */
 export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
@@ -46,6 +47,12 @@ type HeroProps = {
   children?: ReactNode;
   /** a visual, a data panel or a note that follows the stage as its own block */
   aside?: ReactNode;
+  /**
+   * What stands in the space to the right of the pane on wide screens: a small
+   * figure with a line or two of related text. Shown only beside an `aside`
+   * that does not take the full width, and only from 1080px up.
+   */
+  companion?: ReactNode;
   /** compact pages (legal, utility) use the quieter heading size */
   quiet?: boolean;
   /** kept for callers: every page opening is now a night stage */
@@ -63,7 +70,7 @@ type HeroProps = {
  * never stands in the stage: it follows it as its own block on the same night
  * material, so nothing covers the instrument.
  */
-export function PageHero({ crumbs, eyebrow, title, lead, children, aside, quiet, scene }: HeroProps) {
+export function PageHero({ crumbs, eyebrow, title, lead, children, aside, companion, quiet, scene }: HeroProps) {
   return (
     <header className={`cx-hero on-night ${aside ? "cx-has-aside" : ""}`}>
       <div className="cx-stage" aria-hidden>
@@ -80,12 +87,19 @@ export function PageHero({ crumbs, eyebrow, title, lead, children, aside, quiet,
           </div>
         </div>
         {aside && <div className="cx-aside">{aside}</div>}
+        {aside && companion && <div className="cx-companion">{companion}</div>}
       </div>
     </header>
   );
 }
 
-/** Section opening: eyebrow, heading, optional lead, optional action at the baseline. */
+/**
+ * Section opening: eyebrow, heading, optional lead, optional action at the baseline.
+ *
+ * The empty space to the right of the heading carries a faint backdrop on wide
+ * screens. It draws only where there is room beside the text and clears itself
+ * around the action; `backdrop={false}` leaves the row plain.
+ */
 export function SectionHead({
   eyebrow,
   title,
@@ -93,6 +107,7 @@ export function SectionHead({
   action,
   as = "h2",
   className = "",
+  backdrop = "auto",
 }: {
   eyebrow?: string;
   title: ReactNode;
@@ -100,17 +115,19 @@ export function SectionHead({
   action?: ReactNode;
   as?: "h2" | "h3";
   className?: string;
+  backdrop?: BackdropVariant | "auto" | false;
 }) {
   const H = as;
   return (
-    <div className={`flex flex-col gap-21 md:flex-row md:items-end md:justify-between ${className}`}>
+    <div className={`relative flex flex-col gap-21 md:flex-row md:items-end md:justify-between ${className}`}>
+      {backdrop && <Backdrop variant={backdrop} />}
       <div data-reveal>
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <H className={`${as === "h2" ? "h2" : "h3"} ${eyebrow ? "mt-13" : ""} max-w-[22ch]`}>{title}</H>
         {lead && <p className="lead mt-13 max-w-[58ch]">{lead}</p>}
       </div>
       {action && (
-        <div className="shrink-0" data-reveal>
+        <div className="shrink-0" data-reveal data-backdrop-hole>
           {action}
         </div>
       )}

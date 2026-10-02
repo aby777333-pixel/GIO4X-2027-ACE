@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
+import { ThreeDoors } from "@/components/figures/stage/ThreeDoors";
 import { PageHero } from "@/components/ui/Page";
 import { portalMeta, portals, type PortalKey } from "@/config/destinations";
 import { pageMeta } from "@/lib/meta";
@@ -110,6 +112,15 @@ export default function SignInPage() {
             </p>
           </div>
         </div>
+      }
+      companion={
+        <HeroCompanion figure={<ThreeDoors />} label="Before you sign in">
+          A destination is shown here as a link only once it is verified. To check an address you have been sent, paste it into the{" "}
+          <Link href="/trust/verify" className="link">
+            Official Destination Checker
+          </Link>
+          , which compares it with the registry of GIO4X domains and approved third parties.
+        </HeroCompanion>
       }
     />
   );

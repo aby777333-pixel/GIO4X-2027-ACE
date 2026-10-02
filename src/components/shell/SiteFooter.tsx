@@ -6,6 +6,7 @@ import { companyLine, riskWarning } from "@/config/legal";
 import { restrictedJurisdictions } from "@/data/accounts";
 import { Logo } from "@/components/brand/Logo";
 import { Rosette } from "@/components/brand/Rosette";
+import { Backdrop } from "@/components/figures/Backdrop";
 
 const socialLabels: Record<string, string> = {
   linkedin: "LinkedIn",
@@ -43,6 +44,7 @@ export function SiteFooter() {
 
       {/* brand statement */}
       <div className="wrap relative grid gap-34 py-55 lg:grid-cols-phi lg:items-end lg:py-89">
+        <Backdrop variant="lattice" />
         <div>
           <p className="eyebrow">{site.tagline}</p>
           <p className="h2 mt-21 max-w-[18ch] text-on-night">Global markets. Gentlemanly standards.</p>

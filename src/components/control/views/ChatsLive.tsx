@@ -521,7 +521,7 @@ export function ChatsLive(props: ChatsLiveProps) {
                           <p className={`text-[0.6875rem] text-ink-3 ${staff ? "text-right" : ""}`}>
                             <span className="font-semibold text-ink-2">{staff ? who(m.author) : visitorOf(row)}</span> · <span className="num">{fmtDateTime(m.created_at)}</span>
                           </p>
-                          <p className={`mt-3 whitespace-pre-wrap break-words rounded-md border px-13 py-8 text-sm text-ink ${staff ? "border-transparent bg-brand-soft" : "border-line bg-white"}`}>{m.body}</p>
+                          <p className={`mt-3 whitespace-pre-wrap break-words rounded-md border px-13 py-8 text-sm text-ink ${staff ? "border-transparent bg-brand-soft" : "border-line bg-surface"}`}>{m.body}</p>
                         </div>
                       );
                     })

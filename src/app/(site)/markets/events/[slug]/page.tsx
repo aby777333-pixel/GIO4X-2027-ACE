@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
+import { ReleaseRipple } from "@/components/figures/markets/ReleaseRipple";
 import { banksForEvent, eventHref, resolveAll } from "@/components/markets/graph";
 import { LinkRows } from "@/components/markets/LinkRows";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -63,6 +65,14 @@ export default async function EventPage({ params }: Params) {
               ]}
             />
           </aside>
+        }
+        companion={
+          <HeroCompanion figure={<ReleaseRipple count={watched.length} />} label="Around a release">
+            Spreads may widen, prices may gap and an order may be filled at a different price from the one requested.{" "}
+            <Link href="/tools/order-anatomy" className="link">
+              Order anatomy
+            </Link>
+          </HeroCompanion>
         }
       />
 

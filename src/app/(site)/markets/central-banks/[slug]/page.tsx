@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { FigureNote } from "@/components/figures/Figure";
+import { BankGlobe } from "@/components/figures/markets/BankGlobe";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { BankReleases } from "@/components/figures/product/BankReleases";
 import { bankHref, eventsForBank, instrumentsForBank, resolveEvents, resolveTerms } from "@/components/markets/graph";
 import { InlineLinks, LinkRows } from "@/components/markets/LinkRows";
@@ -87,6 +89,11 @@ export default async function CentralBankPage({ params }: Params) {
               Read from your device clock. Decisions are announced in this time zone.
             </p>
           </aside>
+        }
+        companion={
+          <HeroCompanion layout="beside" label="At the source" figure={<BankGlobe lat={b.lat} lon={b.lon} />}>
+            The policy rate, the last decision and the next meeting are not shown here: they are read at the bank’s own publication.
+          </HeroCompanion>
         }
       >
         <a href={b.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { InterestForm } from "@/components/company/InterestForm";
+import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
+import { SteppingStones } from "@/components/figures/stage/SteppingStones";
 import { PageHero } from "@/components/ui/Page";
 import { portals } from "@/config/destinations";
 import { companyLine, riskWarning } from "@/config/legal";
@@ -75,6 +77,11 @@ export default function OpenAccountPage() {
             </>
           )}
         </div>
+        }
+        companion={
+          <HeroCompanion figure={<SteppingStones />} label="What comes later">
+            The application itself will ask for an identity document and a proof of address. No documents are requested at this stage, and neither should be sent by email or through a form on this site: you will be told how to provide them.
+          </HeroCompanion>
         }
       />
 

@@ -12,14 +12,68 @@
   the views already use (.panel, .btn, .state, .table-gx, .field, .input …)
   keeps working: it just reads different values.
 
-  Nothing here reaches outside `.gx-console`. Classes prefixed `gxc-` are the
-  console's own parts.
-*/
-.gx-console {
-  --navy: #1b3a6b;
-  --navy-dark: #0f2347;
-  --sky: #29abe2;
+  The look is chosen per browser (src/components/control/look.ts): two modes,
+  light and dark, and six palettes. The root carries data-gxc-theme and
+  data-gxc-palette; the blocks below replace the variables for each. The
+  first block is the default, Navy in light, and holds the Service Console's
+  original values exactly: a person who never touches the switch sees what
+  they always saw. The console's look is its own: it neither reads nor
+  changes the public site's display preferences.
 
+  Every colour a rule below uses is a variable defined here. Nothing here
+  reaches outside `.gx-console`, with two stated exceptions: the look switcher
+  (`.gxc-look`), which also appears on the sign-in page before that page has
+  taken the console's look, and the page behind a dark console. Classes
+  prefixed `gxc-` are the console's own parts.
+*/
+
+/* ---- the default look: Navy, light ------------------------------------------ */
+.gx-console {
+  color-scheme: light;
+
+  /* the palette */
+  --gxc-side: #1b3a6b; /* sidebar and phone top bar */
+  --gxc-primary: #1b3a6b; /* primary button */
+  --gxc-primary-hover: #0f2347;
+  --gxc-primary-ink: #ffffff;
+  --gxc-tint: #29abe2; /* sky: edges, tints, bars, the focus ring */
+
+  /* the sidebar's own inks: it is a dark surface in every look */
+  --gxc-side-ink: #ffffff;
+  --gxc-side-hover: rgba(255, 255, 255, 0.1);
+  --gxc-side-edge: transparent;
+  --gxc-nav-ink: rgba(255, 255, 255, 0.78);
+  --gxc-nav-soon: rgba(255, 255, 255, 0.55);
+  --gxc-soon-opacity: 0.75;
+  --gxc-role: rgba(255, 255, 255, 0.6);
+  --gxc-current-bg: #ffffff;
+  --gxc-current-ink: var(--gxc-side);
+  --gxc-current-edge: none;
+  --gxc-nav-focus: #7dd3fc;
+  --gxc-signout-hover: #fda4af;
+  --gxc-logo-card: rgba(255, 255, 255, 0.96);
+  --gxc-avatar: linear-gradient(135deg, #29abe2, #34d399);
+  --gxc-avatar-ink: var(--gxc-side);
+
+  /* surfaces and edges */
+  --gxc-card-line: rgba(226, 232, 240, 0.9);
+  --gxc-row-line: #f1f5f9;
+  --gxc-control-line: #cbd5e1; /* the edge of a field or a tick box */
+  --gxc-field: #ffffff;
+  --gxc-ghost: var(--surface);
+  --gxc-card-shadow: 0 1px 2px rgba(15, 35, 71, 0.05);
+  --gxc-sheet-shadow: 0 24px 40px -20px rgba(15, 35, 71, 0.6);
+  --gxc-scrollbar: rgba(255, 255, 255, 0.28);
+
+  /* how strongly the tint and a status colour wash a surface */
+  --gxc-soft: 10%;
+  --gxc-pill-mix: 11%;
+  --gxc-pill-base: #ffffff;
+  --gxc-placeholder-opacity: 0.8;
+  --gxc-focus-line: var(--gxc-tint);
+  --gxc-focus-ring: color-mix(in srgb, var(--gxc-tint) 20%, transparent);
+
+  /* the site's tokens, given the console's values */
   --bg: #f1f5f9;
   --paper: #ffffff;
   --surface: #ffffff;
@@ -31,28 +85,31 @@
   --line: #e2e8f0;
   --line-strong: #cbd5e1;
 
-  --brand: #1b3a6b;
-  --brand-ink: #ffffff;
-  --brand-soft: rgba(41, 171, 226, 0.1);
+  --brand: var(--gxc-primary);
+  --brand-ink: var(--gxc-primary-ink);
+  --brand-soft: color-mix(in srgb, var(--gxc-tint) var(--gxc-soft), transparent);
   /* sky, darkened until it passes AA as text on white */
   --accent: #1479ad;
   --accent-ink: #ffffff;
-  --prestige-ink: #1479ad;
+  --accent-2: var(--accent);
+  --accent-3: var(--accent);
+  --prestige-ink: var(--accent);
   --pos: #0b7a53;
   --neg: #c0362c;
   --warn: #a35f00;
-  --info: #1479ad;
-  --focus: rgba(41, 171, 226, 0.5);
+  --info: var(--accent);
+  --neutral: var(--ink-3);
+  --focus: color-mix(in srgb, var(--gxc-tint) 50%, transparent);
 
-  --tone-1: #29abe2;
-  --tone-2: #29abe2;
-  --tone-3: #29abe2;
-  --tone-4: #29abe2;
-  --tone-5: #29abe2;
-  --tone-6: #29abe2;
-  --grad-surface: linear-gradient(#ffffff, #ffffff);
-  --grad-ink: linear-gradient(#1b3a6b, #1b3a6b);
-  --grad-accent: linear-gradient(#29abe2, #29abe2);
+  --tone-1: var(--gxc-tint);
+  --tone-2: var(--gxc-tint);
+  --tone-3: var(--gxc-tint);
+  --tone-4: var(--gxc-tint);
+  --tone-5: var(--gxc-tint);
+  --tone-6: var(--gxc-tint);
+  --grad-surface: linear-gradient(var(--surface), var(--surface));
+  --grad-ink: linear-gradient(var(--ink), var(--ink));
+  --grad-accent: linear-gradient(var(--gxc-tint), var(--gxc-tint));
   --hi: 0 0 0 transparent;
   --depth-1: 0 1px 2px rgba(15, 35, 71, 0.05);
   --depth-2: 0 1px 3px rgba(15, 35, 71, 0.07);
@@ -63,17 +120,343 @@
   font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+/* the public site's accent ("mood") never reaches the console (accent.css pins
+   these two for the same reason; here they follow the console's own palette) */
+html[data-accent] .gx-console {
+  --brand: var(--gxc-primary);
+  --info: var(--accent);
+}
+
+/* ---- every look but the default ----------------------------------------------
+   Small text, pills, placeholders and the sidebar's quiet labels are set a
+   step stronger than in the original, so that each of them passes WCAG AA
+   (4.5:1 for text, 3:1 for the edge of a field). :where() keeps this at the
+   weight of one class, so the palette and dark blocks below can refine it. */
+.gx-console:where([data-gxc-theme="dark"], [data-gxc-palette]:not([data-gxc-palette="navy"])) {
+  --gxc-nav-ink: rgba(255, 255, 255, 0.8);
+  --gxc-nav-soon: rgba(255, 255, 255, 0.72);
+  --gxc-soon-opacity: 1;
+  --gxc-role: rgba(255, 255, 255, 0.78);
+  --gxc-nav-focus: #ffffff;
+  --gxc-avatar: linear-gradient(135deg, #ffffff, color-mix(in srgb, var(--gxc-tint) 30%, #ffffff));
+  --gxc-pill-mix: 13%;
+  --gxc-placeholder-opacity: 1;
+  --gxc-focus-line: var(--accent);
+  --gxc-focus-ring: color-mix(in srgb, var(--accent) 30%, transparent);
+  --pos: #0a6f4c;
+  --neg: #b83228;
+  --warn: #8f5300;
+}
+
+/* ---- light palettes ----------------------------------------------------------- */
+/* Graphite: charcoal and steel blue on neutral grey */
+.gx-console[data-gxc-palette="graphite"] {
+  --bg: #f2f3f5;
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f8f9fa;
+  --sunken: #e7e9ed;
+  --ink: #1f252d;
+  --ink-2: #454c57;
+  --ink-3: #59616d;
+  --line: #e3e5e9;
+  --line-strong: #cdd1d7;
+  --accent: #3b628c;
+  --accent-ink: #ffffff;
+  --gxc-side: #2a3038;
+  --gxc-primary: #2a3038;
+  --gxc-primary-hover: #171b21;
+  --gxc-primary-ink: #ffffff;
+  --gxc-tint: #6f93ba;
+  --gxc-card-line: rgba(227, 229, 233, 0.9);
+  --gxc-row-line: #f0f1f3;
+  --gxc-control-line: #868d98;
+  --gxc-field: #ffffff;
+}
+/* Emerald: deep green on a green-tinted ground */
+.gx-console[data-gxc-palette="emerald"] {
+  --bg: #f0f5f3;
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7faf9;
+  --sunken: #e6eeea;
+  --ink: #0f4333;
+  --ink-2: #44564e;
+  --ink-3: #55675f;
+  --line: #dfe8e4;
+  --line-strong: #c6d3cd;
+  --accent: #0a7453;
+  --accent-ink: #ffffff;
+  --gxc-side: #0f4d3a;
+  --gxc-primary: #0f4d3a;
+  --gxc-primary-hover: #093527;
+  --gxc-primary-ink: #ffffff;
+  --gxc-tint: #1fae7b;
+  --gxc-card-line: rgba(223, 232, 228, 0.9);
+  --gxc-row-line: #eef4f1;
+  --gxc-control-line: #7a8e84;
+  --gxc-field: #ffffff;
+}
+/* Royal: violet on a lilac-tinted ground */
+.gx-console[data-gxc-palette="royal"] {
+  --bg: #f3f2f9;
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f9f8fc;
+  --sunken: #e9e7f3;
+  --ink: #30256b;
+  --ink-2: #4b4763;
+  --ink-3: #5e5a78;
+  --line: #e4e2ee;
+  --line-strong: #cdc9de;
+  --accent: #6340d6;
+  --accent-ink: #ffffff;
+  --gxc-side: #3a2a7d;
+  --gxc-primary: #3a2a7d;
+  --gxc-primary-hover: #291c5c;
+  --gxc-primary-ink: #ffffff;
+  --gxc-tint: #8a6cf0;
+  --gxc-card-line: rgba(228, 226, 238, 0.9);
+  --gxc-row-line: #f1f0f8;
+  --gxc-control-line: #8c87a8;
+  --gxc-field: #ffffff;
+}
+/* Ocean: deep teal on a teal-tinted ground */
+.gx-console[data-gxc-palette="ocean"] {
+  --bg: #eff5f6;
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7fafb;
+  --sunken: #e4edef;
+  --ink: #0c4350;
+  --ink-2: #42565b;
+  --ink-3: #53676c;
+  --line: #dde8ea;
+  --line-strong: #c3d2d6;
+  --accent: #0a7082;
+  --accent-ink: #ffffff;
+  --gxc-side: #0c4f5e;
+  --gxc-primary: #0c4f5e;
+  --gxc-primary-hover: #073944;
+  --gxc-primary-ink: #ffffff;
+  --gxc-tint: #1cb1c6;
+  --gxc-card-line: rgba(221, 232, 234, 0.9);
+  --gxc-row-line: #edf4f5;
+  --gxc-control-line: #7b9197;
+  --gxc-field: #ffffff;
+}
+/* Mono: black, white and grey only */
+.gx-console[data-gxc-palette="mono"] {
+  --bg: #f4f4f5;
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --sunken: #e9e9eb;
+  --ink: #18181b;
+  --ink-2: #3f3f46;
+  --ink-3: #5b5b63;
+  --line: #e4e4e7;
+  --line-strong: #d0d0d5;
+  --accent: #27272a;
+  --accent-ink: #ffffff;
+  --gxc-side: #18181b;
+  --gxc-primary: #18181b;
+  --gxc-primary-hover: #000000;
+  --gxc-primary-ink: #ffffff;
+  --gxc-tint: #71717a;
+  --gxc-card-line: rgba(228, 228, 231, 0.9);
+  --gxc-row-line: #f1f1f2;
+  --gxc-control-line: #89898f;
+  --gxc-field: #ffffff;
+}
+
+/* ---- dark ---------------------------------------------------------------------
+   This block is Navy in dark and the base of every dark palette: the status
+   colours, the shadows and the sidebar's active item are shared. In dark the
+   primary button is the palette's bright colour with dark lettering. */
+.gx-console[data-gxc-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0b1220;
+  --paper: #0f1829;
+  --surface: #121c30;
+  --surface-2: #18243c;
+  --sunken: #080d18;
+  --ink: #e8eef8;
+  --ink-2: #b9c5d8;
+  --ink-3: #93a1b9;
+  --line: #233149;
+  --line-strong: #3b4c6a;
+  --accent: #62c0f0;
+  --accent-ink: #04121d;
+  --pos: #4fcb93;
+  --neg: #f58b83;
+  --warn: #e6b052;
+
+  --gxc-side: #0f1f42;
+  --gxc-primary: #38a9e0;
+  --gxc-primary-hover: #62bfee;
+  --gxc-primary-ink: #04121d;
+  --gxc-tint: #38a9e0;
+  --gxc-card-line: #233149;
+  --gxc-row-line: #1d2a41;
+  --gxc-control-line: #6479a0;
+  --gxc-field: #0f1829;
+  --gxc-ghost: var(--surface-2);
+
+  --gxc-side-edge: var(--line);
+  --gxc-current-bg: color-mix(in srgb, var(--gxc-tint) 24%, transparent);
+  --gxc-current-ink: #ffffff;
+  --gxc-current-edge: inset 3px 0 0 var(--gxc-tint);
+  --gxc-avatar: linear-gradient(135deg, var(--gxc-primary), var(--gxc-primary-hover));
+  --gxc-avatar-ink: var(--gxc-primary-ink);
+
+  --gxc-soft: 14%;
+  --gxc-pill-mix: 16%;
+  --gxc-pill-base: var(--surface);
+  --gxc-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --gxc-sheet-shadow: 0 24px 40px -20px rgba(0, 0, 0, 0.8);
+  --depth-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --depth-2: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --depth-3: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+}
+.gx-console[data-gxc-theme="dark"][data-gxc-palette="graphite"] {
+  --bg: #0e1013;
+  --paper: #121418;
+  --surface: #171a1f;
+  --surface-2: #1e2228;
+  --sunken: #0a0b0d;
+  --ink: #eceef1;
+  --ink-2: #bcc2ca;
+  --ink-3: #959ca7;
+  --line: #2a2f37;
+  --line-strong: #454c57;
+  --accent: #a3c2e3;
+  --accent-ink: #0a1119;
+  --gxc-side: #1c2027;
+  --gxc-primary: #8fb3da;
+  --gxc-primary-hover: #abc7e6;
+  --gxc-primary-ink: #0a1119;
+  --gxc-tint: #8fb3da;
+  --gxc-card-line: #2a2f37;
+  --gxc-row-line: #23272e;
+  --gxc-control-line: #717a88;
+  --gxc-field: #121418;
+}
+.gx-console[data-gxc-theme="dark"][data-gxc-palette="emerald"] {
+  --bg: #09130f;
+  --paper: #0c1813;
+  --surface: #0f1f19;
+  --surface-2: #152921;
+  --sunken: #060d0a;
+  --ink: #e6f2ec;
+  --ink-2: #b5c9bf;
+  --ink-3: #8ca69a;
+  --line: #1f362c;
+  --line-strong: #375347;
+  --accent: #52d6a1;
+  --accent-ink: #03130c;
+  --gxc-side: #0b2e22;
+  --gxc-primary: #34c98f;
+  --gxc-primary-hover: #5fdcab;
+  --gxc-primary-ink: #03130c;
+  --gxc-tint: #34c98f;
+  --gxc-card-line: #1f362c;
+  --gxc-row-line: #1a2e25;
+  --gxc-control-line: #5e8474;
+  --gxc-field: #0c1813;
+}
+.gx-console[data-gxc-theme="dark"][data-gxc-palette="royal"] {
+  --bg: #0f0d1b;
+  --paper: #131124;
+  --surface: #18152c;
+  --surface-2: #201c39;
+  --sunken: #0a0913;
+  --ink: #ece9f8;
+  --ink-2: #c1bcd8;
+  --ink-3: #9c96ba;
+  --line: #2b2648;
+  --line-strong: #47406d;
+  --accent: #b9a4fb;
+  --accent-ink: #120a2b;
+  --gxc-side: #1d1644;
+  --gxc-primary: #a78bfa;
+  --gxc-primary-hover: #c0abfc;
+  --gxc-primary-ink: #120a2b;
+  --gxc-tint: #a78bfa;
+  --gxc-card-line: #2b2648;
+  --gxc-row-line: #25203f;
+  --gxc-control-line: #7b71aa;
+  --gxc-field: #131124;
+}
+.gx-console[data-gxc-theme="dark"][data-gxc-palette="ocean"] {
+  --bg: #071418;
+  --paper: #0a1a1f;
+  --surface: #0d2128;
+  --surface-2: #132b33;
+  --sunken: #050e11;
+  --ink: #e4f1f4;
+  --ink-2: #b2c8ce;
+  --ink-3: #88a4ac;
+  --line: #1c363f;
+  --line-strong: #34545f;
+  --accent: #56d2e3;
+  --accent-ink: #02151a;
+  --gxc-side: #0a2c36;
+  --gxc-primary: #2cc4d8;
+  --gxc-primary-hover: #5cd6e6;
+  --gxc-primary-ink: #02151a;
+  --gxc-tint: #2cc4d8;
+  --gxc-card-line: #1c363f;
+  --gxc-row-line: #182f37;
+  --gxc-control-line: #578390;
+  --gxc-field: #0a1a1f;
+}
+.gx-console[data-gxc-theme="dark"][data-gxc-palette="mono"] {
+  --bg: #0c0c0d;
+  --paper: #101011;
+  --surface: #161617;
+  --surface-2: #1d1d1f;
+  --sunken: #070707;
+  --ink: #f2f2f3;
+  --ink-2: #c4c4c8;
+  --ink-3: #9b9ba2;
+  --line: #2a2a2d;
+  --line-strong: #47474c;
+  --accent: #e4e4e7;
+  --accent-ink: #0c0c0d;
+  --gxc-side: #000000;
+  --gxc-primary: #f2f2f3;
+  --gxc-primary-hover: #ffffff;
+  --gxc-primary-ink: #0c0c0d;
+  --gxc-tint: #a1a1aa;
+  --gxc-card-line: #2a2a2d;
+  --gxc-row-line: #232325;
+  --gxc-control-line: #78787f;
+  --gxc-field: #101011;
+}
+/* the page behind a dark console (seen when a phone over-scrolls) is dark too */
+body:has(.gx-console[data-gxc-theme="dark"]) {
+  background-color: #0a0d14;
+}
+
 /* ---- sidebar ------------------------------------------------------------- */
 .gxc-side,
 .gxc-top {
-  background: var(--navy);
-  color: #fff;
+  background: var(--gxc-side);
+  color: var(--gxc-side-ink);
+}
+.gxc-side {
+  box-shadow: inset -1px 0 0 var(--gxc-side-edge);
+}
+.gxc-top {
+  box-shadow: inset 0 -1px 0 var(--gxc-side-edge);
 }
 .gxc-logo {
   display: inline-flex;
   align-items: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--gxc-logo-card);
   padding: 0.5rem 0.75rem;
 }
 .gxc-logo-sm {
@@ -85,15 +468,18 @@
   font-size: 0.625rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--gxc-role);
 }
 .gxc-user {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--gxc-side-hover);
   padding: 0.5rem 0.75rem;
+}
+.gxc-user-role {
+  color: var(--gxc-role);
 }
 .gxc-avatar {
   display: flex;
@@ -103,10 +489,10 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: linear-gradient(135deg, #29abe2, #34d399);
+  background: var(--gxc-avatar);
   font-size: 0.6875rem;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--gxc-avatar-ink);
 }
 .gxc-nav-item {
   display: flex;
@@ -116,31 +502,32 @@
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--gxc-nav-ink);
   text-align: left;
   transition:
     background-color var(--t-fast) var(--ease-out),
     color var(--t-fast) var(--ease-out);
 }
 .gxc-nav-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--gxc-side-hover);
+  color: var(--gxc-side-ink);
 }
 .gxc-nav-item.is-current {
-  background: #fff;
-  color: var(--navy);
+  background: var(--gxc-current-bg);
+  box-shadow: var(--gxc-current-edge);
+  color: var(--gxc-current-ink);
   font-weight: 600;
 }
 .gxc-nav-item:focus-visible,
 .gxc-top-button:focus-visible,
 .gxc-menu-button:focus-visible {
-  outline: 2px solid #7dd3fc;
+  outline: 2px solid var(--gxc-nav-focus);
   outline-offset: 2px;
   border-radius: 8px;
 }
 /* not built yet: listed, quieter, and labelled in words */
 .gxc-nav-item.is-soon:not(.is-current) {
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--gxc-nav-soon);
 }
 .gxc-soon {
   flex-shrink: 0;
@@ -152,14 +539,14 @@
   letter-spacing: 0.08em;
   line-height: 1.5;
   text-transform: uppercase;
-  opacity: 0.75;
+  opacity: var(--gxc-soon-opacity);
 }
 .gxc-signout:hover {
-  color: #fda4af;
+  color: var(--gxc-signout-hover);
 }
 .gxc-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  scrollbar-color: var(--gxc-scrollbar) transparent;
 }
 
 /* ---- mobile top bar and menu sheet ---------------------------------------- */
@@ -177,8 +564,8 @@
 }
 .gxc-top-button:hover,
 .gxc-menu-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--gxc-side-hover);
+  color: var(--gxc-side-ink);
 }
 .gxc-sheet {
   position: absolute;
@@ -186,10 +573,257 @@
   top: 100%;
   max-height: calc(100dvh - 3.75rem);
   overflow-y: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: var(--navy);
+  border-top: 1px solid var(--gxc-side-hover);
+  background: var(--gxc-side);
   padding: 0.75rem var(--gutter) 1.25rem;
-  box-shadow: 0 24px 40px -20px rgba(15, 35, 71, 0.6);
+  box-shadow: var(--gxc-sheet-shadow);
+}
+.gxc-sheet-look {
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--gxc-side-hover);
+  padding-bottom: 0.25rem;
+}
+
+/* ---- the look switcher: light or dark, and a palette ---------------------------
+   In the sidebar's foot and in the phone menu it sits on the sidebar's colour.
+   On the sign-in page (`gxc-look--page`) it sits on the page, and reads the
+   page's own tokens, so it also works before that page takes the console's
+   look. The swatch colours are each palette's own two colours: constants. */
+.gxc-look {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.125rem 0.75rem 0.625rem;
+  --gxc-look-ink: var(--gxc-nav-ink, rgba(255, 255, 255, 0.8));
+  --gxc-look-quiet: var(--gxc-nav-ink, rgba(255, 255, 255, 0.8));
+  --gxc-look-track: var(--gxc-side-hover, rgba(255, 255, 255, 0.1));
+  --gxc-look-track-line: transparent;
+  --gxc-look-on-bg: #ffffff;
+  --gxc-look-on-ink: var(--gxc-side, #1b3a6b);
+  --gxc-look-ring: #ffffff;
+  --gxc-look-gap: var(--gxc-side, #1b3a6b);
+  --gxc-look-rim: rgba(255, 255, 255, 0.85);
+  --gxc-look-focus: var(--gxc-nav-focus, #7dd3fc);
+}
+.gxc-look--page {
+  padding: 0;
+  --gxc-look-ink: var(--ink-2);
+  --gxc-look-quiet: var(--ink-3);
+  --gxc-look-track: transparent;
+  --gxc-look-track-line: var(--line-strong);
+  --gxc-look-on-bg: var(--ink);
+  --gxc-look-on-ink: var(--bg);
+  --gxc-look-ring: var(--ink);
+  --gxc-look-gap: var(--bg);
+  --gxc-look-rim: var(--line-strong);
+  --gxc-look-focus: var(--accent);
+}
+.gxc-look-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem 0.625rem;
+  min-height: 1.875rem;
+}
+.gxc-look-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gxc-look-quiet);
+}
+.gxc-look-name {
+  font-size: 0.75rem;
+  color: var(--gxc-look-ink);
+}
+.gxc-look-modes {
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid var(--gxc-look-track-line);
+  border-radius: 999px;
+  background: var(--gxc-look-track);
+  padding: 2px;
+}
+.gxc-look-mode {
+  display: inline-flex;
+  min-height: 1.625rem;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.3125rem;
+  border-radius: 999px;
+  padding: 0 0.625rem;
+  font-size: 0.75rem;
+  color: var(--gxc-look-ink);
+  transition:
+    background-color var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out);
+}
+/* Which control is "on" is drawn from the root's attributes, not from the
+   buttons' own state: the attributes are right before the first paint (the
+   boot script sets them), the buttons only once the page's script has started.
+   `aria-pressed` on each button says the same thing to a screen reader. */
+[data-gxc-theme="light"] .gxc-look-mode[data-mode="light"],
+[data-gxc-theme="dark"] .gxc-look-mode[data-mode="dark"] {
+  background: var(--gxc-look-on-bg);
+  color: var(--gxc-look-on-ink);
+  font-weight: 600;
+}
+.gxc-look-swatches {
+  display: flex;
+  gap: 0.4375rem;
+}
+.gxc-look-swatch {
+  position: relative;
+  height: 1.5rem;
+  width: 1.5rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 2px solid var(--gxc-look-rim);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gxc-sw-a) 0 50%, var(--gxc-sw-b) 50% 100%);
+  transition: box-shadow var(--t-fast) var(--ease-out);
+}
+/* the chosen palette: a second ring (a shape, not only a colour), and its name beside the row */
+[data-gxc-palette="navy"] .gxc-look-swatch[data-swatch="navy"],
+[data-gxc-palette="graphite"] .gxc-look-swatch[data-swatch="graphite"],
+[data-gxc-palette="emerald"] .gxc-look-swatch[data-swatch="emerald"],
+[data-gxc-palette="royal"] .gxc-look-swatch[data-swatch="royal"],
+[data-gxc-palette="ocean"] .gxc-look-swatch[data-swatch="ocean"],
+[data-gxc-palette="mono"] .gxc-look-swatch[data-swatch="mono"] {
+  box-shadow:
+    0 0 0 2px var(--gxc-look-gap),
+    0 0 0 4px var(--gxc-look-ring);
+}
+/* the name: of the swatch under the pointer or the focus (data-hint), else of the palette in use */
+.gxc-look-name[data-hint]::after {
+  content: attr(data-hint);
+}
+[data-gxc-palette="navy"] .gxc-look-name:not([data-hint])::after {
+  content: "Navy";
+}
+[data-gxc-palette="graphite"] .gxc-look-name:not([data-hint])::after {
+  content: "Graphite";
+}
+[data-gxc-palette="emerald"] .gxc-look-name:not([data-hint])::after {
+  content: "Emerald";
+}
+[data-gxc-palette="royal"] .gxc-look-name:not([data-hint])::after {
+  content: "Royal";
+}
+[data-gxc-palette="ocean"] .gxc-look-name:not([data-hint])::after {
+  content: "Ocean";
+}
+[data-gxc-palette="mono"] .gxc-look-name:not([data-hint])::after {
+  content: "Mono";
+}
+.gxc-look-mode:focus-visible,
+.gxc-look-swatch:focus-visible {
+  outline: 2px solid var(--gxc-look-focus);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+.gxc-look-swatch:focus-visible {
+  outline-offset: 5px;
+}
+.gxc-look-swatch[data-swatch="navy"] {
+  --gxc-sw-a: #1b3a6b;
+  --gxc-sw-b: #29abe2;
+}
+.gxc-look-swatch[data-swatch="graphite"] {
+  --gxc-sw-a: #2a3038;
+  --gxc-sw-b: #8fb3da;
+}
+.gxc-look-swatch[data-swatch="emerald"] {
+  --gxc-sw-a: #0f4d3a;
+  --gxc-sw-b: #34c98f;
+}
+.gxc-look-swatch[data-swatch="royal"] {
+  --gxc-sw-a: #3a2a7d;
+  --gxc-sw-b: #a78bfa;
+}
+.gxc-look-swatch[data-swatch="ocean"] {
+  --gxc-sw-a: #0c4f5e;
+  --gxc-sw-b: #2cc4d8;
+}
+.gxc-look-swatch[data-swatch="mono"] {
+  --gxc-sw-a: #18181b;
+  --gxc-sw-b: #d4d4d8;
+}
+@media (pointer: coarse) {
+  .gxc-look:not(.gxc-look--page) .gxc-look-mode {
+    min-height: 2.25rem;
+    padding-inline: 0.875rem;
+  }
+  .gxc-look:not(.gxc-look--page) .gxc-look-swatch {
+    height: 2rem;
+    width: 2rem;
+  }
+  .gxc-look:not(.gxc-look--page) .gxc-look-swatches {
+    gap: 0.625rem;
+  }
+}
+/* On the page it is one row: the two modes, then the swatches, then the name. */
+.gxc-look--page {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.gxc-look--page .gxc-look-row {
+  display: contents;
+}
+.gxc-look--page .gxc-look-label {
+  display: none;
+}
+.gxc-look--page .gxc-look-mode {
+  min-height: 1.75rem;
+}
+.gxc-look--page .gxc-look-swatch {
+  height: 1.75rem;
+  width: 1.75rem;
+}
+.gxc-look--page .gxc-look-name {
+  min-width: 3.75rem;
+}
+@media (max-width: 479px) {
+  /* a phone: the modes are their icons (each still named for a screen reader and on hover) */
+  .gxc-look--page .gxc-look-mode-text,
+  .gxc-look--page .gxc-look-name {
+    display: none;
+  }
+  .gxc-look--page .gxc-look-mode {
+    min-width: 2rem;
+    justify-content: center;
+    padding: 0 0.5rem;
+  }
+}
+
+/* ---- the sign-in page and the notices outside the console ----------------------
+   These wear the public site's look until a look other than the default is
+   chosen; then they take class `gx-console` and everything in this sheet.
+   The switcher sits out of the flow in the foot's margin, so that adding it
+   moved nothing else on the page. */
+.gxc-door-look {
+  position: absolute;
+  inset-inline: var(--gutter);
+  bottom: 0.75rem;
+  display: flex;
+  justify-content: center;
+}
+/* the quiet side of the sign-in page becomes the sidebar's colour, with the sidebar's inks */
+.gx-console .gxc-door-aside {
+  background-color: var(--gxc-side);
+  color: var(--gxc-side-ink);
+  --ink: var(--gxc-side-ink);
+  --ink-2: rgba(255, 255, 255, 0.86);
+  --ink-3: var(--gxc-role);
+  --line: rgba(255, 255, 255, 0.16);
+}
+.gx-console[data-gxc-theme="dark"] .gxc-door-logo {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--gxc-logo-card);
+  padding: 0.375rem 0.625rem;
 }
 
 /* ---- type ------------------------------------------------------------------ */
@@ -219,15 +853,21 @@
 .gx-console .link {
   color: var(--accent);
 }
+/* Mono has no colour to tell a link by: it is underlined instead */
+.gx-console[data-gxc-palette="mono"] :is(.link, .gxc-card-link) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
 
 /* ---- cards ----------------------------------------------------------------- */
 .gx-console .panel,
 .gx-console .panel-quiet,
 .gxc-card {
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid var(--gxc-card-line);
   border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(15, 35, 71, 0.05);
+  background: var(--surface);
+  box-shadow: var(--gxc-card-shadow);
 }
 .gxc-card-head {
   display: flex;
@@ -267,7 +907,7 @@
   border-radius: 12px;
 }
 .gx-console .panel-quiet.border-l-accent {
-  border-left-color: var(--sky);
+  border-left-color: var(--gxc-tint);
 }
 .gx-console .panel-quiet.border-l-pos {
   border-left-color: var(--pos);
@@ -284,15 +924,15 @@
   gap: 0.5rem;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--surface);
   padding: 1rem;
   transition:
     border-color var(--t-fast) var(--ease-out),
     background-color var(--t-fast) var(--ease-out);
 }
 a.gxc-stat:hover {
-  border-color: rgba(41, 171, 226, 0.45);
-  background: rgba(41, 171, 226, 0.05);
+  border-color: color-mix(in srgb, var(--gxc-tint) 45%, transparent);
+  background: color-mix(in srgb, var(--gxc-tint) 5%, transparent);
 }
 .gxc-stat-icon {
   display: flex;
@@ -301,7 +941,7 @@ a.gxc-stat:hover {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(41, 171, 226, 0.1);
+  background: color-mix(in srgb, var(--gxc-tint) var(--gxc-soft), transparent);
   color: var(--accent);
 }
 .gxc-stat-label {
@@ -320,7 +960,7 @@ a.gxc-stat:hover {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--gxc-row-line);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
   transition:
@@ -328,8 +968,8 @@ a.gxc-stat:hover {
     background-color var(--t-fast) var(--ease-out);
 }
 a.gxc-row:hover {
-  border-color: rgba(41, 171, 226, 0.3);
-  background: rgba(41, 171, 226, 0.05);
+  border-color: color-mix(in srgb, var(--gxc-tint) 30%, transparent);
+  background: color-mix(in srgb, var(--gxc-tint) 5%, transparent);
 }
 
 /* the site's tone-cycling 3D tiles become plain cards here */
@@ -340,7 +980,7 @@ a.gxc-row:hover {
 .gx-console .grid.border-l.border-t:not(.flat) > .border-b.border-r {
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--surface);
   box-shadow: none;
   transform: none !important;
 }
@@ -353,14 +993,14 @@ a.gxc-row:hover {
 
 /* ---- tables and lists sit on a card ----------------------------------------- */
 .gx-console .scroll-x:has(> .table-gx) {
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid var(--gxc-card-line);
   border-radius: 16px;
-  background: #fff;
+  background: var(--surface);
   padding: 0.25rem 1rem 0.5rem;
-  box-shadow: 0 1px 2px rgba(15, 35, 71, 0.05);
+  box-shadow: var(--gxc-card-shadow);
 }
 .gx-console .table-gx tr:hover td {
-  background: rgba(41, 171, 226, 0.05);
+  background: color-mix(in srgb, var(--gxc-tint) 5%, transparent);
 }
 
 /* ---- controls --------------------------------------------------------------- */
@@ -374,44 +1014,64 @@ a.gxc-row:hover {
   transform: none;
 }
 .gx-console .btn-primary {
-  border-color: var(--navy);
-  background: var(--navy);
-  color: #fff;
+  border-color: var(--gxc-primary);
+  background: var(--gxc-primary);
+  color: var(--gxc-primary-ink);
 }
 .gx-console .btn-primary:hover {
-  border-color: var(--navy-dark);
-  background: var(--navy-dark);
-  color: #fff;
+  border-color: var(--gxc-primary-hover);
+  background: var(--gxc-primary-hover);
+  color: var(--gxc-primary-ink);
 }
 .gx-console .btn-ghost {
   border: 1px solid var(--line-strong);
-  background: #fff;
+  background: var(--gxc-ghost);
   color: var(--ink);
 }
 .gx-console .btn-ghost:hover {
-  border-color: var(--sky);
-  background: rgba(41, 171, 226, 0.06);
+  border-color: var(--gxc-tint);
+  background: color-mix(in srgb, var(--gxc-tint) 6%, transparent);
 }
 .gx-console .btn::before,
 .gx-console .btn::after {
   display: none;
 }
+/* A button that cannot be pressed. The default look keeps the site's faded
+   button; every other look says it with a flat, readable grey instead. */
+.gx-console:where([data-gxc-theme="dark"], [data-gxc-palette]:not([data-gxc-palette="navy"])) .btn:is([disabled], [aria-disabled="true"]) {
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--ink-3);
+  opacity: 1;
+}
 .gx-console :is(.input, .select, .textarea) {
   border-radius: 8px;
-  background-color: #fff;
-  border-color: var(--line-strong);
+  background-color: var(--gxc-field);
+  border-color: var(--gxc-control-line);
   box-shadow: none;
 }
 .gx-console :is(.input, .select, .textarea):focus {
-  border-color: var(--sky);
-  box-shadow: 0 0 0 3px rgba(41, 171, 226, 0.2);
+  border-color: var(--gxc-focus-line);
+  box-shadow: 0 0 0 3px var(--gxc-focus-ring);
+}
+.gx-console :is(.input, .textarea)::placeholder {
+  opacity: var(--gxc-placeholder-opacity);
+}
+/* the opened list of a select follows the dark surface */
+.gx-console[data-gxc-theme="dark"] .select option {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+.gx-console .check input:not(:checked) {
+  border-color: var(--gxc-control-line);
+  background-color: var(--gxc-field);
 }
 
 /* ---- status badges: the Service Console's pills, shape cue kept --------------- */
 .gx-console .state {
   border-radius: 999px;
   padding: 0.125rem 0.625rem;
-  background: color-mix(in srgb, currentColor 11%, #fff);
+  background: color-mix(in srgb, currentColor var(--gxc-pill-mix), var(--gxc-pill-base));
   font-size: 0.6875rem;
   letter-spacing: 0.02em;
   text-transform: none;

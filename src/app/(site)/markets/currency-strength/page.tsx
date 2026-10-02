@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
+import { BalanceMobile } from "@/components/figures/markets/BalanceMobile";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { EightAround } from "@/components/figures/product/EightAround";
 import { bankHref, formatCorr, instrumentBySlug, ratePair } from "@/components/markets/graph";
 import { Head } from "@/components/markets/Head";
@@ -75,6 +77,11 @@ export default async function CurrencyStrengthPage() {
             <p className="mt-5 text-sm text-ink">It describes what has already happened in published reference rates. It is not a signal, not a forecast and not a recommendation to trade.</p>
             <p className="mt-5 text-sm text-ink-3">A currency that rose over one period may fall over the next. Nothing here measures that.</p>
           </div>
+        }
+        companion={
+          <HeroCompanion layout="beside" figure={<BalanceMobile />}>
+            Read the eight together: each is measured against the other seven. Five fixings is about a week, 21 about a month, 63 about a quarter.
+          </HeroCompanion>
         }
       />
 

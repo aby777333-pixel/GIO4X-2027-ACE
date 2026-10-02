@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
+import { Backdrop } from "@/components/figures/Backdrop";
 import { AgreedList, AskLine, NumberedRows, PendingList, RiskNote } from "@/components/trading/Blocks";
 import { NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
 import { riskWarning } from "@/config/legal";
@@ -107,7 +108,8 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      <section className="section" aria-labelledby="ib-cta">
+      <section className="section relative" aria-labelledby="ib-cta">
+        <Backdrop variant="sessions" />
         <div className="wrap flex flex-col gap-34 md:flex-row md:items-end md:justify-between">
           <div className="max-w-[40rem]">
             <h2 id="ib-cta" className="h2">

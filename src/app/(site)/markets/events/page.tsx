@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { EmptyCalendar } from "@/components/figures/markets/EmptyCalendar";
+import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { eventHref, firstSentence } from "@/components/markets/graph";
 import { Head } from "@/components/markets/Head";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -50,6 +52,11 @@ export default function EventsPage() {
               .
             </p>
           </div>
+        }
+        companion={
+          <HeroCompanion layout="beside" figure={<EmptyCalendar count={econEvents.length} />}>
+            Release dates move, and a wrong date is worse than none. Each explainer links to its publisher’s own calendar.
+          </HeroCompanion>
         }
       />
 
