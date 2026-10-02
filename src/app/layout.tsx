@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "@/styles/globals.css";
 import "@/styles/depth.css";
 import "@/styles/cockpit.css";
+import "@/styles/accent.css";
 import "@/styles/breach.css";
 import "@/styles/console.css";
 import { isProduction, site } from "@/config/site";

@@ -10,6 +10,12 @@
  *     under reduced motion or "low visual effects", adaptive resolution when a
  *     device cannot hold the frame rate
  *   - a short power-on ramp (`boot`) so instruments light up instead of popping
+ *   - the frame: a golden rectangle (1.618 : 1) beside the statement. A scene
+ *     is drawn inside it and clipped to it, so no instrument runs under the
+ *     headline or off the stage
+ *   - the pointer: over the frame the camera swings further and moves in, the
+ *     scene's clock quickens, and a light with a reticle follows the cursor;
+ *     scenes can read `hover`, `mx` and `my` to answer in their own way
  *
  * No WebGL and no dependency: the whole engine is a few kilobytes, loaded after
  * first paint, and the page is complete without it.
@@ -67,6 +73,13 @@ export type Frame = {
   /** eased pointer position, -1 to 1 */
   px: number;
   py: number;
+  /** 0 to 1, eased: how much the pointer is over the instrument's frame (always 0 in a still frame and on touch) */
+  hover: number;
+  /** eased pointer position in canvas pixels; meaningful while `hover` is above 0 */
+  mx: number;
+  my: number;
+  /** the golden rectangle the instrument is drawn in and clipped to, canvas pixels */
+  box: { x: number; y: number; w: number; h: number };
   /** 0 while the hero fills the view, 1 once it has scrolled away */
   scroll: number;
   /** power-on ramp, 0 to 1 */
@@ -127,6 +140,11 @@ export type LabelOpts = {
 export type Scene<S = unknown> = {
   /** time, in seconds, of the composed still frame */
   pose?: number;
+  /**
+   * Draw on the whole stage, unframed and unclipped. Only for a scene that is
+   * composed with page elements placed over the stage (the homepage globe).
+   */
+  free?: boolean;
   /** called once, and again when the page seed or the size class changes */
   setup?(f: Frame): S;
   draw(f: Frame, state: S): void;
@@ -240,6 +258,11 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
   let last = 0;
   let tpx = 0;
   let tpy = 0;
+  // raw pointer, canvas pixels, and whether it is over the frame
+  let rmx = 0;
+  let rmy = 0;
+  let over = false;
+  let clock = 0;
   let slow = 0;
   let frames = 0;
   let state: S | undefined;
@@ -261,6 +284,10 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     still: false,
     px: 0,
     py: 0,
+    hover: 0,
+    mx: 0,
+    my: 0,
+    box: { x: 0, y: 0, w: 1, h: 1 },
     scroll: 0,
     boot: 0,
     q: 1,
@@ -276,11 +303,13 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     u: 100,
     cam,
     aim(yaw, pitch, dist = 6, zoom = 1) {
-      cam.yaw = yaw + f.px * 0.09 * cam.parallax;
-      cam.pitch = pitch + f.py * 0.05 * cam.parallax;
+      // under the pointer the camera swings further and leans in
+      const swing = cam.parallax * (1 + f.hover * 1.4);
+      cam.yaw = yaw + f.px * 0.09 * swing;
+      cam.pitch = pitch + f.py * 0.05 * swing;
       cam.dist = dist;
       // scrolling carries the visitor forward, into the instrument
-      cam.zoom = zoom * (1 + f.scroll * 0.16);
+      cam.zoom = zoom * (1 + f.scroll * 0.16) * (1 + f.hover * 0.045);
       cyaw = Math.cos(cam.yaw);
       syaw = Math.sin(cam.yaw);
       cpit = Math.cos(cam.pitch);
@@ -379,6 +408,16 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     },
   };
 
+  // The frame owns the instrument's place. Scenes written before the frame
+  // existed move their own focal point on narrow screens; inside a frame that
+  // would carry them out of it, so while a framed scene draws, the focal point
+  // cannot be reassigned.
+  let focusX = 0;
+  let focusY = 0;
+  let focusLocked = false;
+  Object.defineProperty(f, "cx", { enumerable: true, get: () => focusX, set: (v: number) => void (focusLocked || (focusX = v)) });
+  Object.defineProperty(f, "cy", { enumerable: true, get: () => focusY, set: (v: number) => void (focusLocked || (focusY = v)) });
+
   // the headline wraps differently at every width and once the display face has loaded
   const measure = () => {
     f.clear = 0;
@@ -420,21 +459,58 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
 
     f.still = still;
     f.dt = dt;
-    f.t = still ? (scene.pose ?? 9) : (time - started) / 1000;
-    f.boot = still ? 1 : easeOut(f.t / 1.8);
-    f.now = new Date();
     f.px += (tpx - f.px) * (still ? 1 : 0.06);
     f.py += (tpy - f.py) * (still ? 1 : 0.06);
+    f.hover += ((over && !still ? 1 : 0) - f.hover) * 0.09;
+    if (f.hover < 0.002) f.hover = 0;
+    f.mx += (rmx - f.mx) * 0.22;
+    f.my += (rmy - f.my) * 0.22;
     if (still) {
       f.px = 0;
       f.py = 0;
+      f.hover = 0;
     }
+    // the scene's own clock: it runs faster while the pointer is over the frame
+    clock += dt * (1 + f.hover * 0.7);
+    f.t = still ? (scene.pose ?? 9) : clock;
+    f.boot = still ? 1 : easeOut((time - started) / 1800);
+    f.now = new Date();
 
-    // default composition: the instrument sits in the golden section to the
-    // right on wide screens, high and behind the statement on narrow ones
-    f.cx = w * (f.mobile ? 0.62 : 0.7);
-    f.cy = h * (f.mobile ? 0.36 : 0.5) + f.scroll * h * 0.12;
-    f.u = Math.min(w * (f.mobile ? 0.4 : 0.2), h * 0.34);
+    const framed = !scene.free;
+    focusLocked = false;
+    if (framed) {
+      // the instrument's frame: a golden rectangle beside the statement on
+      // wide screens, above it on narrow ones
+      const gutter = clamp(w * 0.042, 21, 55);
+      const contentW = Math.min(w - gutter * 2, 1320);
+      const contentL = (w - contentW) / 2;
+      const b = f.box;
+      if (w >= 1080) {
+        b.w = Math.min(contentW * 0.52, 760, (h - 68) * 1.618);
+        b.h = b.w / 1.618;
+        b.x = contentL + contentW - b.w;
+        b.y = (h - b.h) / 2;
+      } else {
+        // must match --cx-frame-h and the 4.75rem offset in cockpit.css, which keep the statement below it
+        b.w = Math.min(contentW, 560);
+        b.h = b.w / 1.618;
+        b.x = (w - b.w) / 2;
+        b.y = 76;
+      }
+      f.cx = b.x + b.w / 2;
+      f.cy = b.y + b.h / 2;
+      f.u = Math.min(b.w / 3.9, b.h / 2.75);
+    } else {
+      // free composition: the golden section to the right on wide screens,
+      // high and behind the statement on narrow ones
+      f.cx = w * (f.mobile ? 0.62 : 0.7);
+      f.cy = h * (f.mobile ? 0.36 : 0.5) + f.scroll * h * 0.12;
+      f.u = Math.min(w * (f.mobile ? 0.4 : 0.2), h * 0.34);
+      f.box.x = 0;
+      f.box.y = 0;
+      f.box.w = w;
+      f.box.h = h;
+    }
     cam.parallax = 1;
     f.aim(0, 0.18);
 
@@ -451,7 +527,83 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
+    if (framed) {
+      const b = f.box;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(b.x, b.y, b.w, b.h);
+      ctx.clip();
+      // a pane of darker glass, so the frame reads as an instrument's window
+      ctx.fillStyle = "rgba(4, 8, 12, 0.34)";
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+    }
+
+    focusLocked = framed;
     scene.draw(f, state as S);
+    focusLocked = false;
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    if (f.hover > 0) {
+      // the pointer carries a light: what it passes over is lit from the key
+      const R = f.u * 1.5;
+      const g = ctx.createRadialGradient(f.mx, f.my, 0, f.mx, f.my, R);
+      g.addColorStop(0, rgba(f.pal.key, 0.2 * f.hover));
+      g.addColorStop(0.45, rgba(f.pal.key, 0.07 * f.hover));
+      g.addColorStop(1, rgba(f.pal.key, 0));
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = g;
+      ctx.fillRect(f.mx - R, f.my - R, R * 2, R * 2);
+      ctx.globalCompositeOperation = "source-over";
+      // and a reticle, as an instrument's cursor: a ring that turns slowly, four ticks
+      const r = 13;
+      ctx.strokeStyle = rgba(f.pal.gold, 0.75 * f.hover);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(f.mx, f.my, r, clock * 0.9, clock * 0.9 + TAU * 0.72);
+      ctx.stroke();
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const a = (i * TAU) / 4;
+        ctx.moveTo(f.mx + Math.cos(a) * (r + 4), f.my + Math.sin(a) * (r + 4));
+        ctx.lineTo(f.mx + Math.cos(a) * (r + 10), f.my + Math.sin(a) * (r + 10));
+      }
+      ctx.stroke();
+      ctx.fillStyle = rgba(f.pal.ink, 0.9 * f.hover);
+      ctx.beginPath();
+      ctx.arc(f.mx, f.my, 1.4, 0, TAU);
+      ctx.fill();
+    }
+    if (framed) {
+      ctx.restore();
+      // the frame itself: a hairline in champagne, heavier at the corners, with
+      // the golden cut marked on its long sides. It brightens under the pointer.
+      const b = f.box;
+      const lit = f.boot * (0.5 + f.hover * 0.5);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = rgba(f.pal.gold, 0.22 * lit);
+      ctx.strokeRect(b.x + 0.5, b.y + 0.5, b.w - 1, b.h - 1);
+      const c = Math.min(21, b.w * 0.05);
+      ctx.strokeStyle = rgba(f.pal.gold, 0.85 * lit);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (const [x, y, sx, sy] of [
+        [b.x, b.y, 1, 1],
+        [b.x + b.w, b.y, -1, 1],
+        [b.x, b.y + b.h, 1, -1],
+        [b.x + b.w, b.y + b.h, -1, -1],
+      ] as const) {
+        ctx.moveTo(x + sx * c, y + sy * 0.75);
+        ctx.lineTo(x + sx * 0.75, y + sy * 0.75);
+        ctx.lineTo(x + sx * 0.75, y + sy * c);
+      }
+      const cut = b.x + b.w * 0.618;
+      ctx.moveTo(cut, b.y - 4);
+      ctx.lineTo(cut, b.y + 5);
+      ctx.moveTo(cut, b.y + b.h - 5);
+      ctx.lineTo(cut, b.y + b.h + 4);
+      ctx.stroke();
+    }
 
     if (!canvas.dataset.on) canvas.dataset.on = "1";
 
@@ -506,10 +658,26 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     if (r.bottom < 0 || r.top > window.innerHeight) return;
     tpx = clamp((e.clientX - (r.left + r.width / 2)) / (r.width / 2), -1, 1);
     tpy = clamp((e.clientY - (r.top + r.height / 2)) / (r.height / 2), -1, 1);
+    // a mouse or a pen can hover; a finger cannot, and its last position must not leave a light on
+    if (e.pointerType === "touch") {
+      over = false;
+      return;
+    }
+    rmx = e.clientX - r.left;
+    rmy = e.clientY - r.top;
+    const b = f.box;
+    const was = over;
+    over = scene.free ? rmx > r.width * 0.42 && rmy >= 0 && rmy <= r.height : rmx >= b.x && rmx <= b.x + b.w && rmy >= b.y && rmy <= b.y + b.h;
+    if (over && !was && f.hover === 0) {
+      // arrive where the pointer is, not from wherever it last was
+      f.mx = rmx;
+      f.my = rmy;
+    }
   };
   const onLeave = () => {
     tpx = 0;
     tpy = 0;
+    over = false;
   };
   const onScroll = () => {
     const r = canvas.getBoundingClientRect();

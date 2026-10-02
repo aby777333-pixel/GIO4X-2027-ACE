@@ -126,6 +126,8 @@ function bezel(f: Frame, b: Bezel, on: number, pulse: number, caret: number): vo
 
 const scene: Scene = {
   pose: 12,
+  // composed with the live globe the page places over the stage, so it keeps the whole stage
+  free: true,
   draw(f) {
     const { pal, mobile } = f;
     // the frame belongs to the globe: it may lean with the pointer, but only a little

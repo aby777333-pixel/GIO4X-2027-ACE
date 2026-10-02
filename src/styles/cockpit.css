@@ -108,10 +108,7 @@
 .cx-scene[data-on] {
   opacity: 1;
 }
-/* with a panel of content beside the statement, the instrument steps back behind it */
-.cx-has-aside .cx-scene[data-on] {
-  opacity: 0.5;
-}
+/* (a pane of content no longer stands in the stage: see "the pane follows the stage" below) */
 [data-effects="low"] .cx-scene {
   transition: none;
 }
@@ -195,9 +192,63 @@
   padding: 0;
 }
 
+/* The pane follows the stage. At the owner's direction nothing stands in the
+   stage but the statement and the instrument: a pane of content (`aside`)
+   follows the stage as its own block on the same night material, at every
+   width, and the instrument is drawn at full strength inside its frame.
+   The statement keeps to the left of that frame (engine.ts: the frame is the
+   right-hand 52% of the content column). The homepage composes its own stage
+   and is left as it was. */
 @media (min-width: 1080px) {
-  .cx-has-aside .cx-main {
-    grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr);
+  .cx-hero:not(.cx-home) {
+    grid-template-rows: [stage-start] minmax(var(--hero-h), auto) [stage-end aside-start] auto [aside-end];
+  }
+  .cx-hero:not(.cx-home) .cx-main {
+    display: contents;
+  }
+  .cx-hero:not(.cx-home) .cx-statement {
+    grid-column: content;
+    grid-row: stage;
+    position: relative;
+    z-index: 1;
+    max-width: 46%;
+    padding-block: 2.125rem;
+  }
+  .cx-hero:not(.cx-home) .cx-aside {
+    grid-column: content;
+    grid-row: aside;
+    justify-self: start;
+    width: min(100%, 46rem);
+    margin-block: 2.125rem 3.4375rem;
+  }
+  /* the frame clips the instrument, so the stage no longer fades it toward the statement */
+  .cx-hero:not(.cx-home) .cx-scene {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* Below the desktop layout the instrument's frame stands at the top of the
+   stage and the statement below it. The frame's height is the engine's
+   (engine.ts: a golden rectangle as wide as the content column, at most 35rem,
+   4.75rem from the top), restated here so the words always begin under it. */
+@media (max-width: 1079px) {
+  .cx-hero:not(.cx-home) {
+    --cx-frame-h: calc(min(100vw - 2 * var(--gutter), 35rem) / 1.618);
+  }
+  .cx-hero:not(.cx-home) .cx-statement > nav:first-child {
+    margin-bottom: calc(var(--cx-frame-h) + 2.9375rem);
+  }
+  .cx-hero:not(.cx-home) .cx-statement:not(:has(> nav:first-child)) .cx-statement-body {
+    padding-top: calc(4.75rem - 2.125rem + var(--cx-frame-h) + 1.3125rem);
+  }
+  /* the frame is whole and at the top: nothing fades it */
+  .cx-hero:not(.cx-home) .cx-scene {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .cx-hero:not(.cx-home) .cx-scene[data-on] {
+    opacity: 1;
   }
 }
 

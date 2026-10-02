@@ -44,7 +44,7 @@ type HeroProps = {
   lead?: ReactNode;
   /** actions under the lead */
   children?: ReactNode;
-  /** right-hand (38.2%) column: a visual, a data panel, a note */
+  /** a visual, a data panel or a note that follows the stage as its own block */
   aside?: ReactNode;
   /** compact pages (legal, utility) use the quieter heading size */
   quiet?: boolean;
@@ -59,9 +59,9 @@ type HeroProps = {
  *
  * Every page opens at the same height on the same night material, with the
  * statement on the left and that page's own instrument (a canvas scene chosen
- * by the route) on the right. An `aside` stands in the stage as a pane of
- * smoked glass in the 38.2% column; below the desktop layout it follows the
- * stage as its own block, so the stage keeps its one height on every page.
+ * by the route) on the right, inside its golden-rectangle frame. An `aside`
+ * never stands in the stage: it follows it as its own block on the same night
+ * material, so nothing covers the instrument.
  */
 export function PageHero({ crumbs, eyebrow, title, lead, children, aside, quiet, scene }: HeroProps) {
   return (

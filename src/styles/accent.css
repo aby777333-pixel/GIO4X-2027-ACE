@@ -1,0 +1,93 @@
+/*
+  ACCENT, made visible.
+
+  tokens.css defines seven accents ("moods"), chosen in the header's display
+  menu and on /preferences. Until now a mood changed only --accent, and the
+  parts of the site a visitor looks at most pinned their own blue: the header,
+  every page's night stage, the footer, the instruments' key light and the
+  tone-cycling tiles. So choosing "Emerald" or "Mono" changed almost nothing.
+
+  This sheet carries the chosen mood into those parts. The default mood,
+  GIO4X, is untouched: nothing below applies to it, so the site looks exactly
+  as it did (including the key light that follows the trading region).
+
+  --mood-1/2/3 are each mood's colours for NIGHT surfaces (the same values
+  tokens.css uses for the dark theme, which pass AA on the night material).
+  The logo's own colours (--dna-*) never change: a mood is not a rebrand.
+*/
+[data-accent="ivory"] {
+  --mood-1: #d8c69b;
+  --mood-2: #cdb98a;
+  --mood-3: #b9c0c6;
+}
+[data-accent="midnight"] {
+  --mood-1: #8fb4de;
+  --mood-2: #a0a8a8;
+  --mood-3: #cdb98a;
+}
+[data-accent="ocean"] {
+  --mood-1: #56c0d4;
+  --mood-2: #4ba6e2;
+  --mood-3: #a0a8a8;
+}
+[data-accent="emerald"] {
+  --mood-1: #4cc282;
+  --mood-2: #35c2b8;
+  --mood-3: #cdb98a;
+}
+[data-accent="royal"] {
+  --mood-1: #a3a7f0;
+  --mood-2: #a0a8a8;
+  --mood-3: #cdb98a;
+}
+[data-accent="mono"] {
+  --mood-1: #eceef0;
+  --mood-2: #b9c0c6;
+  --mood-3: #8b949c;
+}
+
+/* the page itself: links, tiles, gradients and the key light take the mood */
+html[data-accent]:not([data-accent="gio4x"]) {
+  --brand: var(--accent);
+  --info: var(--accent);
+  --tone-1: var(--accent);
+  --tone-2: var(--accent-2);
+  --tone-3: var(--accent-3);
+  --grad-accent: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  --cx-key: var(--mood-1);
+}
+
+/* night surfaces: the header, every stage, the footer and the dark chapters */
+html[data-accent]:not([data-accent="gio4x"]) :is(.on-night, .cx-hero, header[data-site-header], [data-chrome="night"] header[data-site-header]) {
+  --accent: var(--mood-1);
+  --brand: var(--mood-1);
+  --info: var(--mood-1);
+  --tone-1: var(--mood-1);
+  --tone-2: var(--mood-2);
+  --tone-3: var(--mood-3);
+  --grad-accent: linear-gradient(135deg, var(--mood-1) 0%, var(--mood-2) 100%);
+  --brand-soft: color-mix(in srgb, var(--mood-1) 14%, transparent);
+  --focus: color-mix(in srgb, var(--mood-1) 55%, transparent);
+}
+/* dark text on a bright mood (a primary button in the header or a stage) */
+html[data-accent]:not([data-accent="gio4x"]) :is(.on-night, .cx-hero, header[data-site-header]) {
+  --accent-ink: #0b1014;
+}
+
+/* the stage's wash of light and its lit edge follow the mood too */
+html[data-accent]:not([data-accent="gio4x"]) .cx-stage {
+  background:
+    radial-gradient(58% 78% at 71% 46%, color-mix(in srgb, var(--mood-1) 15%, transparent), transparent 70%),
+    radial-gradient(38% 58% at 97% 94%, color-mix(in srgb, var(--mood-2) 8%, transparent), transparent 70%),
+    radial-gradient(46% 60% at 0% 0%, color-mix(in srgb, var(--mood-3) 7%, transparent), transparent 72%),
+    linear-gradient(180deg, #090d12 0%, #0c1116 52%, #0e151b 100%);
+}
+html[data-accent]:not([data-accent="gio4x"]) .cx-stage::after {
+  background: linear-gradient(90deg, var(--mood-2), var(--mood-1) 38.2%, var(--mood-3) 61.8%, transparent);
+}
+
+/* the console keeps its own palette whatever the mood */
+html[data-accent] .gx-console {
+  --brand: #1b3a6b;
+  --info: #1479ad;
+}

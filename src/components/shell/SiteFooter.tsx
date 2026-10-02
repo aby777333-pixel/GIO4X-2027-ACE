@@ -142,18 +142,18 @@ export function SiteFooter() {
         </div>
       )}
 
-      {/* risk: readable by design, never fine print */}
+      {/* risk: readable by design, never fine print. It runs the full width of the page column, like the links above it. */}
       <div className="wrap relative border-t border-night-line py-34">
         <p className="label">Risk warning</p>
-        <p className="mt-13 max-w-[92ch] text-sm leading-relaxed text-on-night-2">
+        <p className="mt-13 text-sm leading-relaxed text-on-night-2">
           {riskWarning}{" "}
           <Link href="/legal/risk" className="link text-on-night">
             Read the full Risk Disclosure
           </Link>
           .
         </p>
-        <p className="mt-13 max-w-[92ch] text-sm leading-relaxed text-on-night-2">{companyLine}</p>
-        <details className="mt-13 max-w-[92ch] text-sm text-on-night-2">
+        <p className="mt-13 text-sm leading-relaxed text-on-night-2">{companyLine}</p>
+        <details className="mt-13 text-sm text-on-night-2">
           <summary className="link-quiet inline-flex cursor-pointer items-center gap-8 font-medium text-on-night">
             <span aria-hidden className="text-prestige">+</span> Jurisdictions where services are not available
           </summary>

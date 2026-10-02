@@ -32,6 +32,30 @@ only on that page. Under reduced motion, low visual effects, no WebGL or a faile
 shown instead. It was ported from the 777 Raptor site, where the changes from the pen are recorded
 (DECISIONS.md, 48).
 
+## The frame, and the pointer
+
+Every instrument is drawn inside a **golden rectangle** (1.618 : 1) and clipped to it, so nothing runs
+under the headline or off the stage. From 1080px the frame is the right-hand 52% of the content column and
+the statement keeps to the left 46%; below that it stands at the top of the stage and the statement
+begins under it. The engine computes it (`f.box`), draws its champagne hairline, corner marks and the
+golden cut on its long sides, and places the scene's focal point at its centre. A scene cannot move its
+own focal point out of the frame. The homepage is the one exception (`free: true` on its scene): it is
+composed with the live globe the page places over the stage.
+
+Over the frame, the pointer does four things to every scene without the scene doing anything: the camera
+swings further and leans in, the scene's clock runs faster, a light in the key colour follows the cursor,
+and a reticle marks it. A scene that wants its own answer reads `f.hover` (0 to 1), `f.mx` and
+`f.my`. Touch has no hover, and a still frame (reduced motion, low effects) ignores the pointer.
+
+Nothing stands in the stage but the statement and the instrument. A page's `aside` (a list, a note, a
+screenshot) follows the stage as its own block on the same night material, at every width.
+
+## Accents
+
+The seven accents in the display menu are carried into the header, every stage, the footer, the key
+light, the tiles and the scenes by `src/styles/accent.css`. The default, GIO4X, is unchanged, including
+the key light that follows the trading region.
+
 ## One height for every page
 
 `--hero-h` is `clamp(30rem, 100svh − header − 4.5rem, 60rem)`: the first viewport minus the
@@ -39,12 +63,8 @@ header, leaving a strip of the page in view. `PageHero`, the homepage hero, the 
 masthead, the article and lesson header and the 777 Raptor header all use `.cx-hero`, so the
 stage is the same height on every page.
 
-Two honest exceptions, both content-driven:
-
-- A pane of content beside the statement (`aside`) that is taller than the stage makes that one
-  stage taller. Today this happens only on short viewports.
-- Below the desktop layout the `aside` leaves the stage and follows it as its own block, so the
-  stage itself keeps its height on phones and tablets.
+One honest exception: below the desktop layout a long statement under the frame can make that one stage
+taller than the rest.
 
 `/search` and the not-found page have no stage: they are tools, and their content is the first
 thing on the page by design.
@@ -67,8 +87,8 @@ Rules every scene follows:
   rest of the site: see `docs/WAITING-FOR-ABE.md`.
 - **Tokens only.** Colours come from `f.pal`, which is read from the design tokens. `pal.key` is the
   key light; champagne (`pal.gold`) marks the page's own subject.
-- **The statement owns the left.** Keep the instrument inside the box described in `engine.ts`;
-  the canvas is masked toward the statement, but do not rely on the mask. A wide instrument reads
+- **Stay in the frame.** Compose for `f.box`: about 3.9 world units wide and 2.75 tall around the
+  origin at zoom 1. Anything outside is clipped. A wide instrument reads
   `f.clear` (where the headline ends, measured) and fits itself to the right of it, as `conditions.ts` does.
 - **Calm.** Rotations take minutes, pulses seconds. Nothing blinks.
 - **A complete still.** Under reduced motion or "low visual effects" exactly one frame is drawn at

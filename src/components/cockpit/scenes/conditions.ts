@@ -144,19 +144,10 @@ const scene: Scene<State> = {
   },
   draw(f, s) {
     const { pal, ctx } = f;
-    // the cluster is wide (about 1.7 units either side at zoom 1), so it is fitted to the room the
-    // stage leaves it: clear of the headline's column on the left and of the stage edge on the right
-    // (on a phone, and on a tall tablet stage, it sits above the statement instead of beside it)
-    const tall = !f.mobile && f.h > f.w;
+    // the cluster is wide (about 1.7 units either side at zoom 1), so it is fitted to the frame
     const span = 1.7 * f.u;
-    // never under the headline, but never squeezed below a legible size either
-    const xl = f.mobile ? 10 : Math.max(f.w * 0.43, tall ? 0 : Math.min(f.w * 0.6, Math.max(610, f.clear + 24)));
-    const xr = f.w - (f.mobile ? 10 : 28);
-    const reach = Math.min(0.9 * span, (xr - xl) / 2);
-    const cx = f.mobile ? f.w / 2 : clamp(f.cx, xl + reach, xr - reach);
+    const reach = Math.min(0.9 * span, f.box.w / 2 - 10);
     f.aim(-0.1 + Math.sin(f.t * 0.09 + s.phase * 9) * 0.05, 0.15, 6.2, reach / span);
-    f.cx = cx;
-    if (f.mobile || tall) f.cy = f.h * (tall ? 0.19 : 0.28) + f.scroll * f.h * 0.12;
 
     deck(f, { y: FLOOR, alpha: 0.12 });
     pool(f, [0, FLOOR, -0.2], 2.5, pal.key, 0.17 * f.boot);
