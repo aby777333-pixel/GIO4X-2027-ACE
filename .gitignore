@@ -14,3 +14,6 @@ npm-debug.log*
 
 # the owner brief is kept locally, not published
 docs/brief/*.docx
+
+# written by the local Netlify build
+deno.lock
