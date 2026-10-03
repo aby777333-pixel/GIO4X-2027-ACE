@@ -63,7 +63,7 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
   const access = await requirePortal("trading.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
-  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
+  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db } = access;
 
   const params = await searchParams;

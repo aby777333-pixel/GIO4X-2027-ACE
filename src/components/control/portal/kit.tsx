@@ -11,7 +11,7 @@ import type { PortalPerson } from "@/lib/server/portal-db";
  */
 
 /** In place of a section when the portal's database is not connected to this deployment. */
-export function PortalUnconfigured({ title }: { title: string }) {
+export function PortalUnconfigured({ title, missing }: { title: string; missing?: "address" | "key" | "both" }) {
   return (
     <>
       <ControlHead title={title} />
@@ -19,6 +19,12 @@ export function PortalUnconfigured({ title }: { title: string }) {
         <Notice title="The client portal’s database is not connected here">
           This section reads client records from the portal. Set <span className="num">PORTAL_SUPABASE_URL</span> and <span className="num">PORTAL_SUPABASE_SECRET_KEY</span> in the hosting environment (see{" "}
           <span className="num">docs/PORTAL-GATEWAY.md</span>), then redeploy.
+          {missing && (
+            <span className="mt-5 block">
+              What the running site sees: the address is {missing === "key" ? "set" : "missing"}, the secret key is {missing === "address" ? "set" : "missing"}.
+              {missing !== "address" && " In Netlify the key needs a value for the Production context and the Functions scope."}
+            </span>
+          )}
         </Notice>
       </div>
     </>

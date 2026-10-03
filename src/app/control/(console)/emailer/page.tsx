@@ -37,7 +37,7 @@ export default async function EmailerPage({ searchParams }: { searchParams: Prom
   const access = await requirePortal("emailer.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
-  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
+  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db } = access;
 
   const params = await searchParams;

@@ -31,7 +31,7 @@ export default async function DocumentsPage() {
   const access = await requirePortal("documents.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
-  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
+  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db } = access;
 
   const [docs] = await Promise.all([db.from("legal_documents").select("id, key, title, body, version, published, updated_by, updated_at").order("key", { ascending: true }).limit(MAX_DOCUMENTS)]);

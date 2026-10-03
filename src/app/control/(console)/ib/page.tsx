@@ -90,7 +90,7 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
   const access = await requirePortal("partners.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
-  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
+  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db } = access;
 
   const params = await searchParams;

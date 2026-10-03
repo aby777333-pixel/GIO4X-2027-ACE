@@ -45,7 +45,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
   const access = await requirePortal("events.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
-  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
+  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db } = access;
 
   const params = await searchParams;

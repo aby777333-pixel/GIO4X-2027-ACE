@@ -46,7 +46,7 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
   const access = await requirePortal("kyc.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
-  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
+  if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db, ctx } = access;
   const decides = can(ctx, "kyc.decide");
 

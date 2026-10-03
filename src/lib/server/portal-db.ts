@@ -53,7 +53,7 @@ function createPortalDb(): PortalDb | null {
 export type PortalAccess =
   | { state: "none" } // not staff: the layout shows the matching notice, the page renders nothing
   | { state: "forbidden" } // staff without the section's capability
-  | { state: "unconfigured"; ctx: StaffContext } // the portal's database is not connected to this deployment
+  | { state: "unconfigured"; ctx: StaffContext; missing: "address" | "key" | "both" } // the portal's database is not connected to this deployment
   | { state: "ok"; ctx: StaffContext; db: PortalDb };
 
 /**
@@ -65,7 +65,11 @@ export async function requirePortal(capability: Capability): Promise<PortalAcces
   if (!ctx) return { state: "none" };
   if (!can(ctx, capability)) return { state: "forbidden" };
   const db = createPortalDb();
-  if (!db) return { state: "unconfigured", ctx };
+  if (!db) {
+    const address = !!process.env.PORTAL_SUPABASE_URL?.trim();
+    const key = !!process.env.PORTAL_SUPABASE_SECRET_KEY?.trim();
+    return { state: "unconfigured", ctx, missing: !address && !key ? "both" : !key ? "key" : "address" };
+  }
   return { state: "ok", ctx, db };
 }
 

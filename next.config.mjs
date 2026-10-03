@@ -36,6 +36,11 @@ const portalOrigin = originOf(process.env.PORTAL_ORIGIN, { localHttp: true });
 // server (src/lib/server/portal-db.ts). Not a secret; the key that goes with
 // it is, and is never written into the build.
 const portalSupabaseUrl = originOf(process.env.PORTAL_SUPABASE_URL);
+// Said once in the build log, never the value: whether the key that goes with it is set.
+if (process.env.NETLIFY) {
+  const k = (process.env.PORTAL_SUPABASE_SECRET_KEY ?? "").trim();
+  console.log(`[gio4x] portal database: address ${portalSupabaseUrl ? "set" : "MISSING"}, secret key ${k ? `set (${k.length} characters)` : "MISSING in this deploy context"}`);
+}
 
 /**
  * Content-Security-Policy, written for this application rather than copied.
