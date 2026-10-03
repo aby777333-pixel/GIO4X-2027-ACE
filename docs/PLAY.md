@@ -75,3 +75,7 @@ The machines use the site's existing sound signals (`src/components/sound/signal
 Readers' riddles are the only part of this that leaves the browser. A riddle is posted to `/api/riddle`, stored as `pending` in `reader_riddles` (migration `0029`), and is shown on `/verse` only after someone with `content.publish` approves it at `/control/content/riddles`. The database forces `pending` on insert whatever the request says. The `/verse` page re-reads approved riddles every five minutes.
 
 The leverage story's six drawings are `src/components/play/LeverageScenes.ts`, one function for each step; `/academy/leverage-story?step=4` opens the story at a step. The hero scenes of these pages are in `src/components/cockpit/scenes/` (`firsttrade`, `dojo`, `lever`, `blueprint`, `starmap`, `quill`), chosen by path in `src/components/cockpit/routes.ts`.
+
+## Fun@Finance
+
+`/fun` is jokes, comic strips, cartoons, limericks, riddles, a mock dictionary, an excuse machine and a bingo card. All of the material is in `src/data/fun.ts`, written for the page; the rule it keeps is at the top of that file (laugh at habits and jargon; never promise a result, make light of real loss, give advice, or name a real person or firm). The cast of the comics (the Bull, the Bear and Wick) is drawn in SVG by `src/components/fun/Toons.tsx`: a new strip is three panels of data, with no drawing to do. The moving parts are `src/components/fun/Fun.tsx`. Nothing on the page is stored.

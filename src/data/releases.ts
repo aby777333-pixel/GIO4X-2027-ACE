@@ -5,6 +5,7 @@
  * A new entry goes at the top.
  */
 export const RELEASES: readonly { id: string; title: string; href: string }[] = [
+  { id: "2026-10-03f", title: "Fun@Finance: jokes, comics and riddles", href: "/fun" },
   { id: "2026-10-03e", title: "Your first trade: a ten-minute course", href: "/academy/first-trade" },
   { id: "2026-10-03d", title: "The glossary as a star map", href: "/glossary/map" },
   { id: "2026-10-03c", title: "Send us a riddle", href: "/verse#readers" },

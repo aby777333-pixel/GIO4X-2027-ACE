@@ -60,6 +60,7 @@ export const SCENES = {
   pip: () => import("./pip"),
   platforms: () => import("./platforms"),
   daily: () => import("./daily"),
+  jest: () => import("./jest"),
   field: () => import("./field"),
   forge: () => import("./forge"),
   gears: () => import("./gears"),

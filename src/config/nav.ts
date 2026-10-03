@@ -160,6 +160,7 @@ export const nav: NavSection[] = [
           { label: "Cheat sheets", href: "/academy/cheat-sheets" },
           { label: "Glossary star map", href: "/glossary/map" },
           { label: "The Verse Room", href: "/verse" },
+          { label: "Fun@Finance", href: "/fun" },
           { label: "Reading list", href: "/academy/books" },
           { label: "FAQ", href: "/faq" },
         ],

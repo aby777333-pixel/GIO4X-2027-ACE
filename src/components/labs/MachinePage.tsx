@@ -26,6 +26,7 @@ export function MachinePage({
   punch,
   next,
   after,
+  keys = true,
 }: {
   path: string;
   title: string;
@@ -38,13 +39,15 @@ export function MachinePage({
   next: { kind: string; label: string; href: string; note: string }[];
   /** anything that belongs between the machines and the risk warning */
   after?: ReactNode;
+  /** whether the page has machines with sliders and buttons the keyboard line applies to */
+  keys?: boolean;
 }) {
   return (
     <>
       <JsonLd data={webPageSchema({ path, name: title, description })} />
       <PageHero quiet crumbs={[parent, { name: title, href: path }]} eyebrow={eyebrow} title={title} lead={lead} />
 
-      <p className="wrap hidden pt-13 text-xs text-ink-3 lg:block">On a keyboard: with the pointer over a machine, the left and right arrows move its slider and Enter presses its main button.</p>
+      {keys && <p className="wrap hidden pt-13 text-xs text-ink-3 lg:block">On a keyboard: with the pointer over a machine, the left and right arrows move its slider and Enter presses its main button.</p>}
 
       {machines.map((m, i) => (
         <section key={m.id} id={m.id} data-machine className={`section scroll-mt-[var(--header-h)] ${i ? "hairline" : ""} ${i % 2 ? "bg-paper" : ""}`} aria-labelledby={`${m.id}-h`}>
