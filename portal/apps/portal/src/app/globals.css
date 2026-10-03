@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light mode only. Dark theme intentionally not supported in this build. */
+:root {
+  --color-bg: #f6f8fb;
+  --color-text: #0f172a;
+  --sidebar-bg: #ffffff;
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+/* ── Technology Hub theme (scoped to .tech-root; dark default + light toggle) ── */
+.tech-root {
+  --tp-bg: #0a0f1c;
+  --tp-panel: #111827;
+  --tp-panel2: #0f172a;
+  --tp-border: #1f2937;
+  --tp-text: #e5e7eb;
+  --tp-muted: #94a3b8;
+  --tp-accent: #38bdf8;
+  background: var(--tp-bg);
+  color: var(--tp-text);
+  min-height: 100vh;
+}
+.tech-root[data-theme="light"] {
+  --tp-bg: #f1f5f9;
+  --tp-panel: #ffffff;
+  --tp-panel2: #f8fafc;
+  --tp-border: #e2e8f0;
+  --tp-text: #0f172a;
+  --tp-muted: #64748b;
+  --tp-accent: #0284c7;
+}
+.tech-panel { background: var(--tp-panel); border: 1px solid var(--tp-border); }
+.tech-panel2 { background: var(--tp-panel2); border: 1px solid var(--tp-border); }
+.tech-muted { color: var(--tp-muted); }
+.tech-border { border-color: var(--tp-border); }
+.tech-accent { color: var(--tp-accent); }

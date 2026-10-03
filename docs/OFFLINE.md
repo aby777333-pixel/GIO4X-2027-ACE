@@ -31,7 +31,7 @@ build step.
 
 ## What it never does
 
-- It never intercepts `/control/**`, `/api/**`, a request that is not `GET`, a request to another origin, a
+- It never intercepts `/control/**`, `/api/**`, `/portal/**` (the client portal), a request that is not `GET`, a request to another origin, a
   range request, or anything that is not a page navigation or one of the static files above (so
   server-component payloads, JSON, feeds, sitemaps and `/sw-off.txt` always go to the network).
 - It never stores a response that is not `200` from this origin, was redirected, or is marked `no-store` or

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@gio4x/ui": ["packages/ui/src/index.ts"],
+      "@gio4x/ui/*": ["packages/ui/src/*"],
+      "@gio4x/supabase": ["packages/supabase/src/index.ts"],
+      "@gio4x/supabase/*": ["packages/supabase/src/*"],
+      "@gio4x/dealer-core": ["packages/dealer-core/src/index.ts"],
+      "@gio4x/dealer-core/*": ["packages/dealer-core/src/*"],
+      "@gio4x/scope-engine": ["packages/scope-engine/src/index.ts"],
+      "@gio4x/scope-engine/*": ["packages/scope-engine/src/*"],
+      "@gio4x/pricing-core": ["packages/pricing-core/src/index.ts"],
+      "@gio4x/pricing-core/*": ["packages/pricing-core/src/*"],
+      "@gio4x/config/*": ["packages/config/*"]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "gio4x-portal-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GIO4X client and IB portal (with its staff console), served by the website at /portal. Imported from the GIO4X-JUNE-2026 repository.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/portal run dev -- -p 3100",
+    "build": "npm --workspace apps/portal run build",
+    "start": "npm --workspace apps/portal run start -- -p 3100",
+    "lint": "npm --workspaces --if-present run lint",
+    "typecheck": "npm --workspaces --if-present run typecheck",
+    "patch:portal-handler": "node scripts/patch-netlify-handler-paths.mjs apps/portal"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}

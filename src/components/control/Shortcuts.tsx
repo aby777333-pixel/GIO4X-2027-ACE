@@ -81,7 +81,7 @@ export function Shortcuts({ items }: { items: NavEntry[] }) {
     const map = new Map<string, NavEntry>();
     for (const item of items) {
       const key = GO_KEYS[item.key];
-      if (key && !item.soon) map.set(key, item);
+      if (key && !item.soon && !item.external) map.set(key, item);
     }
     return map;
   }, [items]);

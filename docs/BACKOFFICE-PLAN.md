@@ -25,6 +25,13 @@ The June system is the reference for **what** a GIO4X back office does. It canno
 6. Staff share one login, so the audit trail cannot say who did what.
 7. Pending withdrawals do not reserve funds; balances are a mutable column, not derived from a ledger.
 
+> **3 October 2026: decision D2 taken by the owner.** The June portal is kept. Its source was copied into
+> `portal/` and it is served by the website at `/portal`, still on its own database (`GIO4X JUNE 2026`).
+> Control's unbuilt sections link to the portal's staff console (`docs/PORTAL-GATEWAY.md`). Nothing in the
+> portal's SQL was changed by that work: the seven problems above are still open and have to be closed
+> before real client money or documents go through it. D3 was checked the same day: 12 accounts, 1 wallet
+> transaction, 6 KYC documents, no tickets.
+
 ## 2. Recommended shape
 
 Build the back office **inside this repository and this database**, module by module, in the way

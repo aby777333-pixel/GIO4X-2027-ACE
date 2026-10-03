@@ -13,6 +13,27 @@ const supabaseOrigin = (() => {
 })();
 
 /**
+ * The client and IB portal is a separate application (the `portal/` folder,
+ * its own Netlify site and its own database). This website serves it at
+ * /portal by proxying to PORTAL_ORIGIN, so a visitor never leaves the site's
+ * address. Unset, or anything but https (http is accepted for localhost
+ * only), means no proxy: /portal is then a 404 and the gateway pages say
+ * "not connected yet". The same test is made in src/config/destinations.ts.
+ */
+const originOf = (value, { localHttp = false } = {}) => {
+  try {
+    const u = new URL(value ?? "");
+    const local = u.hostname === "localhost" || u.hostname === "127.0.0.1";
+    if (u.protocol !== "https:" && !(localHttp && local && u.protocol === "http:")) return "";
+    if (u.username || u.password) return "";
+    return u.origin;
+  } catch {
+    return "";
+  }
+};
+const portalOrigin = originOf(process.env.PORTAL_ORIGIN, { localHttp: true });
+
+/**
  * Content-Security-Policy, written for this application rather than copied.
  *  - No third-party scripts at all. Charts are TradingView iframes (frame-src).
  *  - 'unsafe-inline' for script-src is required by Next.js' inline bootstrap
@@ -64,7 +85,9 @@ const nextConfig = {
   },
   async headers() {
     return [
-      { source: "/:path*", headers: securityHeaders },
+      // everything but the portal: it is another application, answered through this
+      // site, and sends its own headers (portal/apps/portal/next.config.mjs)
+      { source: "/((?!portal(?:/|$)).*)", headers: securityHeaders },
       // private surfaces are never cached by shared caches or indexed
       {
         source: "/control/:path*",
@@ -78,6 +101,13 @@ const nextConfig = {
   },
   async redirects() {
     return legacyRedirects.map((r) => ({ ...r, permanent: true }));
+  },
+  async rewrites() {
+    if (!portalOrigin) return [];
+    return [
+      { source: "/portal", destination: `${portalOrigin}/portal` },
+      { source: "/portal/:path*", destination: `${portalOrigin}/portal/:path*` },
+    ];
   },
 };
 

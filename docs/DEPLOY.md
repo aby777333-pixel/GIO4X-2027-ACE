@@ -10,8 +10,9 @@
 
 Only the value `production` makes the site indexable. It is set per site in the Netlify UI, never in
 `netlify.toml`, so a preview can not be indexed by accident. The previous marketing site
-(`lustrous-youtiao-52c8ea`) and the portal and terminal sites are separate Netlify projects and are not
-touched by this repository.
+(`lustrous-youtiao-52c8ea`) and the terminal site are separate Netlify projects and are not touched by
+this repository. The portal site (`zippy-piroshki-21aa30`) is separate too, but its source is now the
+`portal/` folder here and this site proxies `/portal` to it: see `PORTAL-GATEWAY.md`.
 
 ## Build
 
@@ -42,7 +43,8 @@ Environment variables to set on the site (Site configuration → Environment var
 | `NEXT_PUBLIC_SUPABASE_URL` | project URL | project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable key | publishable key |
 | `PRIVACY_POLICY_VERSION` | optional | the published policy version |
-| portal variables | leave empty | only after the checklist in `PORTAL-GATEWAY.md` |
+| `PORTAL_ORIGIN` | in `netlify.toml` | in `netlify.toml` |
+| other portal variables | leave empty | only after the checklist in `PORTAL-GATEWAY.md` |
 
 Going to production:
 

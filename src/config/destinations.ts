@@ -3,11 +3,17 @@
  * -----------------------------------------------------------------------------
  * Every place GIO4X is allowed to send a visitor lives here and nowhere else.
  *
- * Portal destinations are UNCONFIGURED until the owner supplies and security-
- * reviews them (see docs/PORTAL-GATEWAY.md). They are read from server
- * environment variables, never from query strings, CMS content or user
- * input, and must be https URLs on an allow-listed host.
+ * Portal destinations are read from server environment variables, never from
+ * query strings, CMS content or user input (see docs/PORTAL-GATEWAY.md).
+ * There are two ways one becomes CONFIGURED:
+ *   1. The portal is connected to this website (PORTAL_ORIGIN is set, so
+ *      next.config.mjs proxies /portal to it). Each destination is then a
+ *      path on this site, and the visitor never leaves its address.
+ *   2. An explicit https URL on an allow-listed host is given for it
+ *      (CLIENT_PORTAL_URL and the others), which takes precedence.
+ * Otherwise it is UNCONFIGURED and shown as "not connected yet".
  */
+import { site } from "@/config/site";
 
 export type PortalKey = "client" | "trader" | "ib" | "openAccount";
 
@@ -19,6 +25,26 @@ const PORTAL_ENV: Record<PortalKey, string | undefined> = {
   ib: process.env.IB_PORTAL_URL,
   openAccount: process.env.ACCOUNT_OPENING_URL,
 };
+
+/** Where this website serves the portal, and each destination inside it. */
+export const PORTAL_PATH = "/portal";
+const SAME_SITE: Record<PortalKey, string> = {
+  client: `${PORTAL_PATH}/auth/login`,
+  trader: `${PORTAL_PATH}/accounts`,
+  ib: `${PORTAL_PATH}/ib`,
+  openAccount: `${PORTAL_PATH}/auth/signup`,
+};
+
+/** The same test next.config.mjs makes before it proxies /portal: https, or http on localhost. */
+export const portalConnected = (() => {
+  try {
+    const u = new URL(process.env.PORTAL_ORIGIN ?? "");
+    const local = u.hostname === "localhost" || u.hostname === "127.0.0.1";
+    return (u.protocol === "https:" || (local && u.protocol === "http:")) && !u.username && !u.password;
+  } catch {
+    return false;
+  }
+})();
 
 /**
  * Extra hosts allowed for portal destinations, comma separated (e.g. "portal.gio4x.com").
@@ -64,21 +90,45 @@ export function isOfficialHost(host: string): boolean {
   return officialDomains.some((d) => matches(host, d)) || extraHosts.some((d) => matches(host, d));
 }
 
-function resolve(value: string | undefined): Destination {
-  const raw = value?.trim();
-  if (!raw) return { status: "UNCONFIGURED", url: null };
-  const host = hostOf(raw);
-  // Not https, or not on an allow-listed host: treated as unconfigured, not trusted.
-  if (!host || !isOfficialHost(host)) return { status: "UNCONFIGURED", url: null };
-  return { status: "CONFIGURED", url: raw };
+function resolve(key: PortalKey): Destination {
+  const raw = PORTAL_ENV[key]?.trim();
+  const host = raw ? hostOf(raw) : null;
+  // An explicit address is honoured only if it is https and on an allow-listed host.
+  if (raw && host && isOfficialHost(host)) return { status: "CONFIGURED", url: raw };
+  if (portalConnected) return { status: "CONFIGURED", url: SAME_SITE[key] };
+  return { status: "UNCONFIGURED", url: null };
 }
 
 export const portals: Record<PortalKey, Destination> = {
-  client: resolve(PORTAL_ENV.client),
-  trader: resolve(PORTAL_ENV.trader),
-  ib: resolve(PORTAL_ENV.ib),
-  openAccount: resolve(PORTAL_ENV.openAccount),
+  client: resolve("client"),
+  trader: resolve("trader"),
+  ib: resolve("ib"),
+  openAccount: resolve("openAccount"),
 };
+
+/** The address to show beside a destination: this site's own for a path, the hostname otherwise. */
+export function destinationAddress(url: string): string {
+  if (url.startsWith("/")) {
+    try {
+      return `${new URL(site.url).host}${PORTAL_PATH}`;
+    } catch {
+      return PORTAL_PATH;
+    }
+  }
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * The portal's own staff console, for the Service Console sections GIO4X
+ * Control has not built itself. Null while the portal is not connected.
+ */
+export function portalStaffUrl(section: string): string | null {
+  return portalConnected ? `${PORTAL_PATH}/staff/${section}` : null;
+}
 
 export const portalMeta: Record<PortalKey, { label: string; summary: string }> = {
   client: { label: "Client Portal", summary: "Profile, verification, funding and account documents." },

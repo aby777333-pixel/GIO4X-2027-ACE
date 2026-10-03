@@ -4,7 +4,7 @@ import { InterestForm } from "@/components/company/InterestForm";
 import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { SteppingStones } from "@/components/figures/stage/SteppingStones";
 import { PageHero } from "@/components/ui/Page";
-import { portals } from "@/config/destinations";
+import { destinationAddress, portals } from "@/config/destinations";
 import { companyLine, riskWarning } from "@/config/legal";
 import { site } from "@/config/site";
 import { accounts, restrictedJurisdictions } from "@/data/accounts";
@@ -16,14 +16,6 @@ export const metadata = pageMeta({
   path: "/open-account",
   index: false,
 });
-
-function hostnameOf(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return "";
-  }
-}
 
 const needs = [
   { t: "An identity document", d: "A current document that establishes who you are." },
@@ -57,9 +49,9 @@ export default function OpenAccountPage() {
             <>
               <Rosette size={34} dna />
               <h2 className="h3 mt-13">Continue to the application</h2>
-              <p className="mt-8 text-ink-2">You are about to leave this page for the GIO4X account-opening portal at the address below.</p>
+              <p className="mt-8 text-ink-2">The application continues in the GIO4X portal, at the address below.</p>
               <p className="mt-21 flex flex-wrap items-center gap-x-13 gap-y-5 border-y border-line py-13">
-                <span className="num font-medium text-ink">{hostnameOf(dest.url)}</span>
+                <span className="num font-medium text-ink">{destinationAddress(dest.url)}</span>
                 <span className="inline-flex items-center gap-5 text-xs font-medium text-pos">
                   <span aria-hidden>{"✓"}</span> Verified GIO4X destination
                 </span>

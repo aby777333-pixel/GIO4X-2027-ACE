@@ -1,0 +1,40 @@
+{
+  "name": "@gio4x/portal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gio4x/supabase": "*",
+    "@gio4x/ui": "*",
+    "@opentelemetry/api": "^1.9.1",
+    "@supabase/supabase-js": "^2.99.1",
+    "docx": "^8.5.0",
+    "jspdf": "^2.5.2",
+    "lucide-react": "^0.577.0",
+    "next": "14.2.35",
+    "qrcode": "^1.5.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "recharts": "^3.8.0"
+  },
+  "devDependencies": {
+    "@gio4x/config": "*",
+    "@netlify/plugin-nextjs": "^5.15.9",
+    "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

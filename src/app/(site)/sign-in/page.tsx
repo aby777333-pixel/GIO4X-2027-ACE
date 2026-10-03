@@ -2,7 +2,7 @@ import Link from "next/link";
 import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { ThreeDoors } from "@/components/figures/stage/ThreeDoors";
 import { PageHero } from "@/components/ui/Page";
-import { portalMeta, portals, type PortalKey } from "@/config/destinations";
+import { destinationAddress, portalMeta, portals, type PortalKey } from "@/config/destinations";
 import { pageMeta } from "@/lib/meta";
 
 export const metadata = pageMeta({
@@ -13,14 +13,6 @@ export const metadata = pageMeta({
 });
 
 const ORDER: PortalKey[] = ["client", "trader", "ib"];
-
-function hostnameOf(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return "";
-  }
-}
 
 /** A small shield with a tick: shape plus label, never colour alone. */
 function VerifiedMark() {
@@ -63,7 +55,7 @@ export default function SignInPage() {
                         <span className="h3 block transition-colors duration-fast group-hover:text-accent">{meta.label}</span>
                         <span className="mt-5 block text-sm text-ink-2">{meta.summary}</span>
                         <span className="mt-8 flex flex-wrap items-center gap-x-13 gap-y-5">
-                          <span className="num text-sm font-medium text-ink">{hostnameOf(dest.url)}</span>
+                          <span className="num text-sm font-medium text-ink">{destinationAddress(dest.url)}</span>
                           <VerifiedMark />
                         </span>
                       </span>

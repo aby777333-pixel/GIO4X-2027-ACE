@@ -8,6 +8,10 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # The client and IB portal (the portal/ folder, its own Netlify site) is
+  # served by this site at /portal. Not a secret: it is the address of that
+  # site. Remove the line to disconnect the portal.
+  PORTAL_ORIGIN = "https://zippy-piroshki-21aa30.netlify.app"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

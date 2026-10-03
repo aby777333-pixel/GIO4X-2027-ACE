@@ -1,0 +1,36 @@
+# Netlify config for the GIO4X client/IB portal (apps/portal).
+#
+# This folder is the `portal/` directory of the GIO4X-2027-ACE repository.
+# The portal's Netlify site builds with "Base directory" = portal. Visitors do
+# not use that site's own address: the website proxies /portal/* to it (see
+# next.config.mjs at the repository root), so the public address is
+# <website>/portal.
+
+[build]
+  command = "npm --workspace apps/portal run build"
+  publish = "apps/portal/.next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # The public origin visitors see (the website, which proxies /portal here).
+  # E-mail confirmation and password-reset links are built on it, so
+  # <this origin>/portal/auth/callback must be listed in the portal's Supabase
+  # project under Auth → URL Configuration → Redirect URLs. Change it here
+  # when the website moves to its real domain.
+  NEXT_PUBLIC_SITE_URL = "https://gio4x-2027-ace.netlify.app"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Image optimisation goes to Netlify's image service. The Next.js plugin adds
+# this rule itself when Netlify builds the site; it is repeated here because a
+# deploy made from a local build (`netlify deploy --no-build`) does not carry
+# the plugin's generated rules, and every next/image picture would then fail.
+[[redirects]]
+  from = "/portal/_next/image"
+  to = "/.netlify/images?url=:url&w=:width&q=:quality"
+  status = 200
+  [redirects.query]
+    url = ":url"
+    w = ":width"
+    q = ":quality"

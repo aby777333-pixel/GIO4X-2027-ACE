@@ -248,7 +248,7 @@ export function CommandPalette({ items }: { items: NavEntry[] }) {
 
     // screens: the menu as the server filtered it for this person
     for (const item of items) {
-      if (has(item.label)) out.push({ key: `screen:${item.key}`, group: "Screens", title: item.label, note: item.soon ? "Not built yet" : undefined, run: () => go(item.href) });
+      if (has(item.label)) out.push({ key: `screen:${item.key}`, group: "Screens", title: item.label, note: item.external ? "Opens in a new tab" : item.portal ? "In the portal console" : item.soon ? "Not built yet" : undefined, run: () => (item.external ? window.open(item.href, "_blank", "noopener") : go(item.href)) });
     }
     if (needle) {
       for (const sub of SUB_SCREENS) {

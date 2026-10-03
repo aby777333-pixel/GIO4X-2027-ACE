@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { LinkChecker } from "@/components/trust/LinkChecker";
 import { Chapter, Ext, Rows } from "@/components/trust/Parts";
 import { NextSteps, PageHero } from "@/components/ui/Page";
-import { approvedThirdParties, officialDomains, portalMeta, portals, socials, type PortalKey } from "@/config/destinations";
+import { approvedThirdParties, destinationAddress, officialDomains, portalMeta, portals, socials, type PortalKey } from "@/config/destinations";
 import { site } from "@/config/site";
 import { pageMeta } from "@/lib/meta";
 import { webPageSchema } from "@/lib/schema";
@@ -16,14 +16,6 @@ import { webPageSchema } from "@/lib/schema";
 const description = "Paste any address and compare it with the registry of official GIO4X domains and approved third-party destinations. The check runs on your device and makes no network request.";
 
 export const metadata = pageMeta({ title: "Official Destination Checker", description, path: "/trust/verify" });
-
-const hostOf = (url: string): string => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return "";
-  }
-};
 
 export default function VerifyPage() {
   const portalKeys = Object.keys(portals) as PortalKey[];
@@ -154,7 +146,7 @@ export default function VerifyPage() {
                 {d.status === "CONFIGURED" ? (
                   <span className="grid gap-3 sm:justify-items-end">
                     <span className="state state-open">Connected</span>
-                    <span className="break-all font-mono text-[0.8125rem] text-ink-2">{hostOf(d.url)}</span>
+                    <span className="break-all font-mono text-[0.8125rem] text-ink-2">{destinationAddress(d.url)}</span>
                   </span>
                 ) : (
                   <span className="state state-off">Not connected yet</span>

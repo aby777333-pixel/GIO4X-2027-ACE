@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@gio4x/ui": ["../../packages/ui/src/index.ts"],
+      "@gio4x/ui/*": ["../../packages/ui/src/*"],
+      "@gio4x/supabase": ["../../packages/supabase/src/index.ts"],
+      "@gio4x/supabase/*": ["../../packages/supabase/src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

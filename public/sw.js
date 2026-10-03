@@ -12,7 +12,7 @@
  *     calculators open without a connection. That set is renewed once a day.
  *
  * What it never touches (the request goes to the network as if no worker existed)
- *   - /control/** and /api/**
+ *   - /control/**, /api/** and /portal/** (the client portal: private, and another application)
  *   - any request that is not GET
  *   - any request to another origin (the database, TradingView)
  *   - everything else that is not a page navigation or a static file above:
@@ -44,7 +44,7 @@
  */
 "use strict";
 
-const VERSION = "1";
+const VERSION = "2";
 const PREFIX = "gx-";
 const KEEP = PREFIX + "keep-v" + VERSION; // installed set: /offline, /tools, the tools, /desk
 const PAGES = PREFIX + "pages-v" + VERSION; // pages the visitor has opened
@@ -69,7 +69,7 @@ const TEST = LOCAL && new URL(self.location.href).searchParams.get("test") === "
 /** how often the kill switch is read; under test, on every navigation */
 const KILL_EVERY = TEST ? 0 : 10 * 60 * 1000;
 
-const isPrivate = (p) => p === "/control" || p.startsWith("/control/") || p === "/api" || p.startsWith("/api/");
+const isPrivate = (p) => ["/control", "/api", "/portal"].some((x) => p === x || p.startsWith(x + "/"));
 const isStatic = (p) => p.startsWith("/_next/static/") || p.startsWith("/brand/") || p === "/favicon.ico" || p === "/apple-touch-icon.png" || /^\/icon-[a-z0-9-]+\.png$/.test(p);
 const noCopy = (p) => NO_COPY.some((x) => p === x || p.startsWith(x + "/"));
 

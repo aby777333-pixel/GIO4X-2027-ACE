@@ -6,6 +6,17 @@
  */
 export type PendingSection = { label: string; will: string; needs: string; phase: string };
 
+/**
+ * Every section below also exists, under the same name, in the staff console
+ * of the client portal (portal/apps/portal/src/app/staff, served at
+ * /portal/staff/<key>). Until GIO4X Control builds its own, the section's
+ * page here links to that one. It is a different system: its own sign-in and
+ * its own database, and none of Control's access rules or audit apply there.
+ */
+export const PORTAL_CONSOLE_SECTIONS: ReadonlySet<string> = new Set([
+  "kyc", "funds", "fees", "ib", "copy", "pamm", "trades", "broker", "ledger", "events", "documents", "emailer",
+]);
+
 export const PENDING_SECTIONS: Record<string, PendingSection> = {
   kyc: {
     label: "KYC",

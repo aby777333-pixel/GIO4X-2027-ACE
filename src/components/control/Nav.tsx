@@ -19,12 +19,23 @@ function Items({ items, onNavigate }: { items: NavEntry[]; onNavigate?: () => vo
     <ul className="grid gap-1">
       {items.map((item) => {
         const current = isCurrent(item);
+        // another application behind /portal: a full page load in a new tab, never a client-side route
+        if (item.external) {
+          return (
+            <li key={item.key}>
+              <a href={item.href} target="_blank" rel="noopener" onClick={onNavigate} className="gxc-nav-item">
+                <Icon name={item.icon} />
+                <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              </a>
+            </li>
+          );
+        }
         return (
           <li key={item.key}>
             <Link href={item.href} aria-current={current ? "page" : undefined} onClick={onNavigate} className={`gxc-nav-item ${current ? "is-current" : ""} ${item.soon ? "is-soon" : ""}`}>
               <Icon name={item.icon} />
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
-              {item.soon && <span className="gxc-soon">Soon</span>}
+              {item.soon && <span className="gxc-soon">{item.portal ? "Portal" : "Soon"}</span>}
             </Link>
           </li>
         );

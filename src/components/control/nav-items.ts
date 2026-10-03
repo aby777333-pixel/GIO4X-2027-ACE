@@ -1,4 +1,6 @@
 import type { IconName } from "@/components/control/icons";
+import { PORTAL_CONSOLE_SECTIONS } from "@/components/control/sections";
+import { PORTAL_PATH, portalConnected } from "@/config/destinations";
 import type { Capability } from "@/lib/server/constants";
 
 /**
@@ -11,6 +13,11 @@ import type { Capability } from "@/lib/server/constants";
  * and opens a page that says what it will do and what it is waiting for
  * (src/components/control/sections.ts). Nothing here decides access: every
  * destination checks it itself and the database checks again.
+ *
+ * While the client portal is connected (PORTAL_ORIGIN), the unbuilt sections
+ * its staff console already has are marked "Portal" in place of "Soon", and
+ * the menu ends with a way into that console. It is another application with
+ * its own sign-in, so that entry is a plain link, not a route of this one.
  */
 type Item = { key: string; label: string; href: string; icon: IconName; exact?: boolean; cap?: Capability; built?: boolean };
 
@@ -51,16 +58,21 @@ const NAV: Item[] = [
   { key: "audit", label: "Audit log", href: "/control/audit", icon: "audit", cap: "audit.read", built: true },
 ];
 
-export type NavEntry = { key: string; href: string; label: string; icon: IconName; exact: boolean; soon: boolean };
+export type NavEntry = { key: string; href: string; label: string; icon: IconName; exact: boolean; soon: boolean; portal?: boolean; external?: boolean };
 
 /** The menu this person is offered. Plain data, safe to hand to a client component. */
 export function navFor(caps: ReadonlySet<Capability>): NavEntry[] {
-  return NAV.filter((item) => !item.built || !item.cap || caps.has(item.cap)).map((item) => ({
+  const entries: NavEntry[] = NAV.filter((item) => !item.built || !item.cap || caps.has(item.cap)).map((item) => ({
     key: item.key,
     href: item.href,
     label: item.label,
     icon: item.icon,
     exact: !!item.exact,
     soon: !item.built,
+    portal: !item.built && portalConnected && PORTAL_CONSOLE_SECTIONS.has(item.key),
   }));
+  if (portalConnected) {
+    entries.push({ key: "portal-console", href: `${PORTAL_PATH}/staff`, label: "Client portal console", icon: "customers", exact: true, soon: false, external: true });
+  }
+  return entries;
 }

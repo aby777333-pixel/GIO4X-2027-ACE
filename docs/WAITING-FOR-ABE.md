@@ -28,6 +28,10 @@ has been guessed. Each item says where the answer goes, so supplying it is a con
 | B6 | Platform download links (Raptor desktop/mobile, MT5 server details) | No download links existed on either old site. | `src/data/platforms.ts` |
 | B7 | Official social profiles | Old site: Facebook profile id 61565834445070, LinkedIn company 105476920, a YouTube channel id. Newer site: assumed `/gio4x` handles. Neither set verified, so none is shown. | `socials` in `src/config/destinations.ts` |
 
+Since 3 October 2026 the portal is served by this site at `/portal`, so B1–B4 resolve there without any of
+these variables; they are needed only to send a destination to a different address. Still needed from the
+owner: add `<site origin>/portal/auth/callback` to the portal's Supabase Auth redirect URLs, and decide when
+the portal's sign-in requirement (`AUTH_ENFORCE`) is switched on.
 See `docs/PORTAL-GATEWAY.md` for the security checklist to run before any of B1–B5 is switched on.
 
 ## C. Contact and operations
