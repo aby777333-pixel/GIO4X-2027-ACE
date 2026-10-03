@@ -11,6 +11,7 @@ import type { MilestoneData } from "@/data/milestones";
 import { isRateCurrency } from "@/lib/rates";
 import { DeskTransfer } from "./DeskTransfer";
 import { InstallApp } from "./InstallApp";
+import { Passport } from "@/components/play/Passport";
 import { Milestones } from "./Milestones";
 import {
   forgetCalc,
@@ -664,6 +665,10 @@ export function Desk({ data }: { data: DeskData }) {
 
       <Block id="milestones" title="Milestones" lead="Badges for glossary questions answered, lessons completed and the tour, read from the same record as Learning above. Nothing more is stored for them.">
         <Milestones data={data.milestones} fallback={<Reading />} />
+      </Block>
+
+      <Block id="passport" title="Passport" lead="A stamp for each kind of place on the site, collected by going there. It is off until you start it." tinted>
+        <Passport />
       </Block>
 
       <Block

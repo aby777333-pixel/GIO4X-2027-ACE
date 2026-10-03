@@ -133,7 +133,7 @@ export const nav: NavSection[] = [
           { label: "Practice desk", href: "/labs/simulator", note: "A simulation on invented prices" },
           { label: "Session globe", href: "/labs/session-globe", note: "The four FX sessions on a globe, from the clock" },
           { label: "Order book in 3D", href: "/labs/order-book-3d", note: "Bids, asks, spread and depth: an illustration" },
-          { label: "The Workshop", href: "/labs/workshop", note: "Candle forge, tightrope, hidden candle, pip reels" },
+          { label: "The Workshop", href: "/labs/workshop", note: "Candle forge, tightrope, pip reels, sixty seconds" },
         ],
       },
     ],

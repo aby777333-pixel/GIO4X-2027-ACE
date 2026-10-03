@@ -5,6 +5,7 @@ import { MarketToRaptor } from "@/components/home/MarketToRaptor";
 import { ReferenceRates } from "@/components/home/ReferenceRates";
 import { AccountsTable, AssetIndex, IntelligenceTeaser, Philosophy, PlatformsChapter, ToolsTeaser, TrustBlock } from "@/components/home/Sections";
 import { SessionStrip } from "@/components/market/SessionStrip";
+import { RiddleSection } from "@/components/play/RiddleSection";
 import { SectionHead } from "@/components/ui/Page";
 import { PunchLine } from "@/components/ui/PunchLine";
 import { site } from "@/config/site";
@@ -64,6 +65,7 @@ export default function HomePage() {
       <TrustBlock />
       <PunchLine k="home" />
       <IntelligenceTeaser />
+      <RiddleSection tinted />
       <HomeStory />
     </>
   );

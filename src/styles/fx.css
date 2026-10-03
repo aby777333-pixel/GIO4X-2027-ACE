@@ -274,3 +274,83 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
   animation: gx-reel 70ms linear infinite;
   filter: blur(1.5px);
 }
+
+/* ---- THE PASSPORT (components/play/Passport.tsx) ---------------------------
+   Sixteen stamps on My desk. A stamp not yet earned is a faint dashed ring;
+   an earned one is inked in the accent and sits a little askew, as a stamp
+   does. When all are earned each one is pressed again in turn, once. */
+.gx-passport {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.8125rem;
+}
+.gx-stamp {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.1875rem;
+  aspect-ratio: 1;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 50%;
+  padding: 0.8125rem;
+  text-align: center;
+  color: var(--ink-3);
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.gx-stamp:hover {
+  color: var(--ink);
+  border-color: var(--ink-3);
+}
+.gx-stamp.is-on {
+  border: 2px double var(--accent);
+  color: var(--accent);
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--accent) 9%, transparent);
+}
+.gx-stamp-n {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.gx-stamp-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.gx-stamp-state {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+@keyframes gx-stamp-press {
+  0% {
+    transform: rotate(var(--tilt, 0deg)) scale(1.5);
+    opacity: 0;
+  }
+  60% {
+    transform: rotate(var(--tilt, 0deg)) scale(0.94);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--tilt, 0deg)) scale(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .gx-passport.is-complete .gx-stamp {
+    animation: gx-stamp-press 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  [data-motion="reduced"] .gx-passport.is-complete .gx-stamp,
+  [data-effects="low"] .gx-passport.is-complete .gx-stamp {
+    animation: none;
+  }
+}
+
+/* The daily riddle's four lines. */
+.gx-riddle {
+  border-left: 2px solid var(--prestige);
+  padding-left: 1.3125rem;
+}

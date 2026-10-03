@@ -504,6 +504,10 @@ const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; wh
     holds: "The glossary terms whose “Check yourself” question you answered correctly, and the Academy lessons you have completed by answering all three of their questions correctly.",
     why: "So the glossary can mark the terms you have checked and show how many, and the Academy can mark the lessons you have completed and count them by level and by learning path. No score is kept. Each can be cleared where it is shown, with “Start over”: the terms from the glossary, the lessons from the Academy.",
   },
+  "gx:play": {
+    holds: "The last day you answered the daily riddle correctly and your run of days in a row; your best score in the Workshop game “Sixty seconds”, in pips of an invented price; and, once you have started the passport on My desk, the short names of the stamps you have collected. No addresses, no times and nothing about you.",
+    why: "So the riddle can show your run, the game can show your best, and My desk can show your passport. Each part is written only by something you do: answering a riddle, finishing a round, or pressing “Start my passport”. Handing the passport back deletes its stamps.",
+  },
   "gx:sim": {
     holds: "The state of the Practice desk simulation in Labs: its invented prices, the example account, example positions and orders, and the newest journal entries. No real prices, no real account and nothing about you.",
     why: "So a practice session survives a reload. Written only if you tick “Keep this practice session in this browser” on that page, which is off by default; unticking it deletes the key.",

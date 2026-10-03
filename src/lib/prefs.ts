@@ -125,7 +125,7 @@ export function writePrefs(p: Prefs): void {
 }
 
 /** Everything GIO4X stores in this browser. Used by the privacy reset. */
-export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch", "gx:boot", "gx:learn", "gx:sim", "gx:morning-depth"] as const;
+export const LOCAL_KEYS = ["gx:prefs", "gx:recent", "gx:saved", "gx:calc", "gx:consent", "gx:watch", "gx:boot", "gx:learn", "gx:sim", "gx:morning-depth", "gx:play"] as const;
 
 /** The session-storage keys (emptied by the browser when the tab closes): a closed announcement, an open chat, the stop a guided tour has reached. */
 export const SESSION_KEYS = ["gx:announcement:dismissed", "gx:chat", "gx:tour"] as const;

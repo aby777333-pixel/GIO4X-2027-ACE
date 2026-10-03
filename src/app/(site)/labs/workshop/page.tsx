@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Forge } from "@/components/labs/workshop/Forge";
 import { GuessCandle } from "@/components/labs/workshop/GuessCandle";
 import { PipReels } from "@/components/labs/workshop/PipReels";
+import { SixtySeconds } from "@/components/labs/workshop/SixtySeconds";
 import { Tightrope } from "@/components/labs/workshop/Tightrope";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -11,7 +12,7 @@ import { pageMeta } from "@/lib/meta";
 import { webPageSchema } from "@/lib/schema";
 
 const DESCRIPTION =
-  "Four small machines that each teach one idea: a candle forged from its four prices, leverage walked on a tightrope, a hidden candle to guess, and reels that work out what a pip is worth. Invented figures only: no market data, nothing to win, nothing stored.";
+  "Five small machines that each teach one idea: a candle forged from its four prices, leverage walked on a tightrope, a hidden candle to guess, reels that work out what a pip is worth, and one minute on an invented price. Invented figures only: no market data and nothing to win.";
 
 export const metadata = pageMeta({ title: "The Workshop", description: DESCRIPTION, path: "/labs/workshop" });
 
@@ -52,6 +53,15 @@ const machines = [
     go: { href: "/tools/pip-value", label: "Pip value calculator" },
     body: <PipReels />,
   },
+  {
+    id: "sixty",
+    n: "05",
+    eyebrow: "Sixty seconds",
+    title: "One minute to beat the desk.",
+    lead: "An invented price, one position at a time, and one pip of spread on every trade. See what is left when the minute ends, and why.",
+    go: { href: "/intelligence/blog/what-the-spread-costs-you-over-a-year", label: "What the spread costs you over a year" },
+    body: <SixtySeconds />,
+  },
 ];
 
 export default function WorkshopPage() {
@@ -66,7 +76,7 @@ export default function WorkshopPage() {
         ]}
         eyebrow="GIO4X Labs · Experiment"
         title="The Workshop"
-        lead="Four small machines, one idea each. Everything in them is invented: there is no market data here, nothing to win and nothing kept."
+        lead="Five small machines, one idea each. Everything in them is invented: there is no market data here and nothing to win."
       >
         <a href="#forge" className="btn btn-primary">
           Start at the forge

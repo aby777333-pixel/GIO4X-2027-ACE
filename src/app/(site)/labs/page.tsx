@@ -273,8 +273,8 @@ export default function LabsPage() {
             <div>
               <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">08</p>
               <h3 className="h2 mt-8">The Workshop</h3>
-              <p className="lead mt-13">Four small machines, one idea each: a candle forged from its four prices, leverage walked on a tightrope, a hidden candle to guess, and reels that work out what a pip is worth.</p>
-              <p className="mt-13 max-w-measure text-ink-2">Everything in them is invented. There is no market data, nothing to win and nothing kept.</p>
+              <p className="lead mt-13">Five small machines, one idea each: a candle forged from its four prices, leverage walked on a tightrope, a hidden candle to guess, reels that work out what a pip is worth, and one minute on an invented price.</p>
+              <p className="mt-13 max-w-measure text-ink-2">Everything in them is invented. There is no market data and nothing to win.</p>
               <Link href="/labs/workshop" className="go mt-21">
                 Open the Workshop
               </Link>

@@ -5,6 +5,7 @@ import { StageTransition } from "@/components/cockpit/StageTransition";
 import { MicroFx } from "@/components/fx/MicroFx";
 import { SunTheme } from "@/components/fx/SunTheme";
 import { RecentRecorder } from "@/components/desk/RecentRecorder";
+import { PassportRecorder } from "@/components/play/Passport";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
 import { ChatWidget } from "@/components/shell/ChatWidget";
@@ -58,6 +59,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <Pulse />
       {/* My desk: the "recently viewed" list (only once switched on there), and the offline worker (production builds only) */}
       <RecentRecorder />
+      {/* the passport on My desk: a stamp for the page that is open, only once the visitor has started it */}
+      <PassportRecorder />
       <OfflineRegister />
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
     </>
