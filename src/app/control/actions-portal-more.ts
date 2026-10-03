@@ -188,6 +188,16 @@ export async function setClientStatus(formData: FormData): Promise<void> {
   const reason = line(formData.get("reason"), NOTE_MAX);
   if (status !== "active" && reason.length < NOTE_MIN) redirect(`${back}?error=reason`);
 
+  // An account is closed only when nothing is left in it and nothing is in motion. The
+  // portal's database refuses the change itself (profiles_close_guard); asking first lets
+  // the screen say what stands in the way. The codes are fixed words, safe in a URL.
+  if (status === "closed") {
+    const check = await access.db.rpc("client_close_blockers", { p_user: id });
+    if (check.error) redirect(`${back}?error=portal`);
+    const why = ((check.data ?? []) as unknown[]).filter((c): c is string => typeof c === "string" && /^[a-z_]{3,30}$/.test(c));
+    if (why.length > 0) redirect(`${back}?error=blocked&why=${why.join(".")}`);
+  }
+
   await write(access, back, "client.status", id, { status, reason: reason || null }, "client_status", { id, status, reason }, "status", {
     not_found: "gone",
     staff_profile: "staffprofile",

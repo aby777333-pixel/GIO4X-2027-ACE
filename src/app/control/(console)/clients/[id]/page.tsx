@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { chargeFeeByHand, setClientStatus } from "@/app/control/actions-portal-more";
-import { ControlHead, Empty, Facts, NoAccess } from "@/components/control/bits";
+import { Notice, ControlHead, Empty, Facts, NoAccess } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDate, fmtDateTime } from "@/components/control/format";
 import { FEE_TYPES } from "@/components/control/portal/config-fields";
 import { MoreNotice } from "@/components/control/portal/MoreBits";
@@ -12,6 +12,18 @@ import { can } from "@/lib/server/staff";
 import { isUuid } from "@/lib/server/validate";
 
 export const dynamic = "force-dynamic";
+
+/** What client_close_blockers() can report (portal: 20261003200000_client_close_guard.sql), in words. */
+const CLOSE_BLOCKERS: Record<string, string> = {
+  wallet_balance: "A wallet still holds a balance: it has to be withdrawn first.",
+  pending_transactions: "A deposit or withdrawal is still pending: approve or reject it in Funds & Settlement.",
+  account_balance: "A live trading account still holds balance or equity: it has to be transferred to the wallet and withdrawn.",
+  open_trades: "A trade is still open.",
+  copy: "A copy-trading subscription is still active, as follower or as the provider being followed.",
+  pamm: "A fund investment is still active, or a fund they manage still has units outstanding.",
+  ib_unsettled: "IB commission is awaiting settlement: pay it from their IB page.",
+  downline: "People sit beneath them in the IB network: move or detach them first.",
+};
 export const metadata = controlMeta("Clients", "/control/clients");
 
 const TITLE = "Clients";
@@ -111,6 +123,22 @@ export default async function ClientPage({ params, searchParams }: { params: Pro
       />
       <PortalSource decides={(manages && !isStaffProfile) || charges}>Balances are as the portal holds them; the reserved amounts are summed by the portal’s database.</PortalSource>
       <MoreNotice notice={firstParam(sp.notice)} error={firstParam(sp.error)} />
+      {firstParam(sp.error) === "blocked" && (
+        <div className="mt-21">
+          <Notice tone="error" title="This account cannot be closed yet">
+            Nothing was changed. An account is closed only when nothing is left in it and nothing is in motion. What stands in the way:
+            <ul className="mt-5 list-disc pl-21">
+              {firstParam(sp.why)
+                .split(".")
+                .filter((code) => Object.prototype.hasOwnProperty.call(CLOSE_BLOCKERS, code))
+                .map((code) => (
+                  <li key={code}>{CLOSE_BLOCKERS[code]}</li>
+                ))}
+            </ul>
+            The client can be suspended at once in the meantime.
+          </Notice>
+        </div>
+      )}
 
       <Figures
         items={[
