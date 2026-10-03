@@ -67,7 +67,14 @@ from it. The screens, the access rules and the database are this project's.
 | "Views" on Leads, Tickets, Follow-ups and Blog | A person's own saved filters for that screen: save, rename, pin, delete; at most 30. A view is the screen's address with its filters; search text is never saved. Pinned views appear under "Your desk" on the dashboard with a live count, beside the person's own tickets, enquiries, follow-ups and chats waiting. Nobody sees a colleague's views | staff (the screen's own capability) |
 | `/control/notifications` | The person's notifications, 25 per page: a ticket, enquiry or follow-up assigned to them, a customer's reply on their ticket, a staff change or blog post waiting for them, a visitor waiting in chat. Written by database triggers; titles carry a reference, never a customer's name. Read ones are removed after 30 days, all after 90 | staff (own rows only) |
 | `/control/notifications/feed` (GET), `/control/notifications/read` (POST) | What the bell in the sidebar and the phone bar uses: the unread count and the latest 30, asked every 30 seconds while the tab is visible; and marking read. Never cached | staff (own rows only) |
-| `/control/<section>` | The sections not built yet (KYC, Funds, Fee Engine, General Ledger, IB, Copy, PAMM, Trade Log, Broker Controls, Event Bus, Document Builder, Bulk Emailer): what each will do and what it is waiting for | staff |
+| `/control/kyc` | Clients' verification status and document records in the portal. Reads only | `kyc.read` |
+| `/control/funds`, `/control/fees`, `/control/ledger` | Wallet transactions and transfers; fee schedules, rules and charges; ledger accounts and journal entries, as the portal holds them. Read only | `funds.read` |
+| `/control/ib`, `/control/copy`, `/control/pamm` | Introducing brokers, commission and referral records; signal providers and subscriptions; managed funds and investments. Read only | `partners.read` |
+| `/control/trades`, `/control/broker` | The portal's trade records; account types, trading accounts and switches. Read only | `trading.read` |
+| `/control/events` | The portal's event outbox: what is waiting and what was processed. Read only | `events.read` |
+| `/control/documents` | The legal documents the portal publishes. Read only | `documents.read` |
+| `/control/emailer` | The record of e-mails the portal sent. Read only | `emailer.read` |
+| `/control/<section>` | A section listed in the menu before it is built: what it will do and what it is waiting for. None at present | staff |
 
 ### How the console reaches the website
 
@@ -94,7 +101,7 @@ API role can read or write. A new module adds its capabilities with an `INSERT` 
 | `compliance` | Read enquiries, tickets, chats, customers, subscribers, the audit log and the staff list; the Compliance register and reports. Change nothing. |
 | `sales`, `agent` | Read enquiries, tickets, chats, customers, subscribers and the audit log; change status and stage, take or release an enquiry, add notes and follow-ups; answer chats. `agent` also works tickets; `sales` also reads reports. |
 | `support` | Enquiries as sales, without subscribers or reports; works tickets and answers chats. |
-| `finance`, `dealing` | Read the audit log; `finance` also reads reports. Their modules are not built yet. |
+| `finance`, `dealing` | Read the audit log; `finance` also reads reports. Since `0021`: `finance` reads the portal's funds, partner and trading records, `dealing` its trading records. |
 | `viewer` | Read enquiries, tickets, chats, customers, subscribers and the audit log. Change nothing. |
 
 Capabilities: `leads.read`, `leads.write`, `leads.assign`, `tasks.write`, `subscribers.read`,

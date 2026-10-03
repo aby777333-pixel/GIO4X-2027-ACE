@@ -14,10 +14,11 @@ import type { Capability } from "@/lib/server/constants";
  * (src/components/control/sections.ts). Nothing here decides access: every
  * destination checks it itself and the database checks again.
  *
- * While the client portal is connected (PORTAL_ORIGIN), the unbuilt sections
- * its staff console already has are marked "Portal" in place of "Soon", and
- * the menu ends with a way into that console. It is another application with
- * its own sign-in, so that entry is a plain link, not a route of this one.
+ * The sections that read the client portal's database (KYC to Bulk Emailer:
+ * src/lib/server/portal-db.ts) are ordinary built sections with their own
+ * capabilities. While the portal is connected (PORTAL_ORIGIN) the menu also
+ * ends with a way into the portal's own staff console, which is another
+ * application with its own sign-in, so that entry is a plain link.
  */
 type Item = { key: string; label: string; href: string; icon: IconName; exact?: boolean; cap?: Capability; built?: boolean };
 
@@ -32,25 +33,25 @@ const NAV: Item[] = [
   { key: "pipeline", label: "Pipeline", href: "/control/pipeline", icon: "pipeline", cap: "leads.read", built: true },
   { key: "tasks", label: "Follow-ups", href: "/control/tasks", icon: "tasks", cap: "leads.read", built: true },
   { key: "customers", label: "Customers", href: "/control/customers", icon: "customers", cap: "customers.read", built: true },
-  { key: "kyc", label: "KYC", href: "/control/kyc", icon: "kyc" },
+  { key: "kyc", label: "KYC", href: "/control/kyc", icon: "kyc", cap: "kyc.read", built: true },
   { key: "compliance", label: "Compliance", href: "/control/compliance", icon: "compliance", cap: "compliance.read", built: true },
-  { key: "funds", label: "Funds & Settlement", href: "/control/funds", icon: "funds" },
-  { key: "fees", label: "Fee Engine", href: "/control/fees", icon: "fees" },
-  { key: "ib", label: "IB Network", href: "/control/ib", icon: "ib" },
-  { key: "copy", label: "Copy Trading", href: "/control/copy", icon: "copy" },
-  { key: "pamm", label: "PAMM / MAM", href: "/control/pamm", icon: "pamm" },
-  { key: "trades", label: "Trade Log", href: "/control/trades", icon: "trades" },
+  { key: "funds", label: "Funds & Settlement", href: "/control/funds", icon: "funds", cap: "funds.read", built: true },
+  { key: "fees", label: "Fee Engine", href: "/control/fees", icon: "fees", cap: "funds.read", built: true },
+  { key: "ib", label: "IB Network", href: "/control/ib", icon: "ib", cap: "partners.read", built: true },
+  { key: "copy", label: "Copy Trading", href: "/control/copy", icon: "copy", cap: "partners.read", built: true },
+  { key: "pamm", label: "PAMM / MAM", href: "/control/pamm", icon: "pamm", cap: "partners.read", built: true },
+  { key: "trades", label: "Trade Log", href: "/control/trades", icon: "trades", cap: "trading.read", built: true },
   { key: "reports", label: "Reporting Centre", href: "/control/reports", icon: "reports", cap: "reports.read", built: true },
   { key: "analytics", label: "Analytics", href: "/control/analytics", icon: "reports", cap: "analytics.read", built: true },
-  { key: "broker", label: "Broker Controls", href: "/control/broker", icon: "broker" },
-  { key: "ledger", label: "General Ledger", href: "/control/ledger", icon: "ledger" },
-  { key: "events", label: "Event Bus", href: "/control/events", icon: "events" },
-  { key: "documents", label: "Document Builder", href: "/control/documents", icon: "documents" },
+  { key: "broker", label: "Broker Controls", href: "/control/broker", icon: "broker", cap: "trading.read", built: true },
+  { key: "ledger", label: "General Ledger", href: "/control/ledger", icon: "ledger", cap: "funds.read", built: true },
+  { key: "events", label: "Event Bus", href: "/control/events", icon: "events", cap: "events.read", built: true },
+  { key: "documents", label: "Document Builder", href: "/control/documents", icon: "documents", cap: "documents.read", built: true },
   { key: "blog", label: "Blog", href: "/control/blog", icon: "documents", cap: "blog.read", built: true },
   { key: "media", label: "Media", href: "/control/media", icon: "inbox", cap: "blog.read", built: true },
   { key: "seo", label: "SEO health", href: "/control/seo", icon: "compliance", cap: "blog.read", built: true },
   { key: "content", label: "Content", href: "/control/content", icon: "documents", cap: "content.read", built: true },
-  { key: "emailer", label: "Bulk Emailer", href: "/control/emailer", icon: "emailer" },
+  { key: "emailer", label: "Bulk Emailer", href: "/control/emailer", icon: "emailer", cap: "emailer.read", built: true },
   { key: "subscribers", label: "Subscribers", href: "/control/subscribers", icon: "subscribers", cap: "subscribers.read", built: true },
   { key: "config", label: "Configuration", href: "/control/config", icon: "config", cap: "config.manage", built: true },
   { key: "staff", label: "Team & Access", href: "/control/staff", icon: "team", cap: "staff.read", built: true },

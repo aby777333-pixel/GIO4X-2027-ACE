@@ -32,6 +32,10 @@ const originOf = (value, { localHttp = false } = {}) => {
   }
 };
 const portalOrigin = originOf(process.env.PORTAL_ORIGIN, { localHttp: true });
+// Address of the portal's database, read by Control's portal sections on the
+// server (src/lib/server/portal-db.ts). Not a secret; the key that goes with
+// it is, and is never written into the build.
+const portalSupabaseUrl = originOf(process.env.PORTAL_SUPABASE_URL);
 
 /**
  * Content-Security-Policy, written for this application rather than copied.
@@ -77,7 +81,7 @@ const nextConfig = {
   // Written into the build, so the pages that run on the server (GIO4X Control,
   // the gateway pages) see the same value this file proxies to. A variable set
   // only for the build (netlify.toml) does not exist when the site is running.
-  env: { PORTAL_ORIGIN: portalOrigin },
+  env: { PORTAL_ORIGIN: portalOrigin, PORTAL_SUPABASE_URL: portalSupabaseUrl },
   reactStrictMode: true,
   poweredByHeader: false,
   trailingSlash: false,

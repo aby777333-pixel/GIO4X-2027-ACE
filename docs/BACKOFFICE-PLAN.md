@@ -32,6 +32,13 @@ The June system is the reference for **what** a GIO4X back office does. It canno
 > before real client money or documents go through it. D3 was checked the same day: 12 accounts, 1 wallet
 > transaction, 6 KYC documents, no tickets.
 
+> **3 October 2026, later the same day: second decision by the owner.** Control gets its own screens for the
+> twelve remaining sections, reading the portal's database with that project's secret key
+> (`docs/SECURITY.md` 8a), in place of rebuilding them in this database first. Built so far: read-only
+> screens for all twelve. Next: close the weaknesses listed above in the portal's database
+> (`portal/supabase/migrations/20261003120000_close_known_security_holes.sql`, written for review, not
+> applied), then add decisions and approvals to Control one reviewed function at a time.
+
 ## 2. Recommended shape
 
 Build the back office **inside this repository and this database**, module by module, in the way

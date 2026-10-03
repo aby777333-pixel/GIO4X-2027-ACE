@@ -16,6 +16,10 @@
   # served by this site at /portal. Not a secret: it is the address of that
   # site. Remove the line to disconnect the portal.
   PORTAL_ORIGIN = "https://zippy-piroshki-21aa30.netlify.app"
+  # Address of the portal's database, which Control's portal sections read on
+  # the server. Not a secret. The key that goes with it IS a secret and is
+  # set only in the Netlify UI: PORTAL_SUPABASE_SECRET_KEY.
+  PORTAL_SUPABASE_URL = "https://tdifcayznqnaduchzfqz.supabase.co"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

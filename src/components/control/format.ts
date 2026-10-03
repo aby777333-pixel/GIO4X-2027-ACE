@@ -51,11 +51,11 @@ export const ROLE_LABEL: Record<StaffRole, string> = {
 /** What each role can do today. Must describe `role_capabilities` in 0004_capabilities.sql. */
 export const ROLE_NOTE: Record<StaffRole, string> = {
   admin: "Everything, including staff access",
-  compliance: "Reads everything, including the staff list. Changes nothing",
-  finance: "Reads the audit log. The finance modules are not built yet",
-  dealing: "Reads the audit log. The dealing modules are not built yet",
-  support: "Works enquiries and follow-ups",
-  sales: "Works enquiries and follow-ups, reads subscribers",
+  compliance: "Reads everything, including the staff list and the portal’s client records. Changes nothing",
+  finance: "Reads the audit log and the portal’s funds, fees, ledger, partner and trading records",
+  dealing: "Reads the audit log and the portal’s trades and trading conditions",
+  support: "Works enquiries and follow-ups; reads the portal’s KYC, documents and e-mail record",
+  sales: "Works enquiries and follow-ups, reads subscribers and the portal’s partner and e-mail records",
   agent: "Works enquiries and follow-ups, reads subscribers",
   viewer: "Reads enquiries, subscribers and the audit log",
 };

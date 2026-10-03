@@ -51,8 +51,11 @@ described in this document. See `docs/CONTROL.md`, "Roles and capabilities" and 
 ## 2. The publishable key
 
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is not a secret. It maps to the Postgres role `anon` (or, with a
-session, `authenticated`). **There is no service-role key anywhere in this application**, so there is no key
-whose theft bypasses row-level security. RLS is the security boundary.
+session, `authenticated`). **There is no service-role key for this project's database anywhere in this
+application**, so there is no key whose theft bypasses its row-level security. RLS is the security boundary.
+
+One exception, for a different database, since 3 October 2026 (owner's decision): Control's portal
+sections read the client portal's database with that project's secret key. See section 8a.
 
 With the publishable key and no session, a caller **can**:
 - insert one row into `leads` or `newsletter_subscribers`, supplying only the visitor columns, passing every
@@ -187,6 +190,29 @@ need an inline bootstrap. A nonce-based policy would require rendering every pag
 - Any future secret (service-role key, email provider key, Turnstile secret) lives only in the hosting
   provider's environment settings, never in a `NEXT_PUBLIC_` variable, never in the repository.
 - A secret that is ever committed or pasted somewhere is rotated, not merely deleted.
+
+## 8a. The portal's secret key
+
+Twelve Control sections (KYC, Funds & Settlement, Fee Engine, General Ledger, IB Network, Copy Trading,
+PAMM / MAM, Trade Log, Broker Controls, Event Bus, Document Builder, Bulk Emailer) show records that live in
+the client portal's Supabase project. Control reads them on the server with that project's secret key,
+`PORTAL_SUPABASE_SECRET_KEY`.
+
+- The key is set only in the hosting environment. It is not in the repository, not in `.env.example` with a
+  value, and not in any `NEXT_PUBLIC_` variable. Without it the twelve sections say "not connected".
+- It is used in one file, `src/lib/server/portal-db.ts`, which is marked `server-only`: importing it into
+  browser code fails the build.
+- The key bypasses the portal's row-level security, so **the portal's database does not check who is
+  asking**. The check is Control's and happens before the key is used: `requirePortal(capability)`
+  establishes the caller as active staff (`supabase.auth.getUser()` and the `staff` row) and asks this
+  project's database for their capabilities (`my_capabilities`, `0021_portal_sections.sql`). A page that
+  forgets that call cannot obtain the client at all.
+- The sections only read. No Control code writes to the portal's database. Writes (a KYC decision, a
+  withdrawal approval) will be added one reviewed function at a time, each with its own capability and its
+  own audit entry, after the portal's known weaknesses are closed (`docs/BACKOFFICE-PLAN.md`, section 1).
+- Reads are not written to the audit log. Who may read is decided by role; what was read is not recorded.
+- Consequence to accept: anyone who obtains this key can read and change everything in the portal's
+  database. If it is ever exposed, rotate it in the portal's Supabase project and replace the variable.
 
 ## 9. Not built yet (deliberately)
 

@@ -93,6 +93,14 @@ export const CAPABILITIES = [
   "content.read",
   "content.write",
   "content.publish",
+  // the sections that read the client portal's database (0021_portal_sections.sql)
+  "kyc.read",
+  "funds.read",
+  "partners.read",
+  "trading.read",
+  "events.read",
+  "documents.read",
+  "emailer.read",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
 

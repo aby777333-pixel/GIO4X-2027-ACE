@@ -28,11 +28,14 @@ client/IB portal imported from the `GIO4X-JUNE-2026` repository on 3 October 202
   Auth → URL Configuration → Redirect URLs, or confirmation and password-reset links will be refused.
 - Server Actions are accepted only from the origins listed in `allowedOrigins` in the portal's config; add a
   new public domain there (or in `PORTAL_ALLOWED_ORIGINS`) before moving the website to it.
-- GIO4X Control: the sections it has not built (KYC, Funds & Settlement, Fee Engine, IB Network, Copy
-  Trading, PAMM / MAM, Trade Log, Broker Controls, General Ledger, Event Bus, Document Builder, Bulk Emailer)
-  are marked "Portal" in its menu and link to the same section of the portal's staff console at
-  `/portal/staff/<section>`. That console is a different system: its own sign-in, its own records, none of
-  Control's access rules or audit. See `docs/BACKOFFICE-PLAN.md` for what is known to be wrong with it.
+- GIO4X Control: KYC, Funds & Settlement, Fee Engine, IB Network, Copy Trading, PAMM / MAM, Trade Log,
+  Broker Controls, General Ledger, Event Bus, Document Builder and Bulk Emailer are Control screens that
+  **read** the portal's database on the server (`src/lib/server/portal-db.ts`, `docs/SECURITY.md` 8a).
+  They need `PORTAL_SUPABASE_URL` (in `netlify.toml`) and the secret `PORTAL_SUPABASE_SECRET_KEY` (Netlify
+  UI only). Decisions and approvals are still made in the portal's own staff console, reached from the
+  "Client portal console" entry at the foot of Control's menu (`/portal/staff`): a different system, with
+  its own sign-in and none of Control's access rules or audit. See `docs/BACKOFFICE-PLAN.md` for what is
+  known to be wrong with it.
 
 Local development: `npm run dev` in `portal/` (port 3100, needs `portal/apps/portal/.env.local`), and
 `PORTAL_ORIGIN=http://localhost:3100` in the website's `.env.local`.
