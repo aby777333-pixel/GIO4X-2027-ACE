@@ -338,3 +338,108 @@ export async function settleIb(formData: FormData): Promise<void> {
   }
   redirect(`${back}?notice=${step.result === "unreviewed" ? "paid_unreviewed" : "paid"}`);
 }
+
+/* ----------------------------------------------------------------------------
+ * The remaining sections (0026_portal_ops.sql; portal: 20261003160000_control_ops.sql)
+ * -------------------------------------------------------------------------- */
+
+type OpArgs = Record<string, string | number | boolean | null>;
+type OpPlan = { capability: Capability; back: string; action: string; entity: string | null; args: OpArgs; detail: OpArgs; done: string };
+
+const text = (formData: FormData, name: string, max: number): string => {
+  const raw = formData.get(name);
+  return typeof raw === "string" ? cleanText(raw).replace(/\n+/g, " ").slice(0, max) : "";
+};
+
+/** What one posted form asks for, or null when it is not one of the operations or a value is not acceptable. */
+function planOp(formData: FormData): OpPlan | "invalid" | "value" | null {
+  const op = formData.get("op");
+  const id = formData.get("id");
+  switch (op) {
+    case "provider_status":
+    case "fund_status": {
+      const status = formData.get("status");
+      if (!isUuid(id) || (status !== "active" && status !== "paused" && status !== "closed")) return "invalid";
+      const provider = op === "provider_status";
+      return { capability: "partners.manage", back: provider ? "/control/copy" : "/control/pamm", action: provider ? "copy.status" : "pamm.status", entity: id, args: { id, status }, detail: { status }, done: "status" };
+    }
+    case "ledger_account_create": {
+      const code = text(formData, "code", 40).toUpperCase();
+      const name = text(formData, "name", 120);
+      const type = formData.get("type");
+      const currency = formData.get("currency");
+      if (!/^[A-Z][A-Z0-9_]{2,39}$/.test(code) || !name || typeof type !== "string" || !/^[a-z]{5,9}$/.test(type) || typeof currency !== "string" || !/^[A-Z]{3,4}$/.test(currency)) return "value";
+      return { capability: "ledger.manage", back: "/control/ledger", action: "ledger.account", entity: null, args: { code, name, type, currency }, detail: { op: "create", code, type, currency }, done: "account" };
+    }
+    case "ledger_account_active": {
+      const active = formData.get("active");
+      if (!isUuid(id) || (active !== "true" && active !== "false")) return "invalid";
+      return { capability: "ledger.manage", back: "/control/ledger", action: "ledger.account", entity: id, args: { id, active: active === "true" }, detail: { op: active === "true" ? "on" : "off" }, done: "account" };
+    }
+    case "journal_post": {
+      const debit = formData.get("debit");
+      const credit = formData.get("credit");
+      const amountRaw = formData.get("amount");
+      const amount = typeof amountRaw === "string" ? amountRaw.trim() : "";
+      const description = text(formData, "description", 300);
+      const reference = text(formData, "reference", 120);
+      if (!isUuid(debit) || !isUuid(credit)) return "invalid";
+      if (!/^[0-9]{1,12}([.][0-9]{1,8})?$/.test(amount) || Number(amount) <= 0 || description.length < 5) return "value";
+      // the amount travels as text so that no digit is lost on the way to a numeric column
+      return { capability: "ledger.manage", back: "/control/ledger", action: "ledger.journal", entity: null, args: { debit, credit, amount, description, reference: reference || null }, detail: { debit, credit, amount, reference: reference || null }, done: "journal" };
+    }
+    case "legal_save": {
+      const title = text(formData, "title", 160);
+      const bodyRaw = formData.get("body");
+      const body = typeof bodyRaw === "string" ? cleanText(bodyRaw).slice(0, 200000) : "";
+      if (!title) return "value";
+      if (isUuid(id)) return { capability: "documents.manage", back: "/control/documents", action: "legal.save", entity: id, args: { id, title, body }, detail: { title, characters: body.length }, done: "legal" };
+      const key = text(formData, "key", 40).toLowerCase();
+      if (!/^[a-z][a-z0-9_]{1,39}$/.test(key)) return "value";
+      return { capability: "documents.manage", back: "/control/documents", action: "legal.save", entity: null, args: { key, title, body }, detail: { key, title, characters: body.length }, done: "legal" };
+    }
+    case "legal_publish": {
+      const published = formData.get("published");
+      if (!isUuid(id) || (published !== "true" && published !== "false")) return "invalid";
+      return { capability: "documents.manage", back: "/control/documents", action: "legal.publish", entity: id, args: { id, published: published === "true" }, detail: { published: published === "true" }, done: "published" };
+    }
+    case "events_dispatch":
+      return { capability: "events.manage", back: "/control/events", action: "events.dispatch", entity: null, args: { limit: 100 }, detail: { limit: 100 }, done: "dispatched" };
+    default:
+      return null;
+  }
+}
+
+/**
+ * One change through control_ops: the status of a signal provider or a fund,
+ * a ledger account, a manual journal entry, a legal document, or a run of the
+ * event queue. Who and what they may do, the input against the allow-list,
+ * the audit entry in this database (portal_ops_record), then the one call.
+ */
+export async function runPortalOp(formData: FormData): Promise<void> {
+  const plan = planOp(formData);
+  if (plan === null) redirect("/control");
+  if (plan === "invalid" || plan === "value") {
+    // the form says which screen it came from only through its operation; fall back to the dashboard
+    const op = String(formData.get("op") ?? "");
+    const back = op.startsWith("provider") ? "/control/copy" : op.startsWith("fund") ? "/control/pamm" : op.startsWith("legal") ? "/control/documents" : op.startsWith("events") ? "/control/events" : "/control/ledger";
+    redirect(`${back}?error=${plan}`);
+  }
+  const { ctx, db } = await decider(plan.capability, plan.back);
+
+  const record = await ctx.supabase.rpc("portal_ops_record", { p_action: plan.action, p_entity_id: plan.entity, p_detail: plan.detail });
+  if (record.error) redirect(`${plan.back}?error=${record.error.code === "42501" ? "forbidden" : "audit"}`);
+
+  const { data, error } = await db.rpc("control_ops", { p_op: String(formData.get("op")), p_args: plan.args, p_actor: actorOf(ctx) });
+  const outcome = (data ?? {}) as Outcome;
+  if (error || outcome.result !== "ok") {
+    const code = error ? "portal_error" : (outcome.result ?? "unknown");
+    await ctx.supabase.rpc("portal_ops_record", { p_action: "ops.failed", p_entity_id: plan.entity, p_detail: { attempted: plan.action, outcome: code } });
+    const shown: Record<string, string> = {
+      invalid: "value", not_found: "missing", closed: "closed", in_use: "inuse", duplicate: "duplicate", system: "system",
+      same_account: "same", inactive: "inactive", currency: "currency", too_short: "short",
+    };
+    redirect(`${plan.back}?error=${shown[code] ?? "portal"}`);
+  }
+  redirect(`${plan.back}?notice=${plan.done}`);
+}

@@ -697,6 +697,7 @@ export type Database = {
       staff_directory: { Args: { [_ in never]: never }; Returns: { user_id: string; display_name: string }[] };
       record_subscriber_export: { Args: { row_count: number }; Returns: undefined };
       portal_action_record: { Args: { p_action: string; p_entity_id: string; p_detail: Json }; Returns: undefined };
+      portal_ops_record: { Args: { p_action: string; p_entity_id: string | null; p_detail: Json }; Returns: undefined };
       portal_ib_record: { Args: { p_action: string; p_entity_id: string; p_detail: Json }; Returns: undefined };
       portal_ib_settlement: { Args: { p_op: string; p_ib: string; p_currency: string | null }; Returns: Json };
       portal_config_record: { Args: { p_table: string; p_op: string; p_entity_id: string | null; p_detail: Json }; Returns: undefined };

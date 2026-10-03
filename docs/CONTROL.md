@@ -76,9 +76,11 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/ib` (commission plans), `/control/broker` (account types) | With `partners.manage` / `trading.manage`: add, change or retire a commission plan / an account type | `partners.manage`, `trading.manage` |
 | `/control/ib`, `/control/copy`, `/control/pamm` | Introducing brokers, commission and referral records; signal providers and subscriptions; managed funds and investments. Read only | `partners.read` |
 | `/control/trades`, `/control/broker` | The portal's trade records; account types, trading accounts and switches. Read only | `trading.read` |
-| `/control/events` | The portal's event outbox: what is waiting and what was processed. Read only | `events.read` |
-| `/control/documents` | The legal documents the portal publishes. Read only | `documents.read` |
-| `/control/emailer` | The record of e-mails the portal sent. Read only | `emailer.read` |
+| `/control/events` | The portal's event outbox: what is waiting and what was processed. With `events.manage`: run the queue now | `events.read`, `events.manage` |
+| `/control/copy`, `/control/pamm` | With `partners.manage`: approve, pause, resume or close a signal provider / a fund (closed is final; not while clients are in it) | `partners.manage` |
+| `/control/ledger` | With `ledger.manage`: add a ledger account, switch one off or on, post a manual two-line journal entry | `ledger.manage` |
+| `/control/documents` | The legal documents the portal publishes. With `documents.manage`: edit a text (the version rises), publish it to clients or take it down, add a document | `documents.read`, `documents.manage` |
+| `/control/emailer` | The record of e-mails the portal sent. Read only: no e-mail provider is configured, so there is nothing to send with | `emailer.read` |
 | `/control/<section>` | A section listed in the menu before it is built: what it will do and what it is waiting for. None at present | staff |
 
 ### How the console reaches the website

@@ -2,6 +2,8 @@ import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
+import { DispatchButton, OpsNotice } from "@/components/control/portal/OpsBits";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Event Bus", "/control/events");
@@ -46,7 +48,8 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "events.manage");
 
   const params = await searchParams;
   const state = oneOf(firstParam(params.state), STATES, "");
@@ -79,7 +82,9 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <ControlHead title={TITLE} lead="The events the portal has recorded in its outbox, and whether each has been processed. Newest first." />
-      <PortalSource>The payload is shown as its first {PREVIEW} characters.</PortalSource>
+      <PortalSource decides={manages}>The payload is shown as its first {PREVIEW} characters.</PortalSource>
+      <OpsNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
+      {manages && <DispatchButton waiting={null} />}
       {failed && <PortalReadFailed />}
 
       <Figures

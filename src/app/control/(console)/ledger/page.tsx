@@ -2,6 +2,8 @@ import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
 import { Figures, FilterTabs, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
+import { LedgerManager, OpsNotice } from "@/components/control/portal/OpsBits";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("General Ledger", "/control/ledger");
@@ -57,7 +59,8 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "ledger.manage");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), ENTRY_STATUSES, "");
@@ -127,7 +130,8 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <ControlHead title={TITLE} lead="The portal’s chart of accounts, and the journal entries behind every money movement with their debit and credit lines. Newest entry first." />
-      <PortalSource>Balances are not shown: they are not worked out on this screen.</PortalSource>
+      <PortalSource decides={manages}>Balances are not shown: they are not worked out on this screen.{manages ? " A manual entry is posted, and accounts are added or switched off, beneath the accounts table." : ""}</PortalSource>
+      <OpsNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -172,6 +176,7 @@ export default async function LedgerPage({ searchParams }: { searchParams: Promi
           </div>
         )}
       </Section>
+      {manages && !accounts.error && <LedgerManager accounts={accountRows} />}
 
       <FilterTabs base={BASE} param="status" current={status} options={ENTRY_STATUSES} allLabel="All entries" />
 

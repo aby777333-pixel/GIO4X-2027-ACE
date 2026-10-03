@@ -2,6 +2,8 @@ import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
+import { OpsNotice, StatusManager } from "@/components/control/portal/OpsBits";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("PAMM / MAM", "/control/pamm");
@@ -73,7 +75,8 @@ export default async function PammPage({ searchParams }: { searchParams: Promise
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "partners.manage");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), FUND_STATUSES, "");
@@ -127,7 +130,8 @@ export default async function PammPage({ searchParams }: { searchParams: Promise
   return (
     <>
       <ControlHead title={TITLE} lead="Managed funds in the portal and their terms, the clients invested in them and each fund’s transactions." />
-      <PortalSource>NAV, units and AUM are the portal’s stored values, not recalculated here.</PortalSource>
+      <PortalSource decides={manages}>NAV, units and AUM are the portal’s stored values, not recalculated here.{manages ? " A fund is approved, paused, resumed or closed beneath the table." : ""}</PortalSource>
+      <OpsNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -192,6 +196,7 @@ export default async function PammPage({ searchParams }: { searchParams: Promise
           </div>
         )}
       </Section>
+      {manages && !funds.error && <StatusManager kind="fund" rows={fundRows.map((r) => ({ id: r.id, title: r.name || `${r.id.slice(0, 8)}…`, status: r.status }))} />}
 
       <Section title="Investments" aside="All statuses, newest first">
         {investmentRows.length === 0 ? (

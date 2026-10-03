@@ -2,6 +2,8 @@ import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDate, fmtDateTime } from "@/components/control/format";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
+import { OpsNotice, StatusManager } from "@/components/control/portal/OpsBits";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Copy Trading", "/control/copy");
@@ -67,7 +69,8 @@ export default async function CopyPage({ searchParams }: { searchParams: Promise
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "partners.manage");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), PROVIDER_STATUSES, "");
@@ -121,7 +124,8 @@ export default async function CopyPage({ searchParams }: { searchParams: Promise
   return (
     <>
       <ControlHead title={TITLE} lead="Signal providers in the portal, the clients who follow them and the trades copied to those followers." />
-      <PortalSource>Providers are approved, paused and closed in the portal’s own staff console, not here.</PortalSource>
+      <PortalSource decides={manages}>{manages ? "A provider is approved, paused, resumed or closed beneath the table." : "Providers are approved, paused and closed by finance."}</PortalSource>
+      <OpsNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -178,6 +182,7 @@ export default async function CopyPage({ searchParams }: { searchParams: Promise
           </div>
         )}
       </Section>
+      {manages && !providers.error && <StatusManager kind="provider" rows={providerRows.map((r) => ({ id: r.id, title: r.display_name || `${r.id.slice(0, 8)}…`, status: r.status }))} />}
 
       <Section title="Subscriptions" aside="All statuses, newest first">
         {subscriptionRows.length === 0 ? (

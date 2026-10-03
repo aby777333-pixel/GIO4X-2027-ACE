@@ -222,6 +222,11 @@ the client portal's Supabase project. Control reads them on the server with that
   through one portal function, `control_config_write`, which accepts only those four tables and their listed
   columns, checks the values, never deletes, and records each write. The audit entry is written here first
   (`portal_config_record`). One person makes a configuration change; it moves no money by itself.
+- **The other sections** (`0026_portal_ops.sql`): provider and fund status (`partners.manage`), ledger
+  accounts and manual journal entries (`ledger.manage`), legal documents (`documents.manage`) and a run of
+  the event queue (`events.manage`) go through one portal function, `control_ops`, which names each
+  operation and what it may do; the audit entry is written first (`portal_ops_record`). One person; none
+  moves client money. Trade Log and Bulk Emailer stay read-only.
 - **IB network** (`0025_portal_ib.sql`): roles, links and plans are changed by one person holding
   `partners.manage`, each through its own portal function (`control_ib_*`), with the audit entry written
   first (`portal_ib_record`). Paying commission credits a wallet, so it follows the two-person rule below
