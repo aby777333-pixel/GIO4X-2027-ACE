@@ -218,7 +218,7 @@ export function SixtySeconds() {
           <span className="label">Your best</span> <span className="num ml-5 text-ink">{play.b === undefined ? "none yet" : `${fmt(play.b)} pips`}</span>
         </p>
       </div>
-      <div className="flat mt-13 rounded-[8px] border border-line bg-surface/60 p-13">
+      <div className="flat mt-13 rounded-[8px] border border-line bg-surface/60 p-13 max-sm:[&>div]:![aspect-ratio:1.4]">
         <Figure draw={draw} ratio={2.1} rev={rev} />
       </div>
       <div className="mt-13 flex flex-wrap gap-13">

@@ -10,7 +10,8 @@ export const AMBER: Colour = [214, 160, 70, 1];
 
 export function Stage({ draw, ratio, rev }: { draw: FigureDraw; ratio: number; rev: number }) {
   return (
-    <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+    // on a phone a wide, shallow canvas is too small to read: there it is never shallower than about 4:3
+    <div className={`flat rounded-[8px] border border-line bg-surface/60 p-13 ${ratio > 1.4 ? "max-sm:[&>div]:![aspect-ratio:1.4]" : ""}`}>
       <Figure draw={draw} ratio={ratio} rev={rev} />
     </div>
   );

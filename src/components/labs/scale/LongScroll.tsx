@@ -133,7 +133,7 @@ export function LongScroll() {
           <h2 className="h1 mt-8">{s.name}</h2>
           <p className="lead mt-8 max-w-[40rem]">{s.line}</p>
         </div>
-        <div className="flat mt-21 rounded-[8px] border border-line bg-surface/60 p-13">
+        <div className="flat mt-21 rounded-[8px] border border-line bg-surface/60 p-13 max-sm:[&>div]:![aspect-ratio:1.3]">
           <Figure draw={draw} ratio={2.4} rev={rev} />
         </div>
         <p className="mt-8 text-xs text-ink-3">One invented walk, seen through a wider and wider window. Keep scrolling.</p>

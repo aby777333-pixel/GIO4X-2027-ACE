@@ -208,7 +208,7 @@ export function Alphabet() {
           </button>
         ))}
       </div>
-      <div className="flat mt-13 rounded-[8px] border border-line bg-surface/60 p-13">
+      <div className="flat mt-13 rounded-[8px] border border-line bg-surface/60 p-13 max-sm:[&>div]:![aspect-ratio:1.9]">
         <Figure draw={draw} ratio={2.6} rev={at} />
       </div>
       <p className="gx-couplet mt-13 !mb-0" aria-live="polite">

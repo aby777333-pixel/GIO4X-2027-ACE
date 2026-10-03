@@ -286,10 +286,11 @@ export function Shockwave() {
         ctx.setLineDash([]);
         names.forEach((name, k) => {
           const a = -Math.PI / 2 + ((k + 0.5) / names.length) * TAU + ring * 0.9;
-          const x = cx + Math.cos(a) * rr;
-          const y = cy + Math.sin(a) * rr * 0.62;
-          ctx.font = `${reached ? 600 : 500} 10px ${pal.font}`;
+          ctx.font = `${reached ? 600 : 500} ${w < 360 ? 9 : 10}px ${pal.font}`;
           const tw = ctx.measureText(name).width + 12;
+          // kept inside the canvas: on a phone the outer ring is wider than the room for its names
+          const x = Math.max(tw / 2 + 2, Math.min(w - tw / 2 - 2, cx + Math.cos(a) * rr));
+          const y = cy + Math.sin(a) * rr * 0.62;
           ctx.fillStyle = rgba(pal.surface, 1);
           ctx.fillRect(x - tw / 2, y - 8, tw, 16);
           ctx.fillStyle = rgba(reached ? pal.ink : pal.ink3, 1);

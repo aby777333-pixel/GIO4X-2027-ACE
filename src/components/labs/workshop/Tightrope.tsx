@@ -151,7 +151,7 @@ export function Tightrope() {
 
   return (
     <div>
-      <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+      <div className="flat rounded-[8px] border border-line bg-surface/60 p-13 max-sm:[&>div]:![aspect-ratio:1.4]">
         <Figure draw={draw} ratio={1.7} rev={i} />
       </div>
       <div className="mt-13 grid gap-8">

@@ -523,6 +523,9 @@ export function Gravity() {
  *    read from the timetable. Run the day and watch the light cross the row.
  * ------------------------------------------------------------------------- */
 
+/** the usual three-letter code for each centre, for a tower too narrow to carry its name */
+const CITY_CODE: Record<string, string> = { Sydney: "SYD", Tokyo: "TYO", "Hong Kong": "HKG", Singapore: "SIN", Mumbai: "BOM", Dubai: "DXB", Frankfurt: "FRA", London: "LON", "New York": "NYC" };
+
 export function City() {
   const [hour, setHour] = useState(8);
   const [playing, setPlaying] = useState(false);
@@ -569,9 +572,9 @@ export function City() {
               ctx.fillRect(x + 4 + (c * (tw - 8)) / cols, ground - tall + 5 + ry * 11, Math.max(2, (tw - 8) / cols - 3), 5);
             }
           }
-          ctx.font = `${on ? 700 : 500} ${bw < 46 ? 7.5 : 9}px ${pal.font}`;
+          ctx.font = `${on ? 700 : 500} ${bw < 52 ? 8.5 : 9}px ${pal.font}`;
           ctx.fillStyle = rgba(on ? pal.ink : pal.ink3, 1);
-          const words = name.toUpperCase().split(" ");
+          const words = bw < 52 ? [CITY_CODE[name] ?? name.slice(0, 3).toUpperCase()] : name.toUpperCase().split(" ");
           words.forEach((word, k) => ctx.fillText(word, x + tw / 2, ground + 9 + k * 9));
         });
         ctx.strokeStyle = rgba(pal.ink3, 0.8);

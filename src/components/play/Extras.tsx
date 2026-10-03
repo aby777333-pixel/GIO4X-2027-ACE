@@ -88,7 +88,7 @@ export function Constellation() {
   const lessons = stars.filter((s) => s.startsWith(LESSON_PREFIX)).length;
   return (
     <div>
-      <div className="flat on-night rounded-[8px] border border-night-line bg-night p-13">
+      <div className="flat on-night rounded-[8px] border border-night-line bg-night p-13 max-sm:[&>div]:![aspect-ratio:1.5]">
         <Figure draw={draw} ratio={2.2} rev={stars.length} />
       </div>
       <p className="mt-13 text-ink-2" aria-live="polite">

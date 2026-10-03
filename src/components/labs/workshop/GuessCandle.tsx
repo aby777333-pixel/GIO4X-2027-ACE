@@ -117,7 +117,7 @@ export function GuessCandle() {
 
   return (
     <div>
-      <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+      <div className="flat rounded-[8px] border border-line bg-surface/60 p-13 max-sm:[&>div]:![aspect-ratio:1.4]">
         <Figure draw={draw} ratio={2.1} rev={n * 2 + (revealed ? 1 : 0)} />
       </div>
       <div className="mt-13 flex flex-wrap items-center gap-13">
