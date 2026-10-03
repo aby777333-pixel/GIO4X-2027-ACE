@@ -217,6 +217,11 @@ the client portal's Supabase project. Control reads them on the server with that
   database as the signed-in member of staff (`portal_action_record`, `0022_portal_actions.sql`, which checks
   the capability again): no audit entry, no decision. If the portal then refuses, a second entry says so. The
   portal records the person's name as text beside the record, since they have no account there.
+- **Configuration** (`0024_portal_config.sql`): fee schedules and rules (`fees.manage`), commission plans
+  (`partners.manage`) and account types (`trading.manage`) are added, changed and retired from Control
+  through one portal function, `control_config_write`, which accepts only those four tables and their listed
+  columns, checks the values, never deletes, and records each write. The audit entry is written here first
+  (`portal_config_record`). One person makes a configuration change; it moves no money by itself.
 - **Two people on money** (`0023_portal_four_eyes.sql`). Approving a deposit or a withdrawal changes a
   balance, so the first person only asks (`portal_approval_request`) and a second, different person holding
   `funds.settle` confirms (`portal_approval_confirm`); the database refuses the requester, and the change in

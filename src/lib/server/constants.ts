@@ -104,6 +104,10 @@ export const CAPABILITIES = [
   // decisions made in the portal's database (0022_portal_actions.sql)
   "kyc.decide",
   "funds.settle",
+  // changes to the portal's configuration (0024_portal_config.sql)
+  "fees.manage",
+  "partners.manage",
+  "trading.manage",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
 

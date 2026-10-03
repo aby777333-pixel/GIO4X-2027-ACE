@@ -1,7 +1,9 @@
 import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
+import { ConfigManager, ConfigNotice } from "@/components/control/portal/ConfigManager";
 import { FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Broker Controls", "/control/broker");
@@ -64,7 +66,8 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "trading.manage");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), ACCOUNT_STATUSES, "");
@@ -107,7 +110,8 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <ControlHead title={TITLE} lead="The account types the portal offers, the trading accounts opened under them, and the portal’s switches." />
-      <PortalSource>Per-symbol controls and trading blocks are set in the portal and are not listed here.</PortalSource>
+      <PortalSource decides={manages}>{manages ? "Account types are added, changed and retired beneath their table; a new account opened in the portal takes its type from them. Per-symbol controls and trading blocks are set in the portal and are not listed here." : "Per-symbol controls and trading blocks are set in the portal and are not listed here."}</PortalSource>
+      <ConfigNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Section title="Account types" aside="In the portal’s order">
@@ -143,6 +147,13 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
           </div>
         )}
       </Section>
+      {manages && !types.error && (
+        <ConfigManager
+          table="account_types"
+          title="Add or change an account type"
+          rows={typeRows.map((r) => ({ id: r.id, title: r.name, active: r.active !== false, values: { ...r } }))}
+        />
+      )}
 
       <FilterTabs base={BASE} param="status" current={status} options={ACCOUNT_STATUSES} allLabel="All statuses" />
       <FilterTabs base={BASE} param="kind" current={kind} options={ACCOUNT_KINDS} allLabel="All kinds" />

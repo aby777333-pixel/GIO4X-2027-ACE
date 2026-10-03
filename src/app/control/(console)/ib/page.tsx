@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDate, fmtDateTime } from "@/components/control/format";
+import { ConfigManager, ConfigNotice } from "@/components/control/portal/ConfigManager";
 import { Figures, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal, type PortalPerson } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("IB Network", "/control/ib");
@@ -91,7 +93,8 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "partners.manage");
 
   const params = await searchParams;
   const settled = oneOf(firstParam(params.settled), SETTLED, "");
@@ -160,7 +163,8 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
   return (
     <>
       <ControlHead title={TITLE} lead="Introducing brokers and affiliates in the portal, who sits under whom, the commission plans, the commission rows written so far and the referral links." />
-      <PortalSource>Plans, settlements and the tree are changed in the portal’s own staff console, not here.</PortalSource>
+      <PortalSource decides={manages}>{manages ? "Commission plans are added, changed and retired beneath their table. Settlements and the tree are still changed in the portal’s own staff console." : "Plans, settlements and the tree are changed by finance."}</PortalSource>
+      <ConfigNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -292,6 +296,13 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
           </div>
         )}
       </Section>
+      {manages && !plans.error && (
+        <ConfigManager
+          table="commission_plans"
+          title="Add or change a commission plan"
+          rows={planRows.map((r) => ({ id: r.id, title: r.is_default ? `${r.name} (default)` : r.name, active: r.active !== false, values: { ...r } }))}
+        />
+      )}
 
       <nav aria-label="Filter" className="mt-21 flex flex-wrap gap-8">
         {tab("", "All commission rows")}

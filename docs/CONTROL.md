@@ -70,7 +70,9 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/kyc` | Clients' verification status and document records in the portal. With `kyc.decide`: accept or reject one document awaiting review, recorded in the audit log first | `kyc.read`, `kyc.decide` |
 | `/control/funds` | Wallet transactions and transfers in the portal. With `funds.settle`: approve or reject one pending deposit or withdrawal. An approval takes two people (one asks, another confirms); a rejection takes one. Each step is in the audit log | `funds.read`, `funds.settle` |
 | `/control/kyc/file/<id>` (GET) | Opens a client's uploaded document in a new tab through a one-minute link; recorded in the audit log first | `kyc.read` |
-| `/control/fees`, `/control/ledger` | Fee schedules, rules and charges; ledger accounts and journal entries, as the portal holds them. Read only | `funds.read` |
+| `/control/fees` | Fee schedules, rules and charges in the portal. With `fees.manage`: add, change or retire a schedule or a rule (nothing is deleted) | `funds.read`, `fees.manage` |
+| `/control/ledger` | Ledger accounts and journal entries, as the portal holds them. Read only | `funds.read` |
+| `/control/ib` (commission plans), `/control/broker` (account types) | With `partners.manage` / `trading.manage`: add, change or retire a commission plan / an account type | `partners.manage`, `trading.manage` |
 | `/control/ib`, `/control/copy`, `/control/pamm` | Introducing brokers, commission and referral records; signal providers and subscriptions; managed funds and investments. Read only | `partners.read` |
 | `/control/trades`, `/control/broker` | The portal's trade records; account types, trading accounts and switches. Read only | `trading.read` |
 | `/control/events` | The portal's event outbox: what is waiting and what was processed. Read only | `events.read` |

@@ -1,7 +1,9 @@
 import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
+import { ConfigManager, ConfigNotice } from "@/components/control/portal/ConfigManager";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Fee Engine", "/control/fees");
@@ -20,6 +22,8 @@ type ScheduleRow = {
   active: boolean | null;
   effective_from: string | null;
   effective_to: string | null;
+  precedence: number | null;
+  description: string | null;
 };
 
 type RuleRow = {
@@ -52,10 +56,15 @@ type ChargeRow = {
 
 const yesNo = (value: boolean | null | undefined) => (value === null || value === undefined ? "–" : value ? "Yes" : "No");
 
-/** The rate as the portal stored it; what it is a rate of depends on the method beside it. */
+/** The rate; what it is a rate of depends on the method beside it. */
 function rate(row: RuleRow): string {
   if (row.rate === null || row.rate === undefined || row.rate === "") return "–";
-  return row.calc_method === "percentage" ? `${fmtNum(row.rate)} %` : fmtNum(row.rate);
+  // a percentage rate is stored as a fraction (the portal multiplies the amount by it): 0.005 is 0.5%
+  if (row.calc_method === "percentage" || row.calc_method === "spread_markup") {
+    const n = Number(row.rate);
+    return Number.isFinite(n) ? `${fmtNum(Math.round(n * 1e8) / 1e6)} %` : "–";
+  }
+  return fmtNum(row.rate);
 }
 
 /**
@@ -69,7 +78,8 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "fees.manage");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), CHARGE_STATUSES, "");
@@ -86,7 +96,7 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
     chargesQuery,
     db
       .from("fee_schedules")
-      .select("id, code, name, version, active, effective_from, effective_to", { count: "exact" })
+      .select("id, code, name, version, active, effective_from, effective_to, precedence, description", { count: "exact" })
       .order("precedence", { ascending: true })
       .order("code", { ascending: true })
       .order("version", { ascending: false })
@@ -122,7 +132,8 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
   return (
     <>
       <ControlHead title={TITLE} lead="The portal’s fee schedules, the rules inside them, and the charges they produced. Newest charge first." />
-      <PortalSource>Schedules and rules are set in the portal’s own staff console.</PortalSource>
+      <PortalSource decides={manages}>{manages ? "Schedules and rules are added, changed and retired beneath their tables. A change applies to charges made after it." : "Schedules and rules are set by finance."}</PortalSource>
+      <ConfigNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures items={CHARGE_STATUSES.map((s, i) => ({ label: `Charges ${label(s).toLowerCase()}`, value: byStatus[i]?.error ? "–" : String(byStatus[i]?.count ?? 0) }))} />
@@ -160,6 +171,13 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
           </div>
         )}
       </Section>
+      {manages && !schedules.error && (
+        <ConfigManager
+          table="fee_schedules"
+          title="Add or change a fee schedule"
+          rows={scheduleRows.map((r) => ({ id: r.id, title: `${r.code} v${r.version ?? 1}`, active: r.active !== false, values: { ...r } }))}
+        />
+      )}
 
       <Section title="Fee rules" aside={rules.error ? undefined : shown(ruleRows.length, ruleTotal, "rule", "rules")}>
         {ruleRows.length === 0 ? (
@@ -202,6 +220,14 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
           </div>
         )}
       </Section>
+      {manages && !rules.error && (
+        <ConfigManager
+          table="fee_rules"
+          title="Add or change a fee rule"
+          rows={ruleRows.map((r) => ({ id: r.id, title: `${label(r.fee_type)} · ${label(r.calc_method)} · ${scheduleCode.get(r.schedule_id) ?? "schedule"}`, active: r.active !== false, values: { ...r } }))}
+          choices={scheduleRows.map((s) => ({ value: s.id, label: `${s.code} v${s.version ?? 1}` }))}
+        />
+      )}
 
       <FilterTabs base={BASE} param="status" current={status} options={CHARGE_STATUSES} allLabel="All charges" />
 

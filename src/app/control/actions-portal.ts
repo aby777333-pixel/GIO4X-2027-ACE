@@ -22,6 +22,7 @@
  * nothing either database said, is echoed back.
  */
 import { redirect } from "next/navigation";
+import { CONFIG_TABLES, isConfigTable, type ConfigField } from "@/components/control/portal/config-fields";
 import type { Capability } from "@/lib/server/constants";
 import { requirePortal } from "@/lib/server/portal-db";
 import { cleanText, isUuid } from "@/lib/server/validate";
@@ -148,4 +149,74 @@ export async function settleWalletTransaction(formData: FormData): Promise<void>
     redirect(`${FUNDS}?error=${shown[code] ?? "portal"}`);
   }
   redirect(`${back}&notice=${action === "reject" ? "rejected" : decision === "approve" ? "unreviewed" : "approved"}`);
+}
+
+/** One posted field, reduced to what its kind allows. `undefined` means "not acceptable". */
+function readField(field: ConfigField, raw: FormDataEntryValue | null): string | number | boolean | null | undefined {
+  if (field.kind === "flag") return raw === "on";
+  const text = typeof raw === "string" ? raw.trim() : "";
+  if (!text) return field.required ? undefined : null;
+  switch (field.kind) {
+    case "text": {
+      const clean = cleanText(text).replace(/\n+/g, " ").slice(0, field.max ?? 120);
+      return clean || (field.required ? undefined : null);
+    }
+    // sent as text so that no digit is lost on the way to a numeric column
+    case "decimal":
+      return /^[0-9]{1,12}([.][0-9]{1,8})?$/.test(text) ? text : undefined;
+    case "integer":
+      return /^[0-9]{1,6}$/.test(text) ? Number(text) : undefined;
+    case "choice":
+      return (field.options ?? []).includes(text) ? text : undefined;
+    case "row":
+      return isUuid(text) ? text : undefined;
+    // a datetime-local value, read as UTC like every time the console shows
+    case "when":
+      return /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/.test(text) ? `${text}:00Z` : undefined;
+  }
+}
+
+/**
+ * Add, change or retire one row of the portal's configuration: a fee schedule,
+ * a fee rule, a commission plan or an account type
+ * (src/components/control/portal/config-fields.ts). The same order as every
+ * write here: who and what they may do, the input against the allow-list, the
+ * audit entry in this database (portal_config_record, 0024), then the one call
+ * to the portal (control_config_write), which checks the table, the columns and
+ * the values again and never deletes.
+ */
+export async function savePortalConfig(formData: FormData): Promise<void> {
+  const table = formData.get("table");
+  if (!isConfigTable(table)) redirect("/control");
+  const spec = CONFIG_TABLES[table];
+  const back = spec.back;
+  const { ctx, db } = await decider(spec.capability, back);
+
+  const op = formData.get("op");
+  if (op !== "create" && op !== "update" && op !== "retire") redirect(`${back}?error=invalid`);
+  const idRaw = formData.get("id");
+  const id = op === "create" ? null : isUuid(idRaw) ? idRaw : undefined;
+  if (id === undefined) redirect(`${back}?error=invalid`);
+
+  const values: Record<string, string | number | boolean | null> = {};
+  if (op !== "retire") {
+    for (const field of spec.fields) {
+      const value = readField(field, formData.get(field.name));
+      if (value === undefined) redirect(`${back}?error=value`);
+      values[field.name] = value;
+    }
+  }
+
+  const record = await ctx.supabase.rpc("portal_config_record", { p_table: table, p_op: op, p_entity_id: id, p_detail: values });
+  if (record.error) redirect(`${back}?error=${record.error.code === "42501" ? "forbidden" : "audit"}`);
+
+  const { data, error } = await db.rpc("control_config_write", { p_table: table, p_op: op, p_id: id, p_values: op === "retire" ? null : values, p_actor: actorOf(ctx) });
+  const outcome = (data ?? {}) as Outcome;
+  if (error || outcome.result !== "ok") {
+    const code = error ? "portal_error" : (outcome.result ?? "unknown");
+    await ctx.supabase.rpc("portal_config_record", { p_table: table, p_op: "failed", p_entity_id: id, p_detail: { attempted: op, outcome: code } });
+    const shown: Record<string, string> = { invalid: "value", duplicate: "duplicate", default_plan: "defaultplan", not_found: "missing" };
+    redirect(`${back}?error=${shown[code] ?? "portal"}`);
+  }
+  redirect(`${back}?notice=${op === "create" ? "created" : op === "update" ? "updated" : "retired"}`);
 }
