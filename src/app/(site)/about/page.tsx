@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TwoOffices } from "@/components/figures/extra/SideFigures";
 import { Rosette } from "@/components/brand/Rosette";
 import { Offices } from "@/components/company/Offices";
 import { PlumbLines } from "@/components/figures/company/PlumbLines";
@@ -198,6 +199,7 @@ export default function AboutPage() {
               , a globe that also carries the financial centres and central banks this site covers.
             </p>
           </div>
+          <div className="grid content-start gap-21">
           <aside className="panel-quiet p-21 lg:p-34" aria-labelledby="write-h" data-reveal>
             <p id="write-h" className="label">
               Write to us
@@ -212,6 +214,13 @@ export default function AboutPage() {
               Contact GIO4X
             </Link>
           </aside>
+          {/* this column ended well short of the one beside it: a figure that says what the text says */}
+          <div className="hidden max-w-[28rem] lg:block">
+            <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+              <TwoOffices />
+            </div>
+          </div>
+          </div>
         </div>
       </section>
 

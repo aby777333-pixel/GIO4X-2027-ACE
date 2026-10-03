@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { KeptHere, SameBuilding } from "@/components/figures/extra/SideFigures";
 import { CountVisitsPreference } from "@/components/company/CountVisitsPreference";
 import { PrivacyControls, TimeZonePreference } from "@/components/company/PrivacyControls";
 import { InstallApp } from "@/components/desk/InstallApp";
@@ -37,6 +38,12 @@ export default function PreferencesPage() {
             <Link href="/design" className="go mt-21">
               Designing GIO4X
             </Link>
+            {/* this column ended well short of the one beside it: a figure that says what the text says */}
+            <div className="mt-34 hidden max-w-[28rem] lg:block">
+              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                <SameBuilding />
+              </div>
+            </div>
           </div>
           <div className="panel p-21 sm:p-34">
             <AppearanceControls />
@@ -118,6 +125,12 @@ export default function PreferencesPage() {
                 <p className="mt-5 text-xs text-ink-3">By default each one stays unloaded until you press its button. This switch is the only standing choice, and it is kept with your display preferences.</p>
                 <div className="mt-13 max-w-narrow">
                   <TradingViewPreference />
+                </div>
+              </div>
+              {/* this column ended well short of the one beside it: a figure that says what the text says */}
+              <div className="mt-34 hidden max-w-[28rem] lg:block">
+                <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                  <KeptHere />
                 </div>
               </div>
             </div>

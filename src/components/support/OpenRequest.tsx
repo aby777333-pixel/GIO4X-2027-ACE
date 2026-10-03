@@ -1,5 +1,6 @@
 "use client";
 
+import { ReplyLoop } from "@/components/figures/extra/SideFigures";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Rosette } from "@/components/brand/Rosette";
@@ -196,6 +197,12 @@ export function OpenRequest({ categories, email }: { categories: CategoryOption[
             </ol>
           </div>
           <SupportHours />
+          {/* this column ended well short of the one beside it: a figure that says what the text says */}
+          <div className="hidden max-w-[28rem] lg:block">
+            <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+              <ReplyLoop />
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-21">

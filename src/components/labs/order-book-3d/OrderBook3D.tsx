@@ -52,7 +52,8 @@ export function OrderBook3D({ still }: { still: ReactNode }) {
 
   return (
     <div className="grid gap-34 lg:grid-cols-phi lg:items-start lg:gap-55">
-      <figure className="min-w-0">
+      {/* the model stays in view while its six readings are read: a reading lights a part of it */}
+      <figure className="min-w-0 lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
         <div ref={hostRef} className="gx3d" tabIndex={0} role="group" aria-label="A 3D model of an order book. Illustration, not market data. Arrow keys turn it and Home returns it. The readings after it say everything the model shows.">
           <p className="gx3d-tag chip">Illustration, not market data</p>
           <div className="gx3d-still">{still}</div>
