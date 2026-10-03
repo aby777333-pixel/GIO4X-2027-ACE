@@ -60,7 +60,7 @@ export default function MarketDayPage() {
             </p>
             {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
             <div className="mt-34 max-w-[28rem]">
-              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+              <div className="flat gx-stage">
                 <DayRing />
               </div>
             </div>

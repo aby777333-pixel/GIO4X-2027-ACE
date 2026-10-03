@@ -44,11 +44,15 @@ export function MachinePage({
       <JsonLd data={webPageSchema({ path, name: title, description })} />
       <PageHero quiet crumbs={[parent, { name: title, href: path }]} eyebrow={eyebrow} title={title} lead={lead} />
 
+      <p className="wrap hidden pt-13 text-xs text-ink-3 lg:block">On a keyboard: with the pointer over a machine, the left and right arrows move its slider and Enter presses its main button.</p>
+
       {machines.map((m, i) => (
-        <section key={m.id} id={m.id} className={`section scroll-mt-[var(--header-h)] ${i ? "hairline" : ""} ${i % 2 ? "bg-paper" : ""}`} aria-labelledby={`${m.id}-h`}>
+        <section key={m.id} id={m.id} data-machine className={`section scroll-mt-[var(--header-h)] ${i ? "hairline" : ""} ${i % 2 ? "bg-paper" : ""}`} aria-labelledby={`${m.id}-h`}>
           <div className={m.wide ? "wrap" : "wrap phi phi-r items-start"}>
             <div className={m.wide ? "max-w-[44rem]" : "lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]"}>
-              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">{String(i + 1).padStart(2, "0")}</p>
+              <p className="gx-numeral" aria-hidden>
+                {String(i + 1).padStart(2, "0")}
+              </p>
               <p className="eyebrow mt-8">{m.eyebrow}</p>
               <h2 id={`${m.id}-h`} className="h2 mt-13">
                 {m.title}

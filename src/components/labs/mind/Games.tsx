@@ -52,12 +52,12 @@ function lineDraw(series: number[], reveal: string | null, good: boolean): Figur
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
-    ctx.lineWidth = 1.6;
+    ctx.lineWidth = 1.7;
     ctx.lineJoin = "round";
     ctx.strokeStyle = rgba(reveal ? (good ? pal.emerald : pal.ink3) : pal.accent, 1);
     ctx.stroke();
     if (reveal) {
-      ctx.font = `700 10px ${pal.font}`;
+      ctx.font = `600 10px ${pal.font}`;
       ctx.textBaseline = "middle";
       ctx.fillStyle = rgba(pal.ink, 1);
       ctx.fillText(reveal, 10, 12);

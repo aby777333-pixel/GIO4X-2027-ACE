@@ -38,8 +38,8 @@ export const STAMPS: { id: string; name: string; href: string; test: RegExp }[] 
   // not earned by a visit: stamped when all five hidden riddles have been solved (store.noteHunt)
   { id: "hunt", name: "The riddle hunt", href: "/verse#hunt", test: /^$/ },
   { id: "tool", name: "A tool", href: "/tools", test: /^\/tools\/[a-z0-9-]+$/ },
-  { id: "lesson", name: "A lesson", href: "/academy", test: /^\/academy\/(?!books$|practice$)[a-z0-9-]+$/ },
-  { id: "term", name: "A glossary term", href: "/glossary", test: /^\/glossary\/[a-z0-9-]+$/ },
+  { id: "lesson", name: "A lesson", href: "/academy", test: /^\/academy\/(?!books$|practice$|first-trade$|leverage-story$|cheat-sheets$)[a-z0-9-]+$/ },
+  { id: "term", name: "A glossary term", href: "/glossary", test: /^\/glossary\/(?!map$)[a-z0-9-]+$/ },
   { id: "post", name: "A blog post", href: "/intelligence/blog", test: /^\/intelligence\/blog\/[a-z0-9-]+$/ },
   { id: "instrument", name: "An instrument", href: "/markets", test: /^\/markets\/(forex|metals|indices|energy|equities|crypto)\/[a-z0-9-]+$/ },
   { id: "bank", name: "A central bank", href: "/markets/central-banks", test: /^\/markets\/central-banks\/[a-z0-9-]+$/ },

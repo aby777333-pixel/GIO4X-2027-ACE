@@ -70,7 +70,7 @@ export function OrderBuilder() {
         }
         ctx.beginPath();
         PATH.forEach((p, i) => (i === 0 ? ctx.moveTo(x(i), y(p)) : ctx.lineTo(x(i), y(p))));
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.7;
         ctx.strokeStyle = rgba(pal.ink2, 0.9);
         ctx.stroke();
         const rows: [Line, string, Colour][] = [
@@ -84,7 +84,7 @@ export function OrderBuilder() {
           ctx.beginPath();
           ctx.moveTo(PAD, yy);
           ctx.lineTo(w - PAD, yy);
-          ctx.lineWidth = 1.6;
+          ctx.lineWidth = 1.7;
           ctx.strokeStyle = rgba(tone, 1);
           ctx.stroke();
           ctx.setLineDash([]);
@@ -94,7 +94,7 @@ export function OrderBuilder() {
           if (ctx.roundRect) ctx.roundRect(w - PAD - 84, yy - 10, 84, 20, 4);
           else ctx.rect(w - PAD - 84, yy - 10, 84, 20);
           ctx.fill();
-          ctx.font = `700 10px ${pal.font}`;
+          ctx.font = `600 10px ${pal.font}`;
           ctx.textAlign = "center";
           ctx.fillStyle = "rgba(255,255,255,0.98)";
           ctx.fillText(`${name} ${v[key].toFixed(4)}`, w - PAD - 42, yy + 0.5);
@@ -131,7 +131,7 @@ export function OrderBuilder() {
 
   return (
     <div>
-      <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+      <div className="flat gx-stage">
         <div className="relative">
           <Figure draw={draw} ratio={1.5} rev={rev} />
           <div className="absolute inset-0 cursor-ns-resize touch-none" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} aria-hidden />

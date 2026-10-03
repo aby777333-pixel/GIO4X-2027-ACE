@@ -220,7 +220,7 @@ export function Canyon() {
           ctx.lineTo(xr, y0);
           ctx.stroke();
         }
-        ctx.font = `700 11px ${pal.font}`;
+        ctx.font = `600 11px ${pal.font}`;
         ctx.textBaseline = "middle";
         ctx.textAlign = "left";
         ctx.fillStyle = rgba(pal.accent, 1);
@@ -470,7 +470,7 @@ export function Gravity() {
         ctx.moveTo(0, ly);
         ctx.lineTo(w, ly);
         ctx.stroke();
-        ctx.font = `700 10px ${pal.font}`;
+        ctx.font = `600 10px ${pal.font}`;
         ctx.textAlign = "left";
         ctx.fillStyle = rgba(tone, 1);
         ctx.fillText(name, 10, ly - 10);
@@ -483,7 +483,7 @@ export function Gravity() {
         if (i === 0) ctx.moveTo(x, Y(p));
         else ctx.lineTo(x, Y(p));
       });
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.7;
       ctx.lineJoin = "round";
       ctx.strokeStyle = rgba(PALE, 0.75);
       ctx.stroke();
@@ -498,7 +498,7 @@ export function Gravity() {
       ctx.fillStyle = rgba(PALE, 1);
       ctx.fill();
       if (lit > 0) {
-        ctx.font = `700 12px ${pal.font}`;
+        ctx.font = `600 12px ${pal.font}`;
         ctx.textAlign = "center";
         ctx.fillStyle = rgba(PALE, lit);
         ctx.fillText("BROKEN THROUGH", w / 2, 16);

@@ -1,3 +1,4 @@
+import { GeneratedCover } from "@/components/ui/GeneratedCover";
 import Link from "next/link";
 import { ReadingProgress } from "@/components/knowledge/ReadingProgress";
 import { SideBlock } from "@/components/knowledge/Reader";
@@ -112,6 +113,7 @@ export function BlogPostView({
               </p>
             )}
 
+            {!cover && <GeneratedCover seed={post.slug} className="mt-34 aspect-[21/9] w-full" />}
             {cover && (
               <figure className="mt-34">
                 <BlogCoverImage cover={cover} eager className="h-auto w-full" />

@@ -1,3 +1,4 @@
+import { FooterMotto } from "@/components/play/Guided";
 import Link from "next/link";
 import { nav, secondaryNav } from "@/config/nav";
 import { site } from "@/config/site";
@@ -196,6 +197,7 @@ export function SiteFooter() {
           </picture>
         </a>
       </div>
+      <FooterMotto />
     </footer>
   );
 }

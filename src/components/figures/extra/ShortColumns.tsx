@@ -452,7 +452,7 @@ const drawLine: FigureDraw = ({ ctx, w, h, t, hover, mx, my, pal, still }) => {
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(lerp(cx, p.x, Math.min(head, cross)), lerp(cy, p.y, Math.min(head, cross)));
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = 1.7;
       ctx.strokeStyle = rgba(pal.accent, 0.95);
       ctx.stroke();
       if (head > cross) {

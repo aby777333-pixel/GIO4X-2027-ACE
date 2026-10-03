@@ -199,7 +199,7 @@ export function OpenRequest({ categories, email }: { categories: CategoryOption[
           <SupportHours />
           {/* this column ended well short of the one beside it: a figure that says what the text says */}
           <div className="max-w-[28rem]">
-            <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+            <div className="flat gx-stage">
               <ReplyLoop />
             </div>
           </div>

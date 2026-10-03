@@ -63,7 +63,7 @@ const draw: FigureDraw = ({ ctx, w, h, t, dt, hover, my, pal, still, enter }) =>
   ctx.beginPath();
   ctx.moveTo(x, top);
   ctx.lineTo(x, Math.min(yNow, grown));
-  ctx.lineWidth = 1.6;
+  ctx.lineWidth = 1.7;
   ctx.strokeStyle = rgba(pal.accent, 0.9);
   ctx.stroke();
 

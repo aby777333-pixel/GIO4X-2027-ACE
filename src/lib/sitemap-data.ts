@@ -46,7 +46,7 @@ export function sitemapEntries(name: SitemapName): SitemapEntry[] {
     case "tools":
       return [{ path: "/tools", lastmod: CONTENT_REVISED }, ...tools.map((t) => ({ path: `/tools/${t.slug}`, lastmod: CONTENT_REVISED }))];
     case "glossary":
-      return [{ path: "/glossary", lastmod: CONTENT_REVISED }, ...glossary.map((t) => ({ path: `/glossary/${t.slug}`, lastmod: CONTENT_REVISED }))];
+      return [{ path: "/glossary", lastmod: CONTENT_REVISED }, { path: "/glossary/map", lastmod: CONTENT_REVISED }, ...glossary.map((t) => ({ path: `/glossary/${t.slug}`, lastmod: CONTENT_REVISED }))];
     case "intelligence":
       return [
         { path: "/intelligence", lastmod: latest(articles.map((a) => a.updated ?? a.published)) },
@@ -54,7 +54,7 @@ export function sitemapEntries(name: SitemapName): SitemapEntry[] {
         ...articles.map((a) => ({ path: `/intelligence/${a.slug}`, lastmod: a.updated ?? a.published })),
       ];
     case "academy":
-      return [{ path: "/academy", lastmod: CONTENT_REVISED }, { path: "/academy/books", lastmod: CONTENT_REVISED }, { path: "/academy/practice", lastmod: CONTENT_REVISED }, ...lessons.map((l) => ({ path: `/academy/${l.slug}`, lastmod: l.updated ?? l.published }))];
+      return [{ path: "/academy", lastmod: CONTENT_REVISED }, { path: "/academy/books", lastmod: CONTENT_REVISED }, { path: "/academy/practice", lastmod: CONTENT_REVISED }, { path: "/academy/first-trade", lastmod: CONTENT_REVISED }, { path: "/academy/leverage-story", lastmod: CONTENT_REVISED }, { path: "/academy/cheat-sheets", lastmod: CONTENT_REVISED }, ...lessons.map((l) => ({ path: `/academy/${l.slug}`, lastmod: l.updated ?? l.published }))];
     case "blog":
       // the list page only: the posts are rows in the database and are added by /sitemap-blog.xml itself
       return [{ path: "/intelligence/blog", lastmod: CONTENT_REVISED }];

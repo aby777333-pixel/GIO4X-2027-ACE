@@ -1,3 +1,4 @@
+import { GeneratedCover } from "@/components/ui/GeneratedCover";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/Page";
 import { BLOG_CATEGORIES, BLOG_CATEGORY_LABEL, BLOG_PATH } from "@/lib/blog";
@@ -78,12 +79,11 @@ export function BlogCategoryNav({ current }: { current: BlogCategory | null }) {
 function Featured({ post }: { post: BlogCard }) {
   const href = blogPostHref(post.slug);
   return (
-    <article className={`border-b border-line pb-34 lg:pb-55 ${post.cover ? "grid items-center gap-34 lg:grid-cols-phi lg:gap-55" : ""}`} aria-labelledby="blog-latest-post">
-      {post.cover && (
-        <Link href={href} tabIndex={-1} className="block">
-          <BlogCoverImage cover={post.cover} className="aspect-[16/10] w-full object-cover" />
-        </Link>
-      )}
+    <article className="grid items-center gap-34 border-b border-line pb-34 lg:grid-cols-phi lg:gap-55 lg:pb-55" aria-labelledby="blog-latest-post">
+      <Link href={href} tabIndex={-1} aria-hidden className="block">
+        {/* a post without a picture of its own is given a drawn cover, worked out from its address */}
+        {post.cover ? <BlogCoverImage cover={post.cover} className="aspect-[16/10] w-full object-cover" /> : <GeneratedCover seed={post.slug} className="aspect-[16/10] w-full" />}
+      </Link>
       <div>
         <p className="label">Latest · {BLOG_CATEGORY_LABEL[post.category]}</p>
         <h3 id="blog-latest-post" className="h2 mt-13 max-w-[22ch] [overflow-wrap:anywhere]">
@@ -109,7 +109,7 @@ function Rows({ posts }: { posts: BlogCard[] }) {
         <li key={p.slug} className="border-b border-line">
           <Link
             href={blogPostHref(p.slug)}
-            className={`group grid gap-x-34 gap-y-8 py-21 transition-colors duration-fast hover:bg-surface md:px-13 lg:py-34 ${p.cover ? "md:grid-cols-[8.5rem_minmax(0,1fr)_minmax(0,13rem)]" : "md:grid-cols-[8.5rem_minmax(0,1fr)]"}`}
+            className={`group grid gap-x-34 gap-y-8 py-21 transition-colors duration-fast hover:bg-surface md:px-13 lg:py-34 ${"md:grid-cols-[8.5rem_minmax(0,1fr)_minmax(0,13rem)]"}`}
           >
             <span className="flex items-baseline gap-13 md:flex-col md:gap-3">
               <span className="label text-ink-2">{BLOG_CATEGORY_LABEL[p.category]}</span>
@@ -127,7 +127,7 @@ function Rows({ posts }: { posts: BlogCard[] }) {
                 <span className="num">{p.minutes} min read</span>
               </span>
             </span>
-            {p.cover && <BlogCoverImage cover={p.cover} className="aspect-[16/10] w-full max-w-[21rem] self-start object-cover md:max-w-none" />}
+            {p.cover ? <BlogCoverImage cover={p.cover} className="aspect-[16/10] w-full max-w-[21rem] self-start object-cover md:max-w-none" /> : <GeneratedCover seed={p.slug} className="aspect-[16/10] w-full max-w-[21rem] self-start md:max-w-none" />}
           </Link>
         </li>
       ))}

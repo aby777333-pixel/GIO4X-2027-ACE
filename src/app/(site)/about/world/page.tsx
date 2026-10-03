@@ -77,7 +77,7 @@ export default function WorldPage() {
             <p className="lead mt-13 max-w-[30rem]">The globe adds nothing of its own. Every marker is a place this site publishes elsewhere, with the page it comes from.</p>
             {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
             <div className="mt-34 max-w-[28rem]">
-              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+              <div className="flat gx-stage">
                 <ThreeLayers offices={offices} centres={centres.length} banks={centralBanks.length} />
               </div>
             </div>

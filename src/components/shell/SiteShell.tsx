@@ -6,6 +6,8 @@ import { MicroFx } from "@/components/fx/MicroFx";
 import { SunTheme } from "@/components/fx/SunTheme";
 import { RecentRecorder } from "@/components/desk/RecentRecorder";
 import { AmbienceFollower, CurrencyRain, Season } from "@/components/fx/Extras";
+import { Polish } from "@/components/fx/Polish";
+import { NewRibbon } from "@/components/play/Guided";
 import { PassportRecorder } from "@/components/play/Passport";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
@@ -35,6 +37,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <main id="main" tabIndex={-1} className="pt-[var(--header-h)] focus:outline-none">
         {/* what staff publish from Control: one line above the page, when there is one */}
         <AnnouncementBar />
+        {/* what has been added lately; put away with one button */}
+        <NewRibbon />
         {children}
       </main>
       <SiteFooter />
@@ -63,6 +67,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
       {/* the passport on My desk: a stamp for the page that is open, only once the visitor has started it */}
       <PassportRecorder />
       {/* a tint for three stretches of the year, a symbol that falls when its code is typed, and the pitch of the ambient sound if it is on */}
+      {/* the light in a machine's card, the keys that work a machine, and the part of the day */}
+      <Polish />
+      <div className="gx-grain no-print" aria-hidden />
       <Season />
       <CurrencyRain />
       <AmbienceFollower />

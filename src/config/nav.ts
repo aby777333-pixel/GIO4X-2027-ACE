@@ -154,7 +154,11 @@ export const nav: NavSection[] = [
         items: [
           { label: "Academy", href: "/academy" },
           { label: "Glossary", href: "/glossary" },
+          { label: "Your first trade", href: "/academy/first-trade" },
           { label: "Practice room", href: "/academy/practice" },
+          { label: "Leverage, in six steps", href: "/academy/leverage-story" },
+          { label: "Cheat sheets", href: "/academy/cheat-sheets" },
+          { label: "Glossary star map", href: "/glossary/map" },
           { label: "The Verse Room", href: "/verse" },
           { label: "Reading list", href: "/academy/books" },
           { label: "FAQ", href: "/faq" },

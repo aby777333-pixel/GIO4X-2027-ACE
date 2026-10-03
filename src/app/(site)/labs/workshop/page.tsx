@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Forge } from "@/components/labs/workshop/Forge";
 import { GuessCandle } from "@/components/labs/workshop/GuessCandle";
+import { BuildCandle, DrawChart, RiskDial } from "@/components/labs/more/More";
 import { PipReels } from "@/components/labs/workshop/PipReels";
 import { SixtySeconds } from "@/components/labs/workshop/SixtySeconds";
 import { Tightrope } from "@/components/labs/workshop/Tightrope";
@@ -62,6 +63,33 @@ const machines = [
     go: { href: "/intelligence/blog/what-the-spread-costs-you-over-a-year", label: "What the spread costs you over a year" },
     body: <SixtySeconds />,
   },
+  {
+    id: "build",
+    n: "06",
+    eyebrow: "Build a candle",
+    title: "Four handles, one shape, and its name.",
+    lead: "Set where it opened, where it closed and how far it reached each way. The shape you make is named, with what the name does and does not mean.",
+    go: { href: "/academy/candlestick-patterns-masterclass", label: "Lesson: candlestick patterns" },
+    body: <BuildCandle />,
+  },
+  {
+    id: "draw",
+    n: "07",
+    eyebrow: "Draw a chart",
+    title: "Sketch a line. It is read back to you.",
+    lead: "Draw with a finger or the mouse. Its average is laid over it and each stretch is named: a rise, a fall, a range.",
+    go: { href: "/glossary/moving-average", label: "Moving average, defined" },
+    body: <DrawChart />,
+  },
+  {
+    id: "dial",
+    n: "08",
+    eyebrow: "The risk dial",
+    title: "One dial. Turn it and watch the weather.",
+    lead: "The share of the account risked on each trade, and what ten losses in a row would leave.",
+    go: { href: "/tools/position-size", label: "Position size calculator" },
+    body: <RiskDial />,
+  },
 ];
 
 export default function WorkshopPage() {
@@ -76,7 +104,7 @@ export default function WorkshopPage() {
         ]}
         eyebrow="GIO4X Labs · Experiment"
         title="The Workshop"
-        lead="Five small machines, one idea each. Everything in them is invented: there is no market data here and nothing to win."
+        lead="Eight small machines, one idea each. Everything in them is invented: there is no market data here and nothing to win."
       >
         <a href="#forge" className="btn btn-primary">
           Start at the forge
@@ -84,10 +112,12 @@ export default function WorkshopPage() {
       </PageHero>
 
       {machines.map((m, i) => (
-        <section key={m.id} id={m.id} className={`section scroll-mt-[var(--header-h)] ${i ? "hairline" : ""} ${i % 2 ? "bg-paper" : ""}`} aria-labelledby={`${m.id}-h`}>
+        <section key={m.id} id={m.id} data-machine className={`section scroll-mt-[var(--header-h)] ${i ? "hairline" : ""} ${i % 2 ? "bg-paper" : ""}`} aria-labelledby={`${m.id}-h`}>
           <div className="wrap phi phi-r items-start">
             <div className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
-              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">{m.n}</p>
+              <p className="gx-numeral" aria-hidden>
+                {m.n}
+              </p>
               <p className="eyebrow mt-8">{m.eyebrow}</p>
               <h2 id={`${m.id}-h`} className="h2 mt-13">
                 {m.title}

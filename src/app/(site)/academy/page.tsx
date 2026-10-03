@@ -293,7 +293,7 @@ export default function AcademyPage() {
                 <PathSteps path={p} />
                 {p.key === startHere.key && longer && meet && meet.shared > 0 && (
                   <aside className="mt-34 max-w-[28rem] lg:max-w-none">
-                    <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                    <div className="flat gx-stage">
                       <TwoRoutes routes={meet.routes} lessons={meet.lessons} />
                     </div>
                     <p className="eyebrow mt-13">Where they meet</p>

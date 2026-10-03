@@ -415,7 +415,7 @@ export function Tide() {
       ctx.closePath();
       ctx.fill();
       ctx.strokeStyle = rgba(pal.ink, 0.9);
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.7;
       ctx.beginPath();
       ctx.moveTo(bx, by - 9);
       ctx.lineTo(bx, by - 34);

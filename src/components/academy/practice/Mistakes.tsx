@@ -86,7 +86,7 @@ function drawFor(key: string): FigureDraw {
       if (i === 0) ctx.moveTo(x(i), y(PATH[i]));
       else ctx.lineTo(x(i), y(PATH[i]));
     }
-    ctx.lineWidth = 1.6;
+    ctx.lineWidth = 1.7;
     ctx.strokeStyle = rgba(pal.ink2, 0.95);
     ctx.stroke();
 

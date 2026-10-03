@@ -314,7 +314,7 @@ export function FigureNote({
 }) {
   return (
     <aside className={`mt-34 max-w-[28rem] ${className}`}>
-      <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">{figure}</div>
+      <div className="flat gx-stage">{figure}</div>
       {label ? <p className="eyebrow mt-13">{label}</p> : null}
       <p className={`${label ? "mt-5" : "mt-13"} text-sm leading-relaxed text-ink-3`}>{children}</p>
     </aside>

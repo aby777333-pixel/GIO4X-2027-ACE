@@ -235,7 +235,7 @@ export function Forge({ controls = true }: { controls?: boolean }) {
 
   return (
     <div>
-      <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+      <div className="flat gx-stage">
         <Figure draw={draw} ratio={1.5} rev={n} />
       </div>
       {controls && (

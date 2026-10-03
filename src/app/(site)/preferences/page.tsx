@@ -43,7 +43,7 @@ export default function PreferencesPage() {
             <ReplayOpening />
             {/* this column ended well short of the one beside it: a figure that says what the text says */}
             <div className="mt-34 max-w-[28rem]">
-              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+              <div className="flat gx-stage">
                 <SameBuilding />
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function PreferencesPage() {
               </div>
               {/* this column ended well short of the one beside it: a figure that says what the text says */}
               <div className="mt-34 max-w-[28rem]">
-                <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                <div className="flat gx-stage">
                   <KeptHere />
                 </div>
               </div>

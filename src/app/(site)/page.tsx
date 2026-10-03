@@ -6,7 +6,7 @@ import { ReferenceRates } from "@/components/home/ReferenceRates";
 import { AccountsTable, AssetIndex, IntelligenceTeaser, Philosophy, PlatformsChapter, ToolsTeaser, TrustBlock } from "@/components/home/Sections";
 import { SessionStrip } from "@/components/market/SessionStrip";
 import { WeeklyVerse } from "@/components/play/Extras";
-import { RiddleSection } from "@/components/play/RiddleSection";
+import { RiddleSection, TermSection } from "@/components/play/RiddleSection";
 import { SectionHead } from "@/components/ui/Page";
 import { PunchLine } from "@/components/ui/PunchLine";
 import { site } from "@/config/site";
@@ -67,6 +67,7 @@ export default function HomePage() {
       <PunchLine k="home" />
       <IntelligenceTeaser />
       <RiddleSection tinted />
+      <TermSection />
       <section className="section hairline" aria-label="This week\u2019s verse">
         <div className="wrap">
           <WeeklyVerse />

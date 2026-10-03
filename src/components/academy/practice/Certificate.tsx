@@ -23,7 +23,7 @@ export function Certificate({ levels }: { levels: Level[] }) {
   const [name, setName] = useState("");
   const [at, setAt] = useState<number | null>(null);
 
-  if (learned === null) return <p className="text-ink-3">Your record is read once the page has loaded.</p>;
+  if (learned === null) return <p className="gx-wait text-ink-3">Your record is read once the page has loaded.</p>;
 
   const rows = levels.map((l) => {
     const have = l.slugs.filter((s) => learned[`${LESSON_PREFIX}${s}`]).length;

@@ -26,7 +26,7 @@ export function DailyRiddle({ items }: { items: RiddleItem[] }) {
   const play = usePlay();
   useEffect(() => setAt(indexFor(items.length)), [items.length]);
 
-  if (at === null) return <p className="text-ink-3">Today’s riddle appears once the page has loaded.</p>;
+  if (at === null) return <p className="gx-wait text-ink-3">Today’s riddle appears once the page has loaded.</p>;
 
   const item = items[at];
   const already = play.r?.last === today();

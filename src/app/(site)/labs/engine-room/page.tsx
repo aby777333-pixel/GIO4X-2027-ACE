@@ -36,10 +36,12 @@ export default function Page() {
       />
 
       {machines.map((m, i) => (
-        <section key={m.id} id={m.id} className={`section scroll-mt-[var(--header-h)] ${i ? "hairline" : ""} ${i % 2 ? "bg-paper" : ""}`} aria-labelledby={`${m.id}-h`}>
+        <section key={m.id} id={m.id} data-machine className={`section scroll-mt-[var(--header-h)] ${i ? "hairline" : ""} ${i % 2 ? "bg-paper" : ""}`} aria-labelledby={`${m.id}-h`}>
           <div className="wrap phi phi-r items-start">
             <div className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
-              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">{String(i + 1).padStart(2, "0")}</p>
+              <p className="gx-numeral" aria-hidden>
+                {String(i + 1).padStart(2, "0")}
+              </p>
               <p className="eyebrow mt-8">{m.eyebrow}</p>
               <h2 id={`${m.id}-h`} className="h2 mt-13">
                 {m.title}

@@ -34,7 +34,7 @@ export function WeeklyRiddle() {
     const days = Math.floor(Date.now() / 86400000) - 4; // days since Monday 5 January 1970, UTC
     setWhen({ week: Math.floor(days / 7), day: ((days % 7) + 7) % 7 });
   }, []);
-  if (!when) return <p className="text-ink-3">This week’s riddle appears once the page has loaded.</p>;
+  if (!when) return <p className="gx-wait text-ink-3">This week’s riddle appears once the page has loaded.</p>;
   const r = HARD[when.week % HARD.length];
   const open = Math.min(3, when.day + 1);
   const done = picked !== null;
@@ -241,7 +241,7 @@ export function FinishTheRhyme({ cards }: { cards: Couplet[] }) {
   // the first couplet is dealt after the page loads, so the server and the browser agree on what was sent
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(deal, []);
-  if (!q) return <p className="text-ink-3">A couplet is dealt once the page has loaded.</p>;
+  if (!q) return <p className="gx-wait text-ink-3">A couplet is dealt once the page has loaded.</p>;
   const done = picked !== null;
   const ok = picked === q.card.slug;
   return (

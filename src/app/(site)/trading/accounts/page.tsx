@@ -5,6 +5,7 @@ import { FigureNote } from "@/components/figures/Figure";
 import { Documents } from "@/components/figures/trading/Documents";
 import { Residence } from "@/components/figures/trading/Residence";
 import { NotPublished } from "@/components/platforms/FactState";
+import { AccountCards } from "@/components/trading/AccountCards";
 import { AccountExplorer } from "@/components/trading/AccountExplorer";
 import { AskLine, PendingList, RiskNote } from "@/components/trading/Blocks";
 import { DataNote, NextSteps, PageHero, SectionHead } from "@/components/ui/Page";
@@ -227,6 +228,15 @@ export default function AccountsPage() {
       </section>
 
       <RiskNote text={riskWarning} />
+
+      <section className="section hairline" aria-labelledby="cards-h">
+        <div className="wrap">
+          <SectionHead eyebrow="On the table" title={<span id="cards-h">Three accounts, three cards.</span>} lead="The same published conditions as the table above. Bring a card forward, or turn it over for the rest." />
+          <div className="mt-34">
+            <AccountCards accounts={accounts} />
+          </div>
+        </div>
+      </section>
 
       <PunchLine k="risk" />
 

@@ -130,7 +130,7 @@ export function SixtySeconds() {
           if (k === 0) ctx.moveTo(x(k), y(g.path[k]));
           else ctx.lineTo(x(k), y(g.path[k]));
         }
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.7;
         ctx.lineJoin = "round";
         ctx.strokeStyle = rgba(pal.accent, 1);
         ctx.stroke();

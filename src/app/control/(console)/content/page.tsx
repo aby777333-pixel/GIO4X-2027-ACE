@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { NoAccess } from "@/components/control/bits";
 import { controlMeta } from "@/components/control/format";
 import { composeFaqList, countFaqList, FAQ_LIST_COLUMNS, type FaqListRow } from "@/components/control/views/content-shared";
@@ -22,5 +23,16 @@ export default async function ContentPage() {
   // figures that could not be counted are left out, not shown as zero
   const counts = error ? null : countFaqList(composeFaqList(faqs, (data ?? []) as FaqListRow[]));
 
-  return <ContentView faq={counts} faqInCode={faqs.length} canReadBlog={can(ctx, "blog.read")} />;
+  return (
+    <>
+      <ContentView faq={counts} faqInCode={faqs.length} canReadBlog={can(ctx, "blog.read")} />
+      <p className="mt-21 text-sm text-ink-2">
+        Visitors can send a riddle from the Verse Room. Nothing they send is shown until it is approved:{" "}
+        <Link href="/control/content/riddles" className="link">
+          Readers’ riddles
+        </Link>
+        .
+      </p>
+    </>
+  );
 }

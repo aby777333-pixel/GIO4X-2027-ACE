@@ -11,6 +11,7 @@ import { useSyncExternalStore } from "react";
  *       a row, and the longest run
  *   b   the best score in "Sixty seconds" (the Workshop), in pips
  *   h   the riddle hunt: which of the five hidden riddles have been solved
+ *   v   the newest "recently added" notice the visitor has put away with "Got it"
  *   s   the passport: the stamps collected. Present only once the visitor has
  *       pressed "Start my passport"; until then no page visit is noted
  *
@@ -21,7 +22,7 @@ import { useSyncExternalStore } from "react";
 export const PLAY_KEY = "gx:play";
 const EVENT = "gx:play";
 
-export type Play = { r?: { last: string; streak: number; best: number }; b?: number; s?: string[]; h?: string[] };
+export type Play = { r?: { last: string; streak: number; best: number }; b?: number; s?: string[]; h?: string[]; v?: string };
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const STAMP = /^[a-z][a-z0-9-]{0,31}$/;
@@ -40,6 +41,7 @@ function clean(v: unknown): Play {
     const h = [...new Set(o.h.filter((x): x is string => typeof x === "string" && x in HUNT))];
     if (h.length) out.h = h;
   }
+  if (typeof o.v === "string" && /^[0-9a-z-]{4,16}$/.test(o.v)) out.v = o.v;
   if (Array.isArray(o.s)) out.s = [...new Set(o.s.filter((x): x is string => typeof x === "string" && STAMP.test(x)))].slice(0, MAX_STAMPS);
   return out;
 }
@@ -81,7 +83,7 @@ export function readPlay(): Play {
 
 function write(next: Play): void {
   try {
-    if (!next.r && next.b === undefined && !next.s && !next.h) window.localStorage.removeItem(PLAY_KEY);
+    if (!next.r && next.b === undefined && !next.s && !next.h && !next.v) window.localStorage.removeItem(PLAY_KEY);
     else window.localStorage.setItem(PLAY_KEY, JSON.stringify(next));
   } catch {
     /* storage is unavailable: the record is simply not kept */
@@ -153,4 +155,11 @@ export function noteHunt(id: keyof typeof HUNT): void {
   const h = [...(p.h ?? []), id];
   const done = h.length === Object.keys(HUNT).length;
   write({ ...p, h, ...(done && p.s && !p.s.includes("hunt") ? { s: [...p.s, "hunt"] } : {}) });
+}
+
+/** "Got it" on the recently-added ribbon: it stays away until something newer is added. */
+export function noteSeen(id: string): void {
+  const p = readPlay();
+  if ((p.v ?? "") >= id) return;
+  write({ ...p, v: id });
 }

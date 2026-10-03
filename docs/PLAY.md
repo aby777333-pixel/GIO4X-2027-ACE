@@ -50,9 +50,26 @@ One browser-storage key, `gx:play` (`src/components/play/store.ts`), listed in `
 - `b` the best score in Sixty seconds
 - `h` which hidden riddles have been solved
 - `s` the passport's stamps, present only once the visitor has started it
+- `v` the newest "recently added" ribbon the visitor has dismissed (`src/data/releases.ts`)
 
 Each is written only by something the visitor does. Nothing else added here stores anything: tallies, names typed on a certificate and the ambient sound last only as long as the page.
 
 ## Sound
 
 The machines use the site's existing sound signals (`src/components/sound/signal.ts`), which are silent unless sound is switched on at `/preferences`. The ambient drone (`src/components/fx/Extras.tsx`) is separate, off by default and lasts for one visit.
+
+## Polish, and the later additions
+
+| What | Where |
+|---|---|
+| The one card every figure and machine is drawn in (`.gx-stage`), its pointer light, the grain, dividers that draw themselves, display numerals, drop caps, waiting states | `src/styles/fx.css` (section POLISH) |
+| Pointer light, keyboard shortcuts on `[data-machine]`, the part of the day on `<html data-daypart>` | `src/components/fx/Polish.tsx` |
+| A cover drawn from a slug, for posts and lessons without a picture | `src/components/ui/GeneratedCover.tsx` |
+| Liquid chart, candle garden, paper trail, build a candle, draw a chart, risk dial | `src/components/labs/more/More.tsx` |
+| First-trade course, scroll-told leverage story, term of the day, footer motto, "recently added" ribbon | `src/components/play/Guided.tsx` |
+| Cheat sheets to print | `src/app/(site)/academy/cheat-sheets/page.tsx` |
+| The glossary as a star map | `src/components/glossary/StarMap.tsx` |
+| Account cards | `src/components/trading/AccountCards.tsx` |
+| Sonnet of the month, readers' riddles and their form | `src/components/verse/Readers.tsx` |
+
+Readers' riddles are the only part of this that leaves the browser. A riddle is posted to `/api/riddle`, stored as `pending` in `reader_riddles` (migration `0029`), and is shown on `/verse` only after someone with `content.publish` approves it at `/control/content/riddles`. The database forces `pending` on insert whatever the request says. The `/verse` page re-reads approved riddles every five minutes.

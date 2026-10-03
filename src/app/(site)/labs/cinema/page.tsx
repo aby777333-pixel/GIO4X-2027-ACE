@@ -1,5 +1,6 @@
 import { Canyon, City, Gravity, NightFloor, OrderFlight, Storm } from "@/components/labs/cinema/Pieces";
 import { MachinePage } from "@/components/labs/MachinePage";
+import { Garden, Liquid, PaperTrail } from "@/components/labs/more/More";
 import { pageMeta } from "@/lib/meta";
 
 const DESCRIPTION =
@@ -13,7 +14,7 @@ export default function Page() {
       path="/labs/cinema"
       title="The Screening Room"
       description={DESCRIPTION}
-      lead="Six set pieces, each a picture of one idea. They are metaphors and say so: no price is shown and nothing is forecast."
+      lead="Nine set pieces, each a picture of one idea. They are metaphors and say so: no price is shown and nothing is forecast."
       punch="trend"
       machines={[
         { id: "floor", wide: true, eyebrow: "The floor at night", title: "Six screens. Six ways in.", lead: "A dark room of lit screens. Each is a door into one part of the site.", go: { href: "/explore", label: "Everything on the site" }, body: <NightFloor /> },
@@ -22,6 +23,9 @@ export default function Page() {
         { id: "storm", eyebrow: "The storm chart", title: "Volatility is weather.", lead: "A boat leaves its path behind it, and the path is the chart. Change the sea, and let a release strike.", go: { href: "/glossary/volatility", label: "Volatility, defined" }, body: <Storm /> },
         { id: "gravity", eyebrow: "Gravity wells", title: "A floor, a ceiling, and a comet.", lead: "Support and resistance, pictured. Push the comet and see a level hold, then give way and change its role.", go: { href: "/academy/support-and-resistance-levels", label: "Lesson: support and resistance" }, body: <Gravity /> },
         { id: "city", eyebrow: "The city, in time-lapse", title: "Nine towers, lit in turn.", lead: "Each tower is a financial centre. Its windows light while its exchange is in session.", go: { href: "/markets/clock", label: "World Market Clock" }, body: <City /> },
+        { id: "liquid", eyebrow: "The liquid chart", title: "A level holds until it is full.", lead: "Support, as water: three shelves, each holding a pool until it gives way to the one below.", go: { href: "/glossary/support", label: "Support, defined" }, body: <Liquid /> },
+        { id: "garden", eyebrow: "The candle garden", title: "The wind is volatility.", lead: "A row of candles that sway like plants. Raise the wind, then close the session and let night fall.", go: { href: "/glossary/volatility", label: "Volatility, defined" }, body: <Garden /> },
+        { id: "paper", eyebrow: "The paper trail", title: "A ticket, folded and flown.", lead: "The order ticket folds itself into a paper plane and flies its route: checks, routing, fill.", go: { href: "/labs/trade-anatomy", label: "Trade Anatomy" }, body: <PaperTrail /> },
       ]}
       next={[
         { kind: "Labs", label: "The Mind Room", href: "/labs/mind", note: "Four games about the person at the screen." },

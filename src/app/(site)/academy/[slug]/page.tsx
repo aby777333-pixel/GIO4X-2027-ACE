@@ -10,6 +10,7 @@ import { conceptSlugs, renderProse, shortDate } from "@/components/knowledge/pro
 import { resolveAll, resolveTools } from "@/components/markets/graph";
 import { LinkRows } from "@/components/markets/LinkRows";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { GeneratedCover } from "@/components/ui/GeneratedCover";
 import { NextSteps } from "@/components/ui/Page";
 import { absoluteUrl } from "@/config/site";
 import { getLesson, getModule, lessons, lessonsOf, neighbours } from "@/data/academy";
@@ -129,6 +130,8 @@ export default async function LessonPage({ params }: Params) {
           </>
         }
       >
+        {/* a cover drawn from the lesson's own address: decoration, not a chart of anything */}
+        <GeneratedCover seed={l.slug} className="no-print mb-34 aspect-[21/9] w-full" />
         {lab && (
           <section aria-labelledby="try-it" className="no-print mt-55 scroll-mt-[calc(var(--header-h)+1.3125rem)] border-t border-line-strong pt-34">
             <p className="eyebrow">Try it yourself</p>

@@ -473,7 +473,7 @@ function addressDraw(domain: string): FigureDraw {
       ctx.lineTo(d0, yb);
       ctx.lineTo(d1, yb);
       if (found > 0.98) ctx.lineTo(d1, yb - 5);
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.7;
       ctx.strokeStyle = rgba(pal.accent, 1);
       ctx.stroke();
       ctx.font = `600 9px ${pal.font}`;

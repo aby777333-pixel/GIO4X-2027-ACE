@@ -148,7 +148,7 @@ const drawSeed: FigureDraw = ({ ctx, w, h, t, hover, mx, pal, still }) => {
   // second pass: the same seed, the same path, laid exactly over the first
   if (second > 0) {
     trace(second);
-    ctx.lineWidth = 1.6;
+    ctx.lineWidth = 1.7;
     ctx.strokeStyle = rgba(pal.gold, 0.98);
     ctx.stroke();
   }

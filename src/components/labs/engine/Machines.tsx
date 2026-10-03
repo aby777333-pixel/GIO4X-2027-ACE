@@ -93,7 +93,7 @@ export function MarginCountdown() {
           ctx.textAlign = "center";
           ctx.fillStyle = rgba(on ? pal.ink : pal.ink3, 1);
           ctx.fillText(l.name, x, ly + 22);
-          ctx.font = `500 9px ${pal.font}`;
+          ctx.font = `600 9px ${pal.font}`;
           ctx.fillStyle = rgba(pal.ink3, 0.95);
           ctx.fillText(`at ${l.at}%`, x, ly + 34);
         });
@@ -185,7 +185,7 @@ export function SwapClock() {
             ctx.moveTo(x, 30);
             ctx.lineTo(x + Math.cos(a) * 10, 30 + Math.sin(a) * 10);
             ctx.strokeStyle = rgba(pal.accent, 1);
-            ctx.lineWidth = 1.6;
+            ctx.lineWidth = 1.7;
             ctx.stroke();
           }
         });
@@ -395,7 +395,7 @@ export function Staircase() {
           ctx.lineTo(x0, y1);
           ctx.lineTo(x1, y1);
         }
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 1.7;
         ctx.strokeStyle = rgba(ALERT, 1);
         ctx.stroke();
         // the way back up: the same height, but each step is a bigger share of what is left
@@ -518,7 +518,7 @@ export function Dance() {
         ctx.moveTo(hx + 5, hy - 1);
         ctx.lineTo(hx + 19, hy - 1);
         ctx.strokeStyle = rgba(c, 1);
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 1.7;
         ctx.stroke();
       };
       ctx.setLineDash([2, 5]);
