@@ -34,6 +34,23 @@ export function SiteFooter() {
     { title: "Platforms", items: [...nav[2].groups.flatMap((g) => g.items), { label: "Trader Toolkit", href: "/tools" }] },
     { title: "Knowledge", items: [...nav[3].groups.flatMap((g) => g.items), ...nav[4].groups[0].items] },
     { title: "Company", items: nav[5].groups.flatMap((g) => g.items) },
+    // free things: elsewhere on the web, and here
+    {
+      title: "Nice & Need",
+      items: [
+        { label: "All free resources", href: "/nice-and-need" },
+        { label: "Free courses", href: "/nice-and-need#learn" },
+        { label: "Free data", href: "/nice-and-need#data" },
+        { label: "Central bank calendars", href: "/nice-and-need#banks" },
+        { label: "Charts and calendars", href: "/nice-and-need#charts" },
+        { label: "Scam warnings and checks", href: "/nice-and-need#safe" },
+        { label: "The Playbook", href: "/playbook" },
+        { label: "Candlestick patterns", href: "/playbook#patterns" },
+        { label: "When this happens", href: "/playbook#situations" },
+        { label: "Cheat sheets", href: "/academy/cheat-sheets" },
+        { label: "Fun@Finance", href: "/fun" },
+      ],
+    },
   ];
 
   return (
@@ -61,7 +78,7 @@ export function SiteFooter() {
       </div>
 
       {/* directory */}
-      <nav aria-label="Footer" className="wrap relative grid grid-cols-2 gap-x-21 gap-y-34 border-t border-night-line py-55 md:grid-cols-3 lg:grid-cols-5">
+      <nav aria-label="Footer" className="wrap relative grid grid-cols-2 gap-x-21 gap-y-34 border-t border-night-line py-55 md:grid-cols-3 lg:grid-cols-6">
         {columns.map((c) => (
           <div key={c.title}>
             <p className="label">{c.title}</p>

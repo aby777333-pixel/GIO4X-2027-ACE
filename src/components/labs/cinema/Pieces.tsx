@@ -16,6 +16,8 @@ import { signalSound } from "@/components/sound/signal";
  */
 
 const PALE: Colour = [232, 240, 246, 1];
+/** on the page's own ground a highlight must be seen in either theme: pale at night, ink by day */
+const seen = (pal: { ink: Colour }): Colour => (pal.ink[0] < 128 ? pal.ink : PALE);
 
 /* ---------------------------------------------------------------------------
  * 1. THE FLOOR AT NIGHT — a dark room of lit screens, each a way into one
@@ -103,7 +105,7 @@ export function OrderFlight() {
         const z = 1 - (((still ? 0.3 : t * speed) + s * 0.137) % 1);
         const d = (1 - z) * Math.max(w, h) * 0.75;
         const len = (1 - z) * (flying ? 26 : 4);
-        ctx.strokeStyle = rgba(s % 3 ? pal.accent : PALE, (1 - z) * 0.7);
+        ctx.strokeStyle = rgba(s % 3 ? pal.accent : seen(pal), (1 - z) * 0.7);
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(cx + Math.cos(a) * d, cy + Math.sin(a) * d);
@@ -284,7 +286,7 @@ export function Storm() {
       }
       const flash = Math.max(0, 1 - (time - struck) * 2.2);
       if (flash > 0) {
-        ctx.fillStyle = rgba(PALE, flash * 0.35);
+        ctx.fillStyle = rgba(seen(pal), flash * 0.35);
         ctx.fillRect(0, 0, w, h);
         // the bolt
         const r = seeded(strike * 31 + 7);
@@ -298,7 +300,7 @@ export function Storm() {
           ctx.lineTo(lx, ly);
         }
         ctx.lineWidth = 2;
-        ctx.strokeStyle = rgba(PALE, flash);
+        ctx.strokeStyle = rgba(seen(pal), flash);
         ctx.stroke();
       }
       // rain, in a storm
@@ -363,7 +365,7 @@ export function Storm() {
       ctx.moveTo(0, -8);
       ctx.lineTo(0, -30);
       ctx.stroke();
-      ctx.fillStyle = rgba(PALE, 0.95);
+      ctx.fillStyle = rgba(seen(pal), 0.95);
       ctx.beginPath();
       ctx.moveTo(2, -29);
       ctx.lineTo(15, -12);
@@ -485,22 +487,22 @@ export function Gravity() {
       });
       ctx.lineWidth = 1.7;
       ctx.lineJoin = "round";
-      ctx.strokeStyle = rgba(PALE, 0.75);
+      ctx.strokeStyle = rgba(seen(pal), 0.75);
       ctx.stroke();
       const cy = Y(y + target);
       const halo = ctx.createRadialGradient(hx, cy, 0, hx, cy, 22);
-      halo.addColorStop(0, rgba(PALE, 0.9));
-      halo.addColorStop(1, rgba(PALE, 0));
+      halo.addColorStop(0, rgba(seen(pal), 0.9));
+      halo.addColorStop(1, rgba(seen(pal), 0));
       ctx.fillStyle = halo;
       ctx.fillRect(hx - 22, cy - 22, 44, 44);
       ctx.beginPath();
       ctx.arc(hx, cy, 4, 0, TAU);
-      ctx.fillStyle = rgba(PALE, 1);
+      ctx.fillStyle = rgba(seen(pal), 1);
       ctx.fill();
       if (lit > 0) {
         ctx.font = `600 12px ${pal.font}`;
         ctx.textAlign = "center";
-        ctx.fillStyle = rgba(PALE, lit);
+        ctx.fillStyle = rgba(seen(pal), lit);
         ctx.fillText("BROKEN THROUGH", w / 2, 16);
       }
     };

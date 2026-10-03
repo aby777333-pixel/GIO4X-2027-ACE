@@ -15,6 +15,8 @@ import { TAU, clamp, lerp, rgba, smooth, type Colour, type FigureFrame } from "@
  * step arrived. Every figure is the example in the words beside it.
  */
 const RED: Colour = [214, 96, 88, 1];
+/** gold as a colour for words: the metal itself is too pale to read on a light page */
+const brass = (f: FigureFrame): Colour => (f.pal.ink[0] < 128 ? [122, 94, 32, 1] : f.pal.gold);
 
 type Scene = (f: FigureFrame, a: number, q: number) => void;
 
@@ -136,7 +138,7 @@ const stake: Scene = (f, a, q) => {
     ctx.stroke();
     label(f, "10 × 100", bx + 12, (top + tray + thick) / 2, pal.ink, "left");
   }
-  label(f, `${landed * 100 === 1000 ? "1,000" : landed * 100}`, cx, h * 0.12, pal.gold);
+  label(f, `${landed * 100 === 1000 ? "1,000" : landed * 100}`, cx, h * 0.12, brass(f));
   caption(f, "YOUR STAKE: 1,000");
 };
 
@@ -168,7 +170,7 @@ const controls: Scene = (f, a, q) => {
   ctx.moveTo(s.x - 4, s.y + b.cell / 2);
   ctx.lineTo(s.x - b.cell * 0.9, s.y + b.cell / 2);
   ctx.stroke();
-  label(f, "YOURS", s.x - b.cell, s.y + b.cell / 2, pal.gold, "right");
+  label(f, "YOURS", s.x - b.cell, s.y + b.cell / 2, brass(f), "right");
   label(f, `${open} OF 100`, b.x + b.size / 2, b.y - 12, pal.ink);
   caption(f, "1,000 SET ASIDE ANSWERS FOR 100,000");
 };

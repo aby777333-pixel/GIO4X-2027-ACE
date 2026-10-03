@@ -164,9 +164,12 @@ export function ScrollStory() {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-34 lg:grid-cols-2 lg:gap-55">
       <div className="gx-story-pin lg:order-2">
-        <div className="gx-stage lg:sticky lg:top-[calc(var(--header-h)+2.125rem)]">
+        {/* the wrapper is what sticks: the card sets its own position, which would cancel it */}
+        <div className="lg:sticky lg:top-[calc(var(--header-h)+2.125rem)]">
+         <div className="gx-stage">
           <Figure draw={drawRef.current} ratio={1.15} rev={at} />
           <p className="mt-8 text-xs text-ink-3">One drawing for each step. The figures are examples chosen to make the sum easy.</p>
+         </div>
         </div>
       </div>
       <ol className="lg:order-1">

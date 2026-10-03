@@ -1537,3 +1537,70 @@ html[data-daypart="night"] .cx-hero {
     hyphens: auto;
   }
 }
+
+/* ==========================================================================
+   THE PLAYBOOK, AND NICE & NEED — cards and small pictures.
+   ========================================================================== */
+.gx-play-card,
+.gx-need-card {
+  display: block;
+  height: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 1.3125rem;
+  transition:
+    border-color var(--t-base) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out);
+}
+.gx-play-card:hover,
+.gx-need-card:hover,
+.gx-play-card:focus-visible,
+.gx-need-card:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 13px 34px -21px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduced"]) :is(.gx-play-card, .gx-need-card):hover {
+    transform: translateY(-2px);
+  }
+}
+.gx-thumb {
+  display: block;
+  width: 100%;
+  max-width: 11rem;
+  height: auto;
+}
+.gx-thumb line {
+  stroke-width: 1.4;
+}
+.gx-thumb-up line {
+  stroke: var(--emerald);
+}
+.gx-thumb-up rect {
+  fill: var(--emerald);
+}
+.gx-thumb-down line {
+  stroke: var(--tone-6, #b4534a);
+}
+.gx-thumb-down rect {
+  fill: var(--tone-6, #b4534a);
+}
+.gx-thumb-dim {
+  opacity: 0.38;
+}
+.gx-need-tag {
+  margin-left: 0.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 9999px;
+  padding: 0.0625rem 0.5rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+}
+.gx-need-tag.is-need {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}

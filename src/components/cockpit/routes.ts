@@ -46,6 +46,8 @@ const ROUTES: [prefix: string, scene: SceneId, ownTag?: string][] = [
   ["/glossary/map", "starmap"],
   ["/verse", "quill"],
   ["/fun", "jest"],
+  ["/playbook", "order"],
+  ["/nice-and-need", "atlas"],
   ["/labs/connect-the-dots", "threads"],
   ["/labs/workshop", "forge"],
   ["/labs/engine-room", "gears"],

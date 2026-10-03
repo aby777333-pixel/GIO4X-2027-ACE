@@ -24,6 +24,10 @@ const SWATCH: Record<Exclude<Prefs["accent"], "custom">, [string, string]> = {
   ocean: ["#0b6a7e", "#0870b8"],
   emerald: ["#0a6a3a", "#b39c6b"],
   royal: ["#3b3f8f", "#b39c6b"],
+  sunset: ["#a2461c", "#d99a3c"],
+  rose: ["#8e2f52", "#c9a08a"],
+  forest: ["#2f5d3a", "#c2ad7c"],
+  slate: ["#3d5166", "#b5764a"],
   mono: ["#14191d", "#a0a8a8"],
 };
 

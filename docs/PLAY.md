@@ -79,3 +79,13 @@ The leverage story's six drawings are `src/components/play/LeverageScenes.ts`, o
 ## Fun@Finance
 
 `/fun` is jokes, comic strips, cartoons, limericks, riddles, a mock dictionary, an excuse machine and a bingo card. All of the material is in `src/data/fun.ts`, written for the page; the rule it keeps is at the top of that file (laugh at habits and jargon; never promise a result, make light of real loss, give advice, or name a real person or firm). The cast of the comics (the Bull, the Bear and Wick) is drawn in SVG by `src/components/fun/Toons.tsx`: a new strip is three panels of data, with no drawing to do. The moving parts are `src/components/fun/Fun.tsx`. Nothing on the page is stored.
+
+## The Playbook, and Nice & Need
+
+`/playbook` is twelve candlestick patterns and twelve situations, one page each at `/playbook/[slug]`, all from `src/data/playbook.ts`. An entry carries its own candles (invented, to show the shape), which `src/components/playbook/PlayFigure.tsx` draws and rings. A page explains and never instructs: what a thing is, what it is taken to mean, what to check, where people go wrong. To add a page, add an entry; the sitemap, the index and the links between pages follow.
+
+`/nice-and-need` lists free resources on other websites (`src/data/nice-and-need.ts`), each a well-known public source, with the free things on this site beneath. The page states that GIO4X has no connection with the sites listed. The footer has a column of the same name.
+
+## Moods colour the whole page
+
+A mood (accent) now tints the page's materials as well as what is drawn on it (`src/styles/accent.css`, last section). Four moods were added: Sunset, Rose, Forest, Slate. A mood needs: its key in `Prefs["accent"]` and `ACCENTS` (`src/lib/prefs.ts`), a swatch in `src/components/shell/Appearance.tsx`, light and dark colours in `src/styles/tokens.css`, and night colours in `src/styles/accent.css`.

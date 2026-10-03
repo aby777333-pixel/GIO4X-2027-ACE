@@ -40,6 +40,26 @@
   --mood-2: #a0a8a8;
   --mood-3: #cdb98a;
 }
+[data-accent="sunset"] {
+  --mood-1: #f0a070;
+  --mood-2: #e6bd6a;
+  --mood-3: #c9aa98;
+}
+[data-accent="rose"] {
+  --mood-1: #f09ab8;
+  --mood-2: #dcb39e;
+  --mood-3: #a0a8a8;
+}
+[data-accent="forest"] {
+  --mood-1: #8fcf9a;
+  --mood-2: #c9c77a;
+  --mood-3: #cdb98a;
+}
+[data-accent="slate"] {
+  --mood-1: #a9c0d8;
+  --mood-2: #dba27a;
+  --mood-3: #a0a8a8;
+}
 [data-accent="mono"] {
   --mood-1: #eceef0;
   --mood-2: #b9c0c6;
@@ -104,4 +124,29 @@ html[data-accent="custom"] :is(.on-night, .cx-hero, header[data-site-header]) :i
 html[data-accent] .gx-console {
   --brand: #1b3a6b;
   --info: #1479ad;
+}
+
+/* ---- A MOOD IS THE WHOLE PAGE ------------------------------------------------
+   Until now a mood coloured what is drawn on the page and left the page itself
+   the same ivory (or the same graphite at night). Here the materials take a
+   little of the mood as well: the ground, the paper, the tinted panels and the
+   sunken wells. A few parts in a hundred, so text keeps its contrast and the
+   mood is felt rather than seen. The default mood is untouched, and so is the
+   console, which sets its own materials. */
+html[data-theme="light"][data-accent]:not([data-accent="gio4x"]) {
+  --bg: color-mix(in srgb, var(--accent) 5%, #f6f4ee);
+  --paper: color-mix(in srgb, var(--accent) 3%, #fbfaf6);
+  --surface-2: color-mix(in srgb, var(--accent) 7%, #f0ede5);
+  --sunken: color-mix(in srgb, var(--accent) 8%, #ebe8df);
+}
+html[data-theme="dark"][data-accent]:not([data-accent="gio4x"]) {
+  --bg: color-mix(in srgb, var(--accent) 5%, #0b1014);
+  --paper: color-mix(in srgb, var(--accent) 6%, #0f151a);
+  --surface: color-mix(in srgb, var(--accent) 6%, #141b22);
+  --surface-2: color-mix(in srgb, var(--accent) 8%, #19222a);
+  --sunken: color-mix(in srgb, var(--accent) 4%, #080c0f);
+}
+/* the night stages and the footer lean the same way */
+html[data-accent]:not([data-accent="gio4x"]) :is(.cx-hero, footer.on-night, .on-night) {
+  --night: color-mix(in srgb, var(--mood-1) 5%, #0b1014);
 }

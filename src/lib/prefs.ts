@@ -12,7 +12,7 @@ export const PREFS_KEY = "gx:prefs";
 
 export type Prefs = {
   theme: "light" | "dark" | "auto";
-  accent: "gio4x" | "ivory" | "midnight" | "ocean" | "emerald" | "royal" | "mono" | "custom";
+  accent: "gio4x" | "ivory" | "midnight" | "ocean" | "emerald" | "royal" | "sunset" | "rose" | "forest" | "slate" | "mono" | "custom";
   /** the hue, 0 to 359 degrees, of the visitor's own accent; used only while `accent` is "custom" (src/lib/accent.ts) */
   accentHue: number;
   /** the hue of the supporting colour of the visitor's own accent, or -1: it then follows the first hue */
@@ -75,6 +75,10 @@ export const ACCENTS: { key: Prefs["accent"]; label: string; note: string }[] = 
   { key: "ocean", label: "Ocean", note: "Petroleum blue and silver" },
   { key: "emerald", label: "Emerald", note: "Deep green and brass" },
   { key: "royal", label: "Royal", note: "Indigo, platinum and champagne" },
+  { key: "sunset", label: "Sunset", note: "Terracotta and amber on a warm page" },
+  { key: "rose", label: "Rose", note: "Burgundy and rose gold" },
+  { key: "forest", label: "Forest", note: "Moss green and sand" },
+  { key: "slate", label: "Slate", note: "Steel blue and copper on a cool page" },
   { key: "mono", label: "Mono", note: "Graphite only" },
   { key: "custom", label: "Custom", note: "A hue of your own, composed on the preferences page" },
 ];

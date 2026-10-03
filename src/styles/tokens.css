@@ -206,6 +206,30 @@
   --accent-2: #8b9494;
   --accent-3: #b39c6b;
 }
+[data-accent="sunset"] {
+  --accent: #a2461c;
+  --accent-ink: #ffffff;
+  --accent-2: #9a6410;
+  --accent-3: #8b6f5a;
+}
+[data-accent="rose"] {
+  --accent: #8e2f52;
+  --accent-ink: #ffffff;
+  --accent-2: #9a6a55;
+  --accent-3: #8b9494;
+}
+[data-accent="forest"] {
+  --accent: #2f5d3a;
+  --accent-ink: #ffffff;
+  --accent-2: #6b6a2c;
+  --accent-3: #9a8552;
+}
+[data-accent="slate"] {
+  --accent: #3d5166;
+  --accent-ink: #ffffff;
+  --accent-2: #9a5a30;
+  --accent-3: #7d8891;
+}
 [data-accent="mono"] {
   --accent: #14191d;
   --accent-ink: #ffffff;
@@ -241,6 +265,30 @@
   --accent-ink: #0b1014;
   --accent-2: #a0a8a8;
   --accent-3: #cdb98a;
+}
+[data-theme="dark"][data-accent="sunset"] {
+  --accent: #f0a070;
+  --accent-ink: #0b1014;
+  --accent-2: #e6bd6a;
+  --accent-3: #c9aa98;
+}
+[data-theme="dark"][data-accent="rose"] {
+  --accent: #f09ab8;
+  --accent-ink: #0b1014;
+  --accent-2: #dcb39e;
+  --accent-3: #a0a8a8;
+}
+[data-theme="dark"][data-accent="forest"] {
+  --accent: #8fcf9a;
+  --accent-ink: #0b1014;
+  --accent-2: #c9c77a;
+  --accent-3: #cdb98a;
+}
+[data-theme="dark"][data-accent="slate"] {
+  --accent: #a9c0d8;
+  --accent-ink: #0b1014;
+  --accent-2: #dba27a;
+  --accent-3: #a0a8a8;
 }
 [data-theme="dark"][data-accent="mono"] {
   --accent: #eceef0;
