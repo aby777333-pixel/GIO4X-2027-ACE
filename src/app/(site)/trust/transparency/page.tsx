@@ -1,3 +1,4 @@
+import { OpenDoor } from "@/components/trust/OpenDoor";
 import Link from "next/link";
 import { PegBoard } from "@/components/figures/extra/PegBoard";
 import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
@@ -58,6 +59,8 @@ export default function TransparencyPage() {
           </HeroCompanion>
         }
       />
+
+      <OpenDoor published={publishedCount} pending={pendingCount} />
 
       <section className="section-quiet" aria-labelledby="ledger">
         <div className="wrap">

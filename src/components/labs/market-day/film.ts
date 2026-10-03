@@ -86,6 +86,8 @@ type ChapterDef = {
   title: string;
   /** two plain sentences of general explanation */
   lines: readonly [string, string];
+  /** a couplet for the chapter: a line to remember it by */
+  verse: readonly [string, string];
   /** the minute of the UTC day it falls on */
   at: (start: number) => number;
   /** does the timetable really have this moment on this day? (not at a weekend) */
@@ -103,6 +105,7 @@ const DEFS: ChapterDef[] = [
       `The trading day is conventionally counted from Sydney, where the FX window opens at ${hhmm(FX_SYD.open)} local time and the exchange, the ${SYD.venue}, begins its regular session at ${hhmm(SYD.open)}.`,
       "On the UTC clock that is late in the evening, so this film of one UTC day ends where the next trading day begins.",
     ],
+    verse: ["While London sleeps and New York dreams,", "Sydney wakes the first of streams."],
     at: (start) => utcOf(FX_SYD.tz, FX_SYD.open, start),
     happens: (t, i) => (t.fx[i] & bit("sydney")) !== 0,
   },
@@ -113,6 +116,7 @@ const DEFS: ChapterDef[] = [
       `Tokyo’s exchange, the ${TYO.venue}, begins its regular session at ${hhmm(TYO.open)} local time, and the Tokyo FX window is conventionally counted from ${hhmm(FX_TYO.open)}.`,
       "With Sydney already at work this is the Asia-Pacific morning: the home session of the yen, the Australian dollar and the New Zealand dollar.",
     ],
+    verse: ["Soon after, Tokyo joins in:", "the Asian morning can begin."],
     at: (start) => utcOf(TYO.tz, TYO.open, start),
     happens: (t, i) => t.states[i * NC + centreIndex("tokyo")] === OPEN,
   },
@@ -123,6 +127,7 @@ const DEFS: ChapterDef[] = [
       `Tokyo’s exchange ends its regular session at ${hhmm(TYO.close)} local time, while the Tokyo FX window conventionally runs to ${hhmm(FX_TYO.close)} and Europe’s desks are arriving.`,
       "The time in which the Tokyo and London windows are both open is short, and its length changes with daylight saving in the United Kingdom.",
     ],
+    verse: ["Tokyo winds down as London stirs:", "for a short while the session blurs."],
     at: (start) => utcOf(TYO.tz, TYO.close, start),
     happens: (t, i) => (t.fx[i] & bit("tokyo")) !== 0,
   },
@@ -133,6 +138,7 @@ const DEFS: ChapterDef[] = [
       `London’s exchange, the ${LDN.venue}, begins its regular session at ${hhmm(LDN.open)} local time, the London FX window is counted from ${hhmm(FX_LDN.open)}, and Frankfurt’s ${FRA.venue} opens at ${hhmm(FRA.open)} in its own zone.`,
       "Centres further east whose regular hours have not yet ended are still open, so for a while two regions are at their desks together.",
     ],
+    verse: ["London opens, the desks fill fast:", "the largest centre joins at last."],
     at: (start) => utcOf(LDN.tz, LDN.open, start),
     happens: (t, i) => t.states[i * NC + centreIndex("london")] === OPEN,
   },
@@ -143,6 +149,7 @@ const DEFS: ChapterDef[] = [
       `The New York FX window opens at ${hhmm(FX_NYC.open)} local time while London’s is still open, and New York’s exchange, the ${NYC.venue}, begins its regular session at ${hhmm(NYC.open)}.`,
       "More centres open together means more participants at their desks. It says nothing about the direction of any price.",
     ],
+    verse: ["Two great centres, both awake:", "the fullest hours the day will make."],
     at: (start) => utcOf(FX_NYC.tz, FX_NYC.open, start),
     happens: (t, i) => (t.fx[i] & bit("london")) !== 0 && (t.fx[i] & bit("new-york")) !== 0,
   },
@@ -153,6 +160,7 @@ const DEFS: ChapterDef[] = [
       `New York’s exchange ends its regular session at ${hhmm(NYC.close)} local time, the last of the ${NC} on this globe to close.`,
       `The New York FX window conventionally runs to ${hhmm(FX_NYC.close)}, and on a Friday that hour is also the end of the FX week.`,
     ],
+    verse: ["New York closes, lights go low:", "the day rolls over, on we go."],
     at: (start) => utcOf(NYC.tz, NYC.close, start),
     happens: (t, i) => i > 0 && t.states[(i - 1) * NC + centreIndex("new-york")] === OPEN,
   },
@@ -163,18 +171,21 @@ const DEFS: ChapterDef[] = [
       `Between the end of New York’s day and the regular session in Sydney, none of the ${NC} exchanges on this globe is inside its regular hours.`,
       "Foreign exchange does not stop on a weekday: quotes continue, with few centres at their desks.",
     ],
+    verse: ["Between New York and Sydney's start,", "the quietest hours play their part."],
     at: (start) => utcOf(FX_NYC.tz, FX_NYC.close, start),
     happens: (t, i) => t.week[i] === 1,
   },
 ];
 
 /** The chapters as the page lists them before the clock is read: title and caption, no times. */
-export const CHAPTER_TEXT = DEFS.map((d) => ({ id: d.id, title: d.title, lines: d.lines }));
+export const CHAPTER_TEXT = DEFS.map((d) => ({ id: d.id, title: d.title, lines: d.lines, verse: d.verse }));
 
 export type Chapter = {
   id: ChapterId;
   title: string;
   lines: readonly [string, string];
+  /** a couplet for the chapter: a line to remember it by */
+  verse: readonly [string, string];
   /** minute of the UTC day */
   min: number;
   happens: boolean;
@@ -301,7 +312,7 @@ export function buildDay(start: number): DayTable {
   const chapters = DEFS.map((d) => {
     // every hour in the timetable is a multiple of five minutes; a zone that was not would land on the step before
     const min = Math.floor(d.at(start) / STEP) * STEP;
-    return { id: d.id, title: d.title, lines: d.lines, min, happens: d.happens(base, min / STEP) };
+    return { id: d.id, title: d.title, lines: d.lines, verse: d.verse, min, happens: d.happens(base, min / STEP) };
   });
   return { ...base, chapters };
 }

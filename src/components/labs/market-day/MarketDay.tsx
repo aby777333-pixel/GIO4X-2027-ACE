@@ -272,6 +272,10 @@ export function MarketDay() {
                     Chapter · <span className="num">{clockOf(chapter.min)}</span> UTC
                   </p>
                   <h3 className="h3 mt-8">{chapter.title}</h3>
+                  <p className="gx-couplet mt-8">
+                    <span>{chapter.verse[0]}</span>
+                    <span>{chapter.verse[1]}</span>
+                  </p>
                   <p className="mt-8 text-sm text-ink-2">{chapter.lines[0]}</p>
                   <p className="mt-8 text-sm text-ink-2">{chapter.lines[1]}</p>
                   {!chapter.happens && <p className="mt-8 text-sm text-ink-3">Not on this day: at this moment the regular timetable is in a weekend.</p>}

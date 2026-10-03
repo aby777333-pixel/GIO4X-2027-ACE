@@ -354,3 +354,168 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
   border-left: 2px solid var(--prestige);
   padding-left: 1.3125rem;
 }
+
+/* ---- THE CUT (components/fx/PageTurn.tsx) ----------------------------------
+   One pass of a bright edge and a thin veil across the screen when the page
+   changes. Above the page, never in the pointer's way, gone in under half a
+   second. Not shown at all under reduced motion or low visual effects. */
+.gx-cut {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-cut {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      color-mix(in srgb, var(--night) 16%, transparent) 38%,
+      color-mix(in srgb, var(--night) 26%, transparent) 47%,
+      color-mix(in srgb, var(--accent) 85%, white) 49.4%,
+      color-mix(in srgb, var(--accent) 85%, white) 50%,
+      transparent 50.6%,
+      transparent 100%
+    );
+    background-size: 300% 100%;
+    background-repeat: no-repeat;
+    animation: gx-cut 0.46s cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+}
+@keyframes gx-cut {
+  from {
+    background-position: 150% 0;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    background-position: -50% 0;
+    opacity: 0;
+  }
+}
+
+/* ---- THE OPEN DOOR (components/trust/OpenDoor.tsx) -------------------------
+   A strong-room door in two leaves over the transparency ledger. By default
+   the leaves stand open. Where view timelines exist and motion is allowed
+   they begin closed and swing open as the door scrolls up the screen; the
+   wheel on the right leaf turns first. */
+.gx-door {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--night-line);
+  border-radius: 8px;
+  background:
+    radial-gradient(60% 90% at 50% 50%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    var(--night);
+  perspective: 1600px;
+}
+.gx-door-inside {
+  position: relative;
+  padding: clamp(2.125rem, 6vw, 5.5625rem) clamp(1.3125rem, 14vw, 13rem);
+}
+.gx-door-leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  border: 1px solid var(--night-line);
+  background:
+    repeating-linear-gradient(90deg, rgba(238, 240, 241, 0.035) 0 1px, transparent 1px 34px),
+    linear-gradient(180deg, #2a323a, #161c22 55%, #0e1318);
+  box-shadow: inset 0 0 0 6px rgba(0, 0, 0, 0.25), inset 0 0 55px rgba(0, 0, 0, 0.55);
+  backface-visibility: hidden;
+}
+.gx-door-l {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(-102deg);
+}
+.gx-door-r {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(102deg);
+}
+.gx-door-wheel {
+  position: absolute;
+  left: 13%;
+  top: 50%;
+  width: clamp(3.4375rem, 9vw, 6.5rem);
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  border: 5px solid #8d98a3;
+  border-radius: 50%;
+  background:
+    linear-gradient(#8d98a3, #8d98a3) center / 100% 4px no-repeat,
+    linear-gradient(#8d98a3, #8d98a3) center / 4px 100% no-repeat,
+    radial-gradient(circle, #c9a96a 0 16%, transparent 17%);
+  box-shadow: 0 3px 13px rgba(0, 0, 0, 0.6);
+}
+.gx-door-bolts {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  width: 10px;
+  background: radial-gradient(circle, #8d98a3 0 42%, transparent 46%) center top / 10px 34px repeat-y;
+}
+.gx-door-l .gx-door-bolts {
+  right: 13px;
+}
+.gx-door-r .gx-door-bolts {
+  left: 13px;
+  opacity: 0.6;
+}
+@keyframes gx-door-l {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-102deg);
+  }
+}
+@keyframes gx-door-r {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(102deg);
+  }
+}
+@keyframes gx-door-wheel {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 540deg;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-door {
+      view-timeline: --gx-door block;
+    }
+    html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-door-l {
+      animation: gx-door-l linear both;
+      animation-timeline: --gx-door;
+      animation-range: entry 75% cover 52%;
+    }
+    html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-door-r {
+      animation: gx-door-r linear both;
+      animation-timeline: --gx-door;
+      animation-range: entry 75% cover 52%;
+    }
+    html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-door-wheel {
+      animation: gx-door-wheel linear both;
+      animation-timeline: --gx-door;
+      animation-range: entry 20% entry 100%;
+    }
+  }
+}
+@media print {
+  .gx-door-leaf {
+    display: none;
+  }
+}
