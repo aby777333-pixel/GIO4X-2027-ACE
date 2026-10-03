@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Figure, clamp, lerp, rgba, smooth, type Colour, type FigureDraw } from "@/components/figures/Figure";
+import { Figure, clamp, type FigureDraw } from "@/components/figures/Figure";
 import { FixTheTrade } from "@/components/academy/practice/Drills";
 import { OrderBuilder } from "@/components/academy/practice/OrderBuilder";
 import { SixtySeconds } from "@/components/labs/workshop/SixtySeconds";
 import { punchLines } from "@/data/punchlines";
+import { LEVERAGE_SCENES } from "./LeverageScenes";
 import { RELEASES } from "@/data/releases";
 import { readPlay, noteSeen, usePlay } from "./store";
 
@@ -114,7 +115,6 @@ const STORY = [
   { h: "For you, or against you.", p: "If it went your way, the stake has doubled. If it went the other way, the stake is gone. Same move, same size, the other direction." },
   { h: "So choose a smaller position.", p: "At 10,000 the same 1% move is 100: a tenth of the stake. The leverage on offer did not change. The size you took did." },
 ] as const;
-const RED: Colour = [214, 96, 88, 1];
 
 export function ScrollStory() {
   const [at, setAt] = useState(0);
@@ -124,98 +124,61 @@ export function ScrollStory() {
       (entries) => {
         for (const e of entries) if (e.isIntersecting) setAt(Number((e.target as HTMLElement).dataset.step));
       },
-      { rootMargin: "-45% 0px -45% 0px" },
+      // the band a step must cross to become the one shown: the middle of a wide screen; lower on a narrow one,
+      // where the drawing is pinned over the top of it
+      { rootMargin: window.innerWidth < 1080 ? "-62% 0px -24% 0px" : "-45% 0px -45% 0px" },
     );
     steps.current.forEach((el) => el && io.observe(el));
     return () => io.disconnect();
+  }, []);
+  // a link may open the story at a step: /academy/leverage-story?step=4
+  useEffect(() => {
+    const n = Number(new URLSearchParams(window.location.search).get("step"));
+    if (Number.isInteger(n) && n >= 1 && n <= STORY.length) setAt(n - 1);
   }, []);
   const target = useRef(0);
   target.current = at;
   const drawRef = useRef<FigureDraw | null>(null);
   if (!drawRef.current) {
-    let s = 0; // the step being shown, eased
-    drawRef.current = ({ ctx, w, h, dt, pal, still }) => {
+    let s = 0; // the step being shown, eased, so one drawing fades into the next
+    let last = -1;
+    const began: number[] = [];
+    drawRef.current = (fr) => {
+      const { ctx, w, h, t, dt, still } = fr;
       if (w < 160 || h < 120) return;
-      s = still ? target.current : s + (target.current - s) * (1 - Math.exp(-dt * 5));
-      const k = (n: number) => smooth(clamp(s - n + 1)); // 0 before step n, 1 once it is reached
-      const base = h - 30;
-      const full = base - 24;
-      const stakeX = w * 0.2;
-      const posX = w * 0.62;
-      const bw = Math.min(70, w * 0.16);
-      const small = k(5); // the last step: a position a tenth of the size
-      const posH = full * lerp(1, 0.1, small) * k(1);
-      const stakeH = full * 0.01 * 6; // drawn six times its true share, or it could not be seen; the label says what it is
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = `600 10px ${pal.font}`;
-      // the stake
-      ctx.fillStyle = rgba(pal.accent, 0.9);
-      ctx.fillRect(stakeX - bw / 2, base - stakeH, bw, stakeH);
-      ctx.fillStyle = rgba(pal.ink2, 1);
-      ctx.fillText("YOUR STAKE: 1,000", stakeX, base + 14);
-      // the position it answers for
-      if (posH > 1) {
-        ctx.fillStyle = rgba(pal.ink3, 0.28);
-        ctx.fillRect(posX - bw / 2, base - posH, bw, posH);
-        ctx.strokeStyle = rgba(pal.ink3, 0.9);
-        ctx.lineWidth = 1;
-        ctx.strokeRect(posX - bw / 2 + 0.5, base - posH + 0.5, bw - 1, posH - 1);
-        ctx.fillStyle = rgba(pal.ink2, 1);
-        ctx.fillText(small > 0.5 ? "POSITION: 10,000" : "POSITION: 100,000", posX, base + 14);
-        // the 1% move, as a slice of the position
-        const move = k(2);
-        if (move > 0.02) {
-          const slice = Math.max(2, posH * 0.01 * 6) * move;
-          const against = k(4);
-          ctx.fillStyle = rgba(against > 0.5 ? RED : pal.emerald, 0.95);
-          ctx.fillRect(posX - bw / 2, base - posH, bw, slice);
-          ctx.textAlign = "left";
-          ctx.fillStyle = rgba(pal.ink, 1);
-          ctx.fillText(`1% = ${small > 0.5 ? "100" : "1,000"}`, posX + bw / 2 + 8, base - posH + slice / 2);
-          ctx.textAlign = "center";
-          // carried across to the stake: what that slice is, measured against what you put down
-          const carry = k(3);
-          if (carry > 0.02) {
-            ctx.setLineDash([3, 4]);
-            ctx.strokeStyle = rgba(pal.gold, carry);
-            ctx.beginPath();
-            ctx.moveTo(posX - bw / 2, base - posH + slice / 2);
-            ctx.lineTo(stakeX + bw / 2, base - stakeH / 2);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.fillStyle = rgba(against > 0.5 ? RED : pal.emerald, carry);
-            ctx.fillRect(stakeX - bw / 2, base - stakeH, bw, stakeH * lerp(1, 0.1, small));
-            ctx.fillStyle = rgba(pal.ink, carry);
-            ctx.fillText(small > 0.5 ? "A TENTH OF THE STAKE" : "THE WHOLE STAKE", stakeX, base - stakeH - 12);
-          }
-        }
+      if (target.current !== last) {
+        // a step has arrived: its drawing begins from the start
+        last = target.current;
+        began[last] = t;
       }
-      ctx.strokeStyle = rgba(pal.ink3, 0.9);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(10, base + 0.5);
-      ctx.lineTo(w - 10, base + 0.5);
-      ctx.stroke();
+      s = still ? target.current : s + (target.current - s) * (1 - Math.exp(-dt * 6));
+      LEVERAGE_SCENES.forEach((scene, n) => {
+        const a = clamp(1 - Math.abs(s - n) * 1.7);
+        if (a <= 0.01) return;
+        ctx.save();
+        scene(fr, a, still ? 5.6 : t - (began[n] ?? t));
+        ctx.restore();
+      });
     };
   }
   return (
-    <div className="grid gap-34 lg:grid-cols-2 lg:gap-55">
-      <div className="lg:order-2">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-34 lg:grid-cols-2 lg:gap-55">
+      <div className="gx-story-pin lg:order-2">
         <div className="gx-stage lg:sticky lg:top-[calc(var(--header-h)+2.125rem)]">
           <Figure draw={drawRef.current} ratio={1.15} rev={at} />
-          <p className="mt-8 text-xs text-ink-3">The stake is drawn larger than its true share, or it could not be seen. The figures are examples.</p>
+          <p className="mt-8 text-xs text-ink-3">One drawing for each step. The figures are examples chosen to make the sum easy.</p>
         </div>
       </div>
       <ol className="lg:order-1">
         {STORY.map((x, i) => (
           <li
             key={x.h}
+            id={`step-${i + 1}`}
             data-step={i}
             ref={(el) => {
               steps.current[i] = el;
             }}
-            className={`border-l-2 py-34 pl-21 transition-colors duration-slow lg:min-h-[60vh] ${i === at ? "border-accent" : "border-line"}`}
+            className={`scroll-mt-[40vh] border-l-2 py-34 pl-21 transition-colors duration-slow lg:min-h-[60vh] ${i === at ? "border-accent" : "border-line"}`}
           >
             <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">0{i + 1}</p>
             <h2 className={`h2 mt-8 transition-opacity duration-slow ${i === at ? "" : "opacity-50"}`}>{x.h}</h2>
@@ -283,10 +246,10 @@ export function NewRibbon() {
   const fresh = RELEASES.filter((r) => r.id > (play.v ?? "")).slice(0, 3);
   return (
     <aside className="gx-ribbon no-print" aria-label="Recently added">
-      <p className="label shrink-0">{readPlay().v ? "New since you were last here" : "Recently added"}</p>
-      <ul className="flex min-w-0 flex-wrap gap-x-21 gap-y-3">
-        {fresh.map((r) => (
-          <li key={r.id}>
+      <p className="label hidden shrink-0 sm:block">{readPlay().v ? "New since you were last here" : "Recently added"}</p>
+      <ul className="flex min-w-0 flex-1 flex-wrap gap-x-21 gap-y-3">
+        {fresh.map((r, i) => (
+          <li key={r.id} className={i ? "hidden sm:block" : ""}>
             <Link href={r.href} className="link text-sm">
               {r.title}
             </Link>

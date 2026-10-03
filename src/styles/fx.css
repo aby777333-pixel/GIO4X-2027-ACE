@@ -1179,9 +1179,12 @@ html[data-daypart="night"] .cx-hero {
 /* ---- CHEAT SHEETS (/academy/cheat-sheets) ------------------------------------- */
 .gx-sheets {
   display: grid;
+  /* the column may be narrower than a table inside it: the table then scrolls, the sheet does not widen */
+  grid-template-columns: minmax(0, 1fr);
   gap: 3.4375rem;
 }
 .gx-sheet {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -1234,4 +1237,39 @@ html[data-daypart="night"] .cx-hero {
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--accent) 6%, var(--paper));
   padding: 0.5rem var(--gutter);
+}
+
+/* ---- THE STORY'S DRAWING, ON A NARROW SCREEN ----------------------------------
+   Beside the words on a wide screen. On a narrow one it is pinned under the
+   header, on the page's own colour, and the steps pass beneath it: so each
+   step is read with its drawing in view. It is made shorter there to leave
+   room for the words. */
+@media (max-width: 1079px) {
+  .gx-story-pin {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 5;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.5rem var(--gutter);
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .gx-story-pin .gx-stage {
+    padding: 0.5rem;
+  }
+  .gx-story-pin .gx-stage > p {
+    display: none;
+  }
+}
+
+/* the star map on a narrow screen: kept at a size its stars can be touched at, and slid sideways */
+@media (max-width: 559px) {
+  .gx-sky {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .gx-sky svg {
+    width: 46rem;
+    max-width: none;
+  }
 }

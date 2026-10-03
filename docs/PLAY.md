@@ -73,3 +73,5 @@ The machines use the site's existing sound signals (`src/components/sound/signal
 | Sonnet of the month, readers' riddles and their form | `src/components/verse/Readers.tsx` |
 
 Readers' riddles are the only part of this that leaves the browser. A riddle is posted to `/api/riddle`, stored as `pending` in `reader_riddles` (migration `0029`), and is shown on `/verse` only after someone with `content.publish` approves it at `/control/content/riddles`. The database forces `pending` on insert whatever the request says. The `/verse` page re-reads approved riddles every five minutes.
+
+The leverage story's six drawings are `src/components/play/LeverageScenes.ts`, one function for each step; `/academy/leverage-story?step=4` opens the story at a step. The hero scenes of these pages are in `src/components/cockpit/scenes/` (`firsttrade`, `dojo`, `lever`, `blueprint`, `starmap`, `quill`), chosen by path in `src/components/cockpit/routes.ts`.

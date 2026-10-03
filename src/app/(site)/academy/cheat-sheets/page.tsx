@@ -169,7 +169,7 @@ export default function Page() {
           <p className="gx-sheet-foot">Drawn as a candle that closed above its open. General reading, not a signal.</p>
         </article>
 
-        <p className="no-print max-w-measure text-sm text-ink-3">{riskWarning}</p>
+        <p className="no-print text-sm text-ink-3">{riskWarning}</p>
       </div>
 
       <div className="no-print">

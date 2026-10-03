@@ -110,7 +110,7 @@ export default function PracticePage() {
 
       <section className="section-quiet hairline no-print" aria-label="Risk warning">
         <div className="wrap">
-          <p className="max-w-measure text-sm text-ink-3">{riskWarning}</p>
+          <p className="text-sm text-ink-3">{riskWarning}</p>
         </div>
       </section>
 

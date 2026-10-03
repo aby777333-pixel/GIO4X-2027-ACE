@@ -56,7 +56,7 @@ export default function Page() {
 
       <section className="section-quiet hairline" aria-label="Risk warning">
         <div className="wrap">
-          <p className="max-w-measure text-sm text-ink-3">{riskWarning}</p>
+          <p className="text-sm text-ink-3">{riskWarning}</p>
         </div>
       </section>
 

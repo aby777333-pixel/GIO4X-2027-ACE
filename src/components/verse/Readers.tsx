@@ -245,7 +245,7 @@ export function Sonnet() {
   return (
     <figure className="max-w-[38rem]">
       <figcaption className="eyebrow">{s.title}</figcaption>
-      <blockquote className="mt-13 font-display text-lg leading-relaxed text-ink" aria-live="polite">
+      <blockquote className="mt-13 font-display text-[0.9375rem] leading-relaxed text-ink sm:text-lg" aria-live="polite">
         {s.lines.map((l, i) => (
           <span key={l} className={`block ${i === 4 || i === 8 || i === 12 ? "mt-13" : ""} ${i >= 12 ? "pl-21" : ""}`}>
             {l.trim()}

@@ -79,6 +79,7 @@ export function StarMap({ stars, topics, lines }: { stars: Star[]; topics: strin
           "Point at a star, or move to it with the Tab key, to name it and see what it is tied to. Each star opens its term."
         )}
       </p>
+      <p className="mt-5 text-xs text-ink-3 sm:hidden">On a narrow screen the map is wider than the page: slide it sideways. Touching a star opens its term.</p>
     </div>
   );
 }
