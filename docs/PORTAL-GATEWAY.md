@@ -43,7 +43,7 @@ in between. Two ways:
 - **Netlify builds it** (set up on 3 October 2026): the portal's Netlify site is linked to this repository,
   branch `main`, Base directory `portal` (`portal/netlify.toml`), through a read-only deploy key and a push
   webhook on the GitHub repository. A push to `main` that changes anything under `portal/` builds and
-  publishes it; other pushes are skipped by the `ignore` rule. The website itself is still published by hand
+  publishes it; other pushes are skipped by the `ignore` rule. The website is linked the same way
   (`DEPLOY.md`).
 - **From a Windows PC** (the fallback; how it was first published). The Netlify CLI mistakes the repository
   root for the project when `portal/` is nested in it, so build from a copy outside any repository:

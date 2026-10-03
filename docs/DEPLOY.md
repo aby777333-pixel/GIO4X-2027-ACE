@@ -58,14 +58,14 @@ Going to production:
 
 ### How the preview site is published today
 
-`gio4x-2027-ace` is not linked to the Git repository: a push does not deploy it. It is published from a PC
-with the Netlify CLI, from the repository root, with `NETLIFY_SITE_ID` set to the site's id:
+`gio4x-2027-ace` is linked to the Git repository (since 3 October 2026) through a read-only deploy key and
+the push webhook on the GitHub repository: a push to `main` builds and publishes it. A push that changes
+only `portal/` is skipped by the `ignore` rule in `netlify.toml`; the portal site builds from that folder
+(`PORTAL-GATEWAY.md`).
 
-1. `netlify build`
-2. `netlify deploy --no-build --dir <repository>/.netlify/static`, check the draft address it prints, then
-   repeat with `--prod`.
-
-The portal is published separately: see `PORTAL-GATEWAY.md`.
+Fallback, from a PC with the Netlify CLI, in the repository root with `NETLIFY_SITE_ID` set to the site's id:
+`netlify build`, then `netlify deploy --no-build --dir <repository>/.netlify/static` (check the draft address
+it prints), then the same with `--prod`.
 
 ## Post-deploy smoke test
 
