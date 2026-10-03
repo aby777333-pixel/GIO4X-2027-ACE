@@ -5,7 +5,6 @@ import { StageTransition } from "@/components/cockpit/StageTransition";
 import { MicroFx } from "@/components/fx/MicroFx";
 import { SunTheme } from "@/components/fx/SunTheme";
 import { RecentRecorder } from "@/components/desk/RecentRecorder";
-import { PageTurn } from "@/components/fx/PageTurn";
 import { PassportRecorder } from "@/components/play/Passport";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
@@ -62,8 +61,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <RecentRecorder />
       {/* the passport on My desk: a stamp for the page that is open, only once the visitor has started it */}
       <PassportRecorder />
-      {/* a short wipe between pages, after the new page is on screen */}
-      <PageTurn />
       <OfflineRegister />
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
     </>

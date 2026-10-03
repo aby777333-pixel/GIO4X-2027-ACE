@@ -355,49 +355,6 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
   padding-left: 1.3125rem;
 }
 
-/* ---- THE CUT (components/fx/PageTurn.tsx) ----------------------------------
-   One pass of a bright edge and a thin veil across the screen when the page
-   changes. Above the page, never in the pointer's way, gone in under half a
-   second. Not shown at all under reduced motion or low visual effects. */
-.gx-cut {
-  display: none;
-}
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-cut {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    pointer-events: none;
-    background: linear-gradient(
-      100deg,
-      transparent 0%,
-      color-mix(in srgb, var(--night) 16%, transparent) 38%,
-      color-mix(in srgb, var(--night) 26%, transparent) 47%,
-      color-mix(in srgb, var(--accent) 85%, white) 49.4%,
-      color-mix(in srgb, var(--accent) 85%, white) 50%,
-      transparent 50.6%,
-      transparent 100%
-    );
-    background-size: 300% 100%;
-    background-repeat: no-repeat;
-    animation: gx-cut 0.46s cubic-bezier(0.5, 0, 0.2, 1) both;
-  }
-}
-@keyframes gx-cut {
-  from {
-    background-position: 150% 0;
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
-  }
-  to {
-    background-position: -50% 0;
-    opacity: 0;
-  }
-}
-
 /* ---- THE OPEN DOOR (components/trust/OpenDoor.tsx) -------------------------
    A strong-room door in two leaves over the transparency ledger. By default
    the leaves stand open. Where view timelines exist and motion is allowed
