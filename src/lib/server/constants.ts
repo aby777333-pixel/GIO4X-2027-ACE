@@ -101,6 +101,9 @@ export const CAPABILITIES = [
   "events.read",
   "documents.read",
   "emailer.read",
+  // decisions made in the portal's database (0022_portal_actions.sql)
+  "kyc.decide",
+  "funds.settle",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
 

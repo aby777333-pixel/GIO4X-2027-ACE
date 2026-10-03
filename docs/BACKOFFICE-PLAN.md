@@ -35,9 +35,12 @@ The June system is the reference for **what** a GIO4X back office does. It canno
 > **3 October 2026, later the same day: second decision by the owner.** Control gets its own screens for the
 > twelve remaining sections, reading the portal's database with that project's secret key
 > (`docs/SECURITY.md` 8a), in place of rebuilding them in this database first. Built so far: read-only
-> screens for all twelve. Next: close the weaknesses listed above in the portal's database
-> (`portal/supabase/migrations/20261003120000_close_known_security_holes.sql`, written for review, not
-> applied), then add decisions and approvals to Control one reviewed function at a time.
+> screens for all twelve. The weaknesses listed above, except the shared staff login (6), were then closed in
+> the portal's database (`portal/supabase/migrations/20261003120000_close_known_security_holes.sql`,
+> applied the same day). First decisions added to Control: a KYC document accepted or rejected, a pending
+> deposit or withdrawal approved or rejected (`docs/SECURITY.md` 8a). Still open: a second approver on
+> money, direct edits of a trading account's balance by portal staff, and the anonymous login-attempt
+> function that can lock out an address.
 
 ## 2. Recommended shape
 

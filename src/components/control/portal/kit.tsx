@@ -36,11 +36,18 @@ export function PortalReadFailed() {
   );
 }
 
-/** Every portal-backed section says where its figures come from and that it only reads. */
-export function PortalSource({ children }: { children?: ReactNode }) {
+/**
+ * Every portal-backed section says where its figures come from, and whether it
+ * only reads or the person looking at it can also decide something here.
+ */
+export function PortalSource({ children, decides = false }: { children?: ReactNode; decides?: boolean }) {
   return (
     <p className="mt-13 text-xs text-ink-3">
-      Read from the client portal’s records. This screen only reads; nothing here changes a balance or a client’s status.{children ? <> {children}</> : null}
+      Read from the client portal’s records.{" "}
+      {decides
+        ? "A decision made here is written to the portal and recorded in the audit log with your name."
+        : "This screen only reads; nothing here changes a balance or a client’s status."}
+      {children ? <> {children}</> : null}
     </p>
   );
 }

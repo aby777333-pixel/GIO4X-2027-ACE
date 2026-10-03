@@ -1,7 +1,10 @@
+import { decideKycDocument } from "@/app/control/actions-portal";
 import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
+import { Decide, DecisionNotice } from "@/components/control/portal/Decide";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("KYC", "/control/kyc");
@@ -31,16 +34,21 @@ function fileSize(bytes: number | null): string {
 
 /**
  * Verification, as the client portal holds it: each client's status and the
- * document records behind it. Reads only (kyc.read): a decision on a document
- * is not made from this screen yet, and the files themselves are not opened
- * here. Every figure is a count of the portal's rows.
+ * document records behind it (kyc.read). A person who holds kyc.decide can
+ * accept or reject a document that is awaiting review: one document at a
+ * time, through src/app/control/actions-portal.ts, which records the decision
+ * in the audit log before it is made. The client's overall status is then
+ * worked out by the portal from their documents; it is never set by hand.
+ * The files themselves are not opened here. Every figure is a count of the
+ * portal's rows.
  */
 export default async function KycPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const access = await requirePortal("kyc.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const decides = can(ctx, "kyc.decide");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), DOC_STATUSES, "");
@@ -77,7 +85,8 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
   return (
     <>
       <ControlHead title={TITLE} lead="Each client’s verification status in the portal, and the document records behind it. Newest document first." />
-      <PortalSource>Documents are listed, not opened: the files stay in the portal’s storage.</PortalSource>
+      <PortalSource decides={decides}>Documents are listed, not opened: the files stay in the portal’s storage.</PortalSource>
+      <DecisionNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -96,7 +105,7 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
           <Empty title={failed ? "Nothing could be read" : status ? "No documents with this status" : "No documents have been uploaded"} />
         ) : (
           <div className="scroll-x">
-            <table className="table-gx min-w-[56rem] text-sm">
+            <table className="table-gx min-w-[64rem] text-sm">
               <caption className="sr-only">KYC document records, newest first</caption>
               <thead>
                 <tr>
@@ -106,6 +115,7 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
                   <th scope="col">Uploaded</th>
                   <th scope="col">Status</th>
                   <th scope="col">Reviewed</th>
+                  {decides && <th scope="col">Decision</th>}
                 </tr>
               </thead>
               <tbody>
@@ -128,12 +138,21 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
                       {row.reviewed_at ? (
                         <>
                           <span className="num block whitespace-nowrap">{fmtDateTime(row.reviewed_at)}</span>
-                          <span className="block text-xs text-ink-3">{people.get(row.reviewed_by ?? "")?.name || "Portal staff"}</span>
+                          <span className="block text-xs text-ink-3">{row.reviewed_by ? people.get(row.reviewed_by)?.name || "Portal staff" : "GIO4X Control"}</span>
                         </>
                       ) : (
                         "–"
                       )}
                     </td>
+                    {decides && (
+                      <td>
+                        {row.status === "pending" || row.status === "in_review" ? (
+                          <Decide action={decideKycDocument} id={row.id} what={`${label(row.doc_type)} of ${people.get(row.user_id)?.name || "this client"}`} reason approveLabel="Accept" />
+                        ) : (
+                          <span className="text-ink-3">–</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

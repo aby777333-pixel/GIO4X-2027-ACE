@@ -696,6 +696,7 @@ export type Database = {
       staff_role: { Args: { [_ in never]: never }; Returns: string | null };
       staff_directory: { Args: { [_ in never]: never }; Returns: { user_id: string; display_name: string }[] };
       record_subscriber_export: { Args: { row_count: number }; Returns: undefined };
+      portal_action_record: { Args: { p_action: string; p_entity_id: string; p_detail: Json }; Returns: undefined };
       staff_can: { Args: { cap: string }; Returns: boolean };
       my_capabilities: { Args: { [_ in never]: never }; Returns: string[] };
       staff_list: { Args: { [_ in never]: never }; Returns: StaffListRow[] };

@@ -207,10 +207,22 @@ the client portal's Supabase project. Control reads them on the server with that
   establishes the caller as active staff (`supabase.auth.getUser()` and the `staff` row) and asks this
   project's database for their capabilities (`my_capabilities`, `0021_portal_sections.sql`). A page that
   forgets that call cannot obtain the client at all.
-- The sections only read. No Control code writes to the portal's database. Writes (a KYC decision, a
-  withdrawal approval) will be added one reviewed function at a time, each with its own capability and its
-  own audit entry, after the portal's known weaknesses are closed (`docs/BACKOFFICE-PLAN.md`, section 1).
+- Ten of the twelve sections only read. Two make decisions, and those are the only writes Control makes in
+  the portal's database (`src/app/control/actions-portal.ts`):
+  - KYC: accept or reject one document awaiting review (`kyc.decide`: admin, compliance);
+  - Funds & Settlement: approve or reject one pending deposit or withdrawal (`funds.settle`: admin, finance).
+  Each is one call to a function in the portal's database that only the secret key can execute
+  (`control_review_kyc_document`, `control_settle_wallet_transaction`), acts on one record, and does nothing
+  if that record has already been decided. Before the call, the server action writes the audit entry in this
+  database as the signed-in member of staff (`portal_action_record`, `0022_portal_actions.sql`, which checks
+  the capability again): no audit entry, no decision. If the portal then refuses, a second entry says so. The
+  portal records the person's name as text beside the record, since they have no account there.
+- **One person decides.** There is no second approver on a withdrawal yet; four eyes on money is not built.
 - Reads are not written to the audit log. Who may read is decided by role; what was read is not recorded.
+- The portal's own weaknesses listed in `docs/BACKOFFICE-PLAN.md` (section 1, items 1 to 5 and 7) were closed
+  in its database on 3 October 2026 (`portal/supabase/migrations/20261003120000_close_known_security_holes.sql`,
+  applied with a self-test of 19 checks that ran inside the migration and was rolled back). Item 6, the shared
+  staff login of the portal's own console, is not a database matter and remains.
 - Consequence to accept: anyone who obtains this key can read and change everything in the portal's
   database. If it is ever exposed, rotate it in the portal's Supabase project and replace the variable.
 

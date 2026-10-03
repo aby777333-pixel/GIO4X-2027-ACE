@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { settleWalletTransaction } from "@/app/control/actions-portal";
 import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
+import { Decide, DecisionNotice } from "@/components/control/portal/Decide";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Funds & Settlement", "/control/funds");
@@ -45,16 +48,21 @@ type TransferRow = {
 /**
  * Money in and out of client wallets, as the client portal holds it: every
  * wallet transaction, and the transfers clients made between their own wallets
- * and trading accounts. Reads only (funds.read): a deposit or withdrawal is
- * not approved or declined from this screen. Every figure is a count of the
- * portal's rows; no amounts are added up here.
+ * and trading accounts (funds.read). A person who holds funds.settle can
+ * approve or reject a deposit or withdrawal that is still pending: one at a
+ * time, through src/app/control/actions-portal.ts, which records the decision
+ * in the audit log before it is made. Approving credits or debits the wallet
+ * in the portal's database; one person decides (there is no second approver
+ * yet). Every figure is a count of the portal's rows; no amounts are added up
+ * here.
  */
 export default async function FundsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const access = await requirePortal("funds.read");
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const decides = can(ctx, "funds.settle");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), TX_STATUSES, "");
@@ -122,7 +130,8 @@ export default async function FundsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <ControlHead title={TITLE} lead="Deposits, withdrawals and every other movement on client wallets in the portal, newest first, with the internal transfers beneath." />
-      <PortalSource>Settlement itself is done in the portal’s own staff console.</PortalSource>
+      <PortalSource decides={decides}>{decides ? "Approving a deposit credits the wallet; approving a withdrawal debits it. Check the payment itself before you approve." : "Settlement is done by finance."}</PortalSource>
+      <DecisionNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -145,7 +154,7 @@ export default async function FundsPage({ searchParams }: { searchParams: Promis
           <Empty title={failed ? "Nothing could be read" : status || type ? "No transactions match this filter" : "No wallet transactions have been recorded"} />
         ) : (
           <div className="scroll-x">
-            <table className="table-gx min-w-[64rem] text-sm">
+            <table className="table-gx min-w-[76rem] text-sm">
               <caption className="sr-only">Wallet transactions, newest first</caption>
               <thead>
                 <tr>
@@ -156,6 +165,7 @@ export default async function FundsPage({ searchParams }: { searchParams: Promis
                   <th scope="col">Gateway / reference</th>
                   <th scope="col">Requested</th>
                   <th scope="col">Reviewed by</th>
+                  {decides && <th scope="col">Decision</th>}
                 </tr>
               </thead>
               <tbody>
@@ -178,6 +188,21 @@ export default async function FundsPage({ searchParams }: { searchParams: Promis
                       </td>
                       <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(row.created_at)}</td>
                       <td className="max-w-[12rem] text-ink-2">{row.reviewed_by ? <Person person={people.get(row.reviewed_by)} id={row.reviewed_by} /> : "–"}</td>
+                      {decides && (
+                        <td>
+                          {(row.type === "deposit" || row.type === "withdraw") && (row.status === "pending" || row.status === "processing") ? (
+                            <Decide
+                              action={settleWalletTransaction}
+                              id={row.id}
+                              what={`${label(row.type)} of ${fmtMoney(row.amount, row.currency)}`}
+                              reference
+                              approveLabel={row.type === "deposit" ? "Approve and credit" : "Approve and debit"}
+                            />
+                          ) : (
+                            <span className="text-ink-3">–</span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
