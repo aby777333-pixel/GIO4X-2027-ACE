@@ -108,6 +108,8 @@ export const CAPABILITIES = [
   "fees.manage",
   "partners.manage",
   "trading.manage",
+  // paying introducing brokers (0025_portal_ib.sql)
+  "partners.settle",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
 

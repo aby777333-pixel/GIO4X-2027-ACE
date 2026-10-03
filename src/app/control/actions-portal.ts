@@ -220,3 +220,121 @@ export async function savePortalConfig(formData: FormData): Promise<void> {
   }
   redirect(`${back}?notice=${op === "create" ? "created" : op === "update" ? "updated" : "retired"}`);
 }
+
+/* ----------------------------------------------------------------------------
+ * Introducing brokers (0025_portal_ib.sql; portal: 20261003150000_control_ib.sql)
+ * -------------------------------------------------------------------------- */
+
+const IB = "/control/ib";
+
+/** Where an IB form returns to: the person's page when the form names one, the list otherwise. */
+function ibBack(formData: FormData): string {
+  const at = formData.get("at");
+  return isUuid(at) ? `${IB}/${at}` : IB;
+}
+
+type IbOutcome = { result?: string; amount?: number | string; currency?: string; requested_by_name?: string };
+
+/** The audit entry first, then one call to the portal; a refusal is recorded and shown as a fixed code. */
+async function ibWrite(
+  back: string,
+  action: "ib.role" | "ib.link" | "ib.unlink" | "ib.plan",
+  entity: string,
+  detail: Record<string, string | number | boolean | null>,
+  fn: string,
+  args: Record<string, string | number | boolean | null>,
+  done: string,
+): Promise<never> {
+  const { ctx, db } = await decider("partners.manage", back);
+  const record = await ctx.supabase.rpc("portal_ib_record", { p_action: action, p_entity_id: entity, p_detail: detail });
+  if (record.error) redirect(`${back}?error=${record.error.code === "42501" ? "forbidden" : "audit"}`);
+  const { data, error } = await db.rpc(fn, { ...args, p_actor: actorOf(ctx) });
+  const outcome = (data ?? {}) as IbOutcome;
+  if (error || outcome.result !== "ok") {
+    const code = error ? "portal_error" : (outcome.result ?? "unknown");
+    await ctx.supabase.rpc("portal_ib_record", { p_action: "ib.failed", p_entity_id: entity, p_detail: { attempted: action, outcome: code } });
+    const shown: Record<string, string> = {
+      not_found: "missing", staff_profile: "staff", has_downline: "downline", parent_not_ib: "parent", cycle: "cycle", self: "self",
+      plan_not_found: "plan", no_parent: "noparent", invalid: "value",
+    };
+    redirect(`${back}?error=${shown[code] ?? "portal"}`);
+  }
+  redirect(`${back}?notice=${done}`);
+}
+
+/** Make a client an introducing broker, or an IB a client again (refused while they have a downline). */
+export async function setIbRole(formData: FormData): Promise<void> {
+  const back = ibBack(formData);
+  const id = formData.get("id");
+  const make = formData.get("make");
+  if (!isUuid(id) || (make !== "ib" && make !== "client")) redirect(`${back}?error=invalid`);
+  await ibWrite(back, "ib.role", id, { make }, "control_ib_set_role", { p_user: id, p_is_ib: make === "ib" }, make === "ib" ? "promoted" : "demoted");
+}
+
+/** Put a person under an IB. If they already had a parent they are moved, with everyone beneath them. */
+export async function linkIb(formData: FormData): Promise<void> {
+  const back = ibBack(formData);
+  const child = formData.get("child");
+  const parent = formData.get("parent");
+  const planRaw = formData.get("plan");
+  if (!isUuid(child) || !isUuid(parent)) redirect(`${back}?error=invalid`);
+  const plan = isUuid(planRaw) ? planRaw : null;
+  await ibWrite(back, "ib.link", child, { parent, plan }, "control_ib_link", { p_parent: parent, p_child: child, p_plan: plan }, "linked");
+}
+
+/** Detach a person from their parent. Everyone beneath them stays beneath them. */
+export async function unlinkIb(formData: FormData): Promise<void> {
+  const back = ibBack(formData);
+  const child = formData.get("child");
+  if (!isUuid(child)) redirect(`${back}?error=invalid`);
+  await ibWrite(back, "ib.unlink", child, {}, "control_ib_unlink", { p_child: child }, "unlinked");
+}
+
+/** The commission plan and, optionally, a share override on one direct link. */
+export async function setIbPlan(formData: FormData): Promise<void> {
+  const back = ibBack(formData);
+  const child = formData.get("child");
+  const parent = formData.get("parent");
+  const plan = formData.get("plan");
+  if (!isUuid(child) || !isUuid(parent) || !isUuid(plan)) redirect(`${back}?error=invalid`);
+  const shareRaw = formData.get("share");
+  const shareText = typeof shareRaw === "string" ? shareRaw.trim() : "";
+  if (shareText && !/^(0([.][0-9]{1,6})?|1([.]0{1,6})?)$/.test(shareText)) redirect(`${back}?error=value`);
+  await ibWrite(back, "ib.plan", child, { parent, plan, share: shareText || null }, "control_ib_set_plan", { p_parent: parent, p_child: child, p_plan: plan, p_share: shareText || null }, "plan");
+}
+
+/**
+ * Pay an IB the commission awaiting settlement in one currency. It credits a
+ * wallet, so it takes two people, exactly as a deposit does: request, then a
+ * confirmation by somebody else (portal_ib_settlement writes each audit entry
+ * and refuses the requester). Only after that is the portal asked to pay.
+ */
+export async function settleIb(formData: FormData): Promise<void> {
+  const back = ibBack(formData);
+  const { ctx, db } = await decider("partners.settle", back);
+  const ib = formData.get("ib");
+  const decision = formData.get("decision");
+  const currencyRaw = formData.get("currency");
+  if (!isUuid(ib) || (decision !== "request" && decision !== "confirm" && decision !== "cancel")) redirect(`${back}?error=invalid`);
+  const currency = typeof currencyRaw === "string" && /^[A-Z]{3,4}$/.test(currencyRaw) ? currencyRaw : null;
+  if (decision === "request" && !currency) redirect(`${back}?error=invalid`);
+
+  const { data, error } = await ctx.supabase.rpc("portal_ib_settlement", { p_op: decision, p_ib: ib, p_currency: currency });
+  if (error) redirect(`${back}?error=${error.code === "42501" ? "forbidden" : "audit"}`);
+  const step = (data ?? {}) as IbOutcome;
+  if (step.result === "pending") redirect(`${back}?notice=requested`);
+  if (step.result === "cancelled") redirect(`${back}?notice=cancelled`);
+  if (step.result === "exists") redirect(`${back}?error=requested`);
+  if (step.result === "own") redirect(`${back}?error=own`);
+  if (step.result !== "confirmed" && step.result !== "unreviewed") redirect(`${back}?error=norequest`);
+
+  const actor = step.result === "unreviewed" ? `${actorOf(ctx)} (no second approver on staff)` : `${actorOf(ctx)}; requested by ${cleanText(step.requested_by_name ?? "").slice(0, 40)}`;
+  const paid = await db.rpc("control_ib_settle", { p_ib: ib, p_currency: step.currency ?? currency, p_actor: actor.slice(0, 120) });
+  const outcome = (paid.data ?? {}) as IbOutcome;
+  if (paid.error || outcome.result !== "ok") {
+    const code = paid.error ? "portal_error" : (outcome.result ?? "unknown");
+    await ctx.supabase.rpc("portal_ib_record", { p_action: "ib.failed", p_entity_id: ib, p_detail: { attempted: "ib.settle", outcome: code } });
+    redirect(`${back}?error=${code === "nothing" ? "nothing" : code === "not_found" ? "missing" : "portal"}`);
+  }
+  redirect(`${back}?notice=${step.result === "unreviewed" ? "paid_unreviewed" : "paid"}`);
+}

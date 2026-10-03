@@ -107,7 +107,7 @@ const scene: Scene<State> = {
     trace(f, [front(b0, by), front(b1, by)], pal.gold, 0.9 * named, 1.4, f.still ? -1 : t / 6);
     for (const bx of [b0, b1]) f.line(front(bx, by - 0.06), front(bx, by), pal.gold, 0.9 * named, 1.4);
     f.label("COST", front((b0 + b1) / 2, by), { align: "center", size, colour: pal.gold, alpha: 0.95 * named, dy: -13 });
-    f.label("THE TRADE", front(at[0] + body / 2, Y0 + H / 2), { align: "center", size, colour: pal.ink, alpha: 0.8 * named });
+    f.label("GROSS RESULT", front(at[0] + body / 2, Y0 + H / 2), { align: "center", size, colour: pal.ink, alpha: 0.8 * named });
     ctx.restore();
   },
 };

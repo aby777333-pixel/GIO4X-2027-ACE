@@ -110,7 +110,7 @@ const scene: Scene<State> = {
     ctx.letterSpacing = "1.5px";
     f.label("FROM", [AX, AR, 0], { align: "center", size, colour: pal.key, alpha: 0.95 * named, dy: -13 });
     f.label("TO", [BX, br, 0], { align: "center", size, colour: pal.gold, alpha: 0.95 * named, dy: -13 });
-    f.label("REFERENCE RATE", [0, GATE, 0], { align: "center", size, colour: pal.ink, alpha: 0.85 * named, dy: -14 });
+    f.label("EXCHANGE RATE", [0, GATE, 0], { align: "center", size, colour: pal.ink, alpha: 0.85 * named, dy: -14 });
     ctx.restore();
   },
 };

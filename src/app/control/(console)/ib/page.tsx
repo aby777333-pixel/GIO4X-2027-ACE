@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDate, fmtDateTime } from "@/components/control/format";
-import { ConfigManager, ConfigNotice } from "@/components/control/portal/ConfigManager";
+import { ConfigManager } from "@/components/control/portal/ConfigManager";
+import { IbNotice, SettleControl, type IbListRow, type SettleRequest } from "@/components/control/portal/IbBits";
 import { Figures, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
-import { oneOf, pageRange, portalPeople, requirePortal, type PortalPerson } from "@/lib/server/portal-db";
+import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
 import { can } from "@/lib/server/staff";
+import { cleanSearch } from "@/lib/server/validate";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("IB Network", "/control/ib");
@@ -83,10 +85,12 @@ function sharePct(value: number | string | null | undefined): string {
 /**
  * The partner network, as the client portal holds it: who introduces clients,
  * who sits under whom, the plans that set what they earn, the commission rows
- * the portal has written and the referral links in use. Reads only
- * (partners.read): no plan is edited, no commission is settled and nobody is
- * moved in the tree from this screen. Every figure is a count of the portal's
- * rows.
+ * the portal has written and the referral links in use (partners.read).
+ * Each partner opens on a page of their own (/control/ib/<id>), where the
+ * tree is changed. partners.manage also edits the commission plans here;
+ * partners.settle pays commission awaiting settlement, with two people.
+ * Counts are of the portal's rows; amounts are summed by the portal's
+ * database (control_ib_list), never here.
  */
 export default async function IbPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const access = await requirePortal("partners.read");
@@ -95,10 +99,13 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db, ctx } = access;
   const manages = can(ctx, "partners.manage");
+  const settles = can(ctx, "partners.settle");
 
   const params = await searchParams;
   const settled = oneOf(firstParam(params.settled), SETTLED, "");
   const { page, from, to } = pageRange(firstParam(params.page), PER_PAGE);
+  // reduced to characters that can appear in a name or an address before it goes anywhere near a filter
+  const find = cleanSearch(firstParam(params.find)).slice(0, 60);
 
   let ledgerQuery = db
     .from("commission_ledger")
@@ -122,6 +129,18 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
     db.from("referrals").select("id, code, owner_id, name, destination, clicks, conversions, created_at", { count: "exact" }).order("created_at", { ascending: false }).limit(LATEST),
   ]);
 
+  // The partners with their parent, plan, downline counts and what is owed; open payment
+  // requests for them (Control's own database); and the people a search found.
+  const [partners, found] = await Promise.all([
+    db.rpc("control_ib_list"),
+    find.length >= 2 ? db.from("profiles").select("id, full_name, email, role, status").or(`email.ilike.%${find}%,full_name.ilike.%${find}%`).order("created_at", { ascending: false }).limit(12) : null,
+  ]);
+  const partnerRows = (partners.data ?? []) as IbListRow[];
+  const owing = partnerRows.filter((r) => r.unsettled.length > 0);
+  const openRead = settles && owing.length ? await ctx.supabase.rpc("portal_approvals_open", { p_ids: owing.map((r) => r.id) }) : null;
+  const requests = new Map((openRead?.data ?? []).map((r) => [r.tx_id, r as SettleRequest]));
+  const foundRows = (found?.data ?? []) as { id: string; full_name: string | null; email: string | null; role: string; status: string }[];
+
   const ibRows = (ibs.data ?? []) as IbRow[];
   const relRows = (relationships.data ?? []) as RelationshipRow[];
   const planRows = (plans.data ?? []) as PlanRow[];
@@ -142,10 +161,9 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
   for (const row of referredRows) if (row.referred_by) referredBy.set(row.referred_by, (referredBy.get(row.referred_by) ?? 0) + 1);
   const referredCount = (id: string) => (referred.error ? "–" : `${fmtNum(referredBy.get(id) ?? 0)}${referredCut ? "+" : ""}`);
 
-  const failed = [ibs, relationships, relationshipCount, plans, ledger, unsettled, referrals, referred].some((r) => !!r.error);
+  const failed = [ibs, relationships, relationshipCount, plans, ledger, unsettled, referrals, referred, partners].some((r) => !!r.error) || !!found?.error;
   const planName = new Map(planRows.map((p) => [p.id, p.name]));
   const figure = (r: { error: unknown; count: number | null }) => (r.error ? "–" : fmtNum(r.count ?? 0));
-  const asPerson = (r: IbRow): PortalPerson => ({ id: r.id, name: r.full_name ?? "", email: r.email ?? "", role: r.role, status: r.status, kyc: r.kyc_status, country: r.country });
 
   const href = (p: number, s: string = settled) => {
     const sp = new URLSearchParams();
@@ -163,8 +181,12 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
   return (
     <>
       <ControlHead title={TITLE} lead="Introducing brokers and affiliates in the portal, who sits under whom, the commission plans, the commission rows written so far and the referral links." />
-      <PortalSource decides={manages}>{manages ? "Commission plans are added, changed and retired beneath their table. Settlements and the tree are still changed in the portal’s own staff console." : "Plans, settlements and the tree are changed by finance."}</PortalSource>
-      <ConfigNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
+      <PortalSource decides={manages || settles}>
+        {manages
+          ? "Open a partner to change who they sit under and on which plan. Commission plans are edited beneath their table. Paying commission takes two people."
+          : "Open a partner to see their downline and commission."}
+      </PortalSource>
+      <IbNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -176,46 +198,117 @@ export default async function IbPage({ searchParams }: { searchParams: Promise<R
         ]}
       />
 
-      <Section title="Introducing brokers" aside={`Latest ${LATEST} by joining date${referredCut ? ` · referred clients on this page: ${fmtNum(REFERRED_CAP)}+, each count is a minimum` : ""}`}>
-        {ibRows.length === 0 ? (
-          <Empty title={ibs.error ? "Nothing could be read" : "No profile has the IB or affiliate role"} />
+      <Section title="Partners" aside={partners.error ? undefined : `${fmtNum(partnerRows.length)} with the IB or affiliate role, or with a downline${partnerRows.length >= 500 ? " (first 500)" : ""}`}>
+        {partnerRows.length === 0 ? (
+          <Empty title={partners.error ? "Nothing could be read" : "No introducing broker yet"}>
+            {manages && !partners.error && "Find a client below and open their page to make them an introducing broker."}
+          </Empty>
         ) : (
           <div className="scroll-x">
-            <table className="table-gx min-w-[60rem] text-sm">
+            <table className="table-gx min-w-[68rem] text-sm">
               <caption className="sr-only">Introducing brokers and affiliates, newest first</caption>
               <thead>
                 <tr>
                   <th scope="col">Partner</th>
                   <th scope="col">Role</th>
                   <th scope="col">Status</th>
-                  <th scope="col">KYC</th>
-                  <th scope="col">Referral code</th>
-                  <th scope="col">Clients referred</th>
+                  <th scope="col">Sits under</th>
+                  <th scope="col">Plan</th>
+                  <th scope="col">Direct</th>
+                  <th scope="col">Network</th>
+                  <th scope="col">Referred</th>
+                  <th scope="col">Awaiting settlement</th>
                   <th scope="col">Joined</th>
                 </tr>
               </thead>
               <tbody>
-                {ibRows.map((row) => (
+                {partnerRows.map((row) => (
                   <tr key={row.id}>
                     <td className="max-w-[16rem]">
-                      <Person person={asPerson(row)} id={row.id} />
+                      <Link href={`${BASE}/${row.id}`} className="link block truncate">
+                        {row.name || row.email || `${row.id.slice(0, 8)}…`}
+                      </Link>
+                      {row.name && row.email && <span className="block truncate text-xs text-ink-3">{row.email}</span>}
+                      {row.referral_code && <span className="num block text-xs text-ink-3">Code {row.referral_code}</span>}
                     </td>
                     <td className="whitespace-nowrap text-ink-2">{label(row.role)}</td>
                     <td>
                       <StateBadge value={row.status} />
                     </td>
-                    <td>
-                      <StateBadge value={row.kyc_status} />
+                    <td className="max-w-[12rem] truncate text-ink-2">
+                      {row.parent_id ? (
+                        <Link href={`${BASE}/${row.parent_id}`} className="link">
+                          {row.parent_name || `${row.parent_id.slice(0, 8)}…`}
+                        </Link>
+                      ) : (
+                        "–"
+                      )}
                     </td>
-                    <td className="num whitespace-nowrap text-ink">{row.referral_code ?? "–"}</td>
-                    <td className="num text-ink">{referredCount(row.id)}</td>
-                    <td className="num whitespace-nowrap text-ink-2">{fmtDate(row.created_at)}</td>
+                    <td className="max-w-[10rem] truncate text-ink-2">{row.plan_name || "–"}</td>
+                    <td className="num text-ink-2">{fmtNum(row.direct)}</td>
+                    <td className="num text-ink-2">{fmtNum(row.network)}</td>
+                    <td className="num text-ink-2">{referredBy.has(row.id) || ibIds.includes(row.id) ? referredCount(row.id) : "–"}</td>
+                    <td>
+                      {row.unsettled.length === 0 ? (
+                        <span className="text-ink-3">–</span>
+                      ) : (
+                        <div className="grid gap-8">
+                          {row.unsettled.map((u) => (
+                            <div key={u.currency}>
+                              <span className="num block whitespace-nowrap text-ink">{fmtMoney(u.amount, u.currency)}</span>
+                              {settles && <SettleControl ib={row.id} currency={u.currency} amount={u.amount} request={requests.get(row.id)} />}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="num whitespace-nowrap text-ink-2">{fmtDate(row.joined)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
+      </Section>
+
+      <Section title="Find a person" aside="Any client or partner in the portal, by part of a name or an e-mail address">
+        <form method="get" action={BASE} role="search" className="grid gap-13 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <div className="field">
+            <label htmlFor="ib-find">Name or e-mail</label>
+            <input id="ib-find" name="find" type="search" className="input" defaultValue={find} maxLength={60} autoComplete="off" spellCheck={false} aria-describedby="ib-find-hint" />
+            <p id="ib-find-hint" className="field-hint">
+              At least two characters. Letters, digits and @ . _ + - only. Open a person to make them an introducing broker or place them under one.
+            </p>
+          </div>
+          <div className="flex gap-8 sm:pb-[1.625rem]">
+            <button type="submit" className="btn btn-primary">
+              Find
+            </button>
+            {find && (
+              <Link href={BASE} className="btn btn-quiet">
+                Clear
+              </Link>
+            )}
+          </div>
+        </form>
+        {find.length >= 2 &&
+          (foundRows.length === 0 ? (
+            <p className="mt-13 text-sm text-ink-2">{found?.error ? "The search could not be run just now." : "Nobody matches."}</p>
+          ) : (
+            <ul className="mt-13 border-t border-line">
+              {foundRows.map((r) => (
+                <li key={r.id} className="flex flex-wrap items-baseline justify-between gap-x-21 gap-y-3 border-b border-line py-8 text-sm last:border-b-0">
+                  <Link href={`${BASE}/${r.id}`} className="link">
+                    {r.full_name || r.email || `${r.id.slice(0, 8)}…`}
+                  </Link>
+                  <span className="text-xs text-ink-3">
+                    {r.email ? `${r.email} · ` : ""}
+                    {label(r.role)} · {label(r.status)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ))}
       </Section>
 
       <Section title="Relationships" aside={`Latest ${LATEST}`}>

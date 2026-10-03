@@ -222,6 +222,10 @@ the client portal's Supabase project. Control reads them on the server with that
   through one portal function, `control_config_write`, which accepts only those four tables and their listed
   columns, checks the values, never deletes, and records each write. The audit entry is written here first
   (`portal_config_record`). One person makes a configuration change; it moves no money by itself.
+- **IB network** (`0025_portal_ib.sql`): roles, links and plans are changed by one person holding
+  `partners.manage`, each through its own portal function (`control_ib_*`), with the audit entry written
+  first (`portal_ib_record`). Paying commission credits a wallet, so it follows the two-person rule below
+  (`partners.settle`, `portal_ib_settlement`).
 - **Two people on money** (`0023_portal_four_eyes.sql`). Approving a deposit or a withdrawal changes a
   balance, so the first person only asks (`portal_approval_request`) and a second, different person holding
   `funds.settle` confirms (`portal_approval_confirm`); the database refuses the requester, and the change in

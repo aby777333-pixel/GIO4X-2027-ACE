@@ -72,6 +72,7 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/kyc/file/<id>` (GET) | Opens a client's uploaded document in a new tab through a one-minute link; recorded in the audit log first | `kyc.read` |
 | `/control/fees` | Fee schedules, rules and charges in the portal. With `fees.manage`: add, change or retire a schedule or a rule (nothing is deleted) | `funds.read`, `fees.manage` |
 | `/control/ledger` | Ledger accounts and journal entries, as the portal holds them. Read only | `funds.read` |
+| `/control/ib`, `/control/ib/<id>` | The IB network: partners with parent, plan, downline counts and commission owed; one page per person with their downline, commission by currency and referral links. With `partners.manage`: make a client an IB or the reverse, place a person under an IB, move or detach them, set the plan and share of a link. With `partners.settle`: pay commission awaiting settlement (two people) | `partners.read`, `partners.manage`, `partners.settle` |
 | `/control/ib` (commission plans), `/control/broker` (account types) | With `partners.manage` / `trading.manage`: add, change or retire a commission plan / an account type | `partners.manage`, `trading.manage` |
 | `/control/ib`, `/control/copy`, `/control/pamm` | Introducing brokers, commission and referral records; signal providers and subscriptions; managed funds and investments. Read only | `partners.read` |
 | `/control/trades`, `/control/broker` | The portal's trade records; account types, trading accounts and switches. Read only | `trading.read` |
