@@ -131,22 +131,141 @@ html[data-accent] .gx-console {
    the same ivory (or the same graphite at night). Here the materials take a
    little of the mood as well: the ground, the paper, the tinted panels and the
    sunken wells. A few parts in a hundred, so text keeps its contrast and the
-   mood is felt rather than seen. The default mood is untouched, and so is the
+   mood is felt rather than seen.
+
+   The values are written out as plain hex, worked out once (each mood's accent
+   mixed into the base material at 3 to 8 per cent). They must stay plain: the
+   canvases read these variables and can parse a hex colour and nothing
+   cleverer; a color-mix() here paints every hero a flat green. The default
+   mood is untouched. So is Custom, whose hue is not known here, and the
    console, which sets its own materials. */
-html[data-theme="light"][data-accent]:not([data-accent="gio4x"]) {
-  --bg: color-mix(in srgb, var(--accent) 5%, #f6f4ee);
-  --paper: color-mix(in srgb, var(--accent) 3%, #fbfaf6);
-  --surface-2: color-mix(in srgb, var(--accent) 7%, #f0ede5);
-  --sunken: color-mix(in srgb, var(--accent) 8%, #ebe8df);
+html[data-theme="light"][data-accent="ivory"] {
+  --bg: #f0ede5;
+  --paper: #f7f6f0;
+  --surface-2: #e8e4d9;
+  --sunken: #e2ded2;
 }
-html[data-theme="dark"][data-accent]:not([data-accent="gio4x"]) {
-  --bg: color-mix(in srgb, var(--accent) 5%, #0b1014);
-  --paper: color-mix(in srgb, var(--accent) 6%, #0f151a);
-  --surface: color-mix(in srgb, var(--accent) 6%, #141b22);
-  --surface-2: color-mix(in srgb, var(--accent) 8%, #19222a);
-  --sunken: color-mix(in srgb, var(--accent) 4%, #080c0f);
+html[data-theme="dark"][data-accent="ivory"] {
+  --bg: #15191b;
+  --paper: #1b2022;
+  --surface: #202529;
+  --surface-2: #282f33;
+  --sunken: #101315;
 }
-/* the night stages and the footer lean the same way */
-html[data-accent]:not([data-accent="gio4x"]) :is(.cx-hero, footer.on-night, .on-night) {
-  --night: color-mix(in srgb, var(--mood-1) 5%, #0b1014);
+html[data-theme="light"][data-accent="midnight"] {
+  --bg: #ebebe7;
+  --paper: #f4f4f1;
+  --surface-2: #e1e0db;
+  --sunken: #dbdad5;
+}
+html[data-theme="dark"][data-accent="midnight"] {
+  --bg: #12181e;
+  --paper: #171f26;
+  --surface: #1b242d;
+  --surface-2: #222e38;
+  --sunken: #0d1317;
+}
+html[data-theme="light"][data-accent="ocean"] {
+  --bg: #eaede8;
+  --paper: #f4f6f2;
+  --surface-2: #e0e4de;
+  --sunken: #d9ded7;
+}
+html[data-theme="dark"][data-accent="ocean"] {
+  --bg: #0f191e;
+  --paper: #131f25;
+  --surface: #18252d;
+  --surface-2: #1e2f38;
+  --sunken: #0b1317;
+}
+html[data-theme="light"][data-accent="emerald"] {
+  --bg: #eaede5;
+  --paper: #f4f6f0;
+  --surface-2: #e0e4d9;
+  --sunken: #d9ded2;
+}
+html[data-theme="dark"][data-accent="emerald"] {
+  --bg: #0e191a;
+  --paper: #131f20;
+  --surface: #172528;
+  --surface-2: #1d2f31;
+  --sunken: #0b1314;
+}
+html[data-theme="light"][data-accent="royal"] {
+  --bg: #edebe9;
+  --paper: #f5f4f3;
+  --surface-2: #e3e1df;
+  --sunken: #dddad9;
+}
+html[data-theme="dark"][data-accent="royal"] {
+  --bg: #13181f;
+  --paper: #181e27;
+  --surface: #1d232e;
+  --surface-2: #242d3a;
+  --sunken: #0e1218;
+}
+html[data-theme="light"][data-accent="sunset"] {
+  --bg: #f2ebe4;
+  --paper: #f8f5ef;
+  --surface-2: #ebe1d7;
+  --sunken: #e5dbcf;
+}
+html[data-theme="dark"][data-accent="sunset"] {
+  --bg: #161719;
+  --paper: #1c1d1f;
+  --surface: #212327;
+  --surface-2: #2a2c30;
+  --sunken: #111213;
+}
+html[data-theme="light"][data-accent="rose"] {
+  --bg: #f1eae6;
+  --paper: #f8f4f1;
+  --surface-2: #e9e0db;
+  --sunken: #e4d9d4;
+}
+html[data-theme="dark"][data-accent="rose"] {
+  --bg: #16171c;
+  --paper: #1c1d23;
+  --surface: #21232b;
+  --surface-2: #2a2c35;
+  --sunken: #111216;
+}
+html[data-theme="light"][data-accent="forest"] {
+  --bg: #ecece5;
+  --paper: #f5f5f0;
+  --surface-2: #e2e3d9;
+  --sunken: #dcddd2;
+}
+html[data-theme="dark"][data-accent="forest"] {
+  --bg: #121a1b;
+  --paper: #172022;
+  --surface: #1b2629;
+  --surface-2: #223033;
+  --sunken: #0d1415;
+}
+html[data-theme="light"][data-accent="slate"] {
+  --bg: #edece7;
+  --paper: #f5f5f2;
+  --surface-2: #e3e2dc;
+  --sunken: #dddcd5;
+}
+html[data-theme="dark"][data-accent="slate"] {
+  --bg: #13191e;
+  --paper: #181f25;
+  --surface: #1d252d;
+  --surface-2: #252f38;
+  --sunken: #0e1317;
+}
+html[data-theme="light"][data-accent="mono"] {
+  --bg: #ebe9e4;
+  --paper: #f4f3ef;
+  --surface-2: #e1ded7;
+  --sunken: #dad7cf;
+}
+html[data-theme="dark"][data-accent="mono"] {
+  --bg: #161b1f;
+  --paper: #1c2227;
+  --surface: #21282e;
+  --surface-2: #2a323a;
+  --sunken: #111518;
 }
