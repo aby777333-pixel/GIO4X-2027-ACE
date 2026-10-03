@@ -254,6 +254,40 @@ const BOOT_LEAD = 280;
  * Start a scene on a canvas. Returns the disposer.
  * The canvas is sized by CSS; the engine only sets its backing store.
  */
+/**
+ * How far to lift a scene's focal point, as a share of its frame's height
+ * (negative lowers it). Each scene composes itself around the frame's centre,
+ * but several had their subject low in the frame, some far enough that its
+ * near end was cut off by the frame's lower edge. The figures come from
+ * measuring where the drawn subject actually sat in each frame at 1440 px, and
+ * correcting most of the difference. Wide screens only: the narrow
+ * compositions are set separately by each scene.
+ */
+const FRAME_LIFT: Record<string, number> = {
+  accounts: 0.23,
+  pip: 0.26,
+  events: 0.27,
+  sizing: 0.18,
+  platforms: 0.25,
+  threshold: 0.17,
+  banks: 0.16,
+  compound: 0.13,
+  costs: 0.13,
+  funding: 0.13,
+  leverage: 0.12,
+  course: 0.11,
+  energy: 0.1,
+  equities: 0.1,
+  beacon: 0.09,
+  metals: 0.09,
+  atelier: 0.08,
+  mt5: 0.08,
+  drawdown: -0.15,
+  provenance: -0.14,
+  forex: -0.2,
+  veil: -0.05,
+};
+
 export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { seed?: number; tag?: string } = {}): () => void {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
@@ -539,7 +573,8 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
         b.y = 76;
       }
       f.cx = b.x + b.w / 2;
-      f.cy = b.y + b.h / 2;
+      // on a wide screen, a scene whose subject was measured sitting low (or high) in its frame is re-centred
+      f.cy = b.y + b.h / 2 - (w >= 1080 ? (FRAME_LIFT[canvas.dataset.scene ?? ""] ?? 0) * b.h : 0);
       f.u = Math.min(b.w / 3.9, b.h / 2.75);
     } else {
       // free composition: the golden section to the right on wide screens,

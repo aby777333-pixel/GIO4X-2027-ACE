@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { raptorTour, type RegionKey } from "@/data/platforms";
-import { REGIONS, RaptorWorkspace, WORKSPACE } from "./RaptorWorkspace";
+import { RaptorLive } from "./RaptorLive";
+import { REGIONS, WORKSPACE } from "./RaptorWorkspace";
 
 /**
  * Interface tour. Nine areas of the workspace study, each a real button:
@@ -21,7 +22,7 @@ export function RaptorTour() {
       <figure>
         <div className="rounded-md border border-line bg-surface p-8 shadow-3 sm:p-13">
           <div className="relative">
-            <RaptorWorkspace className="h-auto w-full" focus={[active]} ring />
+            <RaptorLive mode="tour" focus={[active]} ring tilt={false} label={`Illustrative study of a trading workspace, with the ${current.label.toLowerCase()} area brought forward`} />
             {raptorTour.map((r, i) => {
               const g = REGIONS[r.key];
               const on = r.key === active;

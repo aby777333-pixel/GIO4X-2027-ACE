@@ -207,8 +207,9 @@ const scene: Scene<State> = {
     // the camera stands above the deck and looks down the lines, as over a scale model;
     // looking down puts the deck below the pivot, so the focal point is lifted to centre it
     f.aim(0.86 + Math.sin(f.t * 0.06) * 0.03, -0.4, 6.4, m ? 0.66 : 0.9);
-    f.cy -= f.u * (m ? 1.12 : 1.1);
-    f.cx = m ? f.w * 0.5 : f.cx - f.u * 0.1;
+    // lifted far enough that the tanks at the near end of the lines stand whole inside the frame
+    f.cy -= f.u * (m ? 1.5 : 1.8);
+    f.cx = m ? f.w * 0.5 : f.cx - f.u * 0.5;
     const { yaw, pitch, dist } = f.cam;
     const eye: V3 = [dist * Math.cos(pitch) * Math.sin(yaw), -dist * Math.sin(pitch), -dist * Math.cos(pitch) * Math.cos(yaw)];
 

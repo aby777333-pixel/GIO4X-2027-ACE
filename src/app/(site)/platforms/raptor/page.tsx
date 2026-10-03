@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { RouteScene } from "@/components/cockpit/RouteScene";
 import { ClassSelector } from "@/components/figures/extra/ClassSelector";
 import { Headroom } from "@/components/figures/extra/Headroom";
 import { FigureNote } from "@/components/figures/Figure";
@@ -9,7 +8,8 @@ import { BeatRail } from "@/components/platforms/BeatRail";
 import { NotPublished } from "@/components/platforms/FactState";
 import { RaptorBreach } from "@/components/platforms/RaptorBreach";
 import { RaptorTour } from "@/components/platforms/RaptorTour";
-import { LayoutStudies, RaptorWorkspace } from "@/components/platforms/RaptorWorkspace";
+import { RaptorFlight } from "@/components/platforms/RaptorFlight";
+import { LayoutChooser, RaptorLive } from "@/components/platforms/RaptorLive";
 import { Screenshot } from "@/components/platforms/Screenshot";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs, NextSteps, SectionHead } from "@/components/ui/Page";
@@ -110,7 +110,7 @@ export default function RaptorPage() {
       <div className="on-night">
         <header className="cx-hero on-night">
           <div className="cx-stage" aria-hidden>
-            <RouteScene />
+            <RaptorFlight />
           </div>
           <div className="cx-main">
             <div className="cx-statement">
@@ -180,7 +180,7 @@ export default function RaptorPage() {
                 <article id="beat-see" className="grid scroll-mt-[8rem] grid-cols-1 items-center gap-34 lg:grid-cols-phi-r lg:gap-55" data-reveal>
                   <BeatText beat={see} />
                   <Frame>
-                    <RaptorWorkspace className="h-auto w-full" focus={see.regions} label="Illustrative study: market explorer, watchlist and chart brought forward" />
+                    <RaptorLive mode="see" focus={see.regions} label="Illustrative study: market explorer, watchlist and chart brought forward. Pointing at a row of the watchlist redraws the chart as that symbol\u2019s invented shape." />
                   </Frame>
                 </article>
 
@@ -194,17 +194,15 @@ export default function RaptorPage() {
                     <p className="lead">{build.body}</p>
                   </div>
                   <div className="mt-34 border-y border-line py-34">
-                    <div className="scroll-x">
-                      <LayoutStudies className="h-auto w-full min-w-[34rem]" />
-                    </div>
+                    <LayoutChooser />
                   </div>
-                  <p className="mt-13 text-xs text-ink-3">Three arrangements of the same panels, drawn to show the idea. They are not a list of layouts the platform ships with.</p>
+                  <p className="mt-13 text-xs text-ink-3">Three arrangements of the same panels, sliding from one to the next to show the idea. They are not a list of layouts the platform ships with.</p>
                 </article>
 
                 {/* 03 — analyse */}
                 <article id="beat-analyse" className="grid scroll-mt-[8rem] grid-cols-1 items-center gap-34 lg:grid-cols-phi lg:gap-55" data-reveal>
                   <Frame className="order-2 lg:order-1">
-                    <RaptorWorkspace className="h-auto w-full" viewBox="200 37 520 363" focus={["chart"]} label="Illustrative study of the chart area, enlarged" />
+                    <RaptorLive mode="analyse" view={{ x: 200, y: 37, w: 520, h: 363 }} focus={["chart"]} label="Illustrative study of the chart area, enlarged: a crosshair follows the pointer, and a trend line and two levels draw themselves in." />
                   </Frame>
                   <div className="order-1 lg:order-2">
                     <BeatText beat={analyse} />
@@ -214,7 +212,7 @@ export default function RaptorPage() {
                 {/* 04 — act */}
                 <article id="beat-act" className="grid scroll-mt-[8rem] grid-cols-1 items-center gap-34 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:gap-89" data-reveal>
                   <Frame className="order-2 max-w-[19rem] sm:order-1">
-                    <RaptorWorkspace className="h-auto w-full" viewBox="720 37 240 299" focus={["order"]} label="Illustrative study of the order entry area, enlarged" />
+                    <RaptorLive mode="act" view={{ x: 720, y: 37, w: 240, h: 299 }} focus={["order"]} label="Illustrative study of the order entry area, enlarged: the ticket is filled in step by step, instrument, direction, size, stop, send." />
                   </Frame>
                   <div className="order-1 sm:order-2">
                     <BeatText beat={act} />
@@ -266,7 +264,7 @@ export default function RaptorPage() {
                   </div>
                   <Frame className="mt-34">
                     <div className="scroll-x">
-                      <RaptorWorkspace className="h-auto w-full min-w-[38rem]" viewBox="200 400 760 200" focus={["positions", "history", "risk"]} label="Illustrative study of positions, history and risk controls, enlarged" />
+                      <RaptorLive className="min-w-[38rem]" mode="manage" tilt={false} view={{ x: 200, y: 400, w: 760, h: 200 }} focus={["positions", "history", "risk"]} label="Illustrative study of positions, history and risk controls: the pointer moves the margin gauge." />
                     </div>
                   </Frame>
                 </article>

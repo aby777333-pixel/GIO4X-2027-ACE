@@ -157,8 +157,8 @@ const ORB_FRAGMENT = `
     vec3 navy = vec3(.004, .018, .12);
     vec3 cobalt = vec3(.012, .07, .42);
     vec3 blue = vec3(.01, .27, .85);
-    vec3 violet = vec3(.26, .015, .65);
-    vec3 crimson = vec3(.55, .005, .045);
+    vec3 violet = vec3(.0, .35, .31);
+    vec3 crimson = vec3(.004, .28, .06);
 
     vec3 color = mix(blackBlue, navy, smoothstep(.2, .7, plasma));
     color = mix(color, cobalt, smoothstep(.48, .78, plasma) * .7);
@@ -173,7 +173,7 @@ const ORB_FRAGMENT = `
     float colorShift = sin(vPosition.y * 8.0 + vPosition.x * 5.0 + uTime * 1.4) * .5 + .5;
     vec3 leakBlue = vec3(.015, .42, 1.0);
     vec3 leakCyan = vec3(.04, .85, 1.0);
-    vec3 leakViolet = vec3(.55, .08, 1.0);
+    vec3 leakViolet = vec3(.05, 1.0, .55);
     vec3 leakColor = mix(leakBlue, leakCyan, colorShift);
     leakColor = mix(leakColor, leakViolet, sin(vPosition.z * 10.0 - uTime) * .25 + .25);
     vec3 silverBlue = vec3(.72, .86, 1.0);
@@ -211,25 +211,30 @@ const CORONA_FRAGMENT = `
   }
 `;
 
-/** The pen's supernova palette, and its weighting: silver/blue/violet dominant, red secondary, gold rare. */
+/** The supernova palette, recoloured to the GIO4X mark (pale light, blue, teal, emerald), with the pen's weighting: once silver/blue/violet dominant, red secondary, gold rare. */
 const PALETTE: readonly (readonly [number, number, number])[] = [
-  [0.55, 0.62, 0.72],
-  [0.72, 0.78, 0.88],
-  [0.88, 0.93, 1.0],
-  [0.45, 0.72, 1.0],
-  [0.05, 0.82, 1.0],
-  [0.02, 0.45, 1.0],
-  [0.02, 0.15, 0.9],
-  [0.05, 0.06, 0.65],
-  [0.28, 0.02, 1.0],
-  [0.52, 0.02, 0.95],
-  [0.72, 0.02, 0.88],
-  [1.0, 0.02, 0.62],
-  [1.0, 0.04, 0.3],
-  [1.0, 0.015, 0.08],
-  [0.62, 0.004, 0.02],
-  [1.0, 0.38, 0.03],
-  [1.0, 0.62, 0.08],
+  // pale light, at the heart of the burst
+  [0.62, 0.78, 0.8],
+  [0.78, 0.92, 0.94],
+  [0.9, 1.0, 0.98],
+  // the blue of the mark
+  [0.004, 0.16, 0.48],
+  [0.01, 0.24, 0.66],
+  [0.03, 0.36, 0.9],
+  [0.08, 0.5, 1.0],
+  [0.2, 0.62, 1.0],
+  // its teal
+  [0.0, 0.35, 0.31],
+  [0.0, 0.62, 0.55],
+  [0.04, 0.9, 0.8],
+  // its emerald
+  [0.002, 0.28, 0.05],
+  [0.01, 0.46, 0.1],
+  [0.03, 0.72, 0.2],
+  [0.1, 0.95, 0.36],
+  // a rare bright mint
+  [0.5, 1.0, 0.72],
+  [0.7, 1.0, 0.86],
 ];
 
 function explosionColor() {
@@ -308,14 +313,14 @@ export function createBreach(canvas: HTMLCanvasElement, host: HTMLElement): Brea
   const innerCoreMaterial = additive(0x167dff, 0.26);
   const innerCore = new Mesh(keep(new SphereGeometry(1.27, 64, 64)), innerCoreMaterial);
   scene.add(innerCore);
-  const violetCoreMaterial = additive(0x7528ff, 0.16);
+  const violetCoreMaterial = additive(0x10d0c0, 0.16);
   const violetCore = new Mesh(keep(new SphereGeometry(1.12, 48, 48)), violetCoreMaterial);
   scene.add(violetCore);
 
   // LIGHT LEAK JETS
   const leakGroup = new Group();
   scene.add(leakGroup);
-  const LEAK_COLORS = [0x168cff, 0x28dfff, 0x4169ff, 0x6a2cff, 0xa32cff, 0xff285f];
+  const LEAK_COLORS = [0x168cff, 0x28dfff, 0x1a84cc, 0x00c8b8, 0x14c060, 0x3fe08a];
   const leakRays = Array.from({ length: 28 }, () => {
     const length = 0.8 + Math.random() * 2.2;
     const width = 0.018 + Math.random() * 0.05;
@@ -365,8 +370,8 @@ export function createBreach(canvas: HTMLCanvasElement, host: HTMLElement): Brea
     return corona;
   };
   const coronaBlue = makeCorona(0x087cff, 1.23, 0.72);
-  const coronaViolet = makeCorona(0x6028ff, 1.52, 0.28);
-  const coronaPurple = makeCorona(0xbb20ff, 1.95, 0.075);
+  const coronaViolet = makeCorona(0x00a098, 1.52, 0.28);
+  const coronaPurple = makeCorona(0x14c060, 1.95, 0.075);
 
   // ORBITING PLASMA STREAMS
   const spiralGroup = new Group();
@@ -390,10 +395,10 @@ export function createBreach(canvas: HTMLCanvasElement, host: HTMLElement): Brea
   const spirals = [
     makeSpiral(1.95, 0x16dfff, 0.2, 900),
     makeSpiral(2.25, 0x168cff, 0.7, 1000),
-    makeSpiral(2.55, 0x4255ff, 1.15, 1100),
-    makeSpiral(2.85, 0x7928ff, 1.65, 1200),
-    makeSpiral(3.15, 0xc525ff, 2.1, 1100),
-    makeSpiral(3.45, 0xff174f, 0.48, 950),
+    makeSpiral(2.55, 0x0870b8, 1.15, 1100),
+    makeSpiral(2.85, 0x00c8b8, 1.65, 1200),
+    makeSpiral(3.15, 0x14c060, 2.1, 1100),
+    makeSpiral(3.45, 0x3fe08a, 0.48, 950),
   ];
   const spiralTilts = spirals.map((s) => s.rotation.y);
 
@@ -454,8 +459,8 @@ export function createBreach(canvas: HTMLCanvasElement, host: HTMLElement): Brea
     [0xd8eaff, 0, 17, 0.95, 0.8],
     [0x29dfff, 0.04, 14, 0.8, 0.55],
     [0x176cff, 0.09, 11, 0.7, 0.4],
-    [0x7028ff, 0.16, 8, 0.55, 0.3],
-    [0xff174f, 0.24, 5, 0.32, 0.17],
+    [0x00c8b8, 0.16, 8, 0.55, 0.3],
+    [0x14c060, 0.24, 5, 0.32, 0.17],
   ];
   const ringGeometry = keep(new RingGeometry(0.96, 1, 256));
   const waves = WAVES.map(([color, delay, growth, start, fade]) => {
