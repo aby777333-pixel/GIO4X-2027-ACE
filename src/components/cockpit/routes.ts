@@ -5,9 +5,9 @@ import type { SceneId } from "@/components/cockpit/scenes";
  *
  * The rule is the owner's: every page in the menus has its own scene, related
  * to that page, and no animation is repeated. Only pages generated from data
- * (an instrument, a glossary term, a lesson, an article, a tool) share their
- * family's scene, and they pass their own subject as `tag` (the instrument, the
- * term, the tool), so the scene picks that subject out and no two pages look
+ * (an instrument, a glossary term, a lesson, an article) share their family's
+ * scene, and they pass their own subject as `tag` (the instrument, the term),
+ * so the scene picks that subject out and no two pages look
  * the same. The first matching prefix wins, so the list runs from the most
  * specific path to the least.
  */
@@ -68,11 +68,20 @@ const ROUTES: [prefix: string, scene: SceneId, ownTag?: string][] = [
   ["/platforms/metatrader-5", "mt5"],
   ["/platforms/compare", "compare"],
   ["/platforms", "platforms"],
-  // the four tools that show a thing moving each open with that thing; the calculators keep the family's slide rule
+  // every tool opens with a picture of the thing it works out. No tool page reaches the last of these lines today:
+  // it stays so that a tool added without a scene of its own still opens with the family's slide rule
   ["/tools/spread-visualizer", "spread"],
   ["/tools/leverage-visualizer", "leverage"],
   ["/tools/drawdown", "drawdown"],
   ["/tools/order-anatomy", "order"],
+  ["/tools/position-size", "sizing"],
+  ["/tools/pip-value", "pip"],
+  ["/tools/margin", "margin"],
+  ["/tools/profit-loss", "outcome"],
+  ["/tools/risk-reward", "ratio"],
+  ["/tools/compound-growth", "compound"],
+  ["/tools/currency-converter", "convert"],
+  ["/tools/cost-lab", "costs"],
   ["/tools", "instrument"],
   ["/intelligence/blog", "press"],
   ["/intelligence", "signal"],
@@ -93,7 +102,7 @@ const ROUTES: [prefix: string, scene: SceneId, ownTag?: string][] = [
   ["/open-account", "gateway", "open-account"],
 ];
 
-/** Pages whose own scene must not pass to the pages beneath them (each tool keeps the family's instrument). */
+/** Pages whose own scene must not pass to the pages beneath them (each tool has a scene of its own). */
 const EXACT: Record<string, SceneId> = { "/tools": "workbench" };
 
 /** Everything else (About, Careers, Media, Design, What's new, Preferences, not found) carries the rosette. */

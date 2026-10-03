@@ -235,6 +235,34 @@ export function box(f: Frame, min: V3, max: V3, colour: string, alpha = 0.4, fil
 }
 
 /**
+ * A solid machined block between two corners (the first is the nearer in z):
+ * smoked body, tinted faces, lit arrises. Only the faces the camera can see are
+ * drawn, so blocks drawn from the farthest to the nearest hide each other.
+ */
+export function slab(f: Frame, min: V3, max: V3, colour: string, tint = 0.14, on = 1): void {
+  if (on <= 0.003) return;
+  const [x0, y0, z0] = min;
+  const [x1, y1, z1] = max;
+  const a = f.P(x0, y1, z0);
+  const b = f.P(x0, y1, z1);
+  const c = f.P(x1, y1, z0);
+  const d = f.P(x1, y1, z1);
+  if (!a || !b || !c || !d) return;
+  const face = (q: V3[], k: number) => {
+    f.fill(q, f.pal.bg, 0.95 * on);
+    f.fill(q, colour, tint * k * on);
+    f.path(q, colour, 0.5 * on, 1, true);
+  };
+  if (b.x < a.x - 0.5) face([[x0, y0, z1], [x0, y0, z0], [x0, y1, z0], [x0, y1, z1]], 0.5);
+  if (d.x > c.x + 0.5) face([[x1, y0, z0], [x1, y0, z1], [x1, y1, z1], [x1, y1, z0]], 0.6);
+  if (b.y < a.y - 0.5) face([[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]], 1.5);
+  face([[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0]], 1);
+}
+
+/** Where the camera stands along x, in world units: a row of blocks is drawn from the one farthest from it to the nearest. */
+export const eyeX = (f: Frame): number => f.cam.dist * Math.cos(f.cam.pitch) * Math.sin(f.cam.yaw);
+
+/**
  * A ball of smoked glass: a dark body, a rim that catches the key light and a
  * small specular highlight that moves a little with the pointer. Draw it before
  * whatever is engraved on its surface.
