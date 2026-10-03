@@ -11,8 +11,9 @@
   publish = "apps/portal/.next"
   # This site is linked to the whole repository, so every push reaches it.
   # Skip the build when nothing under portal/ changed since the last build
-  # (exit 0 = skip). With no previous build to compare against, build.
-  ignore = "test -n \"$CACHED_COMMIT_REF\" && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+  # (exit 0 = skip). On a first build Netlify gives the same commit for both,
+  # which must build, not skip.
+  ignore = "test \"$CACHED_COMMIT_REF\" != \"$COMMIT_REF\" && git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
 
 [build.environment]
   NODE_VERSION = "20"
