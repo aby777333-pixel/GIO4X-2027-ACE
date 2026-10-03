@@ -252,3 +252,25 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
   line-height: 1.45;
   color: var(--ink-2);
 }
+
+/* The pip reels (components/labs/workshop/PipReels.tsx): a value blurs and
+   shudders while its reel is turning. The reel does not turn at all under
+   reduced motion or low visual effects, so nothing is needed for those. */
+@keyframes gx-reel {
+  0% {
+    transform: translateY(-0.35em);
+    opacity: 0.35;
+  }
+  50% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0.35em);
+    opacity: 0.35;
+  }
+}
+.gx-reel.is-spinning {
+  animation: gx-reel 70ms linear infinite;
+  filter: blur(1.5px);
+}

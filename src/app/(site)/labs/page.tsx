@@ -8,6 +8,7 @@ import { EXAMPLE_PICKS, picksQuery } from "@/components/labs/picks";
 import { MarketDayStill } from "@/components/labs/market-day/MarketDayStill";
 import { TradeStill } from "@/components/labs/trade-anatomy/TradeStill";
 import { SimulatorStill } from "@/components/labs/simulator/Still";
+import { Forge } from "@/components/labs/workshop/Forge";
 import { OrderBookStill } from "@/components/labs/order-book-3d/OrderBookStill";
 import { SessionGlobeStill } from "@/components/labs/session-globe/SessionGlobeStill";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -261,6 +262,21 @@ export default function LabsPage() {
               <p className="mt-13 max-w-measure text-ink-2">An illustration, not market data. Its shapes come from a generator with a fixed seed, so it is the same on every visit; it holds no prices and no quantities, and its six readings stand in full as text.</p>
               <Link href="/labs/order-book-3d" className="go mt-21">
                 Open the Order book in 3D
+              </Link>
+            </div>
+          </article>
+
+          <article className="mt-55 grid gap-34 border-t border-line pt-34 lg:grid-cols-phi lg:items-center lg:gap-55">
+            <div>
+              <Forge controls={false} />
+            </div>
+            <div>
+              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">08</p>
+              <h3 className="h2 mt-8">The Workshop</h3>
+              <p className="lead mt-13">Four small machines, one idea each: a candle forged from its four prices, leverage walked on a tightrope, a hidden candle to guess, and reels that work out what a pip is worth.</p>
+              <p className="mt-13 max-w-measure text-ink-2">Everything in them is invented. There is no market data, nothing to win and nothing kept.</p>
+              <Link href="/labs/workshop" className="go mt-21">
+                Open the Workshop
               </Link>
             </div>
           </article>

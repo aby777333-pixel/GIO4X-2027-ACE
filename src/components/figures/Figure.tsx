@@ -82,12 +82,23 @@ type Props = {
   /** width divided by height; the golden rectangle by default */
   ratio?: number;
   className?: string;
+  /**
+   * Change this to have the figure drawn again. A figure whose drawing depends
+   * on a control outside the canvas passes a number that changes with it, so
+   * that the one still frame under reduced motion is redrawn too.
+   */
+  rev?: number;
 };
 
-export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
+export function Figure({ draw, ratio = 1.618, className = "", rev = 0 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawRef = useRef(draw);
   drawRef.current = draw;
+  const startRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    startRef.current?.();
+  }, [rev]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -249,6 +260,7 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
       start();
     };
 
+    startRef.current = start;
     resize();
     start();
     void document.fonts?.ready.then(start);
