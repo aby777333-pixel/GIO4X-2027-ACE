@@ -65,7 +65,7 @@ export function ScrollArrows() {
   return (
     <div
       style={lift ? { marginBottom: lift } : undefined}
-      className="no-print fixed bottom-[calc(max(0.8125rem,env(safe-area-inset-bottom))+3.4375rem)] right-[max(0.8125rem,env(safe-area-inset-right))] z-[38] flex flex-col gap-5 sm:bottom-[calc(max(1.3125rem,env(safe-area-inset-bottom))+3.4375rem)] sm:right-[max(1.3125rem,env(safe-area-inset-right))]"
+      className="no-print fixed bottom-[calc(max(0.8125rem,env(safe-area-inset-bottom))+3.4375rem)] right-[max(0.8125rem,env(safe-area-inset-right))] z-[38] hidden flex-col gap-5 sm:flex sm:bottom-[calc(max(1.3125rem,env(safe-area-inset-bottom))+3.4375rem)] sm:right-[max(1.3125rem,env(safe-area-inset-right))]"
     >
       <button type="button" className={button} disabled={!up} aria-hidden={!up} tabIndex={up ? 0 : -1} aria-label="Go to the top of the page" title="Top of page" onClick={() => go(0)}>
         <Arrow dir="up" />

@@ -6,6 +6,7 @@ import { InstallApp } from "@/components/desk/InstallApp";
 import { OfflineCopy } from "@/components/desk/OfflineCopy";
 import { TradingViewPreference } from "@/components/markets/TradingViewPreference";
 import { AppearanceControls } from "@/components/shell/Appearance";
+import { ReplayOpening } from "@/components/shell/ReplayOpening";
 import { SoundPreference } from "@/components/sound/SoundPreference";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { pageMeta } from "@/lib/meta";
@@ -38,6 +39,7 @@ export default function PreferencesPage() {
             <Link href="/design" className="go mt-21">
               Designing GIO4X
             </Link>
+            <ReplayOpening />
             {/* this column ended well short of the one beside it: a figure that says what the text says */}
             <div className="mt-34 max-w-[28rem]">
               <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">

@@ -158,7 +158,7 @@ export function Tightrope() {
         <label htmlFor={id} className="label">
           Leverage: <span className="num text-ink">1:{lev}</span>
         </label>
-        <input id={id} type="range" min={0} max={STEPS.length - 1} step={1} value={i} onChange={(e) => setI(Number(e.target.value))} className="w-full accent-[var(--accent)]" aria-valuetext={`1 to ${lev}`} />
+        <input id={id} type="range" min={0} max={STEPS.length - 1} step={1} value={i} onChange={(e) => setI(Number(e.target.value))} className="h-[2.75rem] w-full accent-[var(--accent)]" aria-valuetext={`1 to ${lev}`} />
         <p className="text-ink-2" aria-live="polite">
           At 1:{lev}, a move of <strong className="num text-ink">{pct(lev)}%</strong> against a position equals the whole margin for it.
           {lev >= 100 ? " A major pair can move that far in an ordinary day." : lev >= 20 ? " There is less room than it looks." : " The line is a long way off."}

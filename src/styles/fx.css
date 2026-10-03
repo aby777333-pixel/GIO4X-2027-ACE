@@ -415,7 +415,7 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
 }
 .gx-door-inside {
   position: relative;
-  padding: clamp(2.125rem, 6vw, 5.5625rem) clamp(1.3125rem, 14vw, 13rem);
+  padding: clamp(2.125rem, 6vw, 5.5625rem) clamp(1.3125rem, calc(18vw - 3rem), 13rem);
 }
 .gx-door-leaf {
   position: absolute;

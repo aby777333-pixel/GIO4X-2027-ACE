@@ -99,6 +99,8 @@ export function SequenceChart({ className = "" }: { className?: string }) {
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
+      // on a phone the chart is too small for the panel and the price scale to be legible: it reads the candle on two lines instead
+      const small = k < 0.75;
       const X = (v: number) => v * k;
       const Y = (v: number) => v * k;
 
@@ -118,8 +120,11 @@ export function SequenceChart({ className = "" }: { className?: string }) {
       ctx.moveTo(0, Y(HEAD_Y));
       ctx.lineTo(w, Y(HEAD_Y));
       ctx.stroke();
-      text("EXAMPLE CHART", 14, HEAD_Y / 2, 9.5, 700, col(ink, 0.9));
-      text("INVENTED PRICES · NOT MARKET DATA", VB.w - 14, HEAD_Y / 2, 8.5, 600, col(GOLD, 0.95), "right");
+      if (small) text("EXAMPLE CHART · INVENTED PRICES", 14, HEAD_Y / 2, 9.5, 700, col(GOLD, 0.95));
+      else {
+        text("EXAMPLE CHART", 14, HEAD_Y / 2, 9.5, 700, col(ink, 0.9));
+        text("INVENTED PRICES · NOT MARKET DATA", VB.w - 14, HEAD_Y / 2, 8.5, 600, col(GOLD, 0.95), "right");
+      }
 
       // the phase the reading line is in, as a lit band across the pane
       const bx0 = PLOT.x0 + phase.from * STEP;
@@ -141,7 +146,7 @@ export function SequenceChart({ className = "" }: { className?: string }) {
         ctx.moveTo(X(PLOT.x0), Y(y));
         ctx.lineTo(X(PLOT.x1), Y(y));
         ctx.stroke();
-        text(f4(price), VB.w - 8, y, 8.5, 500, col(ink, 0.5), "right");
+        if (!small) text(f4(price), VB.w - 8, y, 8.5, 500, col(ink, 0.5), "right");
       }
       ctx.setLineDash([]);
 
@@ -230,9 +235,11 @@ export function SequenceChart({ className = "" }: { className?: string }) {
         ctx.stroke();
         ctx.setLineDash([]);
         // the close, tagged on the price scale
-        ctx.fillStyle = col(up ? UP : DOWN, 0.95);
-        ctx.fillRect(X(PLOT.x1 + 4), Y(yOf(candle.c) - 7), X(VB.w - PLOT.x1 - 8), Y(14));
-        text(f4(candle.c), VB.w - 8, yOf(candle.c), 8.5, 700, "rgba(9,14,19,1)", "right");
+        if (!small) {
+          ctx.fillStyle = col(up ? UP : DOWN, 0.95);
+          ctx.fillRect(X(PLOT.x1 + 4), Y(yOf(candle.c) - 7), X(VB.w - PLOT.x1 - 8), Y(14));
+          text(f4(candle.c), VB.w - 8, yOf(candle.c), 8.5, 700, "rgba(9,14,19,1)", "right");
+        }
         // high and low, ticked beside the candle
         for (const [label, price] of [["H", candle.h], ["L", candle.l]] as const) {
           const side = idx > COUNT - 6 ? -1 : 1;
@@ -244,11 +251,15 @@ export function SequenceChart({ className = "" }: { className?: string }) {
           text(label, x + side * STEP * 2.05, yOf(price), 8.5, 700, col(ink, 0.9), "center");
         }
 
+        // the four prices on one line, where there is no room for the panel
+        if (small) text(`O ${f4(candle.o)}   H ${f4(candle.h)}   L ${f4(candle.l)}   C ${f4(candle.c)}`, 14, HEAD_Y + 10, 9, 600, col(up ? UP : DOWN, 1));
+
         // the panel: what this candle says
-        const pw = 196;
+        const pw = small ? 0 : 196;
         const ph = 86;
         const px = idx < COUNT / 2 ? PLOT.x1 - pw - 6 : PLOT.x0 + 6;
         const py = idx < COUNT / 2 ? PLOT.y1 - ph - 6 : PLOT.y0 + 16;
+        if (!small) {
         ctx.fillStyle = "rgba(9,14,19,0.86)";
         ctx.strokeStyle = col(ink, 0.2);
         ctx.beginPath();
@@ -284,11 +295,15 @@ export function SequenceChart({ className = "" }: { className?: string }) {
         }
         lines.push(line);
         lines.slice(0, 2).forEach((s, i) => text(s, px + 10, py + 69 + i * 10, 8.5, 500, col(ink, 0.82)));
+        }
       }
 
       // footer: what the lit band means, and how to use the chart
-      text(phase.note, PLOT.x0, VB.h - 13, 9, 500, col(ink, 0.8));
-      text(pointer ? "Reading the candle under the pointer" : "Move over the chart to read any candle", VB.w - 8, VB.h - 13, 8.5, 600, col(BLUE, 0.95), "right");
+      if (small) text(readCandle(candle), 14, VB.h - 13, 9, 500, col(ink, 0.85));
+      else {
+        text(phase.note, PLOT.x0, VB.h - 13, 9, 500, col(ink, 0.8));
+        text(pointer ? "Reading the candle under the pointer" : "Move over the chart to read any candle", VB.w - 8, VB.h - 13, 8.5, 600, col(BLUE, 0.95), "right");
+      }
 
       if (visible && !frozen) raf = requestAnimationFrame(draw);
     };
