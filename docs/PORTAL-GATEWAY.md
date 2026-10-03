@@ -40,10 +40,12 @@ Local development: `npm run dev` in `portal/` (port 3100, needs `portal/apps/por
 Deploying the portal. Deploy it before the website when the base path changes, or `/portal` answers 404
 in between. Two ways:
 
-- **Netlify builds it** (preferred, not set up yet): link the portal's Netlify site to this repository with
-  Base directory `portal` (`portal/netlify.toml`). Until that is done the site is still linked to
-  `GIO4X-JUNE-2026`, and a push there would publish the old portal, without `/portal`, over this one.
-- **From a Windows PC** (how it was published on 3 October 2026). The Netlify CLI mistakes the repository
+- **Netlify builds it** (set up on 3 October 2026): the portal's Netlify site is linked to this repository,
+  branch `main`, Base directory `portal` (`portal/netlify.toml`), through a read-only deploy key and a push
+  webhook on the GitHub repository. A push to `main` that changes anything under `portal/` builds and
+  publishes it; other pushes are skipped by the `ignore` rule. The website itself is still published by hand
+  (`DEPLOY.md`).
+- **From a Windows PC** (the fallback; how it was first published). The Netlify CLI mistakes the repository
   root for the project when `portal/` is nested in it, so build from a copy outside any repository:
   1. copy `portal/` (without `node_modules`, `.next`, `.netlify`) to an empty folder, `git init` there, and
      write `{ "siteId": "<portal site id>" }` to `.netlify/state.json`;
