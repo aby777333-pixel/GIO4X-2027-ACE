@@ -74,6 +74,10 @@ const securityHeaders = [
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  // Written into the build, so the pages that run on the server (GIO4X Control,
+  // the gateway pages) see the same value this file proxies to. A variable set
+  // only for the build (netlify.toml) does not exist when the site is running.
+  env: { PORTAL_ORIGIN: portalOrigin },
   reactStrictMode: true,
   poweredByHeader: false,
   trailingSlash: false,
