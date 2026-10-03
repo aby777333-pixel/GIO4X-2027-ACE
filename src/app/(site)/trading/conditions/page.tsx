@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { RiskNote } from "@/components/trading/Blocks";
 import { ConditionsExplorer } from "@/components/trading/ConditionsExplorer";
@@ -164,6 +165,8 @@ export default function ConditionsPage() {
       </section>
 
       <RiskNote text={riskWarning} />
+
+      <PunchLine k="conditions" />
 
       <NextSteps
         items={[

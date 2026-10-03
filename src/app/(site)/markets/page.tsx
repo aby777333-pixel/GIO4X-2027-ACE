@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { HeroCompanion } from "@/components/figures/markets/HeroCompanion";
 import { SixDecks } from "@/components/figures/markets/SixDecks";
@@ -231,6 +232,8 @@ export default async function MarketsPage() {
           </ul>
         </div>
       </section>
+
+      <PunchLine k="markets" />
 
       <NextSteps
         items={[

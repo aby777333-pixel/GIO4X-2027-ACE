@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { KeptStub } from "@/components/figures/extra/KeptStub";
 import { SideNote } from "@/components/figures/extra/SideNote";
@@ -97,6 +98,8 @@ export default function SupportPage() {
           </ul>
         </div>
       </section>
+
+      <PunchLine k="support" />
 
       <NextSteps
         items={[

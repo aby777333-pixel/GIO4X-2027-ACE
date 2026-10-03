@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { Backdrop } from "@/components/figures/Backdrop";
 import { FigureNote } from "@/components/figures/Figure";
@@ -226,6 +227,8 @@ export default function AccountsPage() {
       </section>
 
       <RiskNote text={riskWarning} />
+
+      <PunchLine k="risk" />
 
       <NextSteps
         items={[

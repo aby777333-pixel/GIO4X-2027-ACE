@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
 import { LeverBeam } from "@/components/figures/product/LeverBeam";
@@ -151,6 +152,8 @@ export default function ToolsHub() {
           <p className="mt-34 max-w-measure text-xs text-ink-3">{educationalNote} Results are calculations on the figures you enter and do not describe any real account, quote or trade.</p>
         </div>
       </section>
+
+      <PunchLine k="tools" />
 
       <NextSteps
         items={[

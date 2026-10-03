@@ -173,3 +173,82 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
     stroke-dasharray: none !important;
   }
 }
+
+/* ---- PUNCH LINES -----------------------------------------------------------
+   components/ui/PunchLine.tsx: one rhyming line per section, set large. Each
+   word is its own inline-block and arrives in turn as the line scrolls into
+   view. A view timeline does it, so nothing is hidden while a script loads:
+   where view timelines are missing the sentence is simply there. */
+.gx-punch {
+  border-top: 1px solid var(--line);
+  padding: clamp(2.125rem, 7vw, 5.5625rem) var(--gutter);
+  text-align: center;
+}
+.gx-punch-line {
+  margin-inline: auto;
+  max-width: 20ch;
+  font-size: clamp(1.75rem, 5.2vw, 3.4375rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.gx-punch-line span {
+  display: inline-block;
+  white-space: pre;
+}
+.gx-punch-b {
+  color: var(--accent);
+}
+.gx-punch-note {
+  margin-top: 1.3125rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+@keyframes gx-punch-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.55em) rotate(-4deg) scale(0.92);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .gx-punch-line span {
+      animation: gx-punch-in linear both;
+      animation-timeline: view();
+      animation-range: entry calc(20% + var(--i, 0) * 9%) entry calc(75% + var(--i, 0) * 9%);
+    }
+    [data-motion="reduced"] .gx-punch-line span,
+    [data-effects="low"] .gx-punch-line span {
+      animation: none;
+    }
+  }
+}
+@media print {
+  .gx-punch-line span {
+    animation: none !important;
+  }
+}
+
+/* A glossary term's couplet: two lines to remember it by, above the definition. */
+.gx-couplet {
+  margin-bottom: 1.3125rem;
+  border-left: 2px solid var(--accent);
+  padding-left: 0.8125rem;
+}
+.gx-couplet span {
+  display: block;
+  font-style: italic;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}

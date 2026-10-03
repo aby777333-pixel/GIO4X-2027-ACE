@@ -6,6 +6,7 @@ import { ReferenceRates } from "@/components/home/ReferenceRates";
 import { AccountsTable, AssetIndex, IntelligenceTeaser, Philosophy, PlatformsChapter, ToolsTeaser, TrustBlock } from "@/components/home/Sections";
 import { SessionStrip } from "@/components/market/SessionStrip";
 import { SectionHead } from "@/components/ui/Page";
+import { PunchLine } from "@/components/ui/PunchLine";
 import { site } from "@/config/site";
 import { pageMeta } from "@/lib/meta";
 import "@/components/home/home.css";
@@ -61,6 +62,7 @@ export default function HomePage() {
       <ToolsTeaser />
       <AccountsTable />
       <TrustBlock />
+      <PunchLine k="home" />
       <IntelligenceTeaser />
       <HomeStory />
     </>

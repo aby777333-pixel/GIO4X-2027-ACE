@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { TwoOffices } from "@/components/figures/extra/SideFigures";
 import { Rosette } from "@/components/brand/Rosette";
@@ -251,6 +252,8 @@ export default function AboutPage() {
           </ul>
         </div>
       </section>
+
+      <PunchLine k="company" />
 
       <NextSteps
         items={[

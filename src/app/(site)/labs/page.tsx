@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { Constellation, STAGE_COMPACT } from "@/components/labs/Constellation";
 import { DotsDiagram } from "@/components/labs/DotsDiagram";
@@ -316,6 +317,8 @@ export default function LabsPage() {
           </ul>
         </div>
       </section>
+
+      <PunchLine k="labs" />
 
       <NextSteps
         items={[

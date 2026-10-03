@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { Screenshot } from "@/components/platforms/Screenshot";
 import { shots } from "@/data/platform-shots";
@@ -137,6 +138,8 @@ export default function PlatformsPage() {
           </div>
         </div>
       </section>
+
+      <PunchLine k="platforms" />
 
       <NextSteps
         items={[

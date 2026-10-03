@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { Colonnade } from "@/components/figures/stage/Colonnade";
 import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
@@ -145,6 +146,8 @@ export default function TrustCentrePage() {
           </div>
         </div>
       </section>
+
+      <PunchLine k="trust" />
 
       <NextSteps
         title="Start with"

@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
 import { CurrencyOrbits } from "@/components/figures/stage/CurrencyOrbits";
@@ -129,6 +130,8 @@ export default function FundingPage() {
       </section>
 
       <RiskNote text={riskWarning} />
+
+      <PunchLine k="funding" />
 
       <NextSteps
         items={[

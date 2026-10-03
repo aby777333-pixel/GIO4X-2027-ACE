@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { AcademyProgress, LessonMark, LessonsCount } from "@/components/academy/Progress";
 import { MilestoneStrip } from "@/components/desk/Milestones";
@@ -366,6 +367,8 @@ export default function AcademyPage() {
           </p>
         </div>
       </section>
+
+      <PunchLine k="academy" />
 
       <NextSteps
         items={[

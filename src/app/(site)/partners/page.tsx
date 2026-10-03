@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { Rosette } from "@/components/brand/Rosette";
 import { Backdrop } from "@/components/figures/Backdrop";
@@ -124,6 +125,8 @@ export default function PartnersPage() {
       </section>
 
       <RiskNote text={riskWarning} />
+
+      <PunchLine k="partners" />
 
       <NextSteps
         items={[

@@ -1,3 +1,4 @@
+import { couplets } from "@/data/glossary-couplets";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SaveButton } from "@/components/desk/Buttons";
@@ -74,6 +75,7 @@ export default async function TermPage({ params }: Params) {
   const next = glossary[at + 1];
   // the course goes on through the related terms that have a lesson of their own
   const onward = related.filter((r) => getLesson(r.slug)).map((r) => ({ slug: r.slug, term: r.term }));
+  const couplet = couplets[t.slug];
   const [lede, ...rest] = t.definition.split(/(?<=[.!?])\s+(?=[A-Z])/);
   // rough heights, in pixels: the lists beside the definition, and the definition's own column without a lesson
   const beside = related.reduce((sum, r) => sum + (firstSentence(r.definition, 110).length > 56 ? 104 : 82), related.length ? 35 : 0) + (tools.length ? 60 + tools.length * 64 : 0) + (markets.length ? 60 + markets.length * 64 : 0);
@@ -115,6 +117,12 @@ export default async function TermPage({ params }: Params) {
       <div className="wrap section-quiet">
         <div className="phi items-start">
           <article>
+            {couplet && (
+              <p className="gx-couplet" aria-label="A couplet to remember it by">
+                <span>{couplet[0]}</span>
+                <span>{couplet[1]}</span>
+              </p>
+            )}
             <p className="font-display text-xl font-normal leading-snug text-ink lg:text-2xl">{lede}</p>
             {rest.length > 0 && <p className="mt-21 max-w-measure text-[1.0625rem] leading-relaxed text-ink-2">{rest.join(" ")}</p>}
 

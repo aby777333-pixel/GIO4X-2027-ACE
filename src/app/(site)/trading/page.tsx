@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { RiskNote } from "@/components/trading/Blocks";
 import { NextSteps, PageHero } from "@/components/ui/Page";
@@ -61,6 +62,8 @@ export default function TradingPage() {
       </section>
 
       <RiskNote text={riskWarning} />
+
+      <PunchLine k="trading" />
 
       <NextSteps
         items={[

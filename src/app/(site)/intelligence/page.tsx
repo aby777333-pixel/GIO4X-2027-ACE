@@ -1,3 +1,4 @@
+import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { BlogLatest } from "@/components/blog/BlogLatest";
 import { RouteScene } from "@/components/cockpit/RouteScene";
@@ -248,6 +249,8 @@ export default function IntelligencePage() {
       )}
 
       <BlogLatest />
+
+      <PunchLine k="intelligence" />
 
       <NextSteps
         items={[
