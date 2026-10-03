@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Notice } from "@/components/control/bits";
 import { SubmitButton } from "@/components/control/SubmitButton";
 
@@ -19,6 +20,10 @@ export function Decide({
   reason = false,
   reference = false,
   approveLabel = "Approve",
+  approveValue = "approve",
+  approve = true,
+  cancel = false,
+  note,
 }: {
   action: (formData: FormData) => Promise<void>;
   id: string;
@@ -27,13 +32,23 @@ export function Decide({
   reason?: boolean;
   reference?: boolean;
   approveLabel?: string;
+  /** the decision the primary button posts: "approve" (first person) or "confirm" (second person) */
+  approveValue?: "approve" | "confirm";
+  /** false when this person cannot press the primary button (their own request is waiting for somebody else) */
+  approve?: boolean;
+  /** offer "Withdraw the request" (an approval somebody asked for and nobody has confirmed) */
+  cancel?: boolean;
+  /** one line above the buttons: who asked, and when */
+  note?: ReactNode;
 }) {
   const field = `decide-${id}`;
   return (
     <div className="grid min-w-[12rem] gap-8">
+      {note && <p className="text-xs text-ink-2">{note}</p>}
+      {approve && (
       <form action={action} className="grid gap-5">
         <input type="hidden" name="id" value={id} />
-        <input type="hidden" name="decision" value="approve" />
+        <input type="hidden" name="decision" value={approveValue} />
         {reference && (
           <>
             <label htmlFor={`${field}-ref`} className="text-xs text-ink-3">
@@ -47,6 +62,17 @@ export function Decide({
           <span className="sr-only"> {what}</span>
         </SubmitButton>
       </form>
+      )}
+      {cancel && (
+        <form action={action}>
+          <input type="hidden" name="id" value={id} />
+          <input type="hidden" name="decision" value="cancel" />
+          <SubmitButton pending="Recording…" className="btn btn-ghost btn-sm">
+            Withdraw the request
+            <span className="sr-only"> to approve {what}</span>
+          </SubmitButton>
+        </form>
+      )}
       <details>
         <summary className="cursor-pointer text-xs text-ink-2">
           Reject<span className="sr-only"> {what}</span>…
@@ -72,6 +98,9 @@ export function Decide({
 }
 
 const NOTICES: Record<string, string> = {
+  requested: "Approval requested. A second person must confirm it before anything changes; nothing has moved yet.",
+  cancelled: "The request was withdrawn. The transaction is still pending.",
+  unreviewed: "Approved without a second person, because nobody else on staff can approve funds. The audit log records it as unreviewed.",
   approved: "Approved. The decision is recorded in the audit log.",
   rejected: "Rejected. The decision is recorded in the audit log.",
 };
@@ -82,6 +111,9 @@ const ERRORS: Record<string, { title: string; body: string }> = {
   invalid: { title: "That request was not understood", body: "Nothing was changed. Reload the page and try again." },
   reason: { title: "A rejection needs a reason", body: "Nothing was changed. Say in a few words why; the client sees it." },
   audit: { title: "The decision could not be recorded, so it was not made", body: "Nothing was changed in the portal. Try again in a moment." },
+  own: { title: "You asked for this approval, so somebody else must confirm it", body: "Nothing was changed." },
+  requested: { title: "Approval has already been requested for this one", body: "Nothing was changed. A second person can confirm it below." },
+  norequest: { title: "There is no open request to act on", body: "Nothing was changed. The list below shows where it stands." },
   decided: { title: "Somebody had already decided this", body: "Nothing was changed. The list below shows its current status." },
   missing: { title: "That record no longer exists in the portal", body: "Nothing was changed." },
   balance: { title: "The wallet does not hold enough for this withdrawal", body: "Nothing was changed. The attempt is recorded in the audit log." },

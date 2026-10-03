@@ -39,8 +39,9 @@ function fileSize(bytes: number | null): string {
  * time, through src/app/control/actions-portal.ts, which records the decision
  * in the audit log before it is made. The client's overall status is then
  * worked out by the portal from their documents; it is never set by hand.
- * The files themselves are not opened here. Every figure is a count of the
- * portal's rows.
+ * A file is opened through /control/kyc/file/<id>, which records the opening
+ * and redirects to a one-minute link into the portal's private storage. Every
+ * figure is a count of the portal's rows.
  */
 export default async function KycPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const access = await requirePortal("kyc.read");
@@ -85,7 +86,7 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
   return (
     <>
       <ControlHead title={TITLE} lead="Each client’s verification status in the portal, and the document records behind it. Newest document first." />
-      <PortalSource decides={decides}>Documents are listed, not opened: the files stay in the portal’s storage.</PortalSource>
+      <PortalSource decides={decides}>A file opens in a new tab through a link that works for one minute; each opening is recorded in the audit log with your name.</PortalSource>
       <DecisionNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
@@ -126,7 +127,11 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
                     </td>
                     <td className="whitespace-nowrap text-ink">{label(row.doc_type)}</td>
                     <td className="max-w-[14rem] text-ink-2">
-                      <span className="block truncate">{row.file_name ?? "–"}</span>
+                      {/* a plain link, not next/link: it must not be prefetched, since opening a document is recorded */}
+                      <a href={`/control/kyc/file/${row.id}`} target="_blank" rel="noopener" className="link block truncate">
+                        {row.file_name ?? "Open the file"}
+                        <span className="sr-only"> (opens the document in a new tab; recorded in the audit log)</span>
+                      </a>
                       <span className="num block text-xs text-ink-3">{fileSize(row.file_size_bytes)}</span>
                     </td>
                     <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(row.created_at)}</td>

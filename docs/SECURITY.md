@@ -217,7 +217,16 @@ the client portal's Supabase project. Control reads them on the server with that
   database as the signed-in member of staff (`portal_action_record`, `0022_portal_actions.sql`, which checks
   the capability again): no audit entry, no decision. If the portal then refuses, a second entry says so. The
   portal records the person's name as text beside the record, since they have no account there.
-- **One person decides.** There is no second approver on a withdrawal yet; four eyes on money is not built.
+- **Two people on money** (`0023_portal_four_eyes.sql`). Approving a deposit or a withdrawal changes a
+  balance, so the first person only asks (`portal_approval_request`) and a second, different person holding
+  `funds.settle` confirms (`portal_approval_confirm`); the database refuses the requester, and the change in
+  the portal is made only after the confirmation. A rejection takes one person. The stated exception, the
+  same as for staff access: when no other active member of staff holds `funds.settle`, the request is
+  approved at once and the audit entry is marked `unreviewed`.
+- **Opening a KYC file** (`/control/kyc/file/<id>`): staff holding `kyc.read`, from a Control page only,
+  and recorded in the audit log (`kyc.view`) before a link is made. The link goes to the portal's private
+  storage and works for one minute. The storage path comes from the document's record, never from the
+  request.
 - Reads are not written to the audit log. Who may read is decided by role; what was read is not recorded.
 - The portal's own weaknesses listed in `docs/BACKOFFICE-PLAN.md` (section 1, items 1 to 5 and 7) were closed
   in its database on 3 October 2026 (`portal/supabase/migrations/20261003120000_close_known_security_holes.sql`,

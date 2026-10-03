@@ -697,6 +697,10 @@ export type Database = {
       staff_directory: { Args: { [_ in never]: never }; Returns: { user_id: string; display_name: string }[] };
       record_subscriber_export: { Args: { row_count: number }; Returns: undefined };
       portal_action_record: { Args: { p_action: string; p_entity_id: string; p_detail: Json }; Returns: undefined };
+      portal_approval_request: { Args: { p_tx: string; p_reference: string }; Returns: string };
+      portal_approval_confirm: { Args: { p_tx: string }; Returns: Json };
+      portal_approval_cancel: { Args: { p_tx: string }; Returns: boolean };
+      portal_approvals_open: { Args: { p_ids: string[] }; Returns: { tx_id: string; requested_by_name: string; requested_at: string; reference: string | null; mine: boolean }[] };
       staff_can: { Args: { cap: string }; Returns: boolean };
       my_capabilities: { Args: { [_ in never]: never }; Returns: string[] };
       staff_list: { Args: { [_ in never]: never }; Returns: StaffListRow[] };

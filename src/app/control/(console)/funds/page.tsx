@@ -52,9 +52,9 @@ type TransferRow = {
  * approve or reject a deposit or withdrawal that is still pending: one at a
  * time, through src/app/control/actions-portal.ts, which records the decision
  * in the audit log before it is made. Approving credits or debits the wallet
- * in the portal's database; one person decides (there is no second approver
- * yet). Every figure is a count of the portal's rows; no amounts are added up
- * here.
+ * in the portal's database and takes two people: the first asks, a second
+ * confirms (0023_portal_four_eyes.sql). A rejection takes one. Every figure is
+ * a count of the portal's rows; no amounts are added up here.
  */
 export default async function FundsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const access = await requirePortal("funds.read");
@@ -106,6 +106,10 @@ export default async function FundsPage({ searchParams }: { searchParams: Promis
   for (const w of (walletsRead?.data ?? []) as WalletRow[]) wallets.set(w.id, w);
 
   const failed = [txs, transfers, withdrawalsPending, depositsPending, allTx, walletsActive, walletsFrozen].some((r) => r.error) || !!walletsRead?.error;
+  // open approval requests for the rows on this page, from Control's own database (0023)
+  const openIds = rows.filter((r) => (r.type === "deposit" || r.type === "withdraw") && (r.status === "pending" || r.status === "processing")).map((r) => r.id);
+  const requestsRead = decides && openIds.length ? await ctx.supabase.rpc("portal_approvals_open", { p_ids: openIds }) : null;
+  const requests = new Map((requestsRead?.data ?? []).map((r) => [r.tx_id, r]));
   const people = await portalPeople(db, [...rows.flatMap((r) => [wallets.get(r.wallet_id)?.user_id, r.reviewed_by]), ...transferRows.map((r) => r.user_id)]);
   const n = (r: { error: unknown; count: number | null }) => (r.error ? "–" : String(r.count ?? 0));
 
@@ -130,7 +134,11 @@ export default async function FundsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <ControlHead title={TITLE} lead="Deposits, withdrawals and every other movement on client wallets in the portal, newest first, with the internal transfers beneath." />
-      <PortalSource decides={decides}>{decides ? "Approving a deposit credits the wallet; approving a withdrawal debits it. Check the payment itself before you approve." : "Settlement is done by finance."}</PortalSource>
+      <PortalSource decides={decides}>
+        {decides
+          ? "Approving a deposit credits the wallet; approving a withdrawal debits it. It takes two people: one asks, another confirms. Check the payment itself before you do either."
+          : "Settlement is done by finance."}
+      </PortalSource>
       <DecisionNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
@@ -191,13 +199,29 @@ export default async function FundsPage({ searchParams }: { searchParams: Promis
                       {decides && (
                         <td>
                           {(row.type === "deposit" || row.type === "withdraw") && (row.status === "pending" || row.status === "processing") ? (
-                            <Decide
-                              action={settleWalletTransaction}
-                              id={row.id}
-                              what={`${label(row.type)} of ${fmtMoney(row.amount, row.currency)}`}
-                              reference
-                              approveLabel={row.type === "deposit" ? "Approve and credit" : "Approve and debit"}
-                            />
+                            (() => {
+                              const asked = requests.get(row.id);
+                              const verb = row.type === "deposit" ? "credit" : "debit";
+                              return (
+                                <Decide
+                                  action={settleWalletTransaction}
+                                  id={row.id}
+                                  what={`${label(row.type)} of ${fmtMoney(row.amount, row.currency)}`}
+                                  reference={!asked}
+                                  approve={!asked?.mine}
+                                  approveValue={asked ? "confirm" : "approve"}
+                                  approveLabel={asked ? `Confirm and ${verb} (2 of 2)` : "Approve (1 of 2)"}
+                                  cancel={!!asked}
+                                  note={
+                                    asked
+                                      ? asked.mine
+                                        ? `You asked for approval on ${fmtDateTime(asked.requested_at)}. Somebody else must confirm it.`
+                                        : `${asked.requested_by_name} asked for approval on ${fmtDateTime(asked.requested_at)}${asked.reference ? `, reference ${asked.reference}` : ""}.`
+                                      : undefined
+                                  }
+                                />
+                              );
+                            })()
                           ) : (
                             <span className="text-ink-3">–</span>
                           )}

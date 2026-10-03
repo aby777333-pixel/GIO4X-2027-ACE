@@ -12,8 +12,9 @@
  *   1. who is calling (active staff) and whether they hold the capability;
  *   2. the input, reduced to an id, a fixed choice and a short cleaned text;
  *   3. the audit entry, written in THIS database as the signed-in member of
- *      staff (portal_action_record, 0022). The database checks the capability
- *      again. No audit entry, no decision;
+ *      staff (portal_action_record, 0022; for an approval of money, the
+ *      request and confirmation functions of 0023). The database checks the
+ *      capability again. No audit entry, no decision;
  *   4. the decision, in the portal's database, with the person's name as text;
  *   5. if the portal refused or failed, a second audit entry that says so.
  *
@@ -71,24 +72,74 @@ export async function decideKycDocument(formData: FormData): Promise<void> {
   redirect(`${KYC}?notice=${approve ? "approved" : "rejected"}`);
 }
 
+/**
+ * A pending deposit or withdrawal. Approving one changes a balance, so it takes
+ * two people (0023_portal_four_eyes.sql):
+ *
+ *   approve   the first person asks. Nothing changes in the portal. If nobody
+ *             else on staff could confirm, the database approves it at once and
+ *             records it as unreviewed; the change is then made here.
+ *   confirm   a second, different person confirms; the database refuses the
+ *             requester. Only then is the change made in the portal.
+ *   reject    one person is enough. An open request is withdrawn with it.
+ *   cancel    an open request is withdrawn; the transaction stays pending.
+ *
+ * The approval's audit entry is written by the database inside request/confirm,
+ * before the portal is touched; a failure afterwards is recorded as funds.failed.
+ */
 export async function settleWalletTransaction(formData: FormData): Promise<void> {
   const { ctx, db } = await decider("funds.settle", FUNDS);
+  const back = `${FUNDS}?status=pending`;
 
   const id = formData.get("id");
   const decision = formData.get("decision");
-  if (!isUuid(id) || (decision !== "approve" && decision !== "reject")) redirect(`${FUNDS}?error=invalid`);
+  if (!isUuid(id) || (decision !== "approve" && decision !== "confirm" && decision !== "reject" && decision !== "cancel")) redirect(`${FUNDS}?error=invalid`);
   const refRaw = formData.get("reference");
   // a payment reference: letters, digits and the few marks references carry; nothing else survives
-  const reference = typeof refRaw === "string" ? refRaw.replace(/[^A-Za-z0-9 ._\-/#:]/g, "").trim().slice(0, REF_MAX) : "";
+  let reference = typeof refRaw === "string" ? refRaw.replace(/[^A-Za-z0-9 ._\-/#:]/g, "").trim().slice(0, REF_MAX) : "";
 
-  const record = await ctx.supabase.rpc("portal_action_record", {
-    p_action: decision === "approve" ? "funds.approve" : "funds.reject",
-    p_entity_id: id,
-    p_detail: reference ? { reference } : {},
-  });
-  if (record.error) redirect(`${FUNDS}?error=${record.error.code === "42501" ? "forbidden" : "audit"}`);
+  if (decision === "cancel") {
+    const { data, error } = await ctx.supabase.rpc("portal_approval_cancel", { p_tx: id });
+    if (error) redirect(`${FUNDS}?error=${error.code === "42501" ? "forbidden" : "audit"}`);
+    redirect(data ? `${back}&notice=cancelled` : `${FUNDS}?error=norequest`);
+  }
 
-  const { data, error } = await db.rpc("control_settle_wallet_transaction", { p_tx_id: id, p_action: decision, p_gateway_ref: reference || null, p_actor: actorOf(ctx) });
+  // the record must still be an open deposit or withdrawal before anybody is asked to approve it
+  const current = await db.from("wallet_transactions").select("type, status").eq("id", id).maybeSingle();
+  if (current.error) redirect(`${FUNDS}?error=portal`);
+  if (!current.data) redirect(`${FUNDS}?error=missing`);
+  if (current.data.type !== "deposit" && current.data.type !== "withdraw") redirect(`${FUNDS}?error=type`);
+  if (current.data.status !== "pending" && current.data.status !== "processing") redirect(`${FUNDS}?error=decided`);
+
+  let actor = actorOf(ctx);
+  let action: "approve" | "reject";
+
+  if (decision === "reject") {
+    const record = await ctx.supabase.rpc("portal_action_record", { p_action: "funds.reject", p_entity_id: id, p_detail: reference ? { reference } : {} });
+    if (record.error) redirect(`${FUNDS}?error=${record.error.code === "42501" ? "forbidden" : "audit"}`);
+    // a request somebody made earlier is withdrawn with the rejection; there may be none
+    await ctx.supabase.rpc("portal_approval_cancel", { p_tx: id });
+    action = "reject";
+  } else if (decision === "approve") {
+    const { data, error } = await ctx.supabase.rpc("portal_approval_request", { p_tx: id, p_reference: reference });
+    if (error) redirect(`${FUNDS}?error=${error.code === "42501" ? "forbidden" : "audit"}`);
+    if (data === "pending") redirect(`${back}&notice=requested`);
+    if (data === "exists") redirect(`${FUNDS}?error=requested`);
+    if (data !== "unreviewed") redirect(`${FUNDS}?error=audit`);
+    actor = `${actor} (no second approver on staff)`.slice(0, 120);
+    action = "approve";
+  } else {
+    const { data, error } = await ctx.supabase.rpc("portal_approval_confirm", { p_tx: id });
+    if (error) redirect(`${FUNDS}?error=${error.code === "42501" ? "forbidden" : "audit"}`);
+    const confirmed = (data ?? {}) as { result?: string; reference?: string | null; requested_by_name?: string };
+    if (confirmed.result === "own") redirect(`${FUNDS}?error=own`);
+    if (confirmed.result !== "confirmed") redirect(`${FUNDS}?error=norequest`);
+    reference = confirmed.reference ?? "";
+    actor = `${actor}; requested by ${cleanText(confirmed.requested_by_name ?? "").slice(0, 40)}`.slice(0, 120);
+    action = "approve";
+  }
+
+  const { data, error } = await db.rpc("control_settle_wallet_transaction", { p_tx_id: id, p_action: action, p_gateway_ref: reference || null, p_actor: actor });
   const outcome = (data ?? {}) as Outcome;
   if (error || outcome.result !== "ok") {
     const code = error ? "portal_error" : (outcome.result ?? "unknown");
@@ -96,5 +147,5 @@ export async function settleWalletTransaction(formData: FormData): Promise<void>
     const shown: Record<string, string> = { already_decided: "decided", not_found: "missing", insufficient_balance: "balance", wallet_not_active: "wallet", not_settled_here: "type" };
     redirect(`${FUNDS}?error=${shown[code] ?? "portal"}`);
   }
-  redirect(`${FUNDS}?status=pending&notice=${decision === "approve" ? "approved" : "rejected"}`);
+  redirect(`${back}&notice=${action === "reject" ? "rejected" : decision === "approve" ? "unreviewed" : "approved"}`);
 }
