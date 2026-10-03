@@ -13,7 +13,6 @@ import { articleSchema, faqSchema } from "@/lib/schema";
 /** the day these pages were written; changed when their words are */
 const WRITTEN = "2026-10-04";
 
-export const dynamicParams = false;
 export function generateStaticParams() {
   return PLAYBOOK.map((p) => ({ slug: p.slug }));
 }
