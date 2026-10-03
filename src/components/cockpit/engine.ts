@@ -247,6 +247,8 @@ function readRegion(): Region {
 }
 
 const MAX_PIXELS = 3_400_000;
+/** ms: how far into its 1.8 second power-on a scene already is on its first frame (about two fifths lit) */
+const BOOT_LEAD = 280;
 
 /**
  * Start a scene on a canvas. Returns the disposer.
@@ -454,7 +456,13 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     for (const r of range.getClientRects()) f.clear = Math.max(f.clear, r.right - left);
   };
 
-  const resize = () => {
+  /**
+   * Fit the backing store to the canvas. Returns whether the picture was wiped: assigning a canvas's
+   * width or height clears it, even to the same value, so they are assigned only when they change.
+   * (The ResizeObserver reports once when it starts observing; that used to clear the first frame
+   * just after it was drawn and leave one empty frame on screen.)
+   */
+  const resize = (): boolean => {
     const r = canvas.getBoundingClientRect();
     w = Math.max(1, r.width);
     h = Math.max(1, r.height);
@@ -462,11 +470,17 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     dpr = Math.min(dprCap, f.mobile ? 1.5 : 2, window.devicePixelRatio || 1);
     // never hand the GPU more than it needs: cap the backing store
     if (w * h * dpr * dpr > MAX_PIXELS) dpr = Math.max(1, Math.sqrt(MAX_PIXELS / (w * h)));
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
+    const bw = Math.round(w * dpr);
+    const bh = Math.round(h * dpr);
+    const wiped = canvas.width !== bw || canvas.height !== bh;
+    if (wiped) {
+      canvas.width = bw;
+      canvas.height = bh;
+    }
     f.w = w;
     f.h = h;
     measure();
+    return wiped;
   };
 
   const frame = (time: number) => {
@@ -479,7 +493,8 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
       return;
     }
     if (!started) started = time;
-    const dt = last ? Math.min(0.1, (time - last) / 1000) : 0.016;
+    // (a frame drawn at once, outside the loop, is stamped a little later than the loop's own: never run backwards)
+    const dt = last ? clamp((time - last) / 1000, 0, 0.1) : 0.016;
     last = time;
 
     f.still = still;
@@ -498,7 +513,8 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     // the scene's own clock: it runs faster while the pointer is over the frame
     clock += dt * (1 + f.hover * 0.7);
     f.t = still ? (scene.pose ?? 9) : clock;
-    f.boot = still ? 1 : easeOut((time - started) / 1800);
+    // the power-on ramp, with a head start: the very first frame already shows the instrument faintly lit instead of an empty pane
+    f.boot = still ? 1 : easeOut((time - started + BOOT_LEAD) / 1800);
     f.now = new Date();
 
     const framed = !scene.free;
@@ -671,9 +687,29 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
     raf = requestAnimationFrame(frame);
   };
 
+  /**
+   * Draw one frame now, in this task, instead of asking for the next animation frame. Used for the
+   * first picture (so the canvas is never shown before it holds one) and straight after the backing
+   * store has been wiped by a resize (so the wiped canvas is never what gets painted). The loop
+   * carries on from it as usual.
+   */
+  const drawNow = () => {
+    if (disposed) return;
+    cancelAnimationFrame(raf);
+    raf = 0;
+    const was = last;
+    frame(performance.now());
+    // phones skip a frame that comes too soon after the last; a wiped canvas must be drawn regardless
+    if (last === was && !disposed) {
+      cancelAnimationFrame(raf);
+      last = 0;
+      frame(performance.now());
+    }
+  };
+
   const ro = new ResizeObserver(() => {
-    resize();
-    start();
+    if (resize()) drawNow();
+    else start();
   });
   ro.observe(canvas);
   const io = new IntersectionObserver(([e]) => {
@@ -736,7 +772,9 @@ export function mount<S>(canvas: HTMLCanvasElement, scene: Scene<S>, opts: { see
   f.pal = readPalette(canvas, f.region);
   resize();
   onScroll();
-  start();
+  // the first picture is drawn here, synchronously: by the time the canvas is marked `data-on` and
+  // begins to fade in, it already holds a frame, and the page-to-page transition need not wait for one
+  drawNow();
   void document.fonts?.ready.then(() => {
     if (disposed) return;
     measure();

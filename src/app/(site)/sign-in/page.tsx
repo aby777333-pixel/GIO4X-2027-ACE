@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { HeroCompanion } from "@/components/figures/stage/HeroCompanion";
 import { ThreeDoors } from "@/components/figures/stage/ThreeDoors";
+import { PageTour } from "@/components/tour/PageTour";
+import type { PageTourStop } from "@/components/tour/stops";
 import { PageHero } from "@/components/ui/Page";
 import { destinationAddress, portalMeta, portals, type PortalKey } from "@/config/destinations";
 import { pageMeta } from "@/lib/meta";
@@ -35,7 +37,31 @@ function VerifiedMark() {
 export default function SignInPage() {
   const anyUnconfigured = ORDER.some((k) => portals[k].status === "UNCONFIGURED");
 
+  // the first-visit gateway tour: what each door is, in the registry's own words, and whether it is connected
+  const tour: PageTourStop[] = [
+    {
+      target: '[data-tour="doors"]',
+      title: "Three doors",
+      body: "This page is the way from the website into GIO4X’s portals. A door is a link only once its destination is verified; until then it reads “Not connected yet”. There is never a guessed address.",
+    },
+    ...ORDER.map((key): PageTourStop => {
+      const dest = portals[key];
+      return {
+        target: `[data-tour="door-${key}"]`,
+        title: portalMeta[key].label,
+        body: `${portalMeta[key].summary} ${dest.status === "CONFIGURED" ? `It opens at ${destinationAddress(dest.url)}, shown beside it.` : "It is not connected to this website yet."}`,
+      };
+    }),
+    {
+      target: '[data-tour="gateway-safety"]',
+      title: "Before you type anything",
+      body: "GIO4X will never ask for your password or a one-time security code by email or message. If you were sent a link, the Official Destination Checker compares it with the registry of GIO4X domains and approved third parties.",
+    },
+  ];
+
   return (
+    <>
+    <PageTour id="gateway" stops={tour} />
     <PageHero
       crumbs={[{ name: "Sign in", href: "/sign-in" }]}
       eyebrow="Sign in"
@@ -43,13 +69,13 @@ export default function SignInPage() {
       lead="Choose your destination:"
       aside={
         <div>
-          <ul className="border-t border-line-strong">
+          <ul className="border-t border-line-strong" data-tour="doors">
             {ORDER.map((key) => {
               const dest = portals[key];
               const meta = portalMeta[key];
               if (dest.status === "CONFIGURED") {
                 return (
-                  <li key={key} className="border-b border-line">
+                  <li key={key} className="border-b border-line" data-tour={`door-${key}`}>
                     <a href={dest.url} rel="noopener noreferrer" className="group grid grid-cols-[1fr_auto] items-center gap-x-21 gap-y-5 py-21 transition-colors duration-fast hover:bg-surface sm:px-13">
                       <span>
                         <span className="h3 block transition-colors duration-fast group-hover:text-accent">{meta.label}</span>
@@ -67,7 +93,7 @@ export default function SignInPage() {
                 );
               }
               return (
-                <li key={key} className="grid grid-cols-[1fr_auto] items-start gap-x-21 border-b border-line py-21 sm:px-13">
+                <li key={key} className="grid grid-cols-[1fr_auto] items-start gap-x-21 border-b border-line py-21 sm:px-13" data-tour={`door-${key}`}>
                   <span>
                     <span className="h3 block text-ink-2">{meta.label}</span>
                     <span className="mt-5 block text-sm text-ink-3">{meta.summary}</span>
@@ -88,7 +114,7 @@ export default function SignInPage() {
             </p>
           )}
 
-          <div className="mt-34 border-t border-line pt-21 text-sm text-ink-3">
+          <div className="mt-34 border-t border-line pt-21 text-sm text-ink-3" data-tour="gateway-safety">
             <p>
               GIO4X will never ask for your password or a one-time security code by email or message. Unsure about a link?{" "}
               <Link href="/trust/verify" className="link">
@@ -115,5 +141,6 @@ export default function SignInPage() {
         </HeroCompanion>
       }
     />
+    </>
   );
 }

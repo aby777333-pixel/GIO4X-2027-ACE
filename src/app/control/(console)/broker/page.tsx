@@ -4,6 +4,8 @@ import { ConfigManager, ConfigNotice } from "@/components/control/portal/ConfigM
 import { FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
 import { can } from "@/lib/server/staff";
+import { BlocksSection, InstrumentsSection, TerminalAuditSection, TerminalNotice, TerminalUnconfigured } from "@/components/control/portal/TerminalBits";
+import { INSTRUMENT_COLUMNS, isSymbol, requireTerminal, type Instrument, type TerminalAudit, type TradingBlock } from "@/lib/server/terminal-db";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Broker Controls", "/control/broker");
@@ -70,6 +72,19 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
   const manages = can(ctx, "trading.manage");
 
   const params = await searchParams;
+
+  // The trading terminal is a third database: per-symbol conditions and trading blocks.
+  // Its own guard; when it is not connected this page still shows the portal's part.
+  const term = await requireTerminal("trading.read");
+  const terminal = term.state === "ok" ? term.terminal : null;
+  const [instruments, blocks, terminalAudit] = terminal
+    ? await Promise.all([
+        terminal.select<Instrument>(`instruments?select=${INSTRUMENT_COLUMNS}&order=symbol.asc&limit=500`),
+        terminal.select<TradingBlock>(`broker_trading_blocks?select=id,symbol,reason,starts_at,ends_at,created_by&ends_at=gt.${encodeURIComponent(new Date().toISOString())}&order=starts_at.asc&limit=100`),
+        terminal.select<TerminalAudit>("broker_config_audit?select=actor,symbol,field,old_value,new_value,changed_at&order=changed_at.desc&limit=25"),
+      ])
+    : [null, null, null];
+  const focus = firstParam(params.symbol);
   const status = oneOf(firstParam(params.status), ACCOUNT_STATUSES, "");
   const kind = oneOf(firstParam(params.kind), ACCOUNT_KINDS, "");
   const { page, from, to } = pageRange(firstParam(params.page), PER_PAGE);
@@ -112,6 +127,7 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
       <ControlHead title={TITLE} lead="The account types the portal offers, the trading accounts opened under them, and the portal’s switches." />
       <PortalSource decides={manages}>{manages ? "Account types are added, changed and retired beneath their table; a new account opened in the portal takes its type from them. Per-symbol controls and trading blocks are set in the portal and are not listed here." : "Per-symbol controls and trading blocks are set in the portal and are not listed here."}</PortalSource>
       <ConfigNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
+      <TerminalNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Section title="Account types" aside="In the portal’s order">
@@ -209,6 +225,15 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
         )}
         <Pager page={page} pageCount={Math.max(1, Math.ceil(total / PER_PAGE))} total={total} noun={total === 1 ? "trading account" : "trading accounts"} href={href} />
       </Section>
+
+      {term.state === "unconfigured" && <TerminalUnconfigured />}
+      {terminal && (
+        <>
+          <InstrumentsSection instruments={instruments} manages={manages} focus={isSymbol(focus) ? focus : undefined} />
+          <BlocksSection blocks={blocks} symbols={(instruments ?? []).map((i) => i.symbol)} manages={manages} />
+          <TerminalAuditSection rows={terminalAudit} />
+        </>
+      )}
 
       <Section title="Switches" aside={flags.error ? undefined : `${fmtNum(flagRows.length)} in the portal`}>
         {flagRows.length === 0 ? (

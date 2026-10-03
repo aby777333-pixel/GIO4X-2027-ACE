@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Hero } from "@/components/home/Hero";
+import { HomeStory } from "@/components/home/HomeStory";
 import { MarketToRaptor } from "@/components/home/MarketToRaptor";
 import { ReferenceRates } from "@/components/home/ReferenceRates";
 import { AccountsTable, AssetIndex, IntelligenceTeaser, Philosophy, PlatformsChapter, ToolsTeaser, TrustBlock } from "@/components/home/Sections";
@@ -7,6 +8,7 @@ import { SessionStrip } from "@/components/market/SessionStrip";
 import { SectionHead } from "@/components/ui/Page";
 import { site } from "@/config/site";
 import { pageMeta } from "@/lib/meta";
+import "@/components/home/home.css";
 
 export const metadata = pageMeta({
   title: `${site.name} | ${site.tagline}`,
@@ -23,6 +25,11 @@ export const revalidate = 3600;
  *   cinematic → quiet strip → whisper → index → the pinned sequence (globe to
  *   Raptor) → platforms → data →
  *   tools → comparison → trust → reading. Section heights vary on purpose.
+ *
+ * <HomeStory/> ties it into one shot: a small instrument leaves the hero and
+ * travels down the page, changing with the chapter (market, instrument, order,
+ * account); headings arrive in step; marked layers have a few pixels of depth.
+ * It is driven by the scroll position and adds no text: see docs/HOME-STORY.md.
  */
 export default function HomePage() {
   return (
@@ -55,6 +62,7 @@ export default function HomePage() {
       <AccountsTable />
       <TrustBlock />
       <IntelligenceTeaser />
+      <HomeStory />
     </>
   );
 }

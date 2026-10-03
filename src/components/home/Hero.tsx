@@ -13,12 +13,19 @@ import { site } from "@/config/site";
  * phone it is the sky above the statement rather than a second stacked block.
  * The canvas is decorative; <CentreSummary/> says the same real information in
  * words, and the caption says what is real and what is only form.
+ *
+ * Depth (components/home/HomeStory.tsx reads `data-depth`): a far field of
+ * points behind the instrument, the instrument itself, and the statement in
+ * front, each shifting a few pixels with scroll; the far field and the
+ * statement also answer the pointer. The canvas does not, because its scene
+ * already turns its own camera toward the pointer.
  */
 export function Hero() {
   return (
     <section className="cx-hero cx-home on-night" aria-labelledby="hero-title">
       <div className="cx-stage">
-        <HeroScene scene="flightdeck" seed="/" />
+        <div aria-hidden className="gx-depth-far" data-depth="-2" />
+        <HeroScene scene="flightdeck" seed="/" className="gx-depth-mid" />
         <CentreSummary />
         <p className="cx-home-note hidden text-xs text-ink-3 lg:block">
           Financial centres by regular trading hours, joined when open together, with day and night from your clock. Timeline: the day ahead in UTC, each centre&apos;s regular hours and the four FX sessions. Tape, ladder and candles are forms only, not market data.
@@ -27,7 +34,7 @@ export function Hero() {
 
       <div className="cx-main">
         <div className="cx-statement">
-          <div className="cx-statement-body max-w-[40rem]">
+          <div className="cx-statement-body max-w-[40rem]" data-depth="0.5">
             <p className="eyebrow" style={{ animation: "gx-rise 680ms var(--ease-out) both" }}>
               {site.tagline}
             </p>

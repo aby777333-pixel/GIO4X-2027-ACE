@@ -1,0 +1,114 @@
+/* ==========================================================================
+   THE HOMEPAGE AS ONE SHOT (components/home/HomeStory.tsx)
+   Imported by the homepage only. Everything here is inert until the script
+   marks it live, so without JavaScript the page is exactly as it was; under
+   reduced motion or "low visual effects" the script writes no movement.
+   ========================================================================== */
+
+/* ── 1. the travelling instrument ───────────────────────────────────────── */
+.gx-story {
+  display: none;
+}
+@media (min-width: 820px) {
+  .gx-story[data-live] {
+    display: block;
+    position: fixed;
+    z-index: 30; /* under the header (40) and every panel that can open */
+    top: calc(var(--header-h) + 0.8125rem);
+    /* in the page margin where there is one; over the top-right corner of the column where there is not */
+    right: max(var(--gutter), calc((100vw - var(--page)) / 2 - 10.3125rem));
+    width: 9rem;
+    height: 8.0625rem;
+    padding: 0.5rem 0.5rem 0;
+    border: 1px solid color-mix(in srgb, var(--prestige) 46%, transparent);
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--night) 90%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 13px 34px -21px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform-origin: 50% 50%;
+    will-change: transform, opacity;
+  }
+}
+[data-effects="low"] .gx-story[data-live] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--night);
+}
+.gx-story-canvas {
+  display: block;
+  width: 100%;
+  height: 4.9375rem; /* the frame is a golden rectangle: 128 by 79 */
+}
+.gx-story-cap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.3125rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.gx-story-n {
+  color: var(--prestige);
+}
+.gx-story-note {
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+
+/* ── 2. headings in step ────────────────────────────────────────────────
+   --story-in runs 0 → 1 as a section's top comes up the window. The eyebrow's
+   rule is drawn and the heading settles a few pixels; the words are always
+   fully opaque, so nothing is ever hard to read part-way. */
+[data-story-in] .eyebrow::before {
+  transform: scaleX(calc(0.2 + var(--story-in, 1) * 0.8));
+  transform-origin: left center;
+}
+[data-story-in] h2 {
+  transform: translate3d(calc((1 - var(--story-in, 1)) * -8px), 0, 0);
+}
+
+/* ── 3. depth ───────────────────────────────────────────────────────────── */
+/* the far field of the hero: a sparse scatter of points behind the instrument,
+   larger than the stage so that its few pixels of travel never show an edge */
+.gx-depth-far {
+  position: absolute;
+  inset: -2.125rem;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--prestige) 70%, transparent) 0 0.9px, transparent 1.6px),
+    radial-gradient(circle, color-mix(in srgb, var(--on-night) 45%, transparent) 0 0.7px, transparent 1.3px);
+  background-size:
+    14.4375rem 8.9375rem,
+    8.9375rem 14.4375rem;
+  background-position:
+    2.125rem 1.3125rem,
+    5.5rem 3.4375rem;
+  -webkit-mask-image: radial-gradient(70% 82% at 68% 46%, #000, transparent 82%);
+  mask-image: radial-gradient(70% 82% at 68% 46%, #000, transparent 82%);
+}
+[data-effects="low"] .gx-depth-far {
+  display: none;
+}
+/* a watermark behind a section's text */
+.gx-depth-mark {
+  position: absolute;
+  pointer-events: none;
+  color: var(--ink);
+  opacity: 0.05;
+}
+@media print {
+  .gx-depth-far,
+  .gx-depth-mark {
+    display: none;
+  }
+}

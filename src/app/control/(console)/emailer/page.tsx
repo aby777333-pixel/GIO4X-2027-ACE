@@ -2,6 +2,9 @@ import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
+import { mailerReady } from "@/lib/server/mailer";
+import { EmailComposer, TerminalNotice } from "@/components/control/portal/TerminalBits";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Bulk Emailer", "/control/emailer");
@@ -38,7 +41,8 @@ export default async function EmailerPage({ searchParams }: { searchParams: Prom
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const sends = can(ctx, "emailer.send");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), STATUSES, "");
@@ -71,10 +75,21 @@ export default async function EmailerPage({ searchParams }: { searchParams: Prom
     return s ? `${BASE}?${s}` : BASE;
   };
 
+  // how many addresses each fixed audience holds now; the addresses themselves never leave the server
+  const audienceCounts: Record<string, number | null> = {};
+  if (sends && mailerReady()) {
+    for (const audience of ["clients_active", "ibs_active", "kyc_incomplete"]) {
+      const r = await db.rpc("control_email_audience", { p_audience: audience });
+      audienceCounts[audience] = r.error ? null : ((r.data ?? []) as string[]).length;
+    }
+  }
+
   return (
     <>
       <ControlHead title={TITLE} lead="The record of what the portal’s bulk emailer sent. Sending is not done from this screen. Newest first." />
-      <PortalSource>Each row gives the number of recipients; the addresses are not listed.</PortalSource>
+      <PortalSource decides={sends}>Each row gives the number of recipients; the addresses are not listed.</PortalSource>
+      <TerminalNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
+      {sends && <EmailComposer ready={mailerReady()} counts={audienceCounts} chosen={firstParam(params.audience)} />}
       {failed && <PortalReadFailed />}
 
       <Figures

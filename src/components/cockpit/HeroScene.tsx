@@ -10,8 +10,13 @@ import { SCENES, type SceneId } from "@/components/cockpit/scenes";
  * complete without it: no script, no canvas support or a failed chunk simply
  * leaves the lit stage behind the headline.
  *
- * The engine and the scene are separate chunks fetched after first paint, when
- * the browser is idle, so a hero never competes with the headline for bytes.
+ * The engine and the scene are separate chunks. The headline is in the HTML
+ * and painted before this effect runs, so the two chunks are requested at once
+ * (they used to wait for an idle moment, up to 900ms, before the request was
+ * even made). Only the mounting waits: for the next animation frame, so the
+ * first picture is drawn in step with the browser's own painting. The engine
+ * draws that first frame synchronously as it mounts (engine.ts, `drawNow`),
+ * so the canvas is never shown empty.
  */
 export function HeroScene({ scene, tag = "", seed = "", className = "" }: { scene: SceneId; tag?: string; seed?: string; className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -23,22 +28,33 @@ export function HeroScene({ scene, tag = "", seed = "", className = "" }: { scen
     let dispose: (() => void) | undefined;
     let dead = false;
 
+    let raf = 0;
+
     const go = async () => {
       try {
         const [engine, mod] = await Promise.all([import("@/components/cockpit/engine"), load()]);
         if (dead) return;
-        dispose = engine.mount(canvas, mod.default, { seed: hash(seed || scene), tag });
+        const begin = () => {
+          raf = 0;
+          if (dead) return;
+          try {
+            dispose = engine.mount(canvas, mod.default, { seed: hash(seed || scene), tag });
+          } catch {
+            /* the stage stands on its own */
+          }
+        };
+        // a hidden tab has no animation frames: mount at once there, and the engine draws its one frame
+        if (document.hidden) begin();
+        else raf = requestAnimationFrame(begin);
       } catch {
         /* the stage stands on its own */
       }
     };
+    void go();
 
-    const idle = typeof window.requestIdleCallback === "function";
-    const id = idle ? window.requestIdleCallback(() => void go(), { timeout: 900 }) : window.setTimeout(() => void go(), 120);
     return () => {
       dead = true;
-      if (idle) window.cancelIdleCallback(id);
-      else window.clearTimeout(id);
+      cancelAnimationFrame(raf);
       dispose?.();
       delete canvas.dataset.on;
     };

@@ -222,6 +222,19 @@ the client portal's Supabase project. Control reads them on the server with that
   through one portal function, `control_config_write`, which accepts only those four tables and their listed
   columns, checks the values, never deletes, and records each write. The audit entry is written here first
   (`portal_config_record`). One person makes a configuration change; it moves no money by itself.
+- **Two more secrets, same rules.** `RAPTOR_BRIDGE_SERVICE_KEY` (with `RAPTOR_BRIDGE_URL`) reaches the
+  trading terminal's database for per-symbol settings and trading blocks: used only in
+  `src/lib/server/terminal-db.ts`, after `requireTerminal(capability)`. `RESEND_API_KEY` sends service
+  e-mail: used only in `src/lib/server/mailer.ts`. Both files are `server-only`. Without either, its screen
+  says "not connected" / "not set up" and does nothing.
+- **Clients, fees by hand, marketing** (`0027_portal_clients_fees.sql`): a client's status is changed by
+  one person (`clients.manage`); a fee charged by hand and a fee reversed move a client's money and take
+  two people (`fees.charge`, `portal_two_person`, which keeps what was asked for so the second person
+  confirms exactly that); marketing materials and campaign links are `partners.manage`.
+- **Trade entered by hand, service e-mail** (`0028_portal_trade_email.sql`): `trading.manage` and
+  `emailer.send`. An e-mail goes to one of three audiences fixed in the portal's database; no address is
+  typed, shown or written to this database's audit log (audience, subject and count only), and the sender
+  must type the number of recipients to confirm.
 - **The other sections** (`0026_portal_ops.sql`): provider and fund status (`partners.manage`), ledger
   accounts and manual journal entries (`ledger.manage`), legal documents (`documents.manage`) and a run of
   the event queue (`events.manage`) go through one portal function, `control_ops`, which names each

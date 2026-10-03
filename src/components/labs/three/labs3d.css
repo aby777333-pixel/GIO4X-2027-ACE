@@ -1,0 +1,147 @@
+/* ==========================================================================
+   The two 3D instruments in Labs (/labs/session-globe, /labs/order-book-3d).
+   Imported by those two pages only.
+
+   The host holds a server-drawn still. When the WebGL scene is running the
+   host carries `data-live` and the still steps back; with no JavaScript, no
+   WebGL or a lost context the still is simply what is there.
+   ========================================================================== */
+.gx3d {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper);
+  aspect-ratio: 1.618 / 1;
+  min-height: 19rem;
+  width: 100%;
+}
+.gx3d-globe {
+  aspect-ratio: 1 / 1;
+  max-height: min(38rem, 78svh);
+}
+.gx3d:focus-visible {
+  outline: 2px solid var(--focus, var(--accent));
+  outline-offset: 2px;
+}
+.gx3d-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  /* a finger moving up or down still scrolls the page; sideways turns the model */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: 0;
+  transition: opacity var(--t-slow, 420ms) var(--ease-out, ease-out);
+}
+.gx3d[data-dragging] .gx3d-canvas {
+  cursor: grabbing;
+}
+.gx3d[data-live] .gx3d-canvas {
+  opacity: 1;
+}
+.gx3d-still {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.3125rem;
+  transition: opacity var(--t-slow, 420ms) var(--ease-out, ease-out);
+}
+.gx3d-still > svg {
+  width: 100%;
+  height: 100%;
+}
+.gx3d[data-live] .gx3d-still {
+  opacity: 0;
+  visibility: hidden;
+}
+/* labels that follow the model: placed by the scene, never in the way of a drag */
+.gx3d-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+.gx3d[data-live] .gx3d-labels {
+  display: block;
+}
+.gx3d-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  color: var(--ink);
+  padding: 0.125rem 0.375rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  visibility: hidden;
+  will-change: transform;
+}
+.gx3d-label[data-show] {
+  visibility: visible;
+}
+.gx3d-label small {
+  display: block;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.gx3d-label[data-tone="open"] small {
+  color: var(--pos);
+}
+.gx3d-label[data-tone="gold"] {
+  color: var(--prestige-ink, var(--ink));
+}
+/* the standing notice on the picture itself */
+.gx3d-tag {
+  position: absolute;
+  left: 0.8125rem;
+  top: 0.8125rem;
+  z-index: 1;
+  pointer-events: none;
+}
+.gx3d-hint {
+  position: absolute;
+  right: 0.8125rem;
+  bottom: 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  pointer-events: none;
+  display: none;
+}
+.gx3d[data-live] .gx3d-hint {
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gx3d-canvas,
+  .gx3d-still {
+    transition: none;
+  }
+}
+[data-motion="reduced"] .gx3d-canvas,
+[data-motion="reduced"] .gx3d-still,
+[data-effects="low"] .gx3d-canvas,
+[data-effects="low"] .gx3d-still {
+  transition: none;
+}
+@media print {
+  .gx3d-canvas,
+  .gx3d-labels,
+  .gx3d-hint {
+    display: none !important;
+  }
+  .gx3d[data-live] .gx3d-still {
+    opacity: 1;
+    visibility: visible;
+  }
+}

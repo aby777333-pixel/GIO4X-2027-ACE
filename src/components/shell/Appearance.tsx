@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import { clockLabel, sunTimes, type SunPrefs } from "@/components/fx/sun";
 import { AccentDesigner } from "@/components/shell/AccentDesigner";
 import { usePrefs } from "@/hooks/usePrefs";
 import { customAccent, oklchHex } from "@/lib/accent";
@@ -28,18 +29,35 @@ const SWATCH: Record<Exclude<Prefs["accent"], "custom">, [string, string]> = {
 
 /** The appearance controls themselves; used in the header popover and on /preferences. */
 export function AppearanceControls({ compact = false }: { compact?: boolean }) {
-  const [prefs, update] = usePrefs();
+  const [prefs, update, ready] = usePrefs();
+  // "Sun" is one extra field of gx:prefs; the Light / Dark / Auto choice underneath it is kept
+  const sun = (prefs as SunPrefs).sun === true;
+  const choose = (patch: Partial<SunPrefs>) => update(patch);
+  // worked out on this device once the preferences have been read, never on the server
+  const times = ready && sun ? sunTimes(new Date()) : null;
   return (
     <div className="grid gap-21">
       <fieldset>
         <legend className="label">Appearance</legend>
         <div className="seg mt-8" role="group">
           {THEMES.map((t) => (
-            <button key={t.key} type="button" aria-pressed={prefs.theme === t.key} onClick={() => update({ theme: t.key })}>
+            <button key={t.key} type="button" aria-pressed={!sun && prefs.theme === t.key} onClick={() => choose({ theme: t.key, sun: false })}>
               {t.label}
             </button>
           ))}
+          {/* follow the sun: light by day, dark by night, from this device's clock and date (components/fx/sun.ts) */}
+          <button type="button" aria-pressed={sun} onClick={() => choose({ sun: true })}>
+            Sun
+          </button>
         </div>
+        {sun && times ? (
+          <p className="field-hint mt-8" role="status">
+            Light from about <span className="num">{clockLabel(times.rise)}</span> to <span className="num">{clockLabel(times.set)}</span> today, dark otherwise. Estimated from this device’s clock, date and time zone only: no location is requested and nothing is sent. It can be out by an
+            hour or so.
+          </p>
+        ) : (
+          !compact && <p className="field-hint mt-8">Auto follows your device’s setting. Sun is light by day and dark by night, estimated from this device’s clock and date; no location is requested.</p>
+        )}
       </fieldset>
 
       <fieldset>

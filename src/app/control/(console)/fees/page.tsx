@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
 import { ConfigManager, ConfigNotice } from "@/components/control/portal/ConfigManager";
+import { ChargeRequestControl, MoreNotice, ReverseControl, WaiveControl, payloadText, type OpenRequest } from "@/components/control/portal/MoreBits";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
 import { can } from "@/lib/server/staff";
+import { isUuid } from "@/lib/server/validate";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Fee Engine", "/control/fees");
@@ -69,9 +72,12 @@ function rate(row: RuleRow): string {
 
 /**
  * The portal's fee engine: the schedules in force, the rules inside them, and
- * the charges those rules produced. Reads only (funds.read): a schedule is not
- * edited and a charge is not waived or reversed from this screen. Every figure
- * is a count of the portal's rows; no amounts are added up here.
+ * the charges those rules produced (funds.read). fees.manage edits schedules
+ * and rules beneath their tables. fees.charge waives a charge that is still
+ * pending (one person), reverses an applied one and confirms a fee asked for
+ * by hand on a client's page (two people each: portal_two_person, 0027),
+ * through src/app/control/actions-portal-more.ts. Every figure is a count of
+ * the portal's rows; no amounts are added up here.
  */
 export default async function FeesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const access = await requirePortal("funds.read");
@@ -80,6 +86,8 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
   const { db, ctx } = access;
   const manages = can(ctx, "fees.manage");
+  const charges = can(ctx, "fees.charge");
+  const seesClients = can(ctx, "clients.read");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), CHARGE_STATUSES, "");
@@ -92,7 +100,16 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
     .range(from, to);
   if (status) chargesQuery = chargesQuery.eq("status", status);
 
-  const [charges, schedules, rules, ...byStatus] = await Promise.all([
+  // open two-person requests, from Control's own database (0027): reversals by the charge's id, charges by hand by the request's
+  const [reverseOpen, chargeOpen] = await Promise.all([
+    charges ? ctx.supabase.rpc("portal_requests_open", { p_kind: "fee_reverse" }) : null,
+    charges ? ctx.supabase.rpc("portal_requests_open", { p_kind: "fee_charge" }) : null,
+  ]);
+  const reversals = new Map(((reverseOpen?.data ?? []) as OpenRequest[]).map((r) => [r.id, r]));
+  const chargeRequests = (chargeOpen?.data ?? []) as OpenRequest[];
+  const requestsFailed = !!reverseOpen?.error || !!chargeOpen?.error;
+
+  const [chargesRead, schedules, rules, ...byStatus] = await Promise.all([
     chargesQuery,
     db
       .from("fee_schedules")
@@ -109,15 +126,15 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
     ...CHARGE_STATUSES.map((s) => db.from("fee_charges").select("id", { count: "exact", head: true }).eq("status", s)),
   ]);
 
-  const failed = !!charges.error || !!schedules.error || !!rules.error || byStatus.some((r) => r.error);
-  const rows = (charges.data ?? []) as ChargeRow[];
-  const total = charges.count ?? 0;
+  const failed = !!chargesRead.error || !!schedules.error || !!rules.error || byStatus.some((r) => r.error);
+  const rows = (chargesRead.data ?? []) as ChargeRow[];
+  const total = chargesRead.count ?? 0;
   const scheduleRows = (schedules.data ?? []) as ScheduleRow[];
   const scheduleTotal = schedules.count ?? scheduleRows.length;
   const ruleRows = (rules.data ?? []) as RuleRow[];
   const ruleTotal = rules.count ?? ruleRows.length;
   const scheduleCode = new Map(scheduleRows.map((s) => [s.id, s.code]));
-  const people = await portalPeople(db, rows.map((r) => r.user_id));
+  const people = await portalPeople(db, [...rows.map((r) => r.user_id), ...chargeRequests.map((r) => payloadText(r.payload, "user_id"))]);
 
   const shown = (have: number, all: number, one: string, many: string) => (have < all ? `First ${have} of ${all}` : `${all} ${all === 1 ? one : many}`);
 
@@ -132,8 +149,13 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
   return (
     <>
       <ControlHead title={TITLE} lead="The portal’s fee schedules, the rules inside them, and the charges they produced. Newest charge first." />
-      <PortalSource decides={manages}>{manages ? "Schedules and rules are added, changed and retired beneath their tables. A change applies to charges made after it." : "Schedules and rules are set by finance."}</PortalSource>
+      <PortalSource decides={manages || charges}>{manages ? "Schedules and rules are added, changed and retired beneath their tables. A change applies to charges made after it." : "Schedules and rules are set by finance."}</PortalSource>
       <ConfigNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
+      {/* waiving, charging by hand and reversing; ConfigNotice above says the refusals the two share */}
+      <MoreNotice notice={firstParam(params.notice)} error={firstParam(params.error)} generic={false} />
+      {requestsFailed && (
+        <p className="mt-13 text-xs text-ink-3">The open requests to charge or reverse a fee could not be read just now, so none is shown. Reload before asking for a reversal.</p>
+      )}
       {failed && <PortalReadFailed />}
 
       <Figures items={CHARGE_STATUSES.map((s, i) => ({ label: `Charges ${label(s).toLowerCase()}`, value: byStatus[i]?.error ? "–" : String(byStatus[i]?.count ?? 0) }))} />
@@ -229,6 +251,59 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
         />
       )}
 
+      {chargeRequests.length > 0 && (
+        <Section title="Fee charges awaiting a second person" aside={`${chargeRequests.length} asked for by hand; nothing has been charged yet`}>
+          <div className="scroll-x">
+            <table className="table-gx min-w-[64rem] text-sm">
+              <caption className="sr-only">Fees asked for by hand that a second person has yet to confirm, newest first</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Client</th>
+                  <th scope="col">Fee type</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">What it is for</th>
+                  <th scope="col">Asked</th>
+                  <th scope="col">Decision</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chargeRequests.map((request) => {
+                  const userId = payloadText(request.payload, "user_id");
+                  const client = people.get(userId);
+                  return (
+                    <tr key={request.id}>
+                      <td className="max-w-[16rem]">
+                        {seesClients && isUuid(userId) ? (
+                          <>
+                            <Link href={`/control/clients/${userId}`} className="link block truncate">
+                              {client?.name || client?.email || `${userId.slice(0, 8)}…`}
+                            </Link>
+                            {client?.name && client.email && <span className="block truncate text-xs text-ink-3">{client.email}</span>}
+                          </>
+                        ) : (
+                          <Person person={client} id={userId} />
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap text-ink">{label(payloadText(request.payload, "fee_type"))}</td>
+                      <td className="num whitespace-nowrap text-ink">{fmtMoney(payloadText(request.payload, "amount"), "USD")}</td>
+                      <td className="max-w-[18rem] text-ink-2">{payloadText(request.payload, "notes") || "–"}</td>
+                      <td className="text-ink-2">
+                        <span className="block">{request.mine ? "You" : request.requested_by_name}</span>
+                        <span className="num block whitespace-nowrap text-xs text-ink-3">{fmtDateTime(request.requested_at)}</span>
+                      </td>
+                      <td>
+                        <ChargeRequestControl request={request} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-8 text-xs text-ink-3">Confirming debits the client’s main USD wallet by the amount shown. The person who asked cannot confirm their own request.</p>
+        </Section>
+      )}
+
       <FilterTabs base={BASE} param="status" current={status} options={CHARGE_STATUSES} allLabel="All charges" />
 
       <Section title="Fee charges" aside={status ? label(status) : "All statuses"}>
@@ -236,7 +311,7 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
           <Empty title={failed ? "Nothing could be read" : status ? "No charges with this status" : "No fees have been charged"} />
         ) : (
           <div className="scroll-x">
-            <table className="table-gx min-w-[64rem] text-sm">
+            <table className="table-gx min-w-[72rem] text-sm">
               <caption className="sr-only">Fee charges, newest first</caption>
               <thead>
                 <tr>
@@ -248,6 +323,7 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
                   <th scope="col">Status</th>
                   <th scope="col">Source</th>
                   <th scope="col">Created</th>
+                  {charges && <th scope="col">Waive or reverse</th>}
                 </tr>
               </thead>
               <tbody>
@@ -268,11 +344,25 @@ export default async function FeesPage({ searchParams }: { searchParams: Promise
                       {row.source_id && <span className="num block truncate text-xs text-ink-3">{row.source_id}</span>}
                     </td>
                     <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(row.created_at)}</td>
+                    {charges && (
+                      <td>
+                        {row.status === "pending" ? (
+                          <WaiveControl id={row.id} />
+                        ) : row.status === "applied" && Number(row.computed_amount ?? 0) > 0 && !requestsFailed ? (
+                          <ReverseControl id={row.id} request={reversals.get(row.id)} />
+                        ) : (
+                          <span className="text-ink-3">–</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        )}
+        {charges && rows.length > 0 && (
+          <p className="mt-8 text-xs text-ink-3">Waiving a pending charge takes one person. Reversing an applied one credits the client back and takes two: one asks and says why, a different person confirms.</p>
         )}
         <Pager page={page} pageCount={Math.max(1, Math.ceil(total / PER_PAGE))} total={total} noun={total === 1 ? "charge" : "charges"} href={href} />
       </Section>

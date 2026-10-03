@@ -80,7 +80,12 @@ from it. The screens, the access rules and the database are this project's.
 | `/control/copy`, `/control/pamm` | With `partners.manage`: approve, pause, resume or close a signal provider / a fund (closed is final; not while clients are in it) | `partners.manage` |
 | `/control/ledger` | With `ledger.manage`: add a ledger account, switch one off or on, post a manual two-line journal entry | `ledger.manage` |
 | `/control/documents` | The legal documents the portal publishes. With `documents.manage`: edit a text (the version rises), publish it to clients or take it down, add a document | `documents.read`, `documents.manage` |
-| `/control/emailer` | The record of e-mails the portal sent. Read only: no e-mail provider is configured, so there is nothing to send with | `emailer.read` |
+| `/control/emailer` | The record of e-mails sent. With `emailer.send` and a configured provider (`RESEND_API_KEY`): one plain-text service message to a fixed audience, confirmed by typing the recipient count | `emailer.read`, `emailer.send` |
+| `/control/clients`, `/control/clients/<id>` | The portal's client accounts; one page per client (profile, wallets, accounts, KYC, latest transactions and trades). With `clients.manage`: activate, suspend or close. With `fees.charge`: charge a fee by hand (two people) | `clients.read`, `clients.manage`, `fees.charge` |
+| `/control/marketing` | Marketing materials for IBs (a title and the https address of the file) and every campaign link. With `partners.manage`: add, change, retire a material | `partners.read`, `partners.manage` |
+| `/control/broker` (terminal) | Per-symbol conditions and trading blocks on the trading terminal (`RAPTOR_BRIDGE_URL`, `RAPTOR_BRIDGE_SERVICE_KEY`). With `trading.manage`: change one value of one symbol; add a block or end one | `trading.read`, `trading.manage` |
+| `/control/trades` (entry) | With `trading.manage`: enter a closed trade by hand; the portal charges commission and pays rebates on it as on any trade | `trading.manage` |
+| `/control/fees` (by hand) | With `fees.charge`: waive a pending charge; reverse an applied one (two people); confirm a charge another person asked for | `fees.charge` |
 | `/control/<section>` | A section listed in the menu before it is built: what it will do and what it is waiting for. None at present | staff |
 
 ### How the console reaches the website

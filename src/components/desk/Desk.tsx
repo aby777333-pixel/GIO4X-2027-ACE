@@ -102,6 +102,131 @@ function RemoveButton({ label, onClick }: { label: string; onClick: () => void }
   );
 }
 
+/* ---- pick up where you left off ---------------------------------------------------- */
+
+/**
+ * The shortest way back to each thing this browser already holds: the last
+ * page opened (only if the visitor switched that list on), the next Academy
+ * lesson and glossary term, and the tools kept or in use. It reads the same
+ * keys as the sections below and stores nothing of its own.
+ */
+function PickUp({ data }: { data: DeskData }) {
+  const recent = useRecent();
+  const saved = useSaved();
+  const held = useHeldCalc();
+  const learned = useLearned();
+  if (recent === undefined || saved === undefined || held === undefined || learned === null) return <Reading />;
+
+  const last = recent?.p[0] ?? null;
+  const lessonCount = Math.min(countLessons(learned), data.lessons.length);
+  const termCount = Math.min(countLearned(learned), data.terms.length);
+  const nextLesson = data.lessons.find((l) => !learned[`${LESSON_PREFIX}${l.slug}`]);
+  const nextTerm = data.terms.find((t) => !learned[t.slug]);
+  const tools = saved.filter((s) => savedKind(s.h) === "tool").slice(0, 3);
+  const figures = held ? FIGURES.filter((f) => typeof held[f.field] === "string" && held[f.field] !== "").length : 0;
+
+  type Row = { kind: string; body: ReactNode };
+  const rows: Row[] = [];
+  if (last) {
+    rows.push({
+      kind: "Last page",
+      body: (
+        <>
+          <Link href={last.h} className="go">
+            {last.t}
+          </Link>
+          {recent && recent.p.length > 1 && (
+            <a href="#continue" className="link-quiet mt-3 block text-xs text-ink-3 underline decoration-line-strong decoration-dotted underline-offset-4">
+              and {recent.p.length - 1} more below
+            </a>
+          )}
+        </>
+      ),
+    });
+  }
+  if (lessonCount > 0) {
+    const share = data.lessons.length ? (lessonCount / data.lessons.length) * 100 : 0;
+    rows.push({
+      kind: "Academy",
+      body: (
+        <>
+          <p className="text-sm text-ink-2">
+            <span className="num font-medium text-ink">{lessonCount}</span> of <span className="num">{data.lessons.length}</span> lessons completed
+          </p>
+          {/* drawn progress; the sentence above says the same in words */}
+          <span aria-hidden className="mt-5 block h-[3px] max-w-[21rem] rounded-full bg-line">
+            <span className="block h-full rounded-full bg-accent" style={{ width: `${share}%` }} />
+          </span>
+          {nextLesson ? (
+            <Link href={`/academy/${nextLesson.slug}`} className="go mt-8">
+              Continue: {nextLesson.title}
+            </Link>
+          ) : (
+            <p className="mt-5 text-sm text-ink-3">Every lesson has been completed.</p>
+          )}
+        </>
+      ),
+    });
+  }
+  if (termCount > 0 && nextTerm) {
+    rows.push({
+      kind: "Glossary",
+      body: (
+        <>
+          <p className="text-sm text-ink-2">
+            <span className="num font-medium text-ink">{termCount}</span> of <span className="num">{data.terms.length}</span> terms checked
+          </p>
+          <Link href={`/glossary/${nextTerm.slug}`} className="go mt-8">
+            Continue: {nextTerm.term}
+          </Link>
+        </>
+      ),
+    });
+  }
+  if (tools.length > 0 || figures > 0) {
+    rows.push({
+      kind: tools.length > 0 ? "Saved tools" : "Tools",
+      body: (
+        <>
+          {tools.length > 0 && (
+            <ul className="flex flex-wrap gap-8">
+              {tools.map((t) => (
+                <li key={t.h}>
+                  <Link href={t.h} className="chip h-auto min-h-[2.125rem] whitespace-normal py-3 normal-case tracking-normal transition-colors duration-fast hover:border-line-strong hover:text-ink">
+                    {t.t}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          {figures > 0 && (
+            <p className={`text-sm text-ink-2 ${tools.length > 0 ? "mt-8" : ""}`}>
+              {figures === 1 ? "One figure you typed is" : `${figures} figures you typed are`} still in the calculators.{" "}
+              <Link href="/tools" className="link">
+                Trader Toolkit
+              </Link>
+            </p>
+          )}
+        </>
+      ),
+    });
+  }
+
+  if (rows.length === 0) {
+    return <p className="max-w-measure text-sm text-ink-2">Nothing to pick up yet. As you save tools, type figures into a calculator, complete a lesson or switch on the list of recent pages below, the shortest way back to each appears here.</p>;
+  }
+  return (
+    <dl className="border-t border-line-strong">
+      {rows.map((r) => (
+        <div key={r.kind} className="grid gap-x-21 gap-y-5 border-b border-line py-13 sm:grid-cols-[minmax(0,8rem)_minmax(0,1fr)]">
+          <dt className="label pt-3">{r.kind}</dt>
+          <dd className="min-w-0">{r.body}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 /* ---- watchlist ------------------------------------------------------------------- */
 
 function formatFixing(v: number): string {
@@ -513,6 +638,10 @@ function Learning({ data }: { data: DeskData }) {
 export function Desk({ data }: { data: DeskData }) {
   return (
     <>
+      <Block id="resume" title="Pick up where you left off" tinted lead="The shortest way back to what you were doing, read from what this browser already holds. Nothing extra is stored for it.">
+        <PickUp data={data} />
+      </Block>
+
       <Block id="watchlist" title="Watchlist" lead="Instruments you chose to keep an eye on. Each opens its own page.">
         <Watchlist data={data} />
       </Block>

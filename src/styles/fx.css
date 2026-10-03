@@ -1,0 +1,175 @@
+/* ==========================================================================
+   FX — the site-wide finishing layer. Three things, all of them decoration,
+   all of them absent without script, under reduced motion, under "low visual
+   effects" and on paper:
+
+     1. THE ATMOSPHERE: a very quiet wash of light that drifts behind each
+        page opening and differs with the FX session the clock is in
+        (components/cockpit/CockpitFx.tsx writes <html data-atmos>)
+     2. FIRST VIEW: small line figures draw themselves as they scroll into
+        view (components/fx/MicroFx.tsx; counting numbers need no styles)
+     3. the SUN choice needs nothing here: it only picks data-theme.
+
+   Colours are tokens. Nothing here draws a number, a label or a shape that
+   could be read as data.
+   ========================================================================== */
+
+/* ---- 1. THE ATMOSPHERE -----------------------------------------------------
+   One pseudo-element laid over the stage and under the statement (.cx-main
+   and .cx-statement are z-index 1; the stage has none), so the words are never
+   behind it and their contrast on the night does not change.
+
+   It is two or three wide, soft pools of colour whose position moves. The
+   movement is stepped at about five positions a second: at this softness and
+   speed (a few pixels a second) the steps cannot be seen, and the browser
+   repaints one gradient five times a second instead of sixty. Nothing is
+   painted while the stage is scrolled away or the tab is hidden.
+
+     tokyo     the morning session: teal, low on the right, drifting east
+     london    blue, tall, drifting west
+     newyork   emerald with blue, on the diagonal, a little quicker
+     overlap   two sessions at once: two colours crossing each other
+     rest      the week is running, no session window is open: platinum, slow
+     closed    the weekend: one dim pool, hardly moving
+
+   The homepage's stage is composed on its own and is left as it is. */
+.cx-hero:not(.cx-home)::after {
+  content: "";
+  grid-column: full;
+  grid-row: stage;
+  position: relative;
+  z-index: 0;
+  min-width: 0;
+  pointer-events: none;
+  opacity: 0;
+  background-repeat: no-repeat;
+  background-size: 190% 100%;
+  transition: opacity var(--t-cinematic) var(--ease-out);
+}
+html[data-atmos] .cx-hero:not(.cx-home)::after {
+  opacity: 1;
+}
+
+html[data-atmos="tokyo"] .cx-hero:not(.cx-home)::after {
+  background-image:
+    radial-gradient(34% 46% at 50% 88%, color-mix(in srgb, var(--dna-teal) 13%, transparent), transparent 72%),
+    radial-gradient(26% 30% at 50% 24%, color-mix(in srgb, var(--prestige) 5%, transparent), transparent 74%);
+  animation: fx-atmos-east 144s steps(720) infinite alternate;
+}
+html[data-atmos="london"] .cx-hero:not(.cx-home)::after {
+  background-image:
+    radial-gradient(22% 78% at 50% 44%, color-mix(in srgb, var(--dna-blue) 15%, transparent), transparent 72%),
+    radial-gradient(30% 40% at 50% 96%, color-mix(in srgb, var(--platinum) 5%, transparent), transparent 74%);
+  animation: fx-atmos-west 110s steps(550) infinite alternate;
+}
+html[data-atmos="newyork"] .cx-hero:not(.cx-home)::after {
+  background-image:
+    radial-gradient(30% 44% at 50% 22%, color-mix(in srgb, var(--dna-emerald) 13%, transparent), transparent 72%),
+    radial-gradient(28% 40% at 50% 82%, color-mix(in srgb, var(--dna-blue) 9%, transparent), transparent 74%);
+  animation: fx-atmos-cross 89s steps(445) infinite alternate;
+}
+html[data-atmos="overlap"] .cx-hero:not(.cx-home)::after {
+  background-image:
+    radial-gradient(30% 56% at 50% 34%, color-mix(in srgb, var(--dna-blue) 14%, transparent), transparent 72%),
+    radial-gradient(30% 56% at 50% 70%, color-mix(in srgb, var(--dna-emerald) 12%, transparent), transparent 72%),
+    radial-gradient(18% 30% at 50% 50%, color-mix(in srgb, var(--dna-teal) 7%, transparent), transparent 74%);
+  animation: fx-atmos-cross 68s steps(340) infinite alternate;
+}
+html[data-atmos="rest"] .cx-hero:not(.cx-home)::after {
+  background-image: radial-gradient(40% 50% at 50% 60%, color-mix(in srgb, var(--platinum) 7%, transparent), transparent 74%);
+  animation: fx-atmos-east 233s steps(700) infinite alternate;
+}
+html[data-atmos="closed"] .cx-hero:not(.cx-home)::after {
+  background-image: radial-gradient(44% 40% at 50% 100%, color-mix(in srgb, var(--platinum) 5%, transparent), transparent 76%);
+  animation: fx-atmos-east 377s steps(754) infinite alternate;
+}
+@keyframes fx-atmos-east {
+  from {
+    background-position: 12% 0, 88% 0;
+  }
+  to {
+    background-position: 88% 0, 30% 0;
+  }
+}
+@keyframes fx-atmos-west {
+  from {
+    background-position: 90% 0, 20% 0;
+  }
+  to {
+    background-position: 20% 0, 70% 0;
+  }
+}
+@keyframes fx-atmos-cross {
+  from {
+    background-position: 10% 0, 90% 0, 50% 0;
+  }
+  to {
+    background-position: 90% 0, 10% 0, 60% 0;
+  }
+}
+
+/* ---- 2. FIRST VIEW ---------------------------------------------------------
+   MicroFx marks a figure `data-fx-in` at the moment it scrolls into view.
+   Until then it is untouched and fully visible, so nothing can be left hidden
+   by a script that never runs.
+
+   The default is a reveal from the left, which for a line is the line being
+   drawn. It needs no measurement and does not change the shape. An SVG marked
+   data-draw="stroke" has each open path traced along its own length instead
+   (the script writes --len). */
+[data-fx-in]:not([data-draw="stroke"]) {
+  /* no fill mode: when it ends the clip is gone, so nothing that later overflows the figure (a tooltip) is cut */
+  animation: fx-draw-wipe var(--t-reveal) var(--ease-inout);
+}
+/* a sparkline's last point arrives when the line reaches it */
+svg[data-fx-in]:not([data-draw]) > circle {
+  animation: gx-fade var(--t-fast) var(--ease-out) calc(var(--t-reveal) - var(--t-fast)) both;
+}
+svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
+  stroke-dasharray: var(--len, 1000);
+  animation: gx-draw var(--t-cinematic) var(--ease-inout) both;
+}
+@keyframes fx-draw-wipe {
+  from {
+    clip-path: inset(-4px 100% -4px -4px);
+  }
+  to {
+    clip-path: inset(-4px -4px -4px -4px);
+  }
+}
+
+/* ---- never under reduced motion or low effects; never on paper ----------- */
+[data-effects="low"] .cx-hero:not(.cx-home)::after {
+  display: none;
+}
+[data-motion="reduced"] .cx-hero:not(.cx-home)::after {
+  animation: none !important;
+}
+[data-motion="reduced"] [data-fx-in],
+[data-motion="reduced"] [data-fx-in] *,
+[data-effects="low"] [data-fx-in],
+[data-effects="low"] [data-fx-in] * {
+  animation: none !important;
+  stroke-dasharray: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-hero:not(.cx-home)::after {
+    animation: none !important;
+  }
+  [data-fx-in],
+  [data-fx-in] * {
+    animation: none !important;
+    stroke-dasharray: none !important;
+  }
+}
+@media print {
+  .cx-hero:not(.cx-home)::after {
+    display: none !important;
+  }
+  [data-fx-in],
+  [data-fx-in] * {
+    animation: none !important;
+    clip-path: none !important;
+    stroke-dasharray: none !important;
+  }
+}

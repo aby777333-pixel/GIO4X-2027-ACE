@@ -83,6 +83,7 @@
    Transform and opacity only, so the words are in their final place throughout. */
 html[data-stage-turn] #main .cx-hero .cx-statement-body {
   animation: st-rise 382ms var(--ease-out) both;
+  transform-origin: 0 50%;
 }
 @keyframes st-move {
   from {
@@ -132,6 +133,168 @@ html[data-stage-turn] #main .cx-hero .cx-statement-body {
   from {
     opacity: 0;
     transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- 1b. THE CAMERA MOVE --------------------------------------------------
+   The same overlay and the same timings, but the way the old picture leaves
+   (and the way the statement arrives) depends on the section being entered,
+   so a visitor moving round the site is not shown one effect everywhere.
+   StageTransition writes the move on the overlay (data-move) and on <html>
+   (data-stage-turn). With no move named, it is the dissolve above.
+
+     push   Markets: a dolly in. The old picture grows past the frame.
+     rack   Trading, accounts: a rack focus. The old picture goes soft where
+            it stands and the words come into focus.
+     iris   Platforms: an iris. The old picture closes to the frame's centre.
+     pan    Academy, Intelligence, the reference pages: a pan. The old picture
+            slides away to the left as the words come in from the right.
+     pull   Tools and Labs: a pull back. The old picture recedes.
+
+   On a phone the overlay is the plain cross-fade whatever the move
+   (data-simple, above); the statement's arrival is transform, opacity and a
+   short blur only, so the words are in their final place throughout. */
+.st-layer[data-move="push"][data-phase="go"]:not([data-simple]) .st-pic {
+  animation-name: st-push;
+}
+.st-layer[data-move="rack"][data-phase="go"]:not([data-simple]) .st-pic {
+  animation-name: st-rack;
+}
+.st-layer[data-move="iris"][data-phase="go"]:not([data-simple]) .st-pic {
+  animation-name: st-iris;
+  will-change: opacity, clip-path;
+}
+.st-layer[data-move="pan"][data-phase="go"]:not([data-simple]) .st-pic {
+  animation-name: st-pan;
+}
+.st-layer[data-move="pull"][data-phase="go"]:not([data-simple]) .st-pic {
+  animation-name: st-pull;
+}
+html[data-stage-turn="push"] #main .cx-hero .cx-statement-body {
+  animation-name: st-in-push;
+}
+html[data-stage-turn="rack"] #main .cx-hero .cx-statement-body {
+  animation-name: st-in-rack;
+}
+html[data-stage-turn="iris"] #main .cx-hero .cx-statement-body {
+  animation-name: st-in-iris;
+}
+html[data-stage-turn="pan"] #main .cx-hero .cx-statement-body {
+  animation-name: st-in-pan;
+}
+html[data-stage-turn="pull"] #main .cx-hero .cx-statement-body {
+  animation-name: st-in-pull;
+}
+@keyframes st-push {
+  0% {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+  61.8% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.236);
+    filter: blur(5px);
+  }
+}
+@keyframes st-rack {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  50% {
+    opacity: 0.9;
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(21px);
+  }
+}
+@keyframes st-iris {
+  0% {
+    opacity: 1;
+    clip-path: circle(72% at 50% 50%);
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+@keyframes st-pan {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-8%);
+  }
+}
+@keyframes st-pull {
+  0% {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.854);
+    filter: blur(5px);
+  }
+}
+@keyframes st-in-push {
+  from {
+    opacity: 0;
+    transform: scale(0.972);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes st-in-rack {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+@keyframes st-in-iris {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes st-in-pan {
+  from {
+    opacity: 0;
+    transform: translateX(21px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes st-in-pull {
+  from {
+    opacity: 0;
+    transform: scale(1.021);
   }
   to {
     opacity: 1;

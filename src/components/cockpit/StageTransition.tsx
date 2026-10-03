@@ -15,6 +15,11 @@ import { frameOf, isStill, stageCanvas, type Rect } from "@/components/cockpit/s
  * crosses the champagne frame and the new scene powers on underneath. The
  * statement fades up separately (transition.css).
  *
+ * The way the old picture leaves is a camera move chosen by the section being
+ * entered: a push into Markets, a rack focus into Trading, an iris into
+ * Platforms, a pan into the Academy and the reading pages, a pull back into
+ * Tools and Labs, and the dissolve everywhere else (MOVES below).
+ *
  * How it stays out of the way:
  *   - Navigation is never delayed and never intercepted. Nothing happens until
  *     the new page is already in the document; the old canvas, by then detached,
@@ -47,6 +52,33 @@ const FADE_MS = 382;
 const DROP_MS = 240;
 /** the frame's corner marks and golden-cut ticks stand a few pixels outside it */
 const PAD = 6;
+
+/**
+ * THE CAMERA MOVE. The old picture always travels to the new frame; how it then leaves depends on the
+ * section being entered, so that moving round the site is not one effect repeated (transition.css, 1b).
+ * A path in no list keeps the original dissolve ("turn"). This reads the path only: it does not know or
+ * change which scene a page opens with (routes.ts).
+ */
+type Move = "turn" | "push" | "rack" | "iris" | "pan" | "pull";
+const MOVES: [Move, string[]][] = [
+  // a dolly in: into the market
+  ["push", ["/markets"]],
+  // a rack focus: from the picture to the terms
+  ["rack", ["/trading", "/open-account", "/sign-in"]],
+  // an iris: a screen closing on a screen
+  ["iris", ["/platforms"]],
+  // a pan: the next page of something read
+  ["pan", ["/academy", "/glossary", "/faq", "/intelligence", "/morning-room", "/whats-new", "/media"]],
+  // a pull back: stepping away from the bench
+  ["pull", ["/tools", "/labs"]],
+];
+
+function moveFor(pathname: string): Move {
+  for (const [move, roots] of MOVES) {
+    if (roots.some((r) => pathname === r || pathname.startsWith(`${r}/`))) return move;
+  }
+  return "turn";
+}
 
 /** The stage as last seen on screen: the canvas, and where it stood in the window. */
 type Seen = { canvas: HTMLCanvasElement; left: number; top: number; width: number };
@@ -160,17 +192,20 @@ export function StageTransition() {
     layer.setAttribute("aria-hidden", "true");
     layer.dataset.phase = "hold";
     if (simple) layer.dataset.simple = "";
-    const move = document.createElement("div");
-    move.className = "st-move";
+    const move = moveFor(pathname);
+    layer.dataset.move = move;
+    const mover = document.createElement("div");
+    mover.className = "st-move";
     pic.className = "st-pic";
-    move.appendChild(pic);
+    mover.appendChild(pic);
     const sweep = document.createElement("span");
     sweep.className = "st-sweep";
-    layer.append(move, sweep);
+    layer.append(mover, sweep);
     place(layer, start, next.parentElement);
     document.body.appendChild(layer);
     // the statement of the new page fades up on its own, quicker than the instrument
-    root.dataset.stageTurn = "";
+    // (and in the manner of the same camera move)
+    root.dataset.stageTurn = move === "turn" ? "" : move;
 
     let done = false;
     let timer = 0;
@@ -218,7 +253,7 @@ export function StageTransition() {
       if (!simple) {
         // the picture starts where the old frame stood and travels to the new one
         place(layer, end, next.parentElement);
-        move.style.setProperty("--st-from", `translate(${start.left - end.left}px, ${start.top - end.top}px) scale(${start.width / end.width}, ${start.height / end.height})`);
+        mover.style.setProperty("--st-from", `translate(${start.left - end.left}px, ${start.top - end.top}px) scale(${start.width / end.width}, ${start.height / end.height})`);
         const gold = getComputedStyle(next).getPropertyValue("--tone-4").trim();
         if (gold) layer.style.setProperty("--st-gold", gold);
       }

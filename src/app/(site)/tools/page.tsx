@@ -7,6 +7,8 @@ import { SharedFigures } from "@/components/figures/stage/SharedFigures";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { HubMini } from "@/components/tools/HubMini";
+import { PageTour } from "@/components/tour/PageTour";
+import type { PageTourStop } from "@/components/tour/stops";
 import { toolGroups } from "@/components/tools/content";
 import { educationalNote } from "@/config/legal";
 import { getTool, tools, type Tool } from "@/data/tools";
@@ -21,6 +23,15 @@ export const metadata = pageMeta({ title: "Trader Toolkit", description, path: "
 const grouped = toolGroups.map((g) => ({ ...g, items: g.slugs.flatMap((s) => getTool(s) ?? []) }));
 /** Anything added to the registry later still appears, even before it is given a group. */
 const ungrouped = tools.filter((t) => !toolGroups.some((g) => g.slugs.includes(t.slug)));
+
+/** The first-visit Toolkit tour. Each step repeats what the page says at the place it points to. */
+const tour: PageTourStop[] = [
+  { title: "Twelve tools, one system", body: "Calculators and visualisers that work together. Each shows its formula and the working with your own numbers. None of them tells you what to trade." },
+  { target: "main .cx-hero .cx-aside", title: "One set of figures", body: "Set a balance and a risk share here. Instrument, account currency, balance, lot size, leverage and risk are kept in your browser and shared by all twelve tools. Nothing is sent to GIO4X." },
+  ...toolGroups.map((g): PageTourStop => ({ target: `[data-tour-group="${g.key}"]`, title: g.title, body: `${g.question} ${g.note}` })),
+  { target: "#rules", title: "Arithmetic in the open", body: "Every result sits beside its formula and the same formula with your numbers in it, line by line, so any figure can be checked by hand. Starting figures are placeholders, not suggestions." },
+  { title: "Inside a tool", body: "Save keeps a tool on My desk, in this browser only. Previous and next links at the top and foot of each tool lead through all twelve in order; on a phone, a swipe left or right does the same." },
+];
 
 function ToolRow({ tool }: { tool: Tool }) {
   return (
@@ -46,6 +57,7 @@ export default function ToolsHub() {
   return (
     <>
       <JsonLd data={webPageSchema({ path: "/tools", name: "GIO4X Trader Toolkit", description })} />
+      <PageTour id="tools" stops={tour} />
       <PageHero
         crumbs={[{ name: "Tools", href: "/tools" }]}
         eyebrow="Trader Toolkit"
@@ -86,7 +98,7 @@ export default function ToolsHub() {
                 <FigureNote figure={<LeverBeam />}>Each one starts from placeholder figures. Change a figure and the drawing follows, with its formula and the working beside it.</FigureNote>
               )}
             </div>
-            <ul className="border-t border-line-strong" data-reveal={i > 0 ? true : undefined} data-tour={i === 0 ? "tools" : undefined}>
+            <ul className="border-t border-line-strong" data-reveal={i > 0 ? true : undefined} data-tour={i === 0 ? "tools" : undefined} data-tour-group={g.key}>
               {g.items.map((t) => (
                 <ToolRow key={t.slug} tool={t} />
               ))}

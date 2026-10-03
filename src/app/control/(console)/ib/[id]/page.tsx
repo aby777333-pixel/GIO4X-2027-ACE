@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { linkIb, setIbPlan, setIbRole, unlinkIb } from "@/app/control/actions-portal";
+import { createCampaignLink } from "@/app/control/actions-portal-more";
 import { ControlHead, Empty, Facts, NoAccess } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDate, fmtDateTime } from "@/components/control/format";
 import { IbNotice, SettleControl, type IbListRow, type SettleRequest } from "@/components/control/portal/IbBits";
+import { LINK_DESTINATIONS, LINK_DESTINATION_LABEL, MoreNotice } from "@/components/control/portal/MoreBits";
 import { Figures, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { SubmitButton } from "@/components/control/SubmitButton";
 import { requirePortal } from "@/lib/server/portal-db";
@@ -98,6 +100,8 @@ export default async function IbPersonPage({ params, searchParams }: { params: P
       />
       <PortalSource decides={manages || settles}>Amounts are summed by the portal’s database.</PortalSource>
       <IbNotice notice={firstParam(sp.notice)} error={firstParam(sp.error)} />
+      {/* the two outcomes of "Add a campaign link" that IbNotice has no sentence for */}
+      <MoreNotice notice={firstParam(sp.notice)} error={firstParam(sp.error)} only={["link_created", "not_ib"]} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -359,7 +363,7 @@ export default async function IbPersonPage({ params, searchParams }: { params: P
                   <tr key={r.code}>
                     <td className="num text-ink">{r.code}</td>
                     <td className="max-w-[14rem] truncate text-ink-2">{r.name || "–"}</td>
-                    <td className="text-ink-2">{label(r.destination)}</td>
+                    <td className="text-ink-2">{r.destination ? (LINK_DESTINATION_LABEL[r.destination] ?? r.destination) : "–"}</td>
                     <td className="num text-ink-2">{fmtNum(r.clicks)}</td>
                     <td className="num text-ink-2">{fmtNum(r.conversions)}</td>
                     <td className="num whitespace-nowrap text-ink-2">{fmtDate(r.created_at)}</td>
@@ -368,6 +372,39 @@ export default async function IbPersonPage({ params, searchParams }: { params: P
               </tbody>
             </table>
           </div>
+        )}
+        {manages && isIb && (
+          <details className="mt-13 border-t border-line pt-13">
+            <summary className="cursor-pointer text-sm text-ink">Add a campaign link</summary>
+            <form action={createCampaignLink} className="mt-13 grid gap-13 sm:grid-cols-3 sm:items-end">
+              {at}
+              <input type="hidden" name="owner" value={id} />
+              <div className="field">
+                <label htmlFor="ib-link-name">Name</label>
+                <input id="ib-link-name" name="name" type="text" className="input" required maxLength={80} autoComplete="off" />
+              </div>
+              <div className="field">
+                <label htmlFor="ib-link-sub">Channel tag (optional)</label>
+                <input id="ib-link-sub" name="sub_id" type="text" className="input" pattern="[A-Za-z0-9_\-]{1,40}" maxLength={40} autoComplete="off" spellCheck={false} />
+              </div>
+              <div className="field">
+                <label htmlFor="ib-link-destination">Destination</label>
+                <select id="ib-link-destination" name="destination" className="select" required defaultValue="register">
+                  {LINK_DESTINATIONS.map((v) => (
+                    <option key={v} value={v}>
+                      {LINK_DESTINATION_LABEL[v]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="sm:col-span-3">
+                <SubmitButton pending="Recording…" className="btn btn-primary btn-sm">
+                  Create the link
+                </SubmitButton>
+                <span className="ml-13 text-xs text-ink-3">The portal makes the code. A channel tag is letters, digits, dashes and underscores: for example, telegram or newsletter-may. The IB sees the link under Campaign Links.</span>
+              </div>
+            </form>
+          </details>
         )}
       </Section>
     </>

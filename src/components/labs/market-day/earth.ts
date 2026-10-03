@@ -139,6 +139,9 @@ function field(step: number): Float32Array {
   return out;
 }
 
+/** The same land field for another drawing of the globe (the 3D session globe in Labs). Do not write to the array. */
+export const landField = (step: number): Float32Array => field(step);
+
 /** a place as a unit vector: x toward 90°E on the equator, y toward the north pole, z toward 0°E on the equator */
 export function unit(lat: number, lon: number): [number, number, number] {
   const a = lat * DEG;

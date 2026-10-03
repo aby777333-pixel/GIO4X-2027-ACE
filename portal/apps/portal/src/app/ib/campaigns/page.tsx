@@ -2,51 +2,95 @@ import Link from "next/link";
 import { Shell } from "@/components/Shell";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, type Column } from "@/components/DataTable";
-import { StatusBadge } from "@/components/StatusBadge";
 import { Card, CardBody, Button } from "@gio4x/ui";
 import { Plus } from "lucide-react";
-import { SampleDataBanner } from "@/components/SampleDataBanner";
+import { getCurrentUser } from "@/lib/session";
+import { getSupabaseServer } from "@/lib/supabase-server";
 
-type Campaign = { id: number; name: string; channel: string; created: string; clicks: number; signups: number; ftd: number; commission: number; status: "active" | "paused" };
+// Campaign links are the IB's own referral links that carry a campaign name or a
+// channel tag (sub_id). Clicks and sign-ups are the counters on public.referrals;
+// nothing on this page is sample data. Staff can also create a link for an IB from
+// GIO4X Control (IB Network → the partner's page).
+type Campaign = {
+  id: string;
+  code: string;
+  name: string | null;
+  destination: string;
+  sub_id: string | null;
+  clicks: number;
+  conversions: number;
+  created_at: string;
+};
 
-const rows: Campaign[] = [
-  { id: 1, name: "May YouTube — Forex 101", channel: "YouTube", created: "2026-05-01", clicks: 1240, signups: 86, ftd: 54, commission: 540, status: "active" },
-  { id: 2, name: "WhatsApp Broadcast — Cashback Pro", channel: "WhatsApp", created: "2026-04-12", clicks: 480, signups: 32, ftd: 18, commission: 180, status: "active" },
-  { id: 3, name: "Telegram — Gold Sniper teaser", channel: "Telegram", created: "2026-03-20", clicks: 820, signups: 41, ftd: 22, commission: 220, status: "paused" },
-  { id: 4, name: "Facebook — Promo for IN region", channel: "Facebook", created: "2026-05-15", clicks: 2380, signups: 142, ftd: 88, commission: 880, status: "active" },
-];
+const DEST: Record<string, string> = {
+  register: "Live sign-up",
+  "register-demo": "Demo sign-up",
+  home: "Website",
+  raptor: "Trading terminal",
+};
 
 const cols: Column<Campaign>[] = [
-  { key: "name", header: "Campaign", render: (r) => <span className="font-medium text-navy">{r.name}</span> },
-  { key: "channel", header: "Channel", render: (r) => <span className="text-steel">{r.channel}</span> },
-  { key: "created", header: "Created", render: (r) => <span className="text-steel">{r.created}</span> },
+  { key: "name", header: "Campaign", render: (r) => <span className="font-medium text-navy">{r.name ?? "Untitled link"}</span> },
+  { key: "channel", header: "Channel", render: (r) => <span className="text-steel">{r.sub_id ?? "—"}</span> },
+  { key: "code", header: "Code", render: (r) => <span className="font-mono text-[11px] text-sky">{r.code}</span> },
+  { key: "destination", header: "Goes to", render: (r) => <span className="text-steel">{DEST[r.destination] ?? r.destination}</span> },
+  { key: "created", header: "Created", render: (r) => <span className="text-steel">{r.created_at.slice(0, 10)}</span> },
   { key: "clicks", header: "Clicks", align: "right", render: (r) => <span className="text-navy">{r.clicks.toLocaleString()}</span> },
-  { key: "signups", header: "Sign-ups", align: "right", render: (r) => <span className="text-navy">{r.signups}</span> },
-  { key: "ftd", header: "FTDs", align: "right", render: (r) => <span className="text-navy">{r.ftd}</span> },
-  { key: "commission", header: "Commission", align: "right", render: (r) => <span className="font-semibold text-success">${r.commission.toLocaleString()}</span> },
-  { key: "status", header: "Status", render: (r) => <StatusBadge tone={r.status === "active" ? "success" : "neutral"}>{r.status}</StatusBadge> },
+  { key: "signups", header: "Sign-ups", align: "right", render: (r) => <span className="text-navy">{r.conversions.toLocaleString()}</span> },
+  {
+    key: "rate",
+    header: "Conversion",
+    align: "right",
+    render: (r) => <span className="text-steel">{r.clicks ? `${((r.conversions / r.clicks) * 100).toFixed(1)}%` : "—"}</span>,
+  },
 ];
 
-export default function CampaignsPage() {
+export default async function CampaignsPage() {
+  const user = await getCurrentUser();
+
+  let rows: Campaign[] = [];
+  if (user) {
+    const supabase = getSupabaseServer();
+    const { data } = await supabase
+      .from("referrals")
+      .select("id, code, name, destination, sub_id, clicks, conversions, created_at")
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: false });
+    rows = ((data ?? []) as Campaign[]).filter((r) => r.name || r.sub_id);
+  }
+
   return (
     <Shell title="Campaign Links">
       <PageHeader
         title="Campaign Links"
-        subtitle="UTM-tagged campaign URLs for each promo channel."
+        subtitle="Your referral links that carry a campaign name or a channel tag, with the clicks and sign-ups each has brought."
         actions={
           <Link href="/ib/referrals">
             <Button variant="primary">
-              <Plus size={14} className="mr-1" /> New campaign
+              <Plus size={14} className="mr-1" /> New campaign link
             </Button>
           </Link>
         }
       />
 
-      <SampleDataBanner />
+      {!user ? (
+        <div className="mb-4 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-xs text-steel">
+          <Link href="/auth/login?redirect=/ib/campaigns" className="font-medium text-sky hover:underline">
+            Sign in
+          </Link>{" "}
+          to see your campaign links.
+        </div>
+      ) : null}
 
       <Card>
         <CardBody className="px-0 pt-2">
-          <DataTable columns={cols} rows={rows} />
+          {rows.length === 0 ? (
+            <div className="px-6 py-10 text-center text-sm text-steel">
+              No campaign links yet. Create a referral link with a name or a channel tag and it appears here with its clicks and sign-ups.
+            </div>
+          ) : (
+            <DataTable columns={cols} rows={rows} />
+          )}
         </CardBody>
       </Card>
     </Shell>

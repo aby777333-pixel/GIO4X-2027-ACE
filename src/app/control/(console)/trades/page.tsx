@@ -3,6 +3,8 @@ import { ControlHead, Empty, NoAccess, Pager } from "@/components/control/bits";
 import { controlMeta, firstParam, fmtDateTime } from "@/components/control/format";
 import { Figures, FilterTabs, Person, PortalReadFailed, PortalSource, PortalUnconfigured, Section, StateBadge, fmtMoney, fmtNum, label } from "@/components/control/portal/kit";
 import { oneOf, pageRange, portalPeople, requirePortal } from "@/lib/server/portal-db";
+import { can } from "@/lib/server/staff";
+import { RecordTradeForm, TerminalNotice } from "@/components/control/portal/TerminalBits";
 
 export const dynamic = "force-dynamic";
 export const metadata = controlMeta("Trade Log", "/control/trades");
@@ -56,7 +58,8 @@ export default async function TradesPage({ searchParams }: { searchParams: Promi
   if (access.state === "none") return null;
   if (access.state === "forbidden") return <NoAccess title={TITLE} />;
   if (access.state === "unconfigured") return <PortalUnconfigured title={TITLE} missing={access.missing} />;
-  const { db } = access;
+  const { db, ctx } = access;
+  const manages = can(ctx, "trading.manage");
 
   const params = await searchParams;
   const status = oneOf(firstParam(params.status), STATUSES, "");
@@ -102,10 +105,18 @@ export default async function TradesPage({ searchParams }: { searchParams: Promi
     return s ? `${BASE}?${s}` : BASE;
   };
 
+  // active accounts for the hand-entered trade, named by number, kind and holder
+  type AccountOption = { id: string; account_number: string | null; account_kind: string; user_id: string };
+  const optionRead = manages ? await db.from("trading_accounts").select("id, account_number, account_kind, user_id").eq("status", "active").order("created_at", { ascending: false }).limit(300) : null;
+  const optionRows = (optionRead?.data ?? []) as AccountOption[];
+  const holders = optionRows.length ? await portalPeople(db, optionRows.map((r) => r.user_id)) : new Map();
+  const accountOptions = optionRows.map((r) => ({ id: r.id, label: `${r.account_number ?? r.id.slice(0, 8)} · ${label(r.account_kind)} · ${holders.get(r.user_id)?.name || holders.get(r.user_id)?.email || "client"}` }));
+
   return (
     <>
       <ControlHead title={TITLE} lead="Every trade the portal has recorded against a client’s trading account. Newest opened first." />
-      <PortalSource>Prices, lots and amounts are shown as the portal stored them.</PortalSource>
+      <PortalSource decides={manages}>Prices, lots and amounts are shown as the portal stored them.{manages ? " Trades come from the platform; one can be entered by hand beneath the figures when the platform did not deliver it." : ""}</PortalSource>
+      <TerminalNotice notice={firstParam(params.notice)} error={firstParam(params.error)} />
       {failed && <PortalReadFailed />}
 
       <Figures
@@ -139,6 +150,8 @@ export default async function TradesPage({ searchParams }: { searchParams: Promi
       </form>
 
       <FilterTabs base={BASE} param="status" current={status} options={STATUSES} allLabel="All trades" />
+
+      {manages && <RecordTradeForm accounts={accountOptions} />}
 
       <Section title="Trades" aside={[status ? label(status) : "All statuses", symbol || null].filter(Boolean).join(" · ")}>
         {rows.length === 0 ? (

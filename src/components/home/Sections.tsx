@@ -13,8 +13,12 @@ export function Philosophy() {
     { n: "03", t: "Respect the client’s capital.", d: "No countdowns, no bonuses dressed as urgency, no pressure. Risk is stated in ordinary type, in the place where the decision is made." },
   ];
   return (
-    <section className="section" aria-labelledby="philosophy">
-      <div className="wrap phi phi-r items-start">
+    <section className="section relative overflow-clip" aria-labelledby="philosophy">
+      {/* a watermark behind the text; it has a little depth where motion is allowed (HomeStory) */}
+      <div aria-hidden data-depth="-3" className="gx-depth-mark -right-[5.5rem] top-[2.125rem] hidden lg:block">
+        <Rosette size={377} bare strokeWidth={0.5} />
+      </div>
+      <div className="wrap phi phi-r relative items-start">
         <div data-reveal>
           <p className="eyebrow">The house philosophy</p>
           <h2 id="philosophy" className="h2 mt-13">
@@ -87,7 +91,8 @@ export function AssetIndex() {
 export function PlatformsChapter() {
   return (
     <section className="on-night relative overflow-hidden" aria-labelledby="platforms-chapter">
-      <div aria-hidden className="grid-field pointer-events-none absolute inset-0 opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+      {/* taller than the section, so that its few pixels of depth (HomeStory) never show an edge */}
+      <div aria-hidden data-depth="-2" className="grid-field pointer-events-none absolute inset-x-0 -bottom-[2.125rem] -top-[2.125rem] opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
       <div className="wrap relative section-quiet pb-55 lg:pb-89">
         <div className="phi items-end">
           <div data-reveal>

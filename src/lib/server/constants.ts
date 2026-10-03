@@ -114,6 +114,12 @@ export const CAPABILITIES = [
   "ledger.manage",
   "documents.manage",
   "events.manage",
+  // one page per client, their account status, and fees charged by hand (0027_portal_clients_fees.sql)
+  "clients.read",
+  "clients.manage",
+  "fees.charge",
+  // sending service e-mail (0028_portal_trade_email.sql)
+  "emailer.send",
 ] as const;
 export type Capability = (typeof CAPABILITIES)[number];
 

@@ -19,7 +19,9 @@ This document describes how that is built, so it can be extended without breakin
 | The overhead panel | `header[data-site-header]` rules in `cockpit.css` | The site header as night switchgear: backlit keys that rise, light and press. |
 | Touch | `src/components/cockpit/CockpitFx.tsx`, section 3 of `cockpit.css` | Tiles answer the pointer with light and a few degrees of tilt; sections arrive with depth on scroll. |
 | The start-up | `src/components/cockpit/Boot.tsx`, `src/lib/boot.ts`, section 4 of `cockpit.css`, section 2 of `transition.css` | First visit only. On the homepage: the intro, the logo forming from particles and handing over to the hero. On any other page: a power-on under two seconds. |
-| Page to page | `src/components/cockpit/StageTransition.tsx`, `stage.ts`, section 1 of `transition.css` | Between two pages that both open with a stage, the old instrument turns into the new one instead of cutting. |
+| Page to page | `src/components/cockpit/StageTransition.tsx`, `stage.ts`, section 1 of `transition.css` | Between two pages that both open with a stage, the old instrument turns into the new one instead of cutting, with a camera move that depends on the section entered. |
+| The atmosphere | `CockpitFx.tsx` (`data-atmos`), section 1 of `src/styles/fx.css` | A very quiet drifting wash behind each page opening, different for each FX session window on the visitor's clock. |
+| First view | `src/components/fx/MicroFx.tsx`, section 2 of `src/styles/fx.css` | Constants marked `data-count` count up and small line figures draw themselves, once, as they scroll into view. |
 
 No dependency was added. There is no WebGL: the scenes are a few kilobytes each of Canvas 2D
 drawing code with a hand-written perspective camera, loaded as separate chunks after first paint.
@@ -132,9 +134,10 @@ whether or not anything is shown (under reduced motion nothing is, and nothing i
 either). The inline script in `lib/boot.ts` decides before first paint and sets `data-boot` on
 `<html>`: `intro` on the homepage, `run` anywhere else.
 
-**The intro (homepage).** About three seconds: particles drift in the night (0.6s), gather into the
-logo (1.15s), the mark stands while a glint crosses it (0.55s), then the night lifts and the
-particles stream to the hero's champagne frame and fade there (0.85s). The hero is running
+**The intro (homepage).** Two and a half seconds (it was 3.15): particles drift in the night (0.45s),
+gather into the logo (0.95s), the mark stands while a glint crosses it (0.4s), then the night lifts and
+the particles stream to the hero's champagne frame and fade there (0.7s). A logo that has not loaded
+by 0.9s ends the intro instead of holding it. The hero is running
 underneath throughout, so what is left is simply the hero. One Canvas 2D surface the size of the
 window, pixel ratio capped at 1.5, 2,600 particles (1,100 below 720px). The shape and the colours
 are the real logo's: `public/brand/gio4x-logo` is drawn once to an offscreen canvas and its opaque
@@ -165,16 +168,50 @@ on its own (382ms).
 - Nothing is shown on first load, when either page has no stage, when the old frame was scrolled
   out of view, in a hidden tab, or under reduced motion or low effects. Below 720px it is a plain
   cross-fade.
+- **The camera move.** How the old picture leaves depends on the section being entered (`MOVES` in
+  `StageTransition.tsx`, section 1b of `transition.css`): a push into Markets, a rack focus into
+  Trading and account opening, an iris into Platforms, a pan into the Academy, Intelligence and the
+  reading pages, a pull back into Tools and Labs, and the original dissolve everywhere else. The
+  statement arrives in the same manner (`<html data-stage-turn="push">`). It reads the path only and
+  does not touch `routes.ts`. To give a section a move, add its root to `MOVES`.
 - The engine's part is one attribute: after each frame it writes the frame's rectangle to the
   canvas as `data-frame="x,y,w,h"` (canvas CSS pixels; only when it changes). `stage.ts` reads it.
   The existing `data-on` marks the first frame.
 
+## The first frame
+
+A hero must not show an empty pane. Three things see to it (`HeroScene.tsx`, `engine.ts`):
+
+- the scene's chunk is requested as soon as the page hydrates, not at the next idle moment (which
+  could be 900ms away); only the mounting waits, for the next animation frame;
+- `mount` draws its first frame synchronously (`drawNow`) instead of asking for an animation frame,
+  so the canvas already holds a picture when `data-on` starts its fade, and the page-to-page
+  transition does not wait for one;
+- `resize` assigns the canvas's width and height only when they change. Assigning them clears the
+  canvas, and the ResizeObserver's first report used to do exactly that just after the first frame
+  was drawn. A real resize now redraws in the same task.
+
+The power-on ramp (`f.boot`) starts 280ms in (`BOOT_LEAD`), so that first frame is the instrument
+about two fifths lit rather than dark. Nothing here was measured; it is a description of what changed.
+
+## The atmosphere
+
+Behind every page opening except the homepage's, one pseudo-element (`.cx-hero::after`, section 1 of
+`src/styles/fx.css`) carries two or three wide, soft pools of colour that drift. `CockpitFx` writes
+which conventional FX session window the visitor's clock is in to `<html data-atmos>`: `tokyo`
+(Sydney and Tokyo), `london`, `newyork`, `overlap` (two windows at once), `rest` (the week is running
+and no window is open) or `closed` (the weekend), from `fxOverview` in `src/lib/sessions.ts`. Each has
+its own colour, direction and pace. It is decoration under the same rule as a scene: no number, no
+shape that reads as data, and no name. The session is named only where the site already names it.
+It sits above the stage and below the statement, so the words' contrast does not change. The drift
+is stepped at about five positions a second, which cannot be seen at this softness and costs five
+repaints of one gradient a second. Still under reduced motion; absent under low effects and in print.
+
 ## Sound
 
-There is none, and nothing autoplays. If an opt-in sound layer is ever wanted, the hook is
-described at the top of `CockpitFx.tsx`: controls are ordinary buttons and links, so a listener
-for `pointerdown` on `.btn`, `[data-nav]` and `[role="switch"]` is all it needs. It must default
-to off.
+Off by default, and nothing autoplays. `src/components/sound/` holds it: `SoundFx` (mounted in the
+site shell) does nothing at all until "Interface sounds" is switched on at `/preferences`, then
+synthesises a tick, a tab tick, a knock and a chime with the Web Audio API. No audio file exists.
 
 ## Tiles and rows (`depth.css`)
 

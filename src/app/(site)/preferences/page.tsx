@@ -69,6 +69,15 @@ export default function PreferencesPage() {
               <Link href="/#tour" className="go mt-8 min-h-[2.75rem]">
                 Take the tour
               </Link>
+              <p className="mt-13 text-sm text-ink">Two pages have a short tour of their own, offered once on a first visit. Either can be started again here.</p>
+              <div className="mt-5 flex flex-wrap gap-x-34 gap-y-3">
+                <Link href="/tools#guide" className="go min-h-[2.75rem]">
+                  Toolkit tour
+                </Link>
+                <Link href="/sign-in#guide" className="go min-h-[2.75rem]">
+                  Gateway tour
+                </Link>
+              </div>
             </div>
           </div>
           <div className="panel p-21 sm:p-34">

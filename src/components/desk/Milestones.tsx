@@ -163,7 +163,7 @@ function Medallion({ badge, size }: { badge: Badge; size: number }) {
 function useBadges(data: MilestoneData): { list: Badge[] | null; fresh: ReadonlySet<string> } {
   const learned = useLearned();
   const [prefs, , ready] = usePrefs();
-  const list = useMemo(() => (learned === null || !ready ? null : badges(data, learned, prefs.tourDone === true)), [data, learned, ready, prefs.tourDone]);
+  const list = useMemo(() => (learned === null || !ready ? null : badges(data, learned, prefs?.tourDone === true)), [data, learned, ready, prefs?.tourDone]);
   const [fresh, setFresh] = useState<ReadonlySet<string>>(() => new Set());
   const earnedKey = list ? list.filter((b) => b.earned).map((b) => b.id).join("|") : null;
 

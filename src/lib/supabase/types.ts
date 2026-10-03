@@ -698,6 +698,8 @@ export type Database = {
       record_subscriber_export: { Args: { row_count: number }; Returns: undefined };
       portal_action_record: { Args: { p_action: string; p_entity_id: string; p_detail: Json }; Returns: undefined };
       portal_ops_record: { Args: { p_action: string; p_entity_id: string | null; p_detail: Json }; Returns: undefined };
+      portal_two_person: { Args: { p_kind: string; p_op: string; p_id: string; p_payload: Json | null }; Returns: Json };
+      portal_requests_open: { Args: { p_kind: string }; Returns: { id: string; payload: Json; requested_by_name: string; requested_at: string; mine: boolean }[] };
       portal_ib_record: { Args: { p_action: string; p_entity_id: string; p_detail: Json }; Returns: undefined };
       portal_ib_settlement: { Args: { p_op: string; p_ib: string; p_currency: string | null }; Returns: Json };
       portal_config_record: { Args: { p_table: string; p_op: string; p_entity_id: string | null; p_detail: Json }; Returns: undefined };

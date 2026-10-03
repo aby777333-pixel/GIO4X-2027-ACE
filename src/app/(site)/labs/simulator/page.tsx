@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MARKET, ROLLOVER_TICKS, SIM } from "@/components/labs/simulator/engine";
 import { PracticeDesk } from "@/components/labs/simulator/PracticeDesk";
+import { StoryTrade } from "@/components/labs/simulator/StoryTrade";
 import { DataNote, NextSteps, PageHero } from "@/components/ui/Page";
 import { educationalNote } from "@/config/legal";
 import { pageMeta } from "@/lib/meta";
@@ -26,7 +27,7 @@ const rules = [
 const differs = [
   { t: "Liquidity.", d: "Here every order of every size is filled in full, at once. A real market has a limited amount available at each price: large orders move it, quiet hours thin it, and the spread widens and narrows instead of standing still." },
   { t: "Emotions.", d: "Nothing is at stake here, so nothing is felt. Decisions made with real money, after a real loss or in a fast market, are not the decisions made on a practice desk." },
-  { t: "Costs.", d: "The spread, the swap and the absence of commission on this page are invented. Real costs depend on the account, the instrument and the moment, and they are charged whether a trade gains or loses." },
+  { t: "Costs.", d: "The spread, the swap and the commission (or the absence of one) on this page are invented. Real costs depend on the account, the instrument and the moment, and they are charged whether a trade gains or loses." },
   { t: "The price itself.", d: "This price is a random walk with no news, no sessions and no other participants. It cannot be analysed, and nothing learned about its direction applies to any market." },
 ];
 
@@ -42,9 +43,30 @@ export default function SimulatorPage() {
         eyebrow="GIO4X Labs · Simulation"
         title="Practice desk"
         lead="A sandbox for the mechanics of a trade: place, manage and close example positions on a price that is invented in your browser. It is a simulation throughout. No real instrument, no real prices, no real money."
-      />
+      >
+        <a href="#story" className="btn btn-primary">
+          Follow one trade
+        </a>
+        <a href="#desk" className="btn btn-ghost">
+          Go to the desk
+        </a>
+      </PageHero>
 
-      <section className="section-quiet" aria-label="Practice desk, a simulation on invented prices">
+      {/* one trade, in order, for a first visit: the desk beneath has everything at once */}
+      <section id="story" className="section-quiet scroll-mt-[var(--header-h)]" aria-labelledby="story-h">
+        <div className="wrap phi phi-r items-start">
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
+            <p className="eyebrow">Start here</p>
+            <h2 id="story-h" className="h3 mt-13 max-w-[16ch]">
+              One trade, from start to finish.
+            </h2>
+            <p className="mt-13 max-w-narrow text-ink-2">Five short steps: choose a trade, see the margin set aside, watch an illustrative price path, read each charge, and then the result in plain words. The price path is invented and seeded; it is not market data.</p>
+          </div>
+          <StoryTrade />
+        </div>
+      </section>
+
+      <section id="desk" className="section-quiet hairline scroll-mt-[var(--header-h)]" aria-label="Practice desk, a simulation on invented prices">
         <div className="wrap">
           <PracticeDesk />
         </div>

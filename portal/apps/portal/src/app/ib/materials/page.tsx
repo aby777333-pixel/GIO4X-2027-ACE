@@ -2,92 +2,117 @@ import Link from "next/link";
 import { Shell } from "@/components/Shell";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardBody, CardHeader, CardTitle } from "@gio4x/ui";
-import { Download, Image as ImageIcon, FileText, Video, Languages } from "lucide-react";
-import { SampleDataBanner } from "@/components/SampleDataBanner";
+import { Download, Image as ImageIcon, FileText, Video, Languages, Link2, type LucideIcon } from "lucide-react";
+import { getCurrentUser } from "@/lib/session";
+import { getSupabaseServer } from "@/lib/supabase-server";
 
-const sections = [
-  {
-    title: "Banners & creatives",
-    icon: ImageIcon,
-    items: [
-      { name: "Web banners — set of 12 (300x250 → 970x250)", size: "8.4 MB", type: "ZIP" },
-      { name: "Story / Reel templates — May 2026", size: "12.2 MB", type: "ZIP" },
-      { name: "Static social posts (square)", size: "4.6 MB", type: "ZIP" },
-    ],
-  },
-  {
-    title: "Decks & one-pagers",
-    icon: FileText,
-    items: [
-      { name: "IB partnership deck", size: "4.4 MB", type: "PDF" },
-      { name: "Trading conditions sheet", size: "640 KB", type: "PDF" },
-      { name: "GIO4X Copy explainer", size: "1.1 MB", type: "PDF" },
-      { name: "Account types comparison", size: "320 KB", type: "PDF" },
-    ],
-  },
-  {
-    title: "Video assets",
-    icon: Video,
-    items: [
-      { name: "60-sec brand spot — multiple languages", size: "84 MB", type: "MP4" },
-      { name: "Platform walkthrough (5 min)", size: "120 MB", type: "MP4" },
-      { name: "Product testimonial reels", size: "62 MB", type: "ZIP" },
-    ],
-  },
-  {
-    title: "Localised copy",
-    icon: Languages,
-    items: [
-      { name: "Headlines library — EN / HI / TA / AR / ZH / ES", size: "180 KB", type: "DOCX" },
-      { name: "Email templates (10 sequences)", size: "240 KB", type: "ZIP" },
-      { name: "WhatsApp / Telegram pitch decks", size: "1.8 MB", type: "PDF" },
-    ],
-  },
+// The asset library. Rows of public.marketing_materials, added and retired by staff in
+// GIO4X Control (IB Marketing). Each is a title and the https address of the file; a
+// signed-in partner reads the active ones (row-level security). Nothing here is sample
+// data: with no rows the page says so.
+type Material = {
+  id: string;
+  title: string;
+  kind: string;
+  description: string | null;
+  url: string;
+  language: string;
+};
+
+const KINDS: { kind: string; title: string; icon: LucideIcon }[] = [
+  { kind: "banner", title: "Banners & creatives", icon: ImageIcon },
+  { kind: "logo", title: "Logos & brand", icon: ImageIcon },
+  { kind: "document", title: "Decks & one-pagers", icon: FileText },
+  { kind: "video", title: "Video", icon: Video },
+  { kind: "copy", title: "Copy & templates", icon: Languages },
+  { kind: "landing_page", title: "Landing pages", icon: Link2 },
+  { kind: "other", title: "Other", icon: FileText },
 ];
 
-export default function MaterialsPage() {
+export default async function MaterialsPage() {
+  const user = await getCurrentUser();
+
+  let rows: Material[] = [];
+  if (user) {
+    // marketing_materials is newer than the generated database types
+    const supabase = getSupabaseServer() as unknown as {
+      from: (table: string) => {
+        select: (cols: string) => {
+          eq: (col: string, v: boolean) => {
+            order: (col: string, o: { ascending: boolean }) => { order: (col: string, o: { ascending: boolean }) => Promise<{ data: Material[] | null }> };
+          };
+        };
+      };
+    };
+    const { data } = await supabase
+      .from("marketing_materials")
+      .select("id, title, kind, description, url, language")
+      .eq("active", true)
+      .order("sort", { ascending: true })
+      .order("title", { ascending: true });
+    rows = data ?? [];
+  }
+
+  const sections = KINDS.map((k) => ({ ...k, items: rows.filter((r) => r.kind === k.kind) })).filter((s) => s.items.length > 0);
+
   return (
     <Shell title="Marketing Materials">
-      <PageHeader
-        title="Marketing Materials"
-        subtitle="Brand-approved creatives, copy, and decks. Co-branded versions available on request."
-      />
+      <PageHeader title="Marketing Materials" subtitle="Brand-approved creatives, copy, and decks. Co-branded versions available on request." />
 
-      <SampleDataBanner>Sample creatives — the live asset library is coming soon.</SampleDataBanner>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {sections.map((s) => {
-          const Icon = s.icon;
-          return (
-            <Card key={s.title}>
-              <CardHeader>
-                <CardTitle>{s.title}</CardTitle>
-                <Icon size={16} className="text-sky" />
-              </CardHeader>
-              <CardBody>
-                <ul className="divide-y divide-slate-100">
-                  {s.items.map((it) => (
-                    <li key={it.name} className="flex items-center justify-between py-3">
-                      <div>
-                        <div className="text-sm font-medium text-navy">{it.name}</div>
-                        <div className="text-[11px] text-steel">{it.type} · {it.size}</div>
-                      </div>
-                      <Link href="/ib/referrals" className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-navy hover:border-sky/40">
-                        <Download size={12} /> Get
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </CardBody>
-            </Card>
-          );
-        })}
-      </div>
+      {!user ? (
+        <div className="mb-4 rounded-lg border border-dashed border-slate-200 px-4 py-3 text-xs text-steel">
+          <Link href="/auth/login?redirect=/ib/materials" className="font-medium text-sky hover:underline">
+            Sign in
+          </Link>{" "}
+          to see the materials.
+        </div>
+      ) : sections.length === 0 ? (
+        <Card>
+          <CardBody className="!py-10 text-center text-sm text-steel">No materials have been published yet. They appear here as soon as the team adds them.</CardBody>
+        </Card>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {sections.map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.kind}>
+                <CardHeader>
+                  <CardTitle>{s.title}</CardTitle>
+                  <Icon size={16} className="text-sky" />
+                </CardHeader>
+                <CardBody>
+                  <ul className="divide-y divide-slate-100">
+                    {s.items.map((it) => (
+                      <li key={it.id} className="flex items-center justify-between gap-3 py-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium text-navy">{it.title}</div>
+                          <div className="text-[11px] text-steel">
+                            {it.language.toUpperCase()}
+                            {it.description ? ` · ${it.description}` : ""}
+                          </div>
+                        </div>
+                        {/* an outside address chosen by staff: opened in its own tab, with no referrer */}
+                        <a
+                          href={it.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex shrink-0 items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-navy hover:border-sky hover:text-sky"
+                        >
+                          <Download size={12} /> Open
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </CardBody>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       <Card className="mt-6 border-sky/20 bg-sky/5">
         <CardBody className="text-xs text-navy">
-          Need a co-branded asset (your logo + GIO4X)? Open a Support ticket with your brand kit and
-          we'll produce a co-branded version within 2 business days.
+          Need a co-branded asset (your logo + GIO4X)? Open a Support ticket with your brand kit and we&apos;ll produce a co-branded version.
         </CardBody>
       </Card>
     </Shell>

@@ -6,17 +6,18 @@ import { INTRO_END } from "@/lib/boot";
 
 const SECTIONS = ["Markets", "Platforms", "Tools", "Intelligence"];
 
-/* The intro's timeline, in milliseconds. With the logo already loaded it runs 3.15 seconds. */
+/* The intro's timeline, in milliseconds. With the logo already loaded it runs 2.5 seconds (it was 3.15):
+   a title reveal, not a wait. A logo that arrives late can add at most WAIT_MS - DRIFT_MS to that. */
 /** particles drift in the night */
-const DRIFT_MS = 600;
+const DRIFT_MS = 450;
 /** the latest the logo may arrive; past this the intro gives way to the page */
-const WAIT_MS = 1500;
+const WAIT_MS = 900;
 /** they gather into the mark */
-const GATHER_MS = 1150;
+const GATHER_MS = 950;
 /** the mark stands, and a glint crosses it */
-const HOLD_MS = 550;
+const HOLD_MS = 400;
 /** they stream to the hero's frame and dissolve while the night lifts */
-const HAND_MS = 850;
+const HAND_MS = 700;
 /** a skipped intro fades in this long (transition.css) */
 const SKIP_MS = 220;
 
@@ -382,7 +383,7 @@ function playIntro(host: HTMLElement, canvas: HTMLCanvasElement, skipButton: HTM
  * decides before first paint whether this visit shows it, and which form:
  *
  *   - the homepage: THE INTRO. The logo forms from particles and hands over to
- *     the hero, in about three seconds. "Skip", Escape, any other key, a click,
+ *     the hero, in two and a half seconds. "Skip", Escape, any other key, a click,
  *     a touch or the wheel ends it at once. The canvas is decorative; a screen
  *     reader is told "GIO4X", and the keyboard starts on "Skip" and is handed
  *     back when it ends. Focus is never held.

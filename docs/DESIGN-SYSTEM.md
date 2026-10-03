@@ -132,6 +132,26 @@ pulsing CTAs, confetti, parallax for its own sake. Everything must look finished
 `prefers-reduced-motion`, `[data-motion="reduced"]` and `[data-effects="low"]` are all honoured globally;
 canvas scenes must draw one static frame in those modes and pause when off-screen or hidden.
 
+**First view** (`src/components/fx/MicroFx.tsx`, one IntersectionObserver for the page):
+
+- `data-count` on an element whose only content is a number (`<span className="num" data-count>1,320</span>`)
+  makes it count up from zero, once, when it scrolls into view. The markup holds the real value, so
+  with no script or with motion off it is simply the number. **Only for a constant written in the
+  page** (a count of things, a year, a size). Never for a market value, a reference rate, an indicative
+  condition or anything that updates: section 7 applies. The script refuses anything inside
+  `aria-live`, `.table-gx` or `data-live`.
+- Every `<Sparkline/>` draws itself from the left on first view; `data-draw` on any small figure does
+  the same, `data-draw="stroke"` on an SVG traces each path along its length, `data-draw="off"` opts out.
+  The shape never changes, only when it appears.
+
+**Press.** `.btn:active` sinks 1px (`depth.css`) and, with a mouse or pen, sends a ring of light from the
+point pressed (`pointer.css`). Do not add another press effect.
+
+**Theme: Light, Dark, Auto, Sun.** "Sun" (`src/components/fx/sun.ts`) is light by day and dark by night,
+estimated from the device's clock, date and time zone only: no location request, no network. It is one
+extra field, `sun`, inside `gx:prefs`; the visitor's Light / Dark / Auto choice stays underneath it.
+Nothing changes for a visitor who has not chosen it. Components keep reading `data-theme`.
+
 ## 6. The signature
 
 `<Rosette/>` is the eight-blade pinwheel from the logo mark, redrawn procedurally with φ-related radii.

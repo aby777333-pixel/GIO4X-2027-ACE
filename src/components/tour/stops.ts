@@ -70,3 +70,29 @@ export const TOUR_KEY = "gx:tour";
 
 /** The address that starts the tour, wherever it is linked from. It is the homepage; the fragment is read and removed. */
 export const TOUR_HASH = "#tour";
+
+/**
+ * Single-page tours (PageTour.tsx): a first-visit walk round one page. Each
+ * is offered once on that page, can be ended at any step, and is started
+ * again from /preferences or by a link to the page with the fragment below.
+ *
+ * Whether one has been offered is kept with the display preferences
+ * (`gx:prefs`), as one true/false field per tour beside `tourDone`. Nothing
+ * else is stored and nothing is sent.
+ */
+export type PageTourId = "tools" | "gateway";
+
+/** A step of a single-page tour. `target` is a CSS selector on that page; a step without one simply shows its panel. */
+export type PageTourStop = { target?: string; title: string; body: string };
+
+/** The field of `gx:prefs` that records that a page tour was started or declined. */
+export const PAGE_TOUR_FLAG: Record<PageTourId, "tourTools" | "tourGateway"> = { tools: "tourTools", gateway: "tourGateway" };
+
+/** Where each page tour lives, and the words that offer it. */
+export const PAGE_TOURS: Record<PageTourId, { path: string; name: string; offer: string }> = {
+  tools: { path: "/tools", name: "Toolkit tour", offer: "First time in the Toolkit? A few short steps show how the twelve tools fit together." },
+  gateway: { path: "/sign-in", name: "Gateway tour", offer: "Not sure which door is yours? A few short steps explain each portal and how to check an address." },
+};
+
+/** The fragment that starts a page tour: `/tools#guide`, `/sign-in#guide`. It is read and removed. */
+export const PAGE_TOUR_HASH = "#guide";

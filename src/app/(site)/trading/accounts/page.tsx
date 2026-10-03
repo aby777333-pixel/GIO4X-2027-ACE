@@ -42,6 +42,9 @@ export default function AccountsPage() {
               Choose by how you pay.
             </h2>
             <p className="lead mt-13 max-w-[58ch]">Select an account to read its character. The worked example beneath keeps all three in view.</p>
+            <Link href="/trading/accounts/choose" className="go mt-13 min-h-[2.75rem]">
+              Not sure which? Answer four questions
+            </Link>
           </div>
           <div className="mt-34 lg:mt-55" data-tour="accounts">
             <AccountExplorer />

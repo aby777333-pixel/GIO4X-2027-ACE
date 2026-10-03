@@ -15,8 +15,10 @@ import { PositionSize } from "@/components/tools/PositionSize";
 import { ProfitLoss } from "@/components/tools/ProfitLoss";
 import { RiskReward } from "@/components/tools/RiskReward";
 import { SpreadVisualizer } from "@/components/tools/SpreadVisualizer";
+import { SwipeNav } from "@/components/tools/SwipeNav";
+import { ToolPager, type PagerTool } from "@/components/tools/ToolPager";
 import type { RatesProp } from "@/components/tools/calc";
-import { toolContent } from "@/components/tools/content";
+import { toolContent, toolGroups } from "@/components/tools/content";
 import type { ToolProps } from "@/components/tools/ui";
 import { getTerm } from "@/data/glossary";
 import { getTool, tools } from "@/data/tools";
@@ -40,6 +42,13 @@ const TOOLS: Record<string, { Component: ComponentType<ToolProps>; rates: boolea
   "order-anatomy": { Component: OrderAnatomy, rates: false },
 };
 
+/** The tools in the order the hub lists them (its groups, then anything not yet grouped): the order "previous" and "next" follow. */
+const ORDER: string[] = [...toolGroups.flatMap((g) => g.slugs), ...tools.map((t) => t.slug)].filter((s, i, all) => s in TOOLS && getTool(s) !== undefined && all.indexOf(s) === i);
+
+function pagerTool(slug: string | undefined): PagerTool | null {
+  const t = slug ? getTool(slug) : undefined;
+  return t ? { href: `/tools/${t.slug}`, name: t.name } : null;
+}
 
 export function generateStaticParams() {
   return tools.filter((t) => t.slug in TOOLS).map((t) => ({ slug: t.slug }));
@@ -82,9 +91,14 @@ export default async function ToolPage({ params }: Params) {
     return t ? [{ label: t.name, href: `/tools/${t.slug}`, note: t.line, kind: t.kind }] : [];
   });
   const { Component } = entry;
+  const at = ORDER.indexOf(slug);
+  const prev = pagerTool(at > 0 ? ORDER[at - 1] : undefined);
+  const nextTool = pagerTool(at >= 0 ? ORDER[at + 1] : undefined);
+  const pager = { prev, next: nextTool, index: Math.max(0, at), total: ORDER.length };
 
   return (
-    <>
+    // on a touch screen a swipe left or right does what the pager's links do
+    <SwipeNav prev={prev?.href ?? null} next={nextTool?.href ?? null}>
       <JsonLd data={webPageSchema({ path: `/tools/${tool.slug}`, name: pageTitle(tool.name, tool.kind), description: tool.description })} />
       <PageHero
         quiet
@@ -99,6 +113,8 @@ export default async function ToolPage({ params }: Params) {
         {/* keeps the tool on My desk (/desk), in this browser only */}
         <SaveButton href={`/tools/${tool.slug}`} title={tool.name} className="btn btn-ghost" />
       </PageHero>
+
+      <ToolPager {...pager} />
 
       <section className="section-quiet" aria-label={`${tool.name}: the tool`}>
         <div className="wrap">
@@ -122,7 +138,9 @@ export default async function ToolPage({ params }: Params) {
         </div>
       </section>
 
+      <ToolPager {...pager} foot />
+
       <NextSteps title="Continue" items={[...next.slice(0, 3), content.context]} />
-    </>
+    </SwipeNav>
   );
 }

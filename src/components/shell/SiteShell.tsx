@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { CockpitBoot } from "@/components/cockpit/Boot";
 import { CockpitFx } from "@/components/cockpit/CockpitFx";
 import { StageTransition } from "@/components/cockpit/StageTransition";
+import { MicroFx } from "@/components/fx/MicroFx";
+import { SunTheme } from "@/components/fx/SunTheme";
 import { RecentRecorder } from "@/components/desk/RecentRecorder";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
@@ -42,6 +44,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <CockpitBoot />
       {/* between two pages that both open with a stage, the old instrument turns into the new one */}
       <StageTransition />
+      {/* first view: constants marked data-count count up, small line figures draw themselves (off under reduced motion and low effects) */}
+      <MicroFx />
+      {/* "Sun" at /preferences: light by day, dark by night, from this device's clock; does nothing unless chosen */}
+      <SunTheme />
       <ScrollArrows />
       {/* live chat: offered only while a member of staff is present to answer */}
       <ChatWidget />

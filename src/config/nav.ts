@@ -54,6 +54,7 @@ export const nav: NavSection[] = [
         title: "Accounts",
         items: [
           { label: "Account Types", href: "/trading/accounts", note: "Classic, Premium, ECN" },
+          { label: "Choose an Account", href: "/trading/accounts/choose", note: "Four questions" },
           { label: "Trading Conditions", href: "/trading/conditions" },
           { label: "Funding & Withdrawals", href: "/trading/funding" },
         ],
@@ -130,6 +131,8 @@ export const nav: NavSection[] = [
           { label: "One day of markets", href: "/labs/market-day", note: "24 hours as a two-minute film" },
           { label: "Trade Anatomy", href: "/labs/trade-anatomy", note: "One order, click to balance" },
           { label: "Practice desk", href: "/labs/simulator", note: "A simulation on invented prices" },
+          { label: "Session globe", href: "/labs/session-globe", note: "The four FX sessions on a globe, from the clock" },
+          { label: "Order book in 3D", href: "/labs/order-book-3d", note: "Bids, asks, spread and depth: an illustration" },
         ],
       },
     ],

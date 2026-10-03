@@ -108,9 +108,14 @@ export default function OpenAccountPage() {
                 </li>
               ))}
             </ul>
-            <Link href="/trading/accounts" className="go mt-13 min-h-[2.75rem]">
-              Compare account types
-            </Link>
+            <div className="mt-13 flex flex-wrap gap-x-34 gap-y-3">
+              <Link href="/trading/accounts" className="go min-h-[2.75rem]">
+                Compare account types
+              </Link>
+              <Link href="/trading/accounts/choose" className="go min-h-[2.75rem]">
+                Help me choose
+              </Link>
+            </div>
           </div>
 
           {/* right: the security cues, strong and quiet */}

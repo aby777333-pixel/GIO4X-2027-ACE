@@ -7,6 +7,8 @@ import { EXAMPLE_PICKS, picksQuery } from "@/components/labs/picks";
 import { MarketDayStill } from "@/components/labs/market-day/MarketDayStill";
 import { TradeStill } from "@/components/labs/trade-anatomy/TradeStill";
 import { SimulatorStill } from "@/components/labs/simulator/Still";
+import { OrderBookStill } from "@/components/labs/order-book-3d/OrderBookStill";
+import { SessionGlobeStill } from "@/components/labs/session-globe/SessionGlobeStill";
 import { NextSteps, PageHero } from "@/components/ui/Page";
 import { Tabs } from "@/components/ui/Tabs";
 import { connect, graphStats, KIND_LABEL, KIND_ORDER } from "@/data/graph";
@@ -15,7 +17,7 @@ import { pageMeta } from "@/lib/meta";
 export const metadata = pageMeta({
   title: "GIO4X Labs",
   description:
-    "GIO4X Labs is where experiments live, apart from the core brokerage pages: the Market Universe, an explorable knowledge graph; Connect the Dots, which explains how markets, institutions and concepts are related; Trade Anatomy; One day of markets; and a practice desk on invented prices.",
+    "GIO4X Labs is where experiments live, apart from the core brokerage pages: the Market Universe, an explorable knowledge graph; Connect the Dots, which explains how markets, institutions and concepts are related; Trade Anatomy; One day of markets; a practice desk on invented prices; a globe of the four FX sessions; and a 3D illustration of an order book.",
   path: "/labs",
 });
 
@@ -142,11 +144,11 @@ export default function LabsPage() {
             <div>
               <p className="eyebrow">Open now</p>
               <h2 id="labs-open" className="h2 mt-13">
-                Five experiments.
+                Seven experiments.
               </h2>
             </div>
             <p className="max-w-[34rem] text-ink-2">
-              The first two are views of the same thing: the GIO4X Graph, which today holds <span className="num">{graphStats.nodes}</span> nodes and <span className="num">{graphStats.edges}</span> relations, built from the pages and reference data of this site. The other three stand on their own: one order followed to its settlement, one day of sessions, and a practice desk on invented prices.
+              The first two are views of the same thing: the GIO4X Graph, which today holds <span className="num">{graphStats.nodes}</span> nodes and <span className="num">{graphStats.edges}</span> relations, built from the pages and reference data of this site. The other five stand on their own: one order followed to its settlement, one day of sessions, a practice desk on invented prices, and two models you can turn: the four FX sessions on a globe, and the layout of an order book.
             </p>
           </div>
 
@@ -228,6 +230,36 @@ export default function LabsPage() {
               <p className="mt-13 max-w-measure text-ink-2">Not a view of the graph, and not a market. The price is a seeded random walk made in your browser, the instrument and the account are examples, and the settings are made up for practice: they are not GIO4X’s trading conditions.</p>
               <Link href="/labs/simulator" className="go mt-21">
                 Open the Practice desk
+              </Link>
+            </div>
+          </article>
+
+          <article className="mt-55 grid gap-34 border-t border-line pt-34 lg:grid-cols-phi-r lg:items-center lg:gap-55">
+            <div>
+              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">06</p>
+              <h3 className="h2 mt-8">Session globe</h3>
+              <p className="lead mt-13">A globe you can turn, showing which of the four FX sessions (Sydney, Tokyo, London, New York) are open at this minute, and the line between day and night.</p>
+              <p className="mt-13 max-w-measure text-ink-2">It is worked out from your clock and the conventional session windows, and from nothing else: a schedule, not a data feed. The same reading stands beside it as a plain list, and a flat map takes the globe’s place where 3D is not available.</p>
+              <Link href="/labs/session-globe" className="go mt-21">
+                Open the Session globe
+              </Link>
+            </div>
+            <Link href="/labs/session-globe" aria-hidden tabIndex={-1} className="order-first block overflow-hidden rounded border border-line bg-paper p-13 lg:order-none">
+              <SessionGlobeStill />
+            </Link>
+          </article>
+
+          <article className="mt-55 grid gap-34 border-t border-line pt-34 lg:grid-cols-phi lg:items-center lg:gap-55">
+            <Link href="/labs/order-book-3d" aria-hidden tabIndex={-1} className="block overflow-hidden rounded border border-line bg-paper p-13">
+              <OrderBookStill />
+            </Link>
+            <div>
+              <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">07</p>
+              <h3 className="h2 mt-8">Order book in 3D</h3>
+              <p className="lead mt-13">A model you can turn that explains how an order book is laid out: bids, asks, the spread between them, depth, and how a market order walks the book.</p>
+              <p className="mt-13 max-w-measure text-ink-2">An illustration, not market data. Its shapes come from a generator with a fixed seed, so it is the same on every visit; it holds no prices and no quantities, and its six readings stand in full as text.</p>
+              <Link href="/labs/order-book-3d" className="go mt-21">
+                Open the Order book in 3D
               </Link>
             </div>
           </article>

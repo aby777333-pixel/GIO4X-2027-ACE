@@ -11,7 +11,7 @@ MetaTrader 5 × 777 Raptor · Inter × TT Norms · φ = 1.618 · logo DNA.
 |---|---|
 | Home | `/` |
 | Markets | `/markets` (Market Command), `/markets/{class}`, `/markets/{class}/{instrument}`, `/markets/clock`, `/markets/currency-strength`, `/markets/central-banks`, `/markets/events` |
-| Trading | `/trading`, `/trading/accounts`, `/trading/conditions`, `/trading/funding`, `/trading/copy-trading`, `/trading/pamm`, `/partners`, `/partners/money-managers` |
+| Trading | `/trading`, `/trading/accounts`, `/trading/accounts/choose` (account chooser: four questions, works as a plain GET form), `/trading/conditions`, `/trading/funding`, `/trading/copy-trading`, `/trading/pamm`, `/partners`, `/partners/money-managers` |
 | Platforms | `/platforms`, `/platforms/raptor`, `/platforms/metatrader-5`, `/platforms/compare` |
 | Trader Toolkit | `/tools` and twelve calculators / visualisers |
 | Intelligence | `/intelligence`, `/intelligence/{slug}`, `/intelligence/feed.xml`, `/morning-room` |
@@ -85,6 +85,8 @@ No secret is required to build or run the public site. Never commit `.env.local`
 | `docs/CONTENT-AUDIT.md`, `docs/CONTENT-AUDIT-LEGAL.md` | what was carried over from the previous sites, what was held and why |
 | `docs/REQUIREMENTS-MATRIX.md` | the master specification mapped to implementation status |
 | `docs/WAITING-FOR-ABE.md` | everything that needs the owner's input |
+| `docs/DATA-FEEDS.md` | where a live-quotes provider and an economic-calendar provider plug in, what the owner must supply, what the pages show until then |
+| `docs/I18N.md` | multi-language: size of the job, recommended approach, owner decisions, phased plan (nothing is translated yet) |
 
 ## Principles that are enforced, not just stated
 
