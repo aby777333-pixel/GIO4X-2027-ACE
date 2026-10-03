@@ -505,7 +505,7 @@ const LOCAL_KEY_PURPOSE: Record<(typeof LOCAL_KEYS)[number], { holds: string; wh
     why: "So the glossary can mark the terms you have checked and show how many, and the Academy can mark the lessons you have completed and count them by level and by learning path. No score is kept. Each can be cleared where it is shown, with “Start over”: the terms from the glossary, the lessons from the Academy.",
   },
   "gx:play": {
-    holds: "The last day you answered the daily riddle correctly and your run of days in a row; your best score in the Workshop game “Sixty seconds”, in pips of an invented price; and, once you have started the passport on My desk, the short names of the stamps you have collected. No addresses, no times and nothing about you.",
+    holds: "The last day you answered the daily riddle correctly and your run of days in a row; your best score in the Workshop game “Sixty seconds”, in pips of an invented price; which of the five hidden riddles you have solved; and, once you have started the passport on My desk, the short names of the stamps you have collected. No addresses, no times and nothing about you.",
     why: "So the riddle can show your run, the game can show your best, and My desk can show your passport. Each part is written only by something you do: answering a riddle, finishing a round, or pressing “Start my passport”. Handing the passport back deletes its stamps.",
   },
   "gx:sim": {

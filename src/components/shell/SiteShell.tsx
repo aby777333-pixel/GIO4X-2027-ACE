@@ -5,6 +5,7 @@ import { StageTransition } from "@/components/cockpit/StageTransition";
 import { MicroFx } from "@/components/fx/MicroFx";
 import { SunTheme } from "@/components/fx/SunTheme";
 import { RecentRecorder } from "@/components/desk/RecentRecorder";
+import { AmbienceFollower, CurrencyRain, Season } from "@/components/fx/Extras";
 import { PassportRecorder } from "@/components/play/Passport";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AnnouncementBar } from "@/components/shell/AnnouncementBar";
@@ -61,6 +62,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <RecentRecorder />
       {/* the passport on My desk: a stamp for the page that is open, only once the visitor has started it */}
       <PassportRecorder />
+      {/* a tint for three stretches of the year, a symbol that falls when its code is typed, and the pitch of the ambient sound if it is on */}
+      <Season />
+      <CurrencyRain />
+      <AmbienceFollower />
       <OfflineRegister />
       <JsonLd data={[organizationSchema(), websiteSchema()]} />
     </>

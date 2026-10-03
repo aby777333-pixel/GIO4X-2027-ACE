@@ -1,3 +1,4 @@
+import { HiddenRiddle } from "@/components/verse/Verse";
 import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { FigureNote } from "@/components/figures/Figure";
@@ -152,6 +153,8 @@ export default function ToolsHub() {
           <p className="mt-34 max-w-measure text-xs text-ink-3">{educationalNote} Results are calculations on the figures you enter and do not describe any real account, quote or trade.</p>
         </div>
       </section>
+
+      <HiddenRiddle id="tools" />
 
       <PunchLine k="tools" />
 

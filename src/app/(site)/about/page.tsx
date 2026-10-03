@@ -1,3 +1,4 @@
+import { HiddenRiddle } from "@/components/verse/Verse";
 import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { TwoOffices } from "@/components/figures/extra/SideFigures";
@@ -252,6 +253,8 @@ export default function AboutPage() {
           </ul>
         </div>
       </section>
+
+      <HiddenRiddle id="about" />
 
       <PunchLine k="company" />
 

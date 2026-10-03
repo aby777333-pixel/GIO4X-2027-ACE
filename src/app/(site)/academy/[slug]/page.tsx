@@ -1,3 +1,4 @@
+import { limericks } from "@/data/limericks";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Lab } from "@/components/academy/labs";
@@ -150,6 +151,18 @@ export default async function LessonPage({ params }: Params) {
             <div className="mt-21">
               <LessonQuiz slug={l.slug} questions={questions} />
             </div>
+          </section>
+        )}
+        {limericks[l.slug] && (
+          <section aria-labelledby="limerick" className="mt-55 border-t border-line-strong pt-34">
+            <h2 id="limerick" className="eyebrow">
+              The lesson, in a limerick
+            </h2>
+            <p className="gx-couplet mt-13 !mb-0">
+              {limericks[l.slug].map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </p>
           </section>
         )}
         {(prev || next) && (

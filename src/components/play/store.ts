@@ -10,6 +10,7 @@ import { useSyncExternalStore } from "react";
  *   r   the daily riddle: the last day answered correctly, the run of days in
  *       a row, and the longest run
  *   b   the best score in "Sixty seconds" (the Workshop), in pips
+ *   h   the riddle hunt: which of the five hidden riddles have been solved
  *   s   the passport: the stamps collected. Present only once the visitor has
  *       pressed "Start my passport"; until then no page visit is noted
  *
@@ -20,7 +21,7 @@ import { useSyncExternalStore } from "react";
 export const PLAY_KEY = "gx:play";
 const EVENT = "gx:play";
 
-export type Play = { r?: { last: string; streak: number; best: number }; b?: number; s?: string[] };
+export type Play = { r?: { last: string; streak: number; best: number }; b?: number; s?: string[]; h?: string[] };
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const STAMP = /^[a-z][a-z0-9-]{0,31}$/;
@@ -35,9 +36,25 @@ function clean(v: unknown): Play {
     out.r = { last: r.last, streak: Math.min(9999, Math.max(0, r.streak as number)), best: Math.min(9999, Math.max(0, r.best as number)) };
   }
   if (typeof o.b === "number" && Number.isFinite(o.b)) out.b = Math.max(-9999, Math.min(9999, Math.round(o.b * 10) / 10));
+  if (Array.isArray(o.h)) {
+    const h = [...new Set(o.h.filter((x): x is string => typeof x === "string" && x in HUNT))];
+    if (h.length) out.h = h;
+  }
   if (Array.isArray(o.s)) out.s = [...new Set(o.s.filter((x): x is string => typeof x === "string" && STAMP.test(x)))].slice(0, MAX_STAMPS);
   return out;
 }
+
+/**
+ * The five hidden riddles: where each is, its couplet, and its answer among
+ * three. A riddle describes a thing on this site or an idea it teaches.
+ */
+export const HUNT = {
+  tools: { where: "The Trader Toolkit", href: "/tools", a: "From your stop and from your stake", b: "I work out the size that you should take.", answer: "Position size", options: ["Position size", "Pip value", "Compound growth"] },
+  glossary: { where: "The glossary", href: "/glossary", a: "I look the same at every scale,", b: "a path that tells no certain tale.", answer: "A random walk", options: ["A trend line", "A random walk", "A moving average"] },
+  trust: { where: "The Trust Centre", href: "/trust", a: "Between two marks I name the site:", b: "read me first, and read me right.", answer: "The domain in an address", options: ["A password", "The domain in an address", "A padlock"] },
+  about: { where: "About GIO4X", href: "/about", a: "One in London, one in Chennai:", b: "two published doors, and here am I.", answer: "The two offices", options: ["The two platforms", "The two offices", "The two portals"] },
+  labs: { where: "GIO4X Labs", href: "/labs", a: "Poured at the open, drawn high and low,", b: "cooled at the close: what do I show?", answer: "A candlestick", options: ["A candlestick", "A moving average", "A spread"] },
+} as const;
 
 let cache: { raw: string | null; value: Play } = { raw: null, value: {} };
 const EMPTY: Play = {};
@@ -64,7 +81,7 @@ export function readPlay(): Play {
 
 function write(next: Play): void {
   try {
-    if (!next.r && next.b === undefined && !next.s) window.localStorage.removeItem(PLAY_KEY);
+    if (!next.r && next.b === undefined && !next.s && !next.h) window.localStorage.removeItem(PLAY_KEY);
     else window.localStorage.setItem(PLAY_KEY, JSON.stringify(next));
   } catch {
     /* storage is unavailable: the record is simply not kept */
@@ -127,4 +144,13 @@ export function stamp(id: string): void {
   const p = readPlay();
   if (!p.s || p.s.includes(id) || !STAMP.test(id)) return;
   write({ ...p, s: [...p.s, id].slice(0, MAX_STAMPS) });
+}
+
+/** A hidden riddle solved. When all five are, the passport (if there is one) is stamped for it. */
+export function noteHunt(id: keyof typeof HUNT): void {
+  const p = readPlay();
+  if (p.h?.includes(id)) return;
+  const h = [...(p.h ?? []), id];
+  const done = h.length === Object.keys(HUNT).length;
+  write({ ...p, h, ...(done && p.s && !p.s.includes("hunt") ? { s: [...p.s, "hunt"] } : {}) });
 }

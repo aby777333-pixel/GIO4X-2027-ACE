@@ -73,18 +73,31 @@ export function RaptorFlight() {
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
-      const wide = w >= 900;
+      // the frame: the same golden rectangle, in the same place, as every other page's hero (see cockpit/engine)
+      const wide = w >= 1080;
+      const gutter = Math.max(21, Math.min(55, w * 0.042));
+      const contentW = Math.min(w - gutter * 2, 1320);
+      const bw = wide ? Math.min(contentW * 0.52, 760, (h - 68) * 1.618) : Math.min(contentW, 560);
+      const bh = bw / 1.618;
+      const bx = wide ? (w - contentW) / 2 + contentW - bw : (w - bw) / 2;
+      const by = wide ? (h - bh) / 2 : 76;
       // the vanishing point sits to the right on a wide screen, clear of the words
-      const vx = (wide ? w * 0.68 : w * 0.5) - bank * w * 0.07;
-      const horizon = h * (wide ? 0.3 : 0.22) + lift * h * 0.05;
+      const vx = bx + bw * 0.3 - bank * bw * 0.06;
+      const horizon = by + bh * 0.3 + lift * bh * 0.05;
       const camY = 8.2 + lift * 1.6; // height of the eye above the floor: well clear of the tallest candle
       // the eye flies beside the run of candles, not over it, so that they are seen as a row going away
-      const camX = (wide ? -5.2 : -3.4) + bank * 1.4;
-      const f = Math.min(w, h * 1.5) * 0.62;
+      const camX = -4.4 + bank * 1.4;
+      const f = bh * 0.82;
       const SPACE = 1.15; // distance between candles
       const FAR = 46;
 
       ctx.save();
+      ctx.beginPath();
+      ctx.rect(bx, by, bw, bh);
+      ctx.clip();
+      // a pane of darker glass, so the frame reads as an instrument's window
+      ctx.fillStyle = "rgba(4, 8, 12, 0.34)";
+      ctx.fillRect(bx, by, bw, bh);
       // the whole view rolls a little with the bank
       ctx.translate(vx, horizon);
       ctx.rotate(-bank * 0.07);
@@ -94,7 +107,7 @@ export function RaptorFlight() {
       const Y = (y: number, z: number) => horizon + ((camY - y) * f) / z;
 
       // light on the horizon
-      const glow = ctx.createRadialGradient(vx, horizon, 0, vx, horizon, w * 0.5);
+      const glow = ctx.createRadialGradient(vx, horizon, 0, vx, horizon, bw * 0.7);
       glow.addColorStop(0, col(BLUE, 0.3));
       glow.addColorStop(0.4, col(TEAL, 0.1));
       glow.addColorStop(1, col(TEAL, 0));
@@ -187,25 +200,35 @@ export function RaptorFlight() {
       }
       ctx.restore();
 
-      // on a narrow screen the words lie over the whole stage: the flight is turned down behind them
-      if (!wide) {
-        ctx.fillStyle = "rgba(12,17,22,0.62)";
-        ctx.fillRect(0, 0, w, h);
+      // the frame itself: a hairline in champagne, heavier at the corners, with the golden cut marked on its long sides
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(201,169,106,0.2)";
+      ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
+      const c = Math.min(21, bw * 0.05);
+      ctx.strokeStyle = "rgba(201,169,106,0.8)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (const [x, y, sx, sy] of [
+        [bx, by, 1, 1],
+        [bx + bw, by, -1, 1],
+        [bx, by + bh, 1, -1],
+        [bx + bw, by + bh, -1, -1],
+      ] as const) {
+        ctx.moveTo(x + sx * c, y + sy * 0.75);
+        ctx.lineTo(x + sx * 0.75, y + sy * 0.75);
+        ctx.lineTo(x + sx * 0.75, y + sy * c);
       }
-      // on a wide screen the words sit on the left: the night is kept deep behind them
-      if (wide) {
-        const shade = ctx.createLinearGradient(0, 0, w * 0.52, 0);
-        shade.addColorStop(0, "rgba(12,17,22,0.92)");
-        shade.addColorStop(0.6, "rgba(12,17,22,0.6)");
-        shade.addColorStop(1, "rgba(12,17,22,0)");
-        ctx.fillStyle = shade;
-        ctx.fillRect(0, 0, w * 0.52, h);
-      }
+      const cut = bx + bw * 0.618;
+      ctx.moveTo(cut, by - 4);
+      ctx.lineTo(cut, by + 5);
+      ctx.moveTo(cut, by + bh - 5);
+      ctx.lineTo(cut, by + bh + 4);
+      ctx.stroke();
 
       // a breath of light in the whole frame, so a still moment is not dead
       if (!frozen) {
         ctx.fillStyle = col(BLUE, 0.025 + Math.sin(t * 0.8) * 0.012);
-        ctx.fillRect(0, 0, w, h);
+        ctx.fillRect(bx, by, bw, bh);
       }
       if (visible && !frozen && !document.hidden) raf = requestAnimationFrame(frame);
     };

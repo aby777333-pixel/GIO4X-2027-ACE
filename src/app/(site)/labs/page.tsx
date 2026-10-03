@@ -1,3 +1,4 @@
+import { HiddenRiddle } from "@/components/verse/Verse";
 import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { Constellation, STAGE_COMPACT } from "@/components/labs/Constellation";
@@ -281,11 +282,14 @@ export default function LabsPage() {
             </div>
           </article>
 
-          <ul className="mt-55 grid gap-px overflow-hidden rounded border border-line bg-line lg:grid-cols-3">
+          <ul className="mt-55 grid gap-px overflow-hidden rounded border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
             {[
               { n: "09", t: "The Engine Room", d: "Six machines about what happens to a trade once it is on: the margin-call countdown, the swap clock, slippage in slow motion, the compounding staircase, the correlation dance and the marbles.", href: "/labs/engine-room" },
               { n: "10", t: "Forces", d: "Four models of what moves a market, made physical: a tug of war between two currencies, a central bank\u2019s lever, a release that spreads like a ripple, and the tide of liquidity.", href: "/labs/forces" },
               { n: "11", t: "The Long Scroll", d: "One fall from a single tick out to a decade. An invented walk seen through a wider and wider window, which looks much the same at every scale.", href: "/labs/scale" },
+              { n: "12", t: "The Screening Room", d: "Six set pieces: a night trading floor whose screens are doors, an order\u2019s journey seen from the order, a canyon between bid and ask, volatility as weather, levels as gravity, and nine towers that light as their exchanges open.", href: "/labs/cinema" },
+              { n: "13", t: "The Mind Room", d: "Four games about the person at the screen: coin flips against a real tilt, a trade with only a Close button, six questions that show common leans, and headlines that cut both ways.", href: "/labs/mind" },
+              { n: "14", t: "The Verse Room", d: "A riddle a week, a trader\u2019s alphabet, couplets to finish, old sayings weighed, and five riddles hidden round the site.", href: "/verse" },
             ].map((x) => (
               <li key={x.href} className="bg-surface p-21 lg:p-34">
                 <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">{x.n}</p>
@@ -350,6 +354,8 @@ export default function LabsPage() {
           </ul>
         </div>
       </section>
+
+      <HiddenRiddle id="labs" />
 
       <PunchLine k="labs" />
 

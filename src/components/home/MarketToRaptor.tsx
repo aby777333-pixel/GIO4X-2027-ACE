@@ -271,7 +271,9 @@ export function MarketToRaptor() {
       const laneGap = desktop ? Math.min(h * 0.085, 62) : Math.min(h * 0.052, 44);
       const laneY = desktop ? h / 2 : h * 0.33;
       const laneX0 = desktop ? w * 0.42 : -w * 0.08; // streams keep clear of the reading column
-      const laneX1 = w * 1.08;
+      // on a wide screen the streams stop at the page's own right edge, where everything else on the page stops
+      const seqGutter = Math.max(21, Math.min(55, w * 0.042));
+      const laneX1 = desktop ? w - seqGutter - (w - Math.min(w, 1320 + seqGutter * 2)) / 2 : w * 1.08;
       const flow = t * 0.018;
 
       const size = desktop ? 1.9 : 1.6;
@@ -331,6 +333,8 @@ export function MarketToRaptor() {
         if (desktop) alpha *= mix(1, clamp01((x - w * 0.3) / (w * 0.1)), toScatter * (1 - toStream));
         // on phones the statement sits below, so they thin out towards it instead
         else alpha *= mix(1, clamp01((h * 0.56 - y) / (h * 0.08)), toScatter * (1 - toStream));
+        // a stream fades in at its head and out at its foot, so nothing is cut off at the border
+        if (desktop) alpha *= mix(1, Math.min(1, u / 0.07, (1 - u) / 0.07), toStream * (1 - e4));
         const tone = accent[i] && e4 > 0.5 ? BLUE : toStream > 0.3 && e4 < 0.9 ? [TEAL, BLUE, EMERALD][lane[i] % 3] : fg;
         ctx.fillStyle = rgba(tone as [number, number, number], alpha);
         // free coordinates are sized by depth: near ones are larger, which reads as space
@@ -379,7 +383,8 @@ export function MarketToRaptor() {
           const x = mix(laneX0, laneX1, u);
           const y = ly + Math.sin(u * Math.PI * 2 * 1.5 + lane[i]) * laneGap * 0.16;
           if (desktop && x < laneX0 + 34) continue;
-          ctx.fillStyle = rgba(fg, labelAlpha * 0.92);
+          // a symbol fades before the border, early enough for its whole word to fit
+          ctx.fillStyle = rgba(fg, labelAlpha * 0.92 * (desktop ? clamp01((laneX1 - x - 70) / 60) : 1));
           ctx.fillText(l.text, x + 9, y);
         }
         // asset-class names at the head of each stream
@@ -392,7 +397,7 @@ export function MarketToRaptor() {
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(x0, y);
-          ctx.lineTo(w, y);
+          ctx.lineTo(desktop ? laneX1 : w, y);
           ctx.stroke();
           ctx.fillStyle = rgba(fg, labelAlpha * 0.62);
           ctx.fillText(LANE_LABEL[cls].toUpperCase(), x0, y - laneGap * 0.36);

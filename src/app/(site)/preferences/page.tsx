@@ -1,3 +1,4 @@
+import { AmbienceSwitch } from "@/components/fx/Extras";
 import Link from "next/link";
 import { KeptHere, SameBuilding } from "@/components/figures/extra/SideFigures";
 import { CountVisitsPreference } from "@/components/company/CountVisitsPreference";
@@ -87,6 +88,7 @@ export default function PreferencesPage() {
                   Gateway tour
                 </Link>
               </div>
+            <AmbienceSwitch />
             </div>
           </div>
           <div className="panel p-21 sm:p-34">

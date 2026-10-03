@@ -545,3 +545,235 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
     stroke-dasharray: none !important;
   }
 }
+
+/* ---- THE FLOOR AT NIGHT (components/labs/cinema/Pieces.tsx) ----------------
+   A dark room in CSS 3D: six lit screens on an arc, a floor of lines beneath
+   them. The room turns with the pointer (--rx, --ry). On a narrow screen
+   there is no room: the six screens are a plain grid of links. */
+.gx-floor {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--night-line);
+  border-radius: 8px;
+  background:
+    radial-gradient(70% 90% at 50% 20%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+    var(--night);
+}
+.gx-floor-room {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8125rem;
+  padding: 1.3125rem;
+}
+.gx-floor-grid {
+  display: none;
+}
+.gx-floor-screen {
+  position: relative;
+  display: flex;
+  min-height: 6.5rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.1875rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(20, 30, 40, 0.92), rgba(8, 12, 17, 0.96));
+  padding: 0.8125rem;
+  color: var(--on-night);
+  box-shadow: 0 0 34px color-mix(in srgb, var(--accent) 22%, transparent);
+  transition:
+    box-shadow 0.25s,
+    border-color 0.25s;
+}
+.gx-floor-screen:hover,
+.gx-floor-screen:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 55px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.gx-floor-trace {
+  position: absolute;
+  inset: 0.8125rem 0.8125rem auto;
+  height: 2.125rem;
+  background:
+    linear-gradient(100deg, transparent 0 8%, var(--accent) 8% 9%, transparent 9% 26%, var(--accent) 26% 27%, transparent 27% 44%, var(--accent) 44% 45%, transparent 45% 62%, var(--accent) 62% 63%, transparent 63% 80%, var(--accent) 80% 81%, transparent 81%) 0 100% / 100% calc(30% + var(--i, 0) * 9%) no-repeat;
+  opacity: 0.55;
+}
+.gx-floor-name {
+  font-family: var(--font-display, inherit);
+  font-size: 1.3125rem;
+  line-height: 1.1;
+}
+.gx-floor-note {
+  font-size: 0.75rem;
+  color: var(--on-night-2);
+}
+@media (min-width: 900px) {
+  .gx-floor {
+    height: clamp(22rem, 38vw, 30rem);
+    perspective: 1000px;
+  }
+  .gx-floor-room {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.25s ease-out;
+  }
+  .gx-floor-grid {
+    display: block;
+    position: absolute;
+    left: -60%;
+    right: -60%;
+    top: 62%;
+    height: 120%;
+    transform: rotateX(78deg);
+    transform-origin: 50% 0;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--accent) 30%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--accent) 30%, transparent) 1px, transparent 1px);
+    background-size: 3.4375rem 3.4375rem;
+    mask-image: linear-gradient(180deg, #000, transparent 85%);
+    -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%);
+  }
+  .gx-floor-screen {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    width: 11rem;
+    height: 7.5rem;
+    min-height: 0;
+    margin: -3.75rem 0 0 -5.5rem;
+    transform: rotateY(calc(var(--a) * -1)) translateZ(-30rem) translateZ(0);
+    transform-origin: 50% 50% 0;
+  }
+  .gx-floor-screen:hover,
+  .gx-floor-screen:focus-visible {
+    transform: rotateY(calc(var(--a) * -1)) translateZ(-27rem);
+  }
+}
+
+/* ---- THE PROVERB WALL (components/verse/Verse.tsx) -------------------------
+   A card that turns over. Without motion it simply changes face. */
+.gx-flip {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 13rem;
+  text-align: left;
+  perspective: 900px;
+}
+.gx-flip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 1.3125rem;
+  backface-visibility: hidden;
+  transition: transform 0.5s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.gx-flip-back {
+  transform: rotateY(180deg);
+  border-color: var(--accent);
+}
+.gx-flip.is-on .gx-flip-front {
+  transform: rotateY(-180deg);
+}
+.gx-flip.is-on .gx-flip-back {
+  transform: rotateY(0deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gx-flip-face {
+    transition: none;
+  }
+}
+[data-motion="reduced"] .gx-flip-face,
+[data-effects="low"] .gx-flip-face {
+  transition: none;
+}
+
+/* The mark that hides a riddle: small, and plainly a button once found. */
+.gx-hunt-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: 50%;
+  font-family: var(--font-display, inherit);
+  color: var(--ink-3);
+  opacity: 0.5;
+  transition:
+    opacity 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+.gx-hunt-mark:hover,
+.gx-hunt-mark:focus-visible,
+.gx-hunt-mark[aria-expanded="true"] {
+  opacity: 1;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---- CURRENCY RAIN (components/fx/Extras.tsx) ------------------------------
+   A symbol falls down the page once when its three-letter code is typed. */
+.gx-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  overflow: hidden;
+  pointer-events: none;
+}
+.gx-rain span {
+  position: absolute;
+  top: -3rem;
+  font-family: var(--font-display, inherit);
+  color: var(--accent);
+  opacity: 0;
+  animation: gx-rain 2.2s cubic-bezier(0.3, 0, 0.7, 1) both;
+}
+.gx-rain span:nth-child(3n) {
+  color: var(--prestige);
+}
+.gx-rain span:nth-child(3n + 1) {
+  color: var(--emerald);
+}
+@keyframes gx-rain {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(115vh) rotate(40deg);
+    opacity: 0;
+  }
+}
+
+/* ---- SEASON (components/fx/Extras.tsx) -------------------------------------
+   Three stretches of the year tint the hairline under the header: a cool
+   silver at the year-end, a fresh green in the first week, a warm gold in
+   August. Nothing else changes. */
+html[data-season="year-end"] header[data-site-header] {
+  box-shadow: 0 1px 0 0 color-mix(in srgb, #c8d6e2 70%, transparent);
+}
+html[data-season="new-year"] header[data-site-header] {
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--emerald) 70%, transparent);
+}
+html[data-season="summer"] header[data-site-header] {
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--prestige) 70%, transparent);
+}
+.gx-season-note {
+  border-left: 2px solid var(--prestige);
+  padding-left: 0.8125rem;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}

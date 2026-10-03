@@ -1,3 +1,4 @@
+import { HiddenRiddle } from "@/components/verse/Verse";
 import { PunchLine } from "@/components/ui/PunchLine";
 import { GlossaryIndex, type IndexTerm } from "@/components/knowledge/GlossaryIndex";
 import { firstSentence } from "@/components/markets/graph";
@@ -51,6 +52,8 @@ export default function GlossaryPage() {
         lead={`${glossary.length} terms, defined plainly. Many carry a worked example, a formula, and a link to the tool or lesson that puts the idea to work.`}
       />
       <GlossaryIndex terms={terms} topics={glossaryTopics} lessonLine={lessonCount > 0 ? lessonLine : undefined} lessonTotal={lessonCount} />
+      <HiddenRiddle id="glossary" />
+
       <PunchLine k="glossary" />
 
       <NextSteps

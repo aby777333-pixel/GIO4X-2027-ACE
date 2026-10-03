@@ -1,3 +1,4 @@
+import { HiddenRiddle } from "@/components/verse/Verse";
 import { PunchLine } from "@/components/ui/PunchLine";
 import Link from "next/link";
 import { Colonnade } from "@/components/figures/stage/Colonnade";
@@ -146,6 +147,8 @@ export default function TrustCentrePage() {
           </div>
         </div>
       </section>
+
+      <HiddenRiddle id="trust" />
 
       <PunchLine k="trust" />
 
