@@ -285,25 +285,23 @@ export function Figure({ draw, ratio = 1.618, className = "" }: Props) {
 /**
  * A figure with its caption, for a section's short column. The caption is the
  * "related text": one or two plain sentences that add to the section, never
- * a description of the drawing. Hidden below lg, where the columns stack and
- * there is no empty space to fill, unless `always` is set.
+ * a description of the drawing. Shown at every width: on a phone it sits
+ * beneath its heading, before the text it illustrates.
  */
 export function FigureNote({
   children,
   figure,
   label,
-  always = false,
   className = "",
 }: {
   children: React.ReactNode;
   figure: React.ReactNode;
   /** a short small-caps label above the text */
   label?: string;
-  always?: boolean;
   className?: string;
 }) {
   return (
-    <aside className={`${always ? "" : "hidden lg:block"} mt-34 max-w-[28rem] ${className}`}>
+    <aside className={`mt-34 max-w-[28rem] ${className}`}>
       <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">{figure}</div>
       {label ? <p className="eyebrow mt-13">{label}</p> : null}
       <p className={`${label ? "mt-5" : "mt-13"} text-sm leading-relaxed text-ink-3`}>{children}</p>

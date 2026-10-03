@@ -291,7 +291,7 @@ export default function AcademyPage() {
                 <LessonsCount slugs={[...new Set(p.steps.flatMap((s) => s.lessons))].filter((slug) => getLesson(slug) !== undefined)} className="mt-13" />
                 <PathSteps path={p} />
                 {p.key === startHere.key && longer && meet && meet.shared > 0 && (
-                  <aside className="mt-34 hidden lg:block">
+                  <aside className="mt-34 max-w-[28rem] lg:max-w-none">
                     <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
                       <TwoRoutes routes={meet.routes} lessons={meet.lessons} />
                     </div>

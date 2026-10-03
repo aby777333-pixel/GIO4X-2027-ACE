@@ -59,7 +59,7 @@ export default function MarketDayPage() {
               , which reads the same timetable for the present minute.
             </p>
             {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
-            <div className="mt-34 hidden max-w-[28rem] lg:block">
+            <div className="mt-34 max-w-[28rem]">
               <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
                 <DayRing />
               </div>

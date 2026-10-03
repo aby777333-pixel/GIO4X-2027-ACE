@@ -243,7 +243,7 @@ export default function RaptorPage() {
                     </div>
                     <div>
                       {/* beside the chapter on wide screens: what it says is watched, drawn without a figure in it */}
-                      <div className="hidden lg:block">
+                      <div className="max-w-[28rem] lg:max-w-none">
                         <Headroom />
                         <p className="mt-13 text-xs leading-relaxed text-ink-3">
                           A drawing with no figures in it. The distance it measures is{" "}

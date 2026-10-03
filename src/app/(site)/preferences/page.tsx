@@ -39,7 +39,7 @@ export default function PreferencesPage() {
               Designing GIO4X
             </Link>
             {/* this column ended well short of the one beside it: a figure that says what the text says */}
-            <div className="mt-34 hidden max-w-[28rem] lg:block">
+            <div className="mt-34 max-w-[28rem]">
               <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
                 <SameBuilding />
               </div>
@@ -128,7 +128,7 @@ export default function PreferencesPage() {
                 </div>
               </div>
               {/* this column ended well short of the one beside it: a figure that says what the text says */}
-              <div className="mt-34 hidden max-w-[28rem] lg:block">
+              <div className="mt-34 max-w-[28rem]">
                 <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
                   <KeptHere />
                 </div>
