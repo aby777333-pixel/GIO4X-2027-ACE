@@ -19,7 +19,7 @@ conflicts with a quick idea, this document wins.
 | Data primitives (`Change`, `Sparkline`, `RangeBar`) | `src/components/ui/Data.tsx` |
 | Signature motif | `src/components/brand/Rosette.tsx` |
 | Logo (always the supplied asset) | `src/components/brand/Logo.tsx` |
-| Workspace illustration (shapes, never numbers) | `src/components/brand/TerminalStudy.tsx` |
+| Home sequence chart (invented prices, labelled as such; reads a candle under the pointer) | `src/components/home/SequenceChart.tsx`, `sequence-chart-data.ts` |
 | Metadata builder | `src/lib/meta.ts` (`pageMeta`) |
 | Structured data builders | `src/lib/schema.ts` + `src/components/seo/JsonLd.tsx` |
 | Organisation facts | `src/config/site.ts` |

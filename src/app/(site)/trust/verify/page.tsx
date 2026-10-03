@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Backdrop } from "@/components/figures/Backdrop";
+import { OutsideTheLine } from "@/components/figures/extra/ShortColumns";
 import { FigureNote } from "@/components/figures/Figure";
-import { ColumnNote, NotedChapter } from "@/components/figures/trust/NotedChapter";
+import { NotedChapter } from "@/components/figures/trust/NotedChapter";
 import { PortalGates } from "@/components/figures/trust/PortalGates";
 import { SenderLine } from "@/components/figures/trust/SenderLine";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -85,9 +86,9 @@ export default function VerifyPage() {
         title="Approved third parties"
         lead="GIO4X links to these organisations on purpose. They are not GIO4X, and each is responsible for its own website."
         note={
-          <ColumnNote label="In the checker">
+          <FigureNote figure={<OutsideTheLine />} label="In the checker">
             An address on one of these domains is answered “Approved third-party destination”, never “Official GIO4X”. The answer names the organisation and gives the reason GIO4X links to it.
-          </ColumnNote>
+          </FigureNote>
         }
       >
         <div className="scroll-x" data-reveal suppressHydrationWarning>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DayRing } from "@/components/figures/extra/ShortColumns";
 import { FX_SHORT } from "@/components/labs/market-day/film";
 import { MarketDay } from "@/components/labs/market-day/MarketDay";
 import { hhmm } from "@/components/markets/time";
@@ -45,7 +46,7 @@ export default function MarketDayPage() {
 
       <section className="section hairline bg-paper" aria-labelledby="md-read">
         <div className="wrap phi phi-r items-start">
-          <div>
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
             <p className="eyebrow">How to read it</p>
             <h2 id="md-read" className="h2 mt-13">
               A timetable and the sun. Nothing else.
@@ -57,6 +58,12 @@ export default function MarketDayPage() {
               </Link>
               , which reads the same timetable for the present minute.
             </p>
+            {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
+            <div className="mt-34 hidden max-w-[28rem] lg:block">
+              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                <DayRing />
+              </div>
+            </div>
           </div>
           <div className="min-w-0">
             <dl className="border-t border-line-strong">

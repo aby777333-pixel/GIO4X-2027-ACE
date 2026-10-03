@@ -18,7 +18,7 @@ src/
     robots.ts manifest.ts llms.txt opengraph-image.tsx not-found.tsx error.tsx global-error.tsx
   components/
     shell/        header, footer, command bar, Lens, appearance, reveal, 404 suggestions
-    brand/        Logo (supplied asset), Rosette (signature), TerminalStudy (illustration)
+    brand/        Logo (supplied asset), Rosette (signature)
     ui/           Page primitives, Data primitives
     market/       MarketSphere (hero canvas), SessionStrip
     home/ markets/ platforms/ trading/ tools/ knowledge/ company/ trust/ labs/ control/

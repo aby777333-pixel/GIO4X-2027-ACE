@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SeededPath, TwoMarkets } from "@/components/figures/trading/SimulatorFigures";
 import { MARKET, ROLLOVER_TICKS, SIM } from "@/components/labs/simulator/engine";
 import { PracticeDesk } from "@/components/labs/simulator/PracticeDesk";
 import { StoryTrade } from "@/components/labs/simulator/StoryTrade";
@@ -74,7 +75,7 @@ export default function SimulatorPage() {
 
       <section className="section-quiet hairline bg-paper" aria-labelledby="sim-rules">
         <div className="wrap phi phi-r items-start">
-          <div>
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
             <p className="eyebrow">The engine’s rules</p>
             <h2 id="sim-rules" className="h3 mt-13">
               How the simulation decides.
@@ -86,6 +87,12 @@ export default function SimulatorPage() {
               </Link>
               ’s, and the journal shows it for every fill, charge and close.
             </p>
+            {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
+            <div className="mt-34 hidden max-w-[28rem] lg:block">
+              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                <SeededPath />
+              </div>
+            </div>
           </div>
           <ol className="border-t border-line">
             {rules.map((r, i) => (
@@ -117,6 +124,12 @@ export default function SimulatorPage() {
             </p>
             <div className="mt-21 grid gap-8">
               <DataNote status="simulation">Invented prices, an invented instrument and an example account. {educationalNote}</DataNote>
+            </div>
+            {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
+            <div className="mt-34 hidden max-w-[28rem] lg:block">
+              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                <TwoMarkets />
+              </div>
             </div>
           </div>
           <ul className="border-t border-line">

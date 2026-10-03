@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LAYERS } from "@/components/about/world/places";
+import { ThreeLayers } from "@/components/figures/extra/ShortColumns";
 import { WorldMap } from "@/components/about/world/WorldMap";
 import { bankHref } from "@/components/markets/graph";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -68,12 +69,18 @@ export default function WorldPage() {
 
       <section className="section hairline bg-paper" aria-labelledby="world-layers">
         <div className="wrap phi phi-r items-start">
-          <div>
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
             <p className="eyebrow">What is on it</p>
             <h2 id="world-layers" className="h2 mt-13">
               Three layers, each a list the site already keeps.
             </h2>
             <p className="lead mt-13 max-w-[30rem]">The globe adds nothing of its own. Every marker is a place this site publishes elsewhere, with the page it comes from.</p>
+            {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
+            <div className="mt-34 hidden max-w-[28rem] lg:block">
+              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                <ThreeLayers offices={offices} centres={centres.length} banks={centralBanks.length} />
+              </div>
+            </div>
           </div>
           <div className="min-w-0">
             <ul className="border-t border-line-strong">

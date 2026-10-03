@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { TerminalStudy } from "@/components/brand/TerminalStudy";
 import { instruments } from "@/data/instruments";
 import { centres } from "@/lib/sessions";
+import { SequenceChart } from "./SequenceChart";
+import { AVERAGE, CANDLES, HEAD_Y, PLOT, RANGE, STRIP, xOf, yOf } from "./sequence-chart-data";
 
 /**
  * THE GIO4X SEQUENCE — one continuous visual narrative, driven by scroll.
@@ -12,12 +13,14 @@ import { centres } from "@/lib/sessions";
  *   1  a globe of market coordinates (a golden-angle lattice: φ on a sphere)
  *   2  the globe separates into free coordinates
  *   3  coordinates become instruments, flowing in six asset-class streams
- *   4  the streams converge and draw the 777 Raptor workspace
- *   5  the drawing settles into the workspace illustration
+ *   4  the streams converge and draw a chart: its candles, its average, its levels
+ *   5  the drawing settles into the chart itself, which the visitor can then read
+ *      candle by candle with the pointer (SequenceChart)
  *
  * Nothing here is market data: the nine labelled points are the financial
  * centres at their real coordinates and the labels in the streams are the
- * instruments GIO4X lists. No prices, no direction, no fake activity.
+ * instruments GIO4X lists. The chart at the end is drawn on invented prices
+ * and says so on its face.
  *
  * Engineering
  *  - Canvas 2D, ~1,400 points on desktop and ~600 on phones; no dependency.
@@ -25,15 +28,15 @@ import { centres } from "@/lib/sessions";
  *    delay navigation; a visitor can scroll straight through it.
  *  - Runs only while on screen. Under reduced motion, "low visual effects" or
  *    without JavaScript the section is a short static composition: the four
- *    statements and the finished workspace, no pinned scrolling at all.
+ *    statements and the finished chart, no pinned scrolling at all.
  */
 
 const PHI = 1.6180339887;
 const GOLDEN_ANGLE = Math.PI * 2 * (1 - 1 / PHI);
 const DEG = Math.PI / 180;
 
-// The workspace wireframe, in the 610 × 377 box of <TerminalStudy/>.
-const CHART = [0, 6, 3, 9, 7, 13, 10, 8, 14, 18, 15, 21, 19, 17, 24, 28, 26, 31, 29, 34, 30, 38, 36, 41].map((v, i) => [40 + i * 15.2, 208 - v * 3.4] as const);
+// The chart's outline, in the 610 × 377 box SequenceChart draws in. The points
+// gather along it: every candle's wick, the average line, the levels, the frame.
 type Seg = { a: readonly [number, number]; b: readonly [number, number]; w: number; accent?: boolean };
 const rect = (x: number, y: number, w: number, h: number, weight = 1): Seg[] => [
   { a: [x, y], b: [x + w, y], w: weight },
@@ -43,19 +46,15 @@ const rect = (x: number, y: number, w: number, h: number, weight = 1): Seg[] => 
 ];
 const WIRE: Seg[] = [
   ...rect(0, 0, 610, 377, 1.2),
-  { a: [0, 21.5], b: [610, 21.5], w: 1 },
-  { a: [403.5, 22], b: [403.5, 377], w: 1 },
-  { a: [21, 232.5], b: [403, 232.5], w: 1 },
-  ...CHART.slice(1).map((p, i) => ({ a: CHART[i], b: p, w: 3.4, accent: true })),
-  ...[70, 111, 152, 193].map((y) => ({ a: [40, y] as const, b: [390, y] as const, w: 0.35 })),
-  ...Array.from({ length: 7 }, (_, i) => ({ a: [417, 55.5 + i * 24] as const, b: [597, 55.5 + i * 24] as const, w: 0.7 })),
-  ...Array.from({ length: 4 }, (_, r) => ({ a: [21, 281.5 + r * 26] as const, b: [387, 281.5 + r * 26] as const, w: 0.7 })),
-  ...rect(417, 222, 180, 142, 1),
-  ...rect(430, 252, 154, 21, 0.6),
-  ...rect(430, 281, 72, 21, 0.6),
-  ...rect(512, 281, 72, 21, 0.6),
-  ...rect(430, 319, 72, 30, 0.8),
-  ...rect(512, 319, 72, 30, 0.8),
+  { a: [0, HEAD_Y], b: [610, HEAD_Y], w: 1 },
+  { a: [PLOT.x0, STRIP.y1], b: [PLOT.x1, STRIP.y1], w: 1 },
+  ...[0, 1, 2, 3, 4].map((i) => {
+    const y = yOf(RANGE.lo + ((RANGE.hi - RANGE.lo) * i) / 4);
+    return { a: [PLOT.x0, y] as const, b: [PLOT.x1, y] as const, w: 0.3 };
+  }),
+  ...CANDLES.map((c, i) => ({ a: [xOf(i), yOf(c.h)] as const, b: [xOf(i), yOf(c.l)] as const, w: 5 })),
+  ...CANDLES.map((c, i) => ({ a: [xOf(i), STRIP.y1] as const, b: [xOf(i), STRIP.y1 - (STRIP.y1 - STRIP.y0) * c.v] as const, w: 1.6 })),
+  ...AVERAGE.slice(1).map((v, i) => ({ a: [xOf(i), yOf(AVERAGE[i])] as const, b: [xOf(i + 1), yOf(v)] as const, w: 6, accent: true })),
 ];
 
 const LANES = ["forex", "metals", "indices", "energy", "equities", "crypto"] as const;
@@ -65,7 +64,7 @@ const BEATS = [
   { k: "01", t: "Markets are places.", d: "Nine financial centres, from Sydney to New York, at their real coordinates." },
   { k: "02", t: "Places become coordinates.", d: "Every venue, session and price reference is a point that can be mapped." },
   { k: "03", t: "Coordinates become instruments.", d: `${instruments.length} instruments in six asset classes, each in its own stream.` },
-  { k: "04", t: "And the streams become a workspace.", d: "777 Raptor. Built for the market." },
+  { k: "04", t: "And the streams become a chart.", d: "Move over it: every candle reads itself. The workspace for it is 777 Raptor." },
 ] as const;
 
 // deterministic pseudo-random in [0,1): the picture is identical on every visit
@@ -128,7 +127,7 @@ export function MarketToRaptor() {
     let lat: Float32Array, sx: Float32Array, sy: Float32Array, sz: Float32Array, lane: Uint8Array, laneU: Float32Array, laneOff: Float32Array, tx: Float32Array, ty: Float32Array, accent: Uint8Array, delay: Float32Array;
     let labels: { i: number; text: string }[] = [];
     let centreIdx: number[] = [];
-    // layout of the workspace box on the stage
+    // layout of the chart box on the stage
     let box = { x: 0, y: 0, w: 0, h: 0 };
     let globe = { cx: 0, cy: 0, r: 0 };
 
@@ -151,7 +150,7 @@ export function MarketToRaptor() {
       const desktop = w >= 1080;
       n = desktop ? 1400 : w >= 560 ? 900 : 600;
 
-      // the workspace occupies the major (61.8%) part on desktop, the upper part on phones
+      // the chart occupies the major (61.8%) part on desktop, the upper part on phones
       const gutter = Math.max(21, Math.min(55, w * 0.042));
       if (desktop) {
         const bw = Math.min(w * 0.5, 860, (h - 190) * (610 / 377));
@@ -179,7 +178,7 @@ export function MarketToRaptor() {
       accent = new Uint8Array(n);
       delay = new Float32Array(n);
 
-      // workspace targets: points spread along the wireframe in proportion to length × weight
+      // chart targets: points spread along the wireframe in proportion to length × weight
       const lens = WIRE.map((s) => Math.hypot(s.b[0] - s.a[0], s.b[1] - s.a[1]) * s.w);
       const total = lens.reduce((a, b) => a + b, 0);
       let seg = 0;
@@ -313,7 +312,7 @@ export function MarketToRaptor() {
         const x3 = mix(laneX0, laneX1, u);
         const y3 = ly + Math.sin(u * Math.PI * 2 * 1.5 + lane[i]) * laneGap * 0.16 + laneOff[i] * laneGap * 0.3;
 
-        // 4 the workspace
+        // 4 the chart
         const own = clamp01((toWire - delay[i] * 0.35) / 0.65);
         const e4 = ease(own);
 
@@ -511,7 +510,7 @@ export function MarketToRaptor() {
 
         <div className="gx-seq-copy wrap relative">
           <p className="eyebrow" id="seq-title">
-            From the world to the workspace
+            From the world to the chart
           </p>
           <div className="gx-seq-beats-wrap relative mt-21">
             <span aria-hidden className="gx-seq-rail absolute left-0 top-0 h-full w-px bg-line">
@@ -546,9 +545,9 @@ export function MarketToRaptor() {
         </div>
 
         <div ref={figureRef} className="gx-seq-figure">
-          <TerminalStudy className="h-auto w-full" />
+          <SequenceChart />
         </div>
-        <p className="gx-seq-note text-xs text-ink-3">Centres at their real coordinates; instruments as listed by GIO4X. The workspace is an illustrative study, not a screenshot. No market data is shown.</p>
+        <p className="gx-seq-note text-xs text-ink-3">Centres at their real coordinates; instruments as listed by GIO4X. The chart is drawn on invented prices: it is not market data.</p>
       </div>
     </section>
   );

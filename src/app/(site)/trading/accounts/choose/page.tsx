@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MatchCount } from "@/components/figures/extra/ShortColumns";
 import { AccountChooser, type SignUp } from "@/components/trading/AccountChooser";
 import { RiskNote } from "@/components/trading/Blocks";
 import { readAnswers } from "@/components/trading/choose";
@@ -66,11 +67,17 @@ export default async function ChooseAccountPage({ searchParams }: Props) {
 
       <section className="section-quiet hairline bg-paper" aria-labelledby="how">
         <div className="wrap phi phi-r items-start">
-          <div>
+          <div className="lg:sticky lg:top-[calc(var(--header-h)+1.3125rem)]">
             <p className="eyebrow">How the match is made</p>
             <h2 id="how" className="h3 mt-13 max-w-[18ch]">
               A count of published facts, in the open.
             </h2>
+            {/* the short column was empty beneath the heading: a figure that says the same thing as the text beside it */}
+            <div className="mt-34 hidden max-w-[28rem] lg:block">
+              <div className="flat rounded-[8px] border border-line bg-surface/60 p-13">
+                <MatchCount />
+              </div>
+            </div>
           </div>
           <ol className="border-t border-line">
             {[
