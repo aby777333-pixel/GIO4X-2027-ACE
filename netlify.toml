@@ -43,3 +43,19 @@
 
 [context.branch-deploy.environment]
   NEXT_PUBLIC_SITE_ENV = "preview"
+
+# The same proxy as rewrites() in next.config.mjs, done by Netlify's edge
+# before the request reaches this site's server function: one hop fewer for
+# every portal page, script and picture. Keep the address equal to
+# PORTAL_ORIGIN above. Hosts that ignore this file fall back to the rewrite.
+[[redirects]]
+  from = "/portal"
+  to = "https://zippy-piroshki-21aa30.netlify.app/portal"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/portal/*"
+  to = "https://zippy-piroshki-21aa30.netlify.app/portal/:splat"
+  status = 200
+  force = true

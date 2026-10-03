@@ -10,7 +10,9 @@ client/IB portal imported from the `GIO4X-JUNE-2026` repository on 3 October 202
 - The portal is built with `basePath: "/portal"` (`portal/apps/portal/next.config.mjs`), so everything it
   serves is under `/portal`, on its own Netlify address too.
 - The website proxies `/portal` and `/portal/*` to the address in the server variable `PORTAL_ORIGIN`
-  (`rewrites()` in `next.config.mjs`; the value is in `netlify.toml`). A visitor stays on the website's
+  (`rewrites()` in `next.config.mjs`; the value is in `netlify.toml`). On Netlify the same proxy is also
+  written as two `[[redirects]]` in `netlify.toml`, which the edge applies before the request reaches the
+  server function; keep that address equal to `PORTAL_ORIGIN`. A visitor stays on the website's
   address from the first click to the last. Unset, or not https, means no proxy and the gateway pages return
   to "not connected yet".
 - While it is connected, the four destinations resolve to paths on this site: Client Portal

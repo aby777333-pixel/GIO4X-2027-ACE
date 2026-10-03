@@ -56,6 +56,17 @@ Going to production:
 5. Deploy, then run the post-deploy checks below.
 6. Submit `https://www.gio4x.com/sitemap.xml` in Google Search Console and Bing Webmaster Tools.
 
+### How the preview site is published today
+
+`gio4x-2027-ace` is not linked to the Git repository: a push does not deploy it. It is published from a PC
+with the Netlify CLI, from the repository root, with `NETLIFY_SITE_ID` set to the site's id:
+
+1. `netlify build`
+2. `netlify deploy --no-build --dir <repository>/.netlify/static`, check the draft address it prints, then
+   repeat with `--prod`.
+
+The portal is published separately: see `PORTAL-GATEWAY.md`.
+
 ## Post-deploy smoke test
 
 ```bash
