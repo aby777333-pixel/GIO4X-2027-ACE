@@ -32,6 +32,7 @@ type AccountRow = {
   equity: number;
   leverage: number;
   server: string;
+  platform?: string;
   status: "active" | "suspended" | "closed" | "archived";
 };
 
@@ -61,16 +62,21 @@ export default async function AccountsPage() {
   const planTypes = await loadActiveAccountTypes().catch(() => []);
 
   let accounts: AccountRow[] = demoAccounts;
+  let mt5Enabled = false;
   if (user) {
     const supabase = getSupabaseServer();
     const { data } = await supabase
       .from("trading_accounts")
       .select(
-        "id, account_number, account_kind, plan_name, base_currency, balance, equity, leverage, server, status",
+        "id, account_number, account_kind, plan_name, base_currency, balance, equity, leverage, server, status, platform",
       )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    accounts = (data ?? []) as AccountRow[];
+    // `platform` is newer than the generated database types
+    accounts = (data ?? []) as unknown as AccountRow[];
+    // MetaTrader 5 can be chosen only once it is switched on (feature flag platform_mt5)
+    const { data: flag } = await supabase.from("feature_flags").select("enabled").eq("key", "platform_mt5").maybeSingle();
+    mt5Enabled = flag?.enabled === true;
   }
 
   const live = accounts.filter((a) => a.account_kind === "live" && a.status === "active");
@@ -89,7 +95,7 @@ export default async function AccountsPage() {
         subtitle="All your trading accounts in one place. Open new ones, fund them, switch between live and demo."
         actions={
           <>
-            <OpenLiveAccountButton plans={planTypes} />
+            <OpenLiveAccountButton plans={planTypes} mt5Enabled={mt5Enabled} />
             <Link
               href="/accounts/demo"
               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-navy hover:border-sky/40"
@@ -149,7 +155,7 @@ export default async function AccountsPage() {
               >
                 <Plus size={14} /> Create Demo
               </Link>
-              <OpenLiveAccountButton variant="ghost" label="Open Live" plans={planTypes} />
+              <OpenLiveAccountButton variant="ghost" label="Open Live" plans={planTypes} mt5Enabled={mt5Enabled} />
             </div>
           </CardBody>
         </Card>
@@ -180,7 +186,7 @@ export default async function AccountsPage() {
                         </StatusBadge>
                       </div>
                       <div className="mt-0.5 text-xs text-steel">
-                        {acc.plan_name} · {acc.server} · Leverage 1:{acc.leverage}
+                        {acc.platform === "mt5" ? "MetaTrader 5" : "777 Raptor"} · {acc.plan_name} · {acc.server} · Leverage 1:{acc.leverage}
                       </div>
                     </div>
                   </div>

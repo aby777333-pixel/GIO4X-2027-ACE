@@ -80,19 +80,29 @@ export async function openTradingAccount(input: {
   baseCurrency: Enums<"wallet_currency">;
   leverage: number;
   planName?: string;
+  /** Which platform the account lives on. 777 Raptor unless MetaTrader 5 is chosen (and switched on). */
+  platform?: "raptor" | "mt5";
 }): Promise<ActionResult> {
   const user = await requireUser().catch(() => null);
   if (!user) return { ok: false, error: "Not signed in." };
   if (input.accountKind !== "demo" && input.accountKind !== "live") {
     return { ok: false, error: "Choose a demo or live account." };
   }
+  const platform = input.platform === "mt5" ? "mt5" : "raptor";
 
+  // open_trading_account_on (20261003190000_platforms.sql) is newer than the generated
+  // database types; it refuses MetaTrader 5 while the platform_mt5 flag is off.
   const supabase = getSupabaseServer();
-  const { data, error } = await supabase.rpc("open_trading_account", {
+  const { data, error } = await (
+    supabase as unknown as {
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+    }
+  ).rpc("open_trading_account_on", {
+    p_platform: platform,
     p_kind: input.accountKind,
     p_currency: input.baseCurrency,
     p_leverage: input.leverage,
-    p_plan: input.planName ?? undefined,
+    p_plan: input.planName ?? null,
   });
 
   if (error) {

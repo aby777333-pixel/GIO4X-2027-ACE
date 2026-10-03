@@ -32,6 +32,7 @@ type TradeRow = {
   currency: string | null;
   status: string;
   source: string | null;
+  platform: string | null;
   opened_at: string | null;
   closed_at: string | null;
   created_at: string;
@@ -68,7 +69,7 @@ export default async function TradesPage({ searchParams }: { searchParams: Promi
 
   let tradesQuery = db
     .from("trades")
-    .select("id, ticket, trading_account_id, user_id, symbol, side, lots, open_price, close_price, pnl, commission, swap, currency, status, source, opened_at, closed_at, created_at", { count: "exact" })
+    .select("id, ticket, trading_account_id, user_id, symbol, side, lots, open_price, close_price, pnl, commission, swap, currency, status, source, platform, opened_at, closed_at, created_at", { count: "exact" })
     .order("opened_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -176,6 +177,7 @@ export default async function TradesPage({ searchParams }: { searchParams: Promi
                   <th scope="col">Status</th>
                   <th scope="col">Opened</th>
                   <th scope="col">Closed</th>
+                  <th scope="col">Platform</th>
                   <th scope="col">Source</th>
                 </tr>
               </thead>
@@ -200,6 +202,7 @@ export default async function TradesPage({ searchParams }: { searchParams: Promi
                     </td>
                     <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(row.opened_at)}</td>
                     <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(row.closed_at)}</td>
+                    <td className="whitespace-nowrap text-ink-2">{row.platform === "mt5" ? "MetaTrader 5" : "777 Raptor"}</td>
                     <td className="whitespace-nowrap text-ink-2">{row.source || "–"}</td>
                   </tr>
                 ))}

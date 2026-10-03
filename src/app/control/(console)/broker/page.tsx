@@ -43,6 +43,7 @@ type TradingAccountRow = {
   status: string;
   plan_name: string | null;
   server: string | null;
+  platform: string | null;
   created_at: string;
 };
 
@@ -91,7 +92,7 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
 
   let accountsQuery = db
     .from("trading_accounts")
-    .select("id, account_number, user_id, account_kind, leverage, base_currency, balance, equity, margin_free, status, plan_name, server, created_at", { count: "exact" })
+    .select("id, account_number, user_id, account_kind, leverage, base_currency, balance, equity, margin_free, status, plan_name, server, platform, created_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, to);
   if (status) accountsQuery = accountsQuery.eq("status", status);
@@ -194,6 +195,7 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
                   <th scope="col">Free margin</th>
                   <th scope="col">Status</th>
                   <th scope="col">Plan</th>
+                  <th scope="col">Platform</th>
                   <th scope="col">Server</th>
                   <th scope="col">Opened</th>
                 </tr>
@@ -215,6 +217,7 @@ export default async function BrokerPage({ searchParams }: { searchParams: Promi
                       <StateBadge value={row.status} />
                     </td>
                     <td className="whitespace-nowrap text-ink-2">{row.plan_name || "–"}</td>
+                    <td className="whitespace-nowrap text-ink-2">{row.platform === "mt5" ? "MetaTrader 5" : "777 Raptor"}</td>
                     <td className="whitespace-nowrap text-ink-2">{row.server || "–"}</td>
                     <td className="num whitespace-nowrap text-ink-2">{fmtDateTime(row.created_at)}</td>
                   </tr>

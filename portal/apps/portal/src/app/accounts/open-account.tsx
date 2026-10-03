@@ -14,10 +14,13 @@ export function OpenLiveAccountButton({
   variant = "primary",
   label = "Open Live Account",
   plans,
+  mt5Enabled = false,
 }: {
   variant?: "primary" | "ghost";
   label?: string;
   plans?: { name: string; leverage: number }[];
+  /** MetaTrader 5 accounts can be opened (the platform_mt5 flag). Off: the choice is shown, not selectable. */
+  mt5Enabled?: boolean;
 }) {
   const router = useRouter();
   // Broker-configured plans (from Configuration → Account types) with a safe
@@ -27,6 +30,7 @@ export function OpenLiveAccountButton({
   const [currency, setCurrency] = useState<(typeof CURRENCIES)[number]>("USD");
   const [leverage, setLeverage] = useState<number>(planList[0].leverage);
   const [plan, setPlan] = useState<string>(planList[0].name);
+  const [platform, setPlatform] = useState<"raptor" | "mt5">("raptor");
 
   // Selecting a plan defaults the leverage to that plan's configured value;
   // the trader can still override it below.
@@ -46,6 +50,7 @@ export function OpenLiveAccountButton({
         baseCurrency: currency,
         leverage,
         planName: plan,
+        platform,
       });
       if (res.ok) {
         setOpen(false);
@@ -86,6 +91,19 @@ export function OpenLiveAccountButton({
             </div>
 
             <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-steel">Platform</label>
+                <select
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value === "mt5" ? "mt5" : "raptor")}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                >
+                  <option value="raptor">777 Raptor</option>
+                  <option value="mt5" disabled={!mt5Enabled}>
+                    MetaTrader 5{mt5Enabled ? "" : " (not open yet)"}
+                  </option>
+                </select>
+              </div>
               <div>
                 <label className="block text-xs font-medium text-steel">Plan</label>
                 <select
