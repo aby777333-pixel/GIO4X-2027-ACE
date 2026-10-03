@@ -134,6 +134,9 @@ export const nav: NavSection[] = [
           { label: "Session globe", href: "/labs/session-globe", note: "The four FX sessions on a globe, from the clock" },
           { label: "Order book in 3D", href: "/labs/order-book-3d", note: "Bids, asks, spread and depth: an illustration" },
           { label: "The Workshop", href: "/labs/workshop", note: "Candle forge, tightrope, pip reels, sixty seconds" },
+          { label: "The Engine Room", href: "/labs/engine-room", note: "Margin call, swap, slippage, compounding, correlation" },
+          { label: "Forces", href: "/labs/forces", note: "Tug of war, lever room, shockwave, liquidity tide" },
+          { label: "The Long Scroll", href: "/labs/scale", note: "One tick to one decade, in a single fall" },
         ],
       },
     ],
@@ -149,6 +152,7 @@ export const nav: NavSection[] = [
         items: [
           { label: "Academy", href: "/academy" },
           { label: "Glossary", href: "/glossary" },
+          { label: "Practice room", href: "/academy/practice" },
           { label: "Reading list", href: "/academy/books" },
           { label: "FAQ", href: "/faq" },
         ],

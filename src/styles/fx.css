@@ -276,7 +276,7 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
 }
 
 /* ---- THE PASSPORT (components/play/Passport.tsx) ---------------------------
-   Sixteen stamps on My desk. A stamp not yet earned is a faint dashed ring;
+   The stamps on My desk. A stamp not yet earned is a faint dashed ring;
    an earned one is inked in the accent and sits a little askew, as a stamp
    does. When all are earned each one is pressed again in turn, once. */
 .gx-passport {
@@ -474,5 +474,74 @@ svg[data-fx-in][data-draw="stroke"] :is(path, polyline, line) {
 @media print {
   .gx-door-leaf {
     display: none;
+  }
+}
+
+/* ---- THE LONG SCROLL (components/labs/scale/LongScroll.tsx) ----------------
+   A tall track with the stage pinned inside it for the length of the fall. */
+.gx-fall {
+  height: 620vh;
+}
+.gx-fall-stage {
+  position: sticky;
+  top: var(--header-h);
+  display: flex;
+  min-height: calc(100svh - var(--header-h));
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 1.3125rem;
+}
+
+/* ---- THE CERTIFICATE (components/academy/practice/Certificate.tsx) ---------
+   A page to print. The seal's two rings and its tick are traced once. */
+.gx-cert {
+  position: relative;
+  max-width: 44rem;
+  border: 2px double var(--prestige);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: clamp(1.3125rem, 5vw, 3.4375rem);
+  padding-right: clamp(1.3125rem, 22vw, 11rem);
+}
+.gx-cert-seal {
+  position: absolute;
+  right: clamp(0.8125rem, 3vw, 2.125rem);
+  top: clamp(0.8125rem, 3vw, 2.125rem);
+  width: clamp(3.4375rem, 16vw, 7.5rem);
+  fill: none;
+  stroke: var(--prestige);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.gx-cert-seal path {
+  stroke: var(--accent);
+  stroke-width: 6;
+}
+@keyframes gx-seal {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-cert-seal > * {
+    stroke-dasharray: 1;
+    animation: gx-seal 0.9s ease-out both;
+  }
+  html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-cert-seal > :nth-child(2) {
+    animation-delay: 0.35s;
+  }
+  html:not([data-motion="reduced"]):not([data-effects="low"]) .gx-cert-seal > :nth-child(3) {
+    animation-delay: 0.9s;
+    animation-duration: 0.45s;
+  }
+}
+@media print {
+  .gx-cert-seal > * {
+    animation: none !important;
+    stroke-dasharray: none !important;
   }
 }

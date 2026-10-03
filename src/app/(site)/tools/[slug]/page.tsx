@@ -1,3 +1,4 @@
+import { toolRhymes } from "@/data/tool-rhymes";
 import type { ComponentType } from "react";
 import { notFound } from "next/navigation";
 import { SaveButton } from "@/components/desk/Buttons";
@@ -115,6 +116,15 @@ export default async function ToolPage({ params }: Params) {
       </PageHero>
 
       <ToolPager {...pager} />
+
+      {toolRhymes[tool.slug] && (
+        <div className="wrap pt-21">
+          <p className="gx-couplet !mb-0" aria-label="A couplet to remember this tool by">
+            <span>{toolRhymes[tool.slug][0]}</span>
+            <span>{toolRhymes[tool.slug][1]}</span>
+          </p>
+        </div>
+      )}
 
       <section className="section-quiet" aria-label={`${tool.name}: the tool`}>
         <div className="wrap">

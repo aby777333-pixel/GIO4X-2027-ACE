@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Figure, TAU, clamp, lerp, rgba, smooth, type Colour, type FigureDraw } from "@/components/figures/Figure";
+import { signalSound } from "@/components/sound/signal";
 import { seeded } from "./rng";
 
 /**
@@ -46,6 +47,12 @@ export function Forge({ controls = true }: { controls?: boolean }) {
   const [step, setStep] = useState(0);
   const run = useRef({ n: -1, began: 0 });
   const shown = useRef(0);
+  useEffect(() => {
+    if (!controls) return;
+    if (step === 1 || step === 2) signalSound("knock");
+    else if (step === 3) signalSound("soft");
+    else if (step === 4) signalSound("chime");
+  }, [step, controls]);
 
   const draw = useMemo<FigureDraw>(() => {
     const k = candleOf(n);

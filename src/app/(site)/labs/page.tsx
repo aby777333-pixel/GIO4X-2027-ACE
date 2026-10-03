@@ -280,6 +280,23 @@ export default function LabsPage() {
               </Link>
             </div>
           </article>
+
+          <ul className="mt-55 grid gap-px overflow-hidden rounded border border-line bg-line lg:grid-cols-3">
+            {[
+              { n: "09", t: "The Engine Room", d: "Six machines about what happens to a trade once it is on: the margin-call countdown, the swap clock, slippage in slow motion, the compounding staircase, the correlation dance and the marbles.", href: "/labs/engine-room" },
+              { n: "10", t: "Forces", d: "Four models of what moves a market, made physical: a tug of war between two currencies, a central bank\u2019s lever, a release that spreads like a ripple, and the tide of liquidity.", href: "/labs/forces" },
+              { n: "11", t: "The Long Scroll", d: "One fall from a single tick out to a decade. An invented walk seen through a wider and wider window, which looks much the same at every scale.", href: "/labs/scale" },
+            ].map((x) => (
+              <li key={x.href} className="bg-surface p-21 lg:p-34">
+                <p className="num text-xs font-semibold tracking-[0.1em] text-prestige-ink">{x.n}</p>
+                <h3 className="h3 mt-8">{x.t}</h3>
+                <p className="mt-8 text-sm text-ink-2">{x.d}</p>
+                <Link href={x.href} className="go mt-13">
+                  Open
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

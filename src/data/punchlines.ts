@@ -22,6 +22,12 @@ export const punchLines = {
   partners: { a: "Refer with care:", b: "be clear, be fair." },
   support: { a: "Stuck or unsure?", b: "Ask: that's what we're for." },
   risk: { a: "Leverage lifts, and leverage drops;", b: "the careful trader sets the stops." },
+  arithmetic: { a: "Before you click,", b: "do the arithmetic." },
+  plan: { a: "The market\u2019s open:", b: "is your plan?" },
+  stop: { a: "Plan the stop", b: "before the drop." },
+  small: { a: "Cut it small,", b: "or risk it all." },
+  trend: { a: "The trend\u2019s a friend until the end,", b: "so mind the bend." },
+  scale: { a: "Near or far, the shape\u2019s the same:", b: "know your scale before the game." },
 } as const;
 
 export type PunchKey = keyof typeof punchLines;

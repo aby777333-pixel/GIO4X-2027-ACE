@@ -5,6 +5,7 @@ import { MarketToRaptor } from "@/components/home/MarketToRaptor";
 import { ReferenceRates } from "@/components/home/ReferenceRates";
 import { AccountsTable, AssetIndex, IntelligenceTeaser, Philosophy, PlatformsChapter, ToolsTeaser, TrustBlock } from "@/components/home/Sections";
 import { SessionStrip } from "@/components/market/SessionStrip";
+import { WeeklyVerse } from "@/components/play/Extras";
 import { RiddleSection } from "@/components/play/RiddleSection";
 import { SectionHead } from "@/components/ui/Page";
 import { PunchLine } from "@/components/ui/PunchLine";
@@ -66,6 +67,11 @@ export default function HomePage() {
       <PunchLine k="home" />
       <IntelligenceTeaser />
       <RiddleSection tinted />
+      <section className="section hairline" aria-label="This week\u2019s verse">
+        <div className="wrap">
+          <WeeklyVerse />
+        </div>
+      </section>
       <HomeStory />
     </>
   );

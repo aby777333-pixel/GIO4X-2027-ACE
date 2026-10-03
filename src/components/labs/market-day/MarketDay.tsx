@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { signalSound } from "@/components/sound/signal";
 import { DataNote } from "@/components/ui/Page";
 import { centres } from "@/lib/sessions";
 import { wrap180 } from "./earth";
@@ -178,6 +179,11 @@ export function MarketDay() {
 
   const reading = table ? readingAt(table, min) : null;
   const chapter = table ? chapterAt(table, min, asked) : null;
+  const chapterId = chapter?.id;
+  // a chime as the film reaches each chapter: heard only if sound is switched on in the preferences
+  useEffect(() => {
+    if (chapterId && run.current) signalSound("chime");
+  }, [chapterId]);
   /** the chapters in the order the film reaches them */
   const marks = useMemo(() => (table ? [...table.chapters].sort((a, b) => a.min - b.min) : []), [table]);
   const weekend = table ? weekendNote(table) : null;
@@ -316,6 +322,21 @@ export function MarketDay() {
                     </button>
                   ))}
                 </div>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  disabled={!ready}
+                  onClick={() => {
+                    // the whole day from its first minute at twice the speed: sixty seconds
+                    seek(0);
+                    setSpeed(2);
+                    run.current = true;
+                    setPlaying(true);
+                    request();
+                  }}
+                >
+                  The 60-second cut
+                </button>
               </>
             )}
             <button type="button" className="btn btn-ghost btn-sm" onClick={toNow} disabled={!ready} data-film-now>
