@@ -13,7 +13,7 @@ This document describes how that is built, so it can be extended without breakin
 | Part | Where | What it does |
 |---|---|---|
 | The stage | `PageHero` in `src/components/ui/Page.tsx`, `.cx-*` in `src/styles/cockpit.css` | Every page opens with the same night stage at the same height (`--hero-h`), statement on the left, that page's instrument on the right. |
-| The instruments | `src/components/cockpit/scenes/*.ts` | One small 3D scene per page (62 of them), drawn on a single Canvas 2D surface. Every page in the menus has its own; only pages generated from data (an instrument, a term, a lesson, an article, a tool) share their family's scene and pass their subject as `tag`. Each scene answers the pointer in its own way. |
+| The instruments | `src/components/cockpit/scenes/*.ts` | One small 3D scene per page (66 of them), drawn on a single Canvas 2D surface. Every page in the menus has its own; only pages generated from data (an instrument, a term, a lesson, an article, a calculator) share their family's scene and pass their subject as `tag`. The four tools under "See it move" each have their own (`spread`, `leverage`, `drawdown`, `order`); the canvas carries the scene's name as `data-scene`. Each scene answers the pointer in its own way. |
 | The engine | `src/components/cockpit/engine.ts`, `kit.ts` | Camera, palette, frame loop, power-on ramp, adaptive quality; the shared parts (deck, glass panes, rings, traces, lamps). |
 | The route map | `src/components/cockpit/routes.ts` | Which scene a path opens with, and the page's own subject (`tag`). |
 | The overhead panel | `header[data-site-header]` rules in `cockpit.css` | The site header as night switchgear: backlit keys that rise, light and press. |

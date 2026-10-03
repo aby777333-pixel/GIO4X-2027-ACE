@@ -68,6 +68,11 @@ const ROUTES: [prefix: string, scene: SceneId, ownTag?: string][] = [
   ["/platforms/metatrader-5", "mt5"],
   ["/platforms/compare", "compare"],
   ["/platforms", "platforms"],
+  // the four tools that show a thing moving each open with that thing; the calculators keep the family's slide rule
+  ["/tools/spread-visualizer", "spread"],
+  ["/tools/leverage-visualizer", "leverage"],
+  ["/tools/drawdown", "drawdown"],
+  ["/tools/order-anatomy", "order"],
   ["/tools", "instrument"],
   ["/intelligence/blog", "press"],
   ["/intelligence", "signal"],

@@ -44,5 +44,6 @@ export function HeroScene({ scene, tag = "", seed = "", className = "" }: { scen
     };
   }, [scene, tag, seed]);
 
-  return <canvas ref={ref} aria-hidden className={`cx-scene ${className}`} />;
+  // data-scene names the instrument in the markup, so a page's scene can be checked without running it
+  return <canvas ref={ref} aria-hidden data-scene={scene} className={`cx-scene ${className}`} />;
 }
