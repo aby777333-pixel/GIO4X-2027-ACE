@@ -134,7 +134,7 @@ async function run() {
   for (const a of anchors) {
     const t = seen.get(a.target);
     // hashes consumed by client code (search state, graph focus, verifier input) are not element ids
-    if (t?.ids && !t.ids.has(a.hash) && !/^(i|c|cb|ccy|ev|ac|t|p):|^q=|%|https?:/.test(a.hash)) problems.push({ page: a.page, issue: `anchor #${a.hash} not found on ${a.target}` });
+    if (t?.ids && !t.ids.has(a.hash) && !/^(i|c|cb|ccy|ev|ac|t|p):|^q=|%|https?:/.test(a.hash) && !/^(tour|guide)$/.test(a.hash)) problems.push({ page: a.page, issue: `anchor #${a.hash} not found on ${a.target}` });
   }
   for (const p of sitemapUrls) {
     const s = seen.get(p)?.status;

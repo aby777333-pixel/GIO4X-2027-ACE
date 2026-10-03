@@ -54,7 +54,7 @@ export function sitemapEntries(name: SitemapName): SitemapEntry[] {
         ...articles.map((a) => ({ path: `/intelligence/${a.slug}`, lastmod: a.updated ?? a.published })),
       ];
     case "academy":
-      return [{ path: "/academy", lastmod: CONTENT_REVISED }, { path: "/academy/books", lastmod: CONTENT_REVISED }, ...lessons.map((l) => ({ path: `/academy/${l.slug}`, lastmod: l.updated ?? l.published }))];
+      return [{ path: "/academy", lastmod: CONTENT_REVISED }, { path: "/academy/books", lastmod: CONTENT_REVISED }, { path: "/academy/practice", lastmod: CONTENT_REVISED }, ...lessons.map((l) => ({ path: `/academy/${l.slug}`, lastmod: l.updated ?? l.published }))];
     case "blog":
       // the list page only: the posts are rows in the database and are added by /sitemap-blog.xml itself
       return [{ path: "/intelligence/blog", lastmod: CONTENT_REVISED }];

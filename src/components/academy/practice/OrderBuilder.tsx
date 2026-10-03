@@ -111,7 +111,11 @@ export function OrderBuilder() {
     const p = priceAt(e);
     const nearest = (["entry", "stop", "target"] as Line[]).sort((a, b) => Math.abs(v[a] - p) - Math.abs(v[b] - p))[0];
     drag.current = nearest;
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* the pointer has already gone: the line is still moved to where it was pressed */
+    }
     setV((s) => ({ ...s, [nearest]: snap(p) }));
   };
   const move = (e: PointerEvent<HTMLDivElement>) => {

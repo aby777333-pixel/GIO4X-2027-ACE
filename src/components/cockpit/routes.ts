@@ -83,7 +83,7 @@ const ROUTES: [prefix: string, scene: SceneId, ownTag?: string][] = [
   ["/tools/currency-converter", "convert"],
   ["/tools/cost-lab", "costs"],
   ["/tools", "instrument"],
-  ["/intelligence/blog", "press"],
+  ["/intelligence/blog", "daily"],
   ["/intelligence", "signal"],
   ["/morning-room", "horizon"],
   ["/labs", "constellation"],

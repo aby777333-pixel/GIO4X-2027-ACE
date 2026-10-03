@@ -37,9 +37,11 @@ function snippet(text: string, max = 158): string {
 
 export function pageMeta(input: PageMeta): Metadata {
   const m = { ...input, description: snippet(input.description) };
-  const fullTitle = m.absoluteTitle ? m.title : `${m.title} | ${site.name}`;
+  // a title that would run past 70 characters with the brand suffix goes out without it
+  const alone = m.absoluteTitle || `${m.title} | ${site.name}`.length > 70;
+  const fullTitle = alone ? m.title : `${m.title} | ${site.name}`;
   return {
-    title: m.absoluteTitle ? { absolute: m.title } : m.title,
+    title: alone ? { absolute: m.title } : m.title,
     description: m.description,
     alternates: { canonical: m.path },
     ...(m.index === false ? { robots: { index: false, follow: true } } : {}),

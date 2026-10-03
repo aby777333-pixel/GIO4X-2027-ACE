@@ -1107,3 +1107,13 @@
 .print-only {
   display: none;
 }
+
+/* On a touch screen the compact controls (small buttons, segmented choices)
+   are given the height a finger needs. With a mouse they stay compact. */
+@media (pointer: coarse) {
+  .btn-sm,
+  .seg > button,
+  .seg > a {
+    height: 2.75rem;
+  }
+}

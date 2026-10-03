@@ -1,3 +1,4 @@
+import { SeasonNote } from "@/components/fx/Extras";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Cadence } from "@/components/figures/company/Cadence";
@@ -163,6 +164,11 @@ export default function MorningRoomPage() {
           </HeroCompanion>
         }
       />
+
+      {/* in three stretches of the year markets are known to be different: one line says so, and nothing is shown outside them */}
+      <div className="wrap empty:hidden pt-21">
+        <SeasonNote />
+      </div>
       <SessionStrip />
 
       <DepthRoom>

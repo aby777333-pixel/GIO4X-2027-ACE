@@ -10,9 +10,8 @@ import { REGIONS, WORKSPACE } from "./RaptorWorkspace";
  * THE LIVING WORKSPACE — the Raptor page's interface study, drawn on a canvas
  * so that it can move and answer the pointer.
  *
- * It is the same nine areas, in the same places, as the still drawing in
- * RaptorWorkspace (the geometry is imported from it), and it keeps the same
- * rule: shapes stand in for figures. No price, quantity, balance or result is
+ * Nine areas of a trading workspace (their places are in RaptorWorkspace),
+ * drawn under one rule: shapes stand in for figures. No price, quantity, balance or result is
  * ever written; the chart is a set of invented shapes, one per symbol, and
  * the symbols are instruments GIO4X lists. It is an illustration, never a
  * screenshot, and every use of it is captioned as that.

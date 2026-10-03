@@ -59,6 +59,7 @@ export const SCENES = {
   pamm: () => import("./pamm"),
   pip: () => import("./pip"),
   platforms: () => import("./platforms"),
+  daily: () => import("./daily"),
   press: () => import("./press"),
   prism: () => import("./prism"),
   proof: () => import("./proof"),
